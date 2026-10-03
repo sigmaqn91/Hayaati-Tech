@@ -7,9 +7,14 @@ export const runtime = 'nodejs';
 // In-memory rate limiting store for assistant chat
 const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_PROMPTS_PER_WINDOW = 25; // Cost protection: max 25 requests per IP per 10 mins
+const MAX_PROMPTS_PER_WINDOW = 60; // Generous limit for normal user conversation
 
 function isRateLimited(ip: string): boolean {
+  // If IP is generic or missing on serverless, don't penalize visitors
+  if (!ip || ip === 'unknown-client' || ip === '127.0.0.1') {
+    return false;
+  }
+
   const now = Date.now();
   const timestamps = rateLimitMap.get(ip) || [];
   const validTimestamps = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
@@ -44,19 +49,25 @@ Mission & Persona:
 - Keep responses concise (2 to 4 sentences usually, max 6 sentences).
 `;
 
-// Recommended current model with fallback resilience
-const PRIMARY_MODEL = 'gemini-3.8-flash';
-const FALLBACK_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+// Robust model candidates: try the most reliable models in sequence
+const CANDIDATE_MODELS = [
+  'gemini-2.0-flash',
+  'gemini-3.8-flash',
+  'gemini-1.5-flash',
+  'models/gemini-2.0-flash',
+  'models/gemini-3.8-flash',
+];
 
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown-client';
 
     if (isRateLimited(ip)) {
+      console.warn(`[Assistant Rate Limited] IP: ${ip}`);
       return NextResponse.json(
         {
           error:
-            'Assistant query rate limit reached. Please wait a brief moment before sending another message.',
+            'Assistant query rate limit reached (60 queries per 10 minutes). Please wait a moment before sending another message.',
         },
         {
           status: 429,
@@ -93,10 +104,11 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
+      console.error('[Gemini API Error]: GEMINI_API_KEY environment variable is not defined on server.');
       return NextResponse.json(
         {
           error:
-            'GEMINI_API_KEY is not configured on the server environment. Please set GEMINI_API_KEY in your Vercel settings and redeploy.',
+            'GEMINI_API_KEY is not configured on the server. Please verify your environment variable in Vercel.',
         },
         { status: 503, headers: { 'Content-Type': 'application/json' } }
       );
@@ -123,12 +135,11 @@ export async function POST(req: NextRequest) {
       parts: [{ text: message.trim() }],
     });
 
-    // Execute generation with primary model and automatic fallback on 404
     let replyText = '';
-    const modelsToTry = [PRIMARY_MODEL, ...FALLBACK_MODELS];
     let lastError: Error | null = null;
 
-    for (const modelToUse of modelsToTry) {
+    // Iterate through candidates until one succeeds
+    for (const modelToUse of CANDIDATE_MODELS) {
       try {
         const response = await ai.models.generateContent({
           model: modelToUse,
@@ -140,23 +151,21 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        replyText = response.text || 'Transmission received. Exploring horizon parameters.';
-        break; // Success, break loop
+        const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text && text.trim().length > 0) {
+          replyText = text.trim();
+          break; // Success!
+        }
       } catch (genErr: unknown) {
         lastError = genErr instanceof Error ? genErr : new Error(String(genErr));
-        const errMsg = lastError.message.toLowerCase();
-        // If not found or unsupported, try next fallback model
-        if (errMsg.includes('not found') || errMsg.includes('404') || errMsg.includes('no longer available')) {
-          continue;
-        } else {
-          // For other errors (e.g. rate limit / auth), throw immediately
-          throw genErr;
-        }
+        console.warn(`[Gemini Attempt Failed on model: ${modelToUse}]:`, lastError.message);
+        // Continue to the next fallback candidate model!
+        continue;
       }
     }
 
-    if (!replyText && lastError) {
-      throw lastError;
+    if (!replyText) {
+      throw lastError || new Error('All candidate models failed to return a response.');
     }
 
     return NextResponse.json(
@@ -164,7 +173,10 @@ export async function POST(req: NextRequest) {
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err: unknown) {
-    let cleanMessage = 'The cognitive assistant encountered an unexpected error. Please try again.';
+    // Log the EXACT error to Vercel console for debugging
+    console.error('[HAYAATI CHAT API FATAL ERROR]:', err);
+
+    let cleanMessage = 'The cognitive assistant encountered an error. Please try again.';
 
     if (err instanceof Error) {
       const raw = err.message;
@@ -172,17 +184,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error:
-              'The AI assistant has reached its current computational quota. Please wait a moment before sending another query.',
+              'The AI assistant has reached its computational rate limit. Please wait a brief moment before sending another query.',
           },
           { status: 429, headers: { 'Content-Type': 'application/json' } }
         );
       } else if (raw.includes('API_KEY_INVALID') || raw.includes('403')) {
         cleanMessage = 'Invalid GEMINI_API_KEY. Please verify your API key in Vercel settings.';
-      } else if (raw.includes('503') || raw.includes('overloaded')) {
-        cleanMessage = 'The AI model is temporarily busy. Please retry in a few seconds.';
       } else {
-        // Clean error message without exposing raw JSON dumps
-        cleanMessage = 'Cognitive engine transmission failure. Please try again shortly.';
+        cleanMessage = 'Transmission interrupted. Please retry your inquiry.';
       }
     }
 
