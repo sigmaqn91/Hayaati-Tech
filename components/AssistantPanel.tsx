@@ -90,7 +90,7 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/app/api/assistant/chat', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -102,10 +102,23 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
         }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      let data: { reply?: string; error?: string } = {};
+
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        throw new Error(
+          `Server returned an invalid HTML response (${res.status}). Please check server logs and configuration.`
+        );
+      }
 
       if (!res.ok) {
-        throw new Error(data.error || 'Server rejected transmission.');
+        throw new Error(data.error || `Server responded with status ${res.status}`);
+      }
+
+      if (!data.reply) {
+        throw new Error('No reply content received from the assistant.');
       }
 
       const replyMsg: Message = {
@@ -121,7 +134,11 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
         speakResponse(data.reply);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Network transmission error';
+      let msg = err instanceof Error ? err.message : 'Transmission error. Please try again.';
+      // Clean up raw JSON error messages if any
+      if (msg.includes('{"error"') || msg.startsWith('{')) {
+        msg = 'The cognitive engine is temporarily unavailable. Please retry in a few moments.';
+      }
       setErrorMessage(msg);
       setMessages((prev) => [
         ...prev,

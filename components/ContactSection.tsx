@@ -21,7 +21,7 @@ export function ContactSection() {
     setErrorMessage(null);
 
     try {
-      const res = await fetch('/app/api/enquiry', {
+      const res = await fetch('/api/enquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -30,7 +30,16 @@ export function ContactSection() {
         }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      let data: { success?: boolean; error?: string } = {};
+
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        throw new Error(
+          `Server returned an invalid response (${res.status}). Please verify server configuration.`
+        );
+      }
 
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Transmission rejected by delivery server.');

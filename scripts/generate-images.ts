@@ -101,7 +101,7 @@ async function main() {
     process.exit(1);
   }
 
-  const modelName = process.env.IMAGE_MODEL || 'imagen-3.0-generate-002';
+  const modelName = 'imagen-3.0-generate-002';
   const ai = new GoogleGenAI({ apiKey });
 
   const tasks = gatherImageTasks();

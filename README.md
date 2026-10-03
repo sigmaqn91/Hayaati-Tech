@@ -123,7 +123,6 @@ Everything is cleanly isolated in simple data files:
 |---|---|---|
 | `GEMINI_API_KEY` | **Secret** (Server-only) | Powers the AI assistant and voice reasoning. Never exposed to browser. |
 | `RESEND_API_KEY` | **Secret** (Server-only) | Transmits contact & project submission forms. |
-| `IMAGE_MODEL` | **Config** | Model used by `scripts/generate-images.ts` (default: `imagen-3.0-generate-002`). |
 | `APP_URL` | **Config** | Production server URL (`https://www.hayaatiweb.site`). |
 | `NEXT_PUBLIC_APP_URL` | **Config** | Public canonical URL for meta tags. |
 
