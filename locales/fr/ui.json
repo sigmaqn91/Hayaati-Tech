@@ -27,13 +27,13 @@
     "online": "SYSTÈMES EN LIGNE",
     "headline": "L'avenir n'arrive pas tout seul. Nous le concevons ensemble.",
     "subtitle": "Un plan cinématique de l'innovation humaine, des machines cognitives, des colonies orbitales et des habitats durables de 2030 à 2050. Conçu par Aliya Khan.",
-    "exploreCta": "Explorer 2030 2050",
+    "exploreCta": "Explorer 2030–2050",
     "projectsCta": "Voir Mes Projets",
     "coordinates": "COORDONNÉES: 28.6139° N, 77.2090° E // MOTEUR ACTIF",
     "timelineSpan": "HORIZON TEMPOREL 2030 — 2050",
     "liveTelemetry": "TÉLÉMÉTRIE: NOMINALE",
     "scrollDown": "Faites défiler pour explorer la chronologie",
-    "imageAlt": "Vision cinématique d'une métropole futuriste 2030 2050"
+    "imageAlt": "Vision cinématique d'une métropole futuriste 2030–2050"
   },
   "timeline": {
     "sectionTag": "CARTE_CHRONOLOGIQUE // 2030 -> 2050",
@@ -206,7 +206,7 @@
   },
   "footer": {
     "copyright": "Hayaati Web Technology. Fondé par Aliya Khan.",
-    "disclaimer": "Hayaati Web Technology est une archive de recherche spéculative indépendante. Toutes les projections représentent des hypothèses d'ingénierie pour 2030 2050.",
+    "disclaimer": "Hayaati Web Technology est une archive de recherche spéculative indépendante. Toutes les projections représentent des hypothèses d'ingénierie pour 2030–2050.",
     "liveDomainLabel": "DOMAINE OFFICIEL",
     "quickLinks": "Index de Navigation",
     "systemDesignation": "MOTEUR CENTRAL HAYAATI // VÉRIFIÉ",

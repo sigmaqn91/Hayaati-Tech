@@ -26,14 +26,14 @@
     "systemStatus": "SYSTEM//NODE.2030-2050",
     "online": "SYSTEMS ONLINE",
     "headline": "The future is not arriving. It is being architected.",
-    "subtitle": "A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030 2050. Built by Aliya Khan.",
-    "exploreCta": "Explore 2030 2050",
+    "subtitle": "A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030–2050. Built by Aliya Khan.",
+    "exploreCta": "Explore 2030–2050",
     "projectsCta": "View My Projects",
     "coordinates": "GEO: 28.6139° N, 77.2090° E // ENGINE ACTIVE",
     "timelineSpan": "HORIZON 2030 — 2050",
     "liveTelemetry": "TELEMETRY: NOMINAL",
     "scrollDown": "Scroll to explore chronological timeline",
-    "imageAlt": "Cinematic vision of futuristic metropolis 2030 2050"
+    "imageAlt": "Cinematic vision of futuristic metropolis 2030–2050"
   },
   "timeline": {
     "sectionTag": "CHRONO_MAP // 2030 -> 2050",
@@ -206,7 +206,7 @@
   },
   "footer": {
     "copyright": "Hayaati Web Technology. Founded by Aliya Khan.",
-    "disclaimer": "Hayaati Web Technology is an independent speculative research archive. All technical projections represent engineering hypotheses for 2030 2050.",
+    "disclaimer": "Hayaati Web Technology is an independent speculative research archive. All technical projections represent engineering hypotheses for 2030–2050.",
     "liveDomainLabel": "OFFICIAL DOMAIN",
     "quickLinks": "Navigation Index",
     "systemDesignation": "HAYAATI CORE ENGINE // VERIFIED",

@@ -10,6 +10,16 @@ interface DecryptTextProps {
 
 const CHARS = '01#%&*+<>[]_/~X@';
 
+function splitUnits(text: string): string[] {
+  try {
+    if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
+      const seg = new (Intl as any).Segmenter(undefined, { granularity: 'grapheme' });
+      return Array.from(seg.segment(text), (s: any) => s.segment as string);
+    }
+  } catch (e) {}
+  return Array.from(text);
+}
+
 export function DecryptText({ text, className = '', speed = 25 }: DecryptTextProps) {
   const [displayText, setDisplayText] = useState(text);
 
@@ -17,22 +27,22 @@ export function DecryptText({ text, className = '', speed = 25 }: DecryptTextPro
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     if (prefersReducedMotion) {
-      setDisplayText(text);
       return;
     }
 
+    const units = splitUnits(text);
     let iteration = 0;
-    const maxIterations = text.length;
+    const maxIterations = units.length;
 
     const interval = setInterval(() => {
       setDisplayText(() =>
-        text
-          .split('')
-          .map((char, index) => {
-            if (char === ' ') return ' ';
+        units
+          .map((unit, index) => {
+            if (/^\s+$/.test(unit)) return unit;
             if (index < iteration) {
-              return text[index];
+              return unit;
             }
             return CHARS[Math.floor(Math.random() * CHARS.length)];
           })
@@ -43,6 +53,7 @@ export function DecryptText({ text, className = '', speed = 25 }: DecryptTextPro
         clearInterval(interval);
         setDisplayText(text);
       }
+
       iteration += 1;
     }, speed);
 

@@ -27,13 +27,13 @@
     "online": "SİSTEMLER ÇEVRİMİÇİ",
     "headline": "Gelecek kendiliğinden gelmez. Onu birlikte inşa ediyoruz.",
     "subtitle": "2030'dan 2050'ye insan inovasyonunun, bilişsel makinelerin, yörünge kolonilerinin ve sürdürülebilir yaşam alanlarının sinematik vizyonu. Aliya Khan tarafından tasarlandı.",
-    "exploreCta": "2030 2050'yi Keşfet",
+    "exploreCta": "2030–2050'yi Keşfet",
     "projectsCta": "Projeleri İncele",
     "coordinates": "KONUM: 28.6139° K, 77.2090° D // MOTOR AKTİF",
     "timelineSpan": "UFUK 2030 — 2050",
     "liveTelemetry": "TELEMETRİ: NORMAL",
     "scrollDown": "Zaman çizelgesini keşfetmek için aşağı kaydırın",
-    "imageAlt": "2030 2050 fütüristik metropolün sinematik görünümü"
+    "imageAlt": "2030–2050 fütüristik metropolün sinematik görünümü"
   },
   "timeline": {
     "sectionTag": "ZAMAN_HARİTASI // 2030 -> 2050",
@@ -206,7 +206,7 @@
   },
   "footer": {
     "copyright": "Hayaati Web Technology. Aliya Khan tarafından kuruldu.",
-    "disclaimer": "Hayaati Web Technology bağımsız bir spekülatif araştırma arşividir. Tüm öngörüler 2030 2050 dönemi için mühendislik hipotezleridir.",
+    "disclaimer": "Hayaati Web Technology bağımsız bir spekülatif araştırma arşividir. Tüm öngörüler 2030–2050 dönemi için mühendislik hipotezleridir.",
     "liveDomainLabel": "RESMİ ETKİ ALANI",
     "quickLinks": "Gezinme İndeksi",
     "systemDesignation": "HAYAATI ÇEKİRDEK MOTOR // DOĞRULANDI",

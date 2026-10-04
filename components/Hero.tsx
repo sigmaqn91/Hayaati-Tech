@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { HeroStarfield } from './HeroStarfield';
@@ -18,6 +18,8 @@ export function Hero({ onOpenAssistant }: HeroProps) {
   const [scrollY, setScrollY] = useState(0);
   const [heroImageError, setHeroImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const [headlineHeight, setHeadlineHeight] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,9 +32,9 @@ export function Hero({ onOpenAssistant }: HeroProps) {
   const isLatin = LATIN_LANGUAGES.has(language);
   const talkToLabel = t.assistant.talkTo;
 
-  // Split headline into two balanced lines
+  // Split headline into two balanced lines across all script sentence delimiters
   const rawHeadline = t.hero.headline || '';
-  const delimiterMatch = rawHeadline.match(/^(.*?[.!?])\s*(.+)$/);
+  const delimiterMatch = rawHeadline.match(/^(.*?[.!?|।۔。])\s*(.+)$/);
   let line1 = rawHeadline;
   let line2 = '';
   if (delimiterMatch) {
@@ -46,6 +48,22 @@ export function Hero({ onOpenAssistant }: HeroProps) {
       line2 = words.slice(mid).join(' ');
     }
   }
+
+  // Keep headline height fixed to prevent page jumps during decryption and language switches
+  useEffect(() => {
+    const updateHeadlineHeight = () => {
+      if (headlineRef.current) {
+        const height = headlineRef.current.offsetHeight;
+        if (height > 0) {
+          setHeadlineHeight(height);
+        }
+      }
+    };
+
+    updateHeadlineHeight();
+    window.addEventListener('resize', updateHeadlineHeight);
+    return () => window.removeEventListener('resize', updateHeadlineHeight);
+  }, [language, line1, line2]);
 
   return (
     <section
@@ -90,8 +108,8 @@ export function Hero({ onOpenAssistant }: HeroProps) {
       {/* Static scanline texture overlay */}
       <div className="absolute inset-0 scanlines-overlay opacity-30 pointer-events-none" />
 
-      {/* Hero Canvas Starfield / Data Grid */}
-      <HeroStarfield />
+      {/* Hero Canvas Starfield / Perspective Data Grid */}
+      <HeroStarfield hasImage={imageLoaded && !heroImageError} />
 
       {/* Hero Content Box */}
       <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
@@ -117,23 +135,25 @@ export function Hero({ onOpenAssistant }: HeroProps) {
 
         {/* Main Headline Split into Two Balanced Lines */}
         <h1
-          className={`font-bold tracking-tight text-white max-w-4xl text-center mx-auto mb-2 ${
+          ref={headlineRef}
+          className={`font-bold tracking-tight text-white max-w-4xl text-center mx-auto mb-2 min-h-[5rem] sm:min-h-[6.5rem] md:min-h-[8rem] lg:min-h-[10rem] ${
             isLatin ? 'leading-[1.18]' : 'leading-[1.45]'
           }`}
           style={{
             fontSize: 'clamp(1.75rem, 5vw + 0.5rem, 4.25rem)',
             textWrap: 'balance',
             wordBreak: 'keep-all',
+            minHeight: headlineHeight ? `${headlineHeight}px` : undefined,
           }}
         >
           {/* Line 1 */}
-          <span className="block text-slate-100">
-            {isLatin ? <DecryptText text={line1} speed={20} /> : line1}
+          <span className="block text-slate-100 min-h-[1.25em]">
+            <DecryptText key={`${language}-${line1}`} text={line1} speed={25} />
           </span>
           {/* Line 2 (Key Phrase with cyan-to-violet gradient & soft glow) */}
           {line2 ? (
-            <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#38e8ff] via-[#818cf8] to-[#c084fc] bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(56,232,255,0.4)] font-extrabold">
-              {line2}
+            <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#38e8ff] via-[#818cf8] to-[#c084fc] bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(56,232,255,0.4)] font-extrabold min-h-[1.25em]">
+              <DecryptText key={`${language}-${line2}`} text={line2} speed={25} />
             </span>
           ) : null}
         </h1>

@@ -5,26 +5,26 @@ import { LanguageProvider } from '@/context/LanguageContext';
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hayaatiweb.site';
 
 export const metadata: Metadata = {
-  title: 'Hayaati Web Technology — Future (2030 2050)',
+  title: 'Hayaati Web Technology — Future (2030–2050)',
   description:
-    'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030 2050. Built by Aliya Khan.',
+    'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030–2050. Built by Aliya Khan.',
   metadataBase: new URL(appUrl),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'Hayaati Web Technology — Future (2030 2050)',
+    title: 'Hayaati Web Technology — Future (2030–2050)',
     description:
-      'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030 2050. Built by Aliya Khan.',
+      'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030–2050. Built by Aliya Khan.',
     url: appUrl,
     siteName: 'Hayaati Web Technology',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hayaati Web Technology — Future (2030 2050)',
+    title: 'Hayaati Web Technology — Future (2030–2050)',
     description:
-      'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030 2050. Built by Aliya Khan.',
+      'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030–2050. Built by Aliya Khan.',
   },
 };
 
@@ -34,7 +34,7 @@ const jsonLd = {
   name: 'Hayaati Web Technology',
   url: 'https://www.hayaatiweb.site',
   description:
-    'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030 2050.',
+    'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030–2050.',
   creator: {
     '@type': 'Person',
     name: 'Aliya Khan',
