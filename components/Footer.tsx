@@ -6,7 +6,6 @@ import { Mail, Globe, Shield, Terminal } from 'lucide-react';
 
 export function Footer() {
   const { t } = useLanguage();
-
   const links = [
     { href: '#hero', label: t.nav.home },
     { href: '#timeline', label: t.nav.timeline },
@@ -31,10 +30,10 @@ export function Footer() {
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed font-sans max-w-sm">
-              Dedicated frontier architecture examining cognitive systems, sustainable urban ecologies, and planetary infrastructure across 2030 to 2050.
+              {t.about.subtitle}
             </p>
             <div className="text-[11px] font-mono text-slate-500 pt-1">
-              Architect / Owner: <span className="text-slate-200">Aliya Khan</span>
+              {t.about.architectTitle}: <span className="text-slate-200">Aliya Khan</span>
             </div>
           </div>
 
@@ -60,7 +59,7 @@ export function Footer() {
           {/* Col 3: Domain & Direct Transmissions */}
           <div className="flex flex-col space-y-3">
             <div className="text-xs font-mono text-[#38e8ff] uppercase tracking-wider">
-              Direct Contact & Domain
+              {t.about.contactDirect}
             </div>
             <div className="space-y-2 text-xs font-mono text-slate-400">
               <div className="flex items-center gap-2">

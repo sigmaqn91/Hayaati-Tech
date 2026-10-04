@@ -1,62 +1,61 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getTranslation, languageList } from '@/locales';
-import { SupportedLanguage, TranslationSchema } from '@/locales/types';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { defaultBundle, languageList, loadLanguageBundle } from '@/locales';
+import { SupportedLanguage, TranslationSchema, ContentSchema, LanguageBundle } from '@/locales/types';
 
 interface LanguageContextType {
   language: SupportedLanguage;
   setLanguage: (lang: SupportedLanguage) => void;
   t: TranslationSchema;
+  content: ContentSchema;
   isRtl: boolean;
   languages: typeof languageList;
 }
 
-const defaultTranslation = getTranslation('en');
-
 const LanguageContext = createContext<LanguageContextType>({
   language: 'en',
   setLanguage: () => {},
-  t: defaultTranslation,
+  t: defaultBundle.ui,
+  content: defaultBundle.content,
   isRtl: false,
   languages: languageList,
 });
 
-function getInitialLanguage(): SupportedLanguage {
-  if (typeof window === 'undefined') return 'en';
-  try {
-    const stored = localStorage.getItem('hayaati_lang') as SupportedLanguage | null;
-    if (stored && languageList.some((l) => l.code === stored)) {
-      return stored;
-    }
-    if (navigator.language) {
-      const browserCode = navigator.language.slice(0, 2).toLowerCase() as SupportedLanguage;
-      if (languageList.some((l) => l.code === browserCode)) {
-        return browserCode;
-      }
-    }
-  } catch {
-    // Storage unavailable
-  }
-  return 'en';
-}
-
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<SupportedLanguage>(getInitialLanguage);
-  const [translation, setTranslation] = useState<TranslationSchema>(() => getTranslation(language));
+  const [language, setLanguageState] = useState<SupportedLanguage>('en');
+  const [bundle, setBundle] = useState<LanguageBundle>(defaultBundle);
 
-  const setLanguage = (lang: SupportedLanguage) => {
+  // Restore stored user preference safely after hydration (defaulting strictly to English on first visit)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('hayaati_lang') as SupportedLanguage | null;
+      if (stored && stored !== 'en' && languageList.some((l) => l.code === stored)) {
+        loadLanguageBundle(stored).then((loadedBundle) => {
+          setLanguageState(stored);
+          setBundle(loadedBundle);
+        });
+      }
+    } catch {
+      // Storage unavailable
+    }
+  }, []);
+
+  const setLanguage = useCallback((lang: SupportedLanguage) => {
     setLanguageState(lang);
-    const trans = getTranslation(lang);
-    setTranslation(trans);
     try {
       localStorage.setItem('hayaati_lang', lang);
     } catch {
       // Storage unavailable
     }
-  };
 
-  const isRtl = translation.meta.rtl;
+    // Dynamically load the language bundle
+    loadLanguageBundle(lang).then((loadedBundle) => {
+      setBundle(loadedBundle);
+    });
+  }, []);
+
+  const isRtl = language === 'ur' || language === 'ar';
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -70,12 +69,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       value={{
         language,
         setLanguage,
-        t: translation,
+        t: bundle.ui,
+        content: bundle.content,
         isRtl,
         languages: languageList,
       }}
     >
-      <div dir={isRtl ? 'rtl' : 'ltr'} className={isRtl ? 'font-sans text-right' : 'font-sans'}>
+      <div dir={isRtl ? 'rtl' : 'ltr'} className={isRtl ? 'font-sans text-right rtl-layout' : 'font-sans'}>
         {children}
       </div>
     </LanguageContext.Provider>

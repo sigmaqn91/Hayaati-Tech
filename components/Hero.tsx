@@ -5,31 +5,55 @@ import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { HeroStarfield } from './HeroStarfield';
 import { DecryptText } from './DecryptText';
-import { ArrowDown, Layers, Terminal } from 'lucide-react';
+import { ArrowDown, Layers } from 'lucide-react';
 
-export function Hero() {
-  const { t } = useLanguage();
+interface HeroProps {
+  onOpenAssistant?: () => void;
+}
+
+const LATIN_LANGUAGES = new Set(['en', 'fr', 'de', 'es', 'pt', 'it', 'tr', 'id', 'vi']);
+
+export function Hero({ onOpenAssistant }: HeroProps) {
+  const { t, language } = useLanguage();
   const [scrollY, setScrollY] = useState(0);
   const [heroImageError, setHeroImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Gentle parallax factor (subtle 0.15 ratio)
       setScrollY(window.scrollY);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const isLatin = LATIN_LANGUAGES.has(language);
+  const talkToLabel = t.assistant.talkTo;
+
+  // Split headline into two balanced lines
+  const rawHeadline = t.hero.headline || '';
+  const delimiterMatch = rawHeadline.match(/^(.*?[.!?])\s*(.+)$/);
+  let line1 = rawHeadline;
+  let line2 = '';
+  if (delimiterMatch) {
+    line1 = delimiterMatch[1].trim();
+    line2 = delimiterMatch[2].trim();
+  } else {
+    const words = rawHeadline.split(' ');
+    if (words.length > 3) {
+      const mid = Math.ceil(words.length / 2);
+      line1 = words.slice(0, mid).join(' ');
+      line2 = words.slice(mid).join(' ');
+    }
+  }
+
   return (
     <section
       id="hero"
-      aria-label="Hero Section"
+      aria-label={t.nav.home}
       className="relative min-h-[92vh] flex items-center justify-center pt-24 pb-16 overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
     >
-      {/* Background Image Container with gentle parallax */}
+      {/* Background Image Container with subtle parallax */}
       <div
         className="absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden"
         style={{
@@ -39,7 +63,7 @@ export function Hero() {
         {!heroImageError ? (
           <Image
             src="/images/hero/hero-main.webp"
-            alt="Cinematic vision of futuristic metropolis 2030–2050"
+            alt={t.hero.imageAlt}
             fill
             priority
             sizes="100vw"
@@ -52,7 +76,7 @@ export function Hero() {
           />
         ) : null}
 
-        {/* Fallback solid architectural grid panel when hero image is not yet rendered to disk */}
+        {/* Fallback architectural grid panel when hero image is not rendered */}
         {(!imageLoaded || heroImageError) && (
           <div className="absolute inset-0 bg-[#070a0f] opacity-80 flex items-center justify-center">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#111723_1px,transparent_1px),linear-gradient(to_bottom,#111723_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_70%,transparent_100%)] opacity-40" />
@@ -66,13 +90,13 @@ export function Hero() {
       {/* Static scanline texture overlay */}
       <div className="absolute inset-0 scanlines-overlay opacity-30 pointer-events-none" />
 
-      {/* Hero Canvas Starfield / Data Grid (Max 60 particles, pauses off-screen) */}
+      {/* Hero Canvas Starfield / Data Grid */}
       <HeroStarfield />
 
       {/* Hero Content Box */}
       <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
         {/* System Online HUD Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0b0f17] border border-[#38e8ff]/40 shadow-[0_0_12px_rgba(56,232,255,0.15)] mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0b0f17] border border-[#38e8ff]/40 shadow-[0_0_12px_rgba(56,232,255,0.15)] mb-5">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#38e8ff] opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#38e8ff]" />
@@ -86,22 +110,75 @@ export function Hero() {
           </span>
         </div>
 
-        {/* Main Headline with Decrypt Effect */}
-        <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white max-w-4xl leading-[1.1] mb-6">
-          <DecryptText text={t.hero.headline} speed={22} />
+        {/* Monospace Label Above Headline */}
+        <div className="text-[10px] sm:text-xs font-mono tracking-widest text-[#38e8ff]/80 uppercase mb-2">
+          {t.hero.timelineSpan}
+        </div>
+
+        {/* Main Headline Split into Two Balanced Lines */}
+        <h1
+          className={`font-bold tracking-tight text-white max-w-4xl text-center mx-auto mb-2 ${
+            isLatin ? 'leading-[1.18]' : 'leading-[1.45]'
+          }`}
+          style={{
+            fontSize: 'clamp(1.75rem, 5vw + 0.5rem, 4.25rem)',
+            textWrap: 'balance',
+            wordBreak: 'keep-all',
+          }}
+        >
+          {/* Line 1 */}
+          <span className="block text-slate-100">
+            {isLatin ? <DecryptText text={line1} speed={20} /> : line1}
+          </span>
+          {/* Line 2 (Key Phrase with cyan-to-violet gradient & soft glow) */}
+          {line2 ? (
+            <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#38e8ff] via-[#818cf8] to-[#c084fc] bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(56,232,255,0.4)] font-extrabold">
+              {line2}
+            </span>
+          ) : null}
         </h1>
 
+        {/* Thin Animated Line Under Heading */}
+        <div className="w-28 h-0.5 bg-gradient-to-r from-transparent via-[#38e8ff] to-transparent my-5 animate-pulse" />
+
         {/* Subtitle */}
-        <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl leading-relaxed mb-10 font-normal">
+        <p
+          className={`text-slate-300 max-w-2xl leading-relaxed mb-8 font-normal text-sm sm:text-base md:text-lg ${
+            isLatin ? '' : 'leading-[1.6]'
+          }`}
+          style={{ textWrap: 'balance' }}
+        >
           {t.hero.subtitle}
         </p>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-          {/* Primary CTA */}
+        {/* Action Buttons: Centered "Talk to Hayaati" Orb Button + Exploration CTAs */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
+          {/* Prominent Centered Orb Button: Talk to Hayaati */}
+          <button
+            onClick={onOpenAssistant}
+            className="group w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-3 bg-[#070a0f] border border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-xs font-bold uppercase tracking-wider shadow-[0_0_25px_rgba(56,232,255,0.35)] transition-all cursor-pointer rounded-full"
+            aria-label={talkToLabel}
+          >
+            {/* Glowing Orb Icon */}
+            <div className="relative w-4 h-4 rounded-full flex items-center justify-center shrink-0">
+              <span className="absolute inset-0 rounded-full bg-[#38e8ff] opacity-75 animate-ping [animation-duration:2s]" />
+              <span
+                className="relative z-10 w-3.5 h-3.5 rounded-full shadow-[0_0_8px_#38e8ff]"
+                style={{
+                  background:
+                    'radial-gradient(circle at 35% 30%, #ffffff 0%, #38e8ff 40%, #1e40af 80%, #050b18 100%)',
+                }}
+              />
+            </div>
+            <span className="text-[#38e8ff] group-hover:text-white transition-colors">
+              {talkToLabel}
+            </span>
+          </button>
+
+          {/* Primary Exploration CTA */}
           <a
             href="#timeline"
-            className="w-full sm:w-auto px-7 py-3.5 min-h-[48px] flex items-center justify-center gap-2 bg-[#38e8ff] text-[#05070a] font-mono text-xs font-bold uppercase tracking-wider hover:bg-[#38e8ff]/90 shadow-[0_0_20px_rgba(56,232,255,0.3)] transition-all cursor-pointer"
+            className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-2 bg-[#38e8ff] text-[#05070a] font-mono text-xs font-bold uppercase tracking-wider hover:bg-[#38e8ff]/90 shadow-[0_0_20px_rgba(56,232,255,0.25)] transition-all cursor-pointer rounded-none"
           >
             <span>{t.hero.exploreCta}</span>
             <ArrowDown className="w-3.5 h-3.5 text-[#05070a]" />
@@ -110,7 +187,7 @@ export function Hero() {
           {/* Secondary CTA */}
           <a
             href="#projects"
-            className="w-full sm:w-auto px-7 py-3.5 min-h-[48px] flex items-center justify-center gap-2 bg-[#0b0f17] text-slate-200 border border-[#1e293b] hover:border-[#38e8ff]/50 hover:text-white font-mono text-xs font-medium uppercase tracking-wider transition-all cursor-pointer"
+            className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-2 bg-[#0b0f17] text-slate-200 border border-[#1e293b] hover:border-[#38e8ff]/50 hover:text-white font-mono text-xs font-medium uppercase tracking-wider transition-all cursor-pointer rounded-none"
           >
             <Layers className="w-3.5 h-3.5 text-[#38e8ff]" />
             <span>{t.hero.projectsCta}</span>
@@ -118,9 +195,8 @@ export function Hero() {
         </div>
 
         {/* Monospace Telemetry Details Bar */}
-        <div className="mt-14 pt-6 border-t border-[#1e293b] w-full max-w-2xl flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-500 gap-3">
+        <div className="mt-12 pt-6 border-t border-[#1e293b] w-full max-w-2xl flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-500 gap-3">
           <div className="flex items-center gap-2">
-            <Terminal className="w-3 h-3 text-[#38e8ff]/70" />
             <span>{t.hero.coordinates}</span>
           </div>
           <div className="text-[#38e8ff]/80 font-semibold tracking-wider">

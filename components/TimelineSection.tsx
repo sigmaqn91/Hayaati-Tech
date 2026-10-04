@@ -1,23 +1,31 @@
 'use client';
 
 import React, { useState } from 'react';
-import { timelineEras, TimelineCard } from '@/data/future';
+import { timelineEras, TimelineCardData } from '@/data/future';
 import { RealImageSlot } from './RealImageSlot';
 import { TechCardModal } from './TechCardModal';
 import { useLanguage } from '@/context/LanguageContext';
 import { Clock, Calendar, ArrowRight, Zap, BookOpen } from 'lucide-react';
 
 export function TimelineSection() {
-  const { t } = useLanguage();
+  const { t, content } = useLanguage();
   const [selectedEraIndex, setSelectedEraIndex] = useState(0);
-  const [activeModalCard, setActiveModalCard] = useState<TimelineCard | null>(null);
+  const [activeModalCard, setActiveModalCard] = useState<TimelineCardData | null>(null);
 
   const currentEra = timelineEras[selectedEraIndex];
+  const eraContent = content.eras[currentEra.id] || {
+    title: '',
+    yearLabel: `ERA // ${currentEra.year}`,
+    story: '',
+    breakthroughs: [],
+    bannerAlt: '',
+    bannerPrompt: '',
+  };
 
   return (
     <section
       id="timeline"
-      aria-label="Future Timeline Section"
+      aria-label={t.timeline.title}
       className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-[#1e293b]"
     >
       {/* Section Header */}
@@ -38,6 +46,8 @@ export function TimelineSection() {
       <div className="flex flex-wrap items-center gap-3 mb-10 pb-4 border-b border-[#1e293b]">
         {timelineEras.map((era, index) => {
           const isActive = index === selectedEraIndex;
+          const localizedTitle = content.eras[era.id]?.title || '';
+          const localizedYearLabel = content.eras[era.id]?.yearLabel || `ERA // ${era.year}`;
           return (
             <button
               key={era.id}
@@ -49,8 +59,10 @@ export function TimelineSection() {
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span className="font-bold">{era.yearLabel}</span>
-              <span className="hidden sm:inline text-slate-400 text-[11px]">— {era.title}</span>
+              <span className="font-bold">{localizedYearLabel}</span>
+              {localizedTitle ? (
+                <span className="hidden sm:inline text-slate-400 text-[11px]"> — {localizedTitle}</span>
+              ) : null}
             </button>
           );
         })}
@@ -58,12 +70,12 @@ export function TimelineSection() {
 
       {/* Selected Era Main Display Container */}
       <div className="space-y-12">
-        {/* Big Era Panoramic Banner (1600x700 real image slot) */}
+        {/* Panoramic Banner */}
         <div className="relative overflow-hidden bg-[#0b0f17] border border-[#1e293b] hud-frame">
           <RealImageSlot
             src={currentEra.bannerImage}
-            alt={currentEra.bannerAlt}
-            title={`${currentEra.yearLabel} — ${currentEra.title}`}
+            alt={eraContent.bannerAlt || eraContent.title}
+            title={`${eraContent.yearLabel} — ${eraContent.title}`}
             width={1600}
             height={700}
             sizes="(max-width: 1280px) 100vw, 1200px"
@@ -76,28 +88,28 @@ export function TimelineSection() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-[#38e8ff]" />
                 <span className="font-mono text-xs text-[#38e8ff] uppercase tracking-widest font-bold">
-                  {currentEra.yearLabel} CHRONOLOGICAL BLUEPRINT
+                  {eraContent.yearLabel} — {t.timeline.chronoMap}
                 </span>
               </div>
               <div className="font-mono text-[11px] text-slate-500">
-                FRAME CODE: {currentEra.id.toUpperCase()}
+                {t.timeline.statusPrefix}: {currentEra.id.toUpperCase()}
               </div>
             </div>
 
             <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6">
-              {currentEra.title}
+              {eraContent.title}
             </h3>
 
             {/* Story & Breakthroughs Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4 border-t border-[#1e293b]">
-              {/* "A Day in This Era" Story Container */}
+              {/* "A Day in This Era" Story */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2 font-mono text-xs text-[#38e8ff] uppercase tracking-wider">
                   <BookOpen className="w-3.5 h-3.5" />
                   <span>{t.timeline.storyTitle}</span>
                 </div>
                 <div className="p-5 bg-[#070a0f] border-l-2 border-l-[#38e8ff] border-y border-r border-[#1e293b] text-sm text-slate-300 leading-relaxed font-sans">
-                  &quot;{currentEra.story}&quot;
+                  &quot;{eraContent.story}&quot;
                 </div>
               </div>
 
@@ -108,7 +120,7 @@ export function TimelineSection() {
                   <span>{t.timeline.breakthroughsTitle}</span>
                 </div>
                 <ul className="space-y-2.5">
-                  {currentEra.breakthroughs.map((breakthrough, idx) => (
+                  {eraContent.breakthroughs.map((breakthrough, idx) => (
                     <li
                       key={idx}
                       className="p-3 bg-[#070a0f] border border-[#1e293b] text-xs font-mono text-slate-300 flex items-start gap-2.5"
@@ -128,54 +140,64 @@ export function TimelineSection() {
           <div className="flex items-center justify-between mb-6">
             <h4 className="text-lg font-mono text-white uppercase tracking-wider flex items-center gap-2">
               <span className="w-2 h-2 bg-[#38e8ff]" />
-              Key Innovations of {currentEra.yearLabel}
+              {t.timeline.breakthroughsTitle} — {eraContent.yearLabel}
             </h4>
             <span className="text-xs font-mono text-slate-500">
-              {currentEra.cards.length} SPECIFICATIONS
+              {currentEra.cards.length} {t.timeline.specificationsCount}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {currentEra.cards.map((card) => (
-              <div
-                key={card.id}
-                onClick={() => setActiveModalCard(card)}
-                className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
-              >
-                {/* Card Image Slot (800x500) */}
-                <div className="relative">
-                  <RealImageSlot
-                    src={card.image}
-                    alt={card.alt}
-                    title={card.title}
-                    width={800}
-                    height={500}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="w-full h-[200px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                  />
-                  <div className="absolute top-2 right-2 px-2 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-[#38e8ff]">
-                    {card.year}
-                  </div>
-                </div>
+            {currentEra.cards.map((card) => {
+              const cardContent = content.timelineCards[card.id] || {
+                title: '',
+                description: '',
+                breakthrough: '',
+                alt: '',
+                prompt: '',
+              };
 
-                {/* Card Content */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-2">
-                    <h5 className="font-bold text-white text-base group-hover:text-[#38e8ff] transition-colors leading-snug">
-                      {card.title}
-                    </h5>
-                    <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
-                      {card.description}
-                    </p>
+              return (
+                <div
+                  key={card.id}
+                  onClick={() => setActiveModalCard(card)}
+                  className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
+                >
+                  {/* Card Image Slot */}
+                  <div className="relative">
+                    <RealImageSlot
+                      src={card.image}
+                      alt={cardContent.alt || cardContent.title}
+                      title={cardContent.title}
+                      width={800}
+                      height={500}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="w-full h-[200px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+                    <div className="absolute top-2 right-2 px-2 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-[#38e8ff]">
+                      {card.year}
+                    </div>
                   </div>
 
-                  <div className="pt-3 border-t border-[#1e293b] flex items-center justify-between text-[11px] font-mono text-slate-500 group-hover:text-[#38e8ff]">
-                    <span>VIEW DOSSIER</span>
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                  {/* Card Content */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <h5 className="font-bold text-white text-base group-hover:text-[#38e8ff] transition-colors leading-snug">
+                        {cardContent.title}
+                      </h5>
+                      <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
+                        {cardContent.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-[#1e293b] flex items-center justify-between text-[11px] font-mono text-slate-500 group-hover:text-[#38e8ff]">
+                      <span>{t.tech.viewDossier}</span>
+                      <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

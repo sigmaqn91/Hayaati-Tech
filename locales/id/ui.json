@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "code": "id",
+    "languageName": "Indonesian",
+    "nativeName": "Bahasa Indonesia",
+    "rtl": false
+  },
+  "nav": {
+    "home": "Beranda",
+    "timeline": "Garis Waktu Masa Depan",
+    "tech": "Teknologi Masa Depan",
+    "places": "Kota & Pemukiman",
+    "projects": "Proyek Saya",
+    "advertise": "Pasang / Ajukan",
+    "about": "Tentang",
+    "contact": "Hubungi Kami",
+    "assistant": "Asisten AI",
+    "language": "Bahasa",
+    "menu": "Buka menu navigasi",
+    "close": "Tutup menu navigasi",
+    "brandSubtitle": "TEKNOLOGI // 2030-2050",
+    "menuSysHeader": "MENU SISTEM",
+    "locationDomain": "SIMPUL: WWW.HAYAATIWEB.SITE"
+  },
+  "hero": {
+    "systemStatus": "SISTEM//SIMPUL.2030-2050",
+    "online": "SEMUA SISTEM AKTIF",
+    "headline": "Masa depan tidak datang dengan sendirinya. Kita merancangnya bersama.",
+    "subtitle": "Cetak biru sinematik inovasi manusia, mesin kognitif, koloni orbital, dan habitat berkelanjutan dari 2030 hingga 2050. Dibuat oleh Aliya Khan.",
+    "exploreCta": "Jelajahi 2030 2050",
+    "projectsCta": "Lihat Proyek Saya",
+    "coordinates": "LOKASI: 28.6139° U, 77.2090° T // MESIN AKTIF",
+    "timelineSpan": "RENTANG 2030 — 2050",
+    "liveTelemetry": "TELEMETRI: NOMINAL",
+    "scrollDown": "Gulir ke bawah untuk menjelajahi garis waktu",
+    "imageAlt": "Pemandangan sinematik kota metropolitan futuristik 2030 2050"
+  },
+  "timeline": {
+    "sectionTag": "PETA_KRONOLOGI // 2030 -> 2050",
+    "title": "Kronik Inovasi Peradaban",
+    "subtitle": "Dari kecerdasan tepi yang hadir di mana-mana pada 2030 hingga industri berat antariksa pada 2050.",
+    "chronoMap": "CETAK BIRU KRONOLOGIS",
+    "eraHeading": "CAKRAWALA ERA",
+    "storyTitle": "Sehari di Era Ini",
+    "breakthroughsTitle": "Tonggak Teknologi Utama",
+    "viewEraDetails": "Buka Berkas Era",
+    "jumpToEra": "Lompat ke Era Ini",
+    "statusPrefix": "STATUS SISTEM",
+    "eraBreakthroughsHeading": "Terobosan",
+    "specificationsCount": "Spesifikasi"
+  },
+  "tech": {
+    "sectionTag": "INDEKS_SISTEM // 42 BIDANG",
+    "title": "Katalog Teknologi Masa Depan",
+    "subtitle": "Cetak biru komprehensif dan mekanisme ilmiah di 7 perbatasan teknologi fundamental.",
+    "systemsIndex": "INDEKS KATALOG",
+    "howItWorksLabel": "CARA KERJA SISTEM",
+    "architectureMechanics": "ARSITEKTUR TEKNIS & MEKANIKA",
+    "underlyingMechanism": "PRINSIP DASAR FISIKA",
+    "searchPlaceholder": "Cari teknologi, sistem, atau terobosan ilmiah...",
+    "searchNoResults": "Tidak ada sistem teknologi yang cocok.",
+    "filterAll": "Semua Bidang",
+    "modalClose": "Tutup Berkas",
+    "viewDossier": "Lihat Berkas Teknis",
+    "yearLabel": "TAHUN",
+    "statusLabel": "STATUS SISTEM",
+    "activeStatus": "SPESIFIKASI AKTIF",
+    "promptLabel": "PETUNJUK",
+    "categories": {
+      "all": "Semua Bidang",
+      "ai": "AI Masa Depan",
+      "vehicles": "Kendaraan & Mobilitas",
+      "devices": "Perangkat & Bionik",
+      "homeWork": "Hunian & Kerja",
+      "health": "Kesehatan & Biologi",
+      "energy": "Energi & Iklim",
+      "space": "Luar Angkasa"
+    }
+  },
+  "places": {
+    "sectionTag": "INDEKS_HABITAT // 2030-2050",
+    "title": "Kartu Pos Kota & Pemukiman",
+    "subtitle": "Dokumentasi visual fotorealistik dan berkas infrastruktur peradaban baru di Bumi dan orbit antariksa.",
+    "horizonLabel": "CAKRAWALA",
+    "aDayInPlace": "Sehari di Tempat Ini",
+    "infrastructureLabel": "Infrastruktur Kunci",
+    "viewLocation": "Periksa Tata Letak",
+    "promptLabel": "PETUNJUK"
+  },
+  "projects": {
+    "sectionTag": "PROYEK PENDIRI // ALIYA KHAN",
+    "title": "Proyek Saya",
+    "subtitle": "Sistem perangkat lunak aktif, arsip riset, dan arsitektur rekayasa yang dikembangkan oleh Aliya Khan.",
+    "tabs": {
+      "live": "Sistem Siap Pakai",
+      "inProgress": "Tahap Rekayasa",
+      "futureIdeas": "Gagasan Masa Depan"
+    },
+    "visit": "Buka Tautan Sistem",
+    "emptyLive": "Belum ada sistem publik yang aktif saat ini. Peluncuran baru akan dipublikasikan di sini.",
+    "emptyInProgress": "Cetak biru rekayasa aktif akan dicatat di sini seiring pencapaian target.",
+    "emptyIdeas": "Proposal riset teoretis akan dikatalogkan di sini.",
+    "pendingNotice": "Proyek ditinjau dan disinkronkan langsung oleh Aliya Khan."
+  },
+  "advertise": {
+    "sectionTag": "PENGAJUAN_PROYEK // PENDAFTARAN",
+    "title": "Pasang / Ajukan Proyek",
+    "subtitle": "Kirimkan inovasi teknologi atau inisiatif berkelanjutan untuk ditinjau langsung oleh Aliya Khan.",
+    "reviewNotice": "Setiap pengajuan dievaluasi langsung oleh Aliya Khan. Pesan promosi tidak relevan akan ditolak.",
+    "pricingNote": "Penempatan dan ketentuan kerja sama akan dikomunikasikan melalui korespondensi langsung.",
+    "form": {
+      "name": "Nama Lengkap",
+      "email": "Alamat Email Langsung",
+      "projectName": "Judul Proyek / Lembaga",
+      "projectLink": "Tautan Sistem / Dokumen Teknis",
+      "category": "Bidang Keahlian",
+      "selectCategory": "Pilih bidang...",
+      "budget": "Perkiraan Anggaran / Tahap Pendanaan",
+      "budgetPlaceholder": "misal 10.000$ - 50.000$, Dana Riset",
+      "description": "Sinopsis Proyek & Terobosan Inti",
+      "submitBtn": "Kirim Proyek untuk Peninjauan",
+      "sending": "Mengenkripsi dan mengirimkan...",
+      "sentSuccess": "Pengajuan berhasil dikirim. Aliya Khan akan meninjau berkas Anda.",
+      "sendError": "Pengiriman gagal. Silakan kirimkan email langsung."
+    }
+  },
+  "about": {
+    "sectionTag": "KEPALA ARSITEK // BERKAS",
+    "title": "Tentang — Aliya Khan",
+    "subtitle": "Pendiri, Arsitek Perangkat Lunak, dan Peneliti Sistem di Hayaati Web Technology.",
+    "ownerName": "Aliya Khan",
+    "architectTitle": "PENDIRI & KEPALA ARSITEK",
+    "leadArchitect": "Memimpin arsitektur sistem masa depan dan infrastruktur digital berperforma tinggi.",
+    "bioPlaceholder": "Aliya Khan adalah arsitek perangkat lunak dan peneliti di persimpangan sistem terdistribusi, kecerdasan kognitif buatan, dan habitat manusia jangka panjang. Hayaati Web Technology adalah platform mandiri untuk menyajikan lompatan teknologi manusia.",
+    "contactDirect": "Kontak Langsung",
+    "photoAlt": "Aliya Khan, Pendiri & Kepala Arsitek"
+  },
+  "contact": {
+    "sectionTag": "SALURAN AMAN // TERENKRIPSI",
+    "title": "Komunikasi Langsung",
+    "subtitle": "Kirimkan pertanyaan teknis mendalam, kemitraan riset, atau proposal kolaborasi rekayasa.",
+    "emailLabel": "Saluran Resmi Korespondensi",
+    "directEmail": "Hayaati.Technology@gmail.com",
+    "form": {
+      "name": "Nama Lengkap Anda",
+      "email": "Alamat Email Anda",
+      "message": "Pesan / Substansi Pertanyaan",
+      "submitBtn": "Kirim Pesan Terenkripsi",
+      "sending": "Mengirimkan...",
+      "sentSuccess": "Pesan Anda berhasil diterima. Kami akan merespons melalui saluran resmi.",
+      "sendError": "Gagal mengirim pesan. Silakan hubungi kami langsung via email.",
+      "placeholderName": "Masukkan nama lengkap...",
+      "placeholderEmail": "Masukkan alamat email...",
+      "placeholderMessage": "Tuliskan pertanyaan atau proposal teknis Anda..."
+    }
+  },
+  "assistant": {
+    "buttonLabel": "Asisten AI",
+    "panelTitle": "ANTARMUKA KOGNITIF HAYAATI",
+    "subtitle": "CAKRAWALA KOGNITIF // 2030-2050",
+    "welcomeMessage": "Halo! Saya asisten Hayaati. Tanyakan apa saja tentang visi teknologi masa depan atau pilih topik untuk dieksplorasi.",
+    "chips": [
+      "Seperti apa peradaban pada tahun 2030?",
+      "Tunjukkan teknologi kesehatan masa depan",
+      "Ceritakan tentang Hayaati dan Aliya Khan"
+    ],
+    "inputPlaceholder": "Tanyakan tentang lini masa 2030-2050, teknologi, atau tata kota...",
+    "sendBtn": "Kirim",
+    "retryBtn": "Coba Lagi",
+    "voiceBtn": "Mulai Koneksi Suara",
+    "voiceStopBtn": "Akhiri Sesi Suara",
+    "voiceListening": "Mendengarkan...",
+    "voiceSpeaking": "Hayaati sedang berbicara...",
+    "voiceConnecting": "Menghubungkan suara...",
+    "voiceUnsupported": "Akses mikrofon tidak didukung pada peramban ini.",
+    "voiceNotAvailableLang": "Percakapan suara belum diaktifkan dalam bahasa ini. Anda dapat berbincang lewat teks.",
+    "rateLimitBanner": "Batas permintaan per pengunjung aktif.",
+    "talkTo": "Bicara dengan Hayaati",
+    "typeInstead": "Gunakan teks",
+    "returnToOrb": "Kembali ke Bola Suara",
+    "muteMic": "Bisukan mikrofon",
+    "unmuteMic": "Nyalakan mikrofon",
+    "micLabel": "Mikrofon",
+    "mutedLabel": "Bisu",
+    "endSession": "Selesai",
+    "endLabel": "Tutup",
+    "userTag": "ANDA",
+    "assistantTag": "HAYAATI",
+    "cognitiveLink": "TAUTAN KOGNITIF LANGSUNG",
+    "orb": {
+      "ready": "Siap",
+      "listening": "Mendengarkan...",
+      "thinking": "Memproses...",
+      "speaking": "Menjawab...",
+      "tapToStart": "Ketuk Mulai untuk berbicara",
+      "start": "Mulai"
+    },
+    "errors": {
+      "quotaReached": "Asisten telah mencapai kapasitas komputasi sementara. Silakan coba lagi nanti.",
+      "serverBusy": "Layanan sedang sibuk. Silakan coba beberapa saat lagi.",
+      "networkError": "Koneksi jaringan terputus. Periksa sambungan internet Anda.",
+      "micBlocked": "Akses mikrofon ditolak. Berikan izin mikrofon pada peramban.",
+      "sessionEnded": "Sesi suara selesai (mencapai batas durasi). Anda dapat memulai sesi baru kapan saja.",
+      "genericError": "Terjadi gangguan saat memproses. Silakan klik Coba Lagi."
+    }
+  },
+  "footer": {
+    "copyright": "Hayaati Web Technology. Didirikan oleh Aliya Khan.",
+    "disclaimer": "Hayaati Web Technology adalah repositori riset spekulatif mandiri. Semua proyeksi merupakan hipotesis rekayasa untuk 2030 2050.",
+    "liveDomainLabel": "DOMAIN RESMI",
+    "quickLinks": "Indeks Navigasi",
+    "systemDesignation": "MESIN INTI HAYAATI // TERVERIFIKASI",
+    "allRightsReserved": "Hak cipta dilindungi undang-undang."
+  },
+  "common": {
+    "year": "Tahun",
+    "status": "Kondisi",
+    "operational": "Beroperasi",
+    "close": "Tutup",
+    "back": "Kembali",
+    "retry": "Coba lagi",
+    "error": "Kesalahan",
+    "success": "Berhasil",
+    "loading": "Memuat..."
+  },
+  "languageSelector": {
+    "selectLanguage": "Pilih bahasa tampilan",
+    "dialogTitle": "Pemilih Bahasa",
+    "searchPlaceholder": "Cari bahasa (misal Bahasa Indonesia, English, Français)...",
+    "languagesCountSuffix": "bahasa"
+  },
+  "imageSlot": {
+    "opticalChannel": "SALURAN OPTIK",
+    "framePending": "MEMPROSES GAMBAR",
+    "sysDim": "SYS//800x500"
+  },
+  "notFound": {
+    "errorTag": "KESALAHAN 404 // SEKTOR TIDAK DITEMUKAN",
+    "title": "Sinyal Hilang di Luar Angkasa",
+    "description": "Koordinat yang diminta tidak cocok dengan subsistem atau habitat masa depan yang terdaftar.",
+    "returnBtn": "Kembali ke Komando Orbital"
+  }
+}

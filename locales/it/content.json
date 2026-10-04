@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "Le Fondamenta Cognitive",
+      "yearLabel": "EPOCA // 2030",
+      "story": "Le giornate iniziano con un'intelligenza artificiale ambientale che ha sincronizzato le reti elettriche durante la notte. La città vive di navette elettriche silenziose e capsule di consegna sotterranee dedicate.",
+      "breakthroughs": [
+        "Assistenti integrati sul dispositivo a bassissima latenza senza dipendenza dal cloud",
+        "Batterie a stato solido litio-metallo per 1.000 km di mobilità metropolitana continua",
+        "Certificazione operativa di taxi volanti aerei a guida autonoma nei principali corridoi urbani"
+      ],
+      "bannerAlt": "Veduta cinematografica di una metropoli ecologica nel 2030 con percorsi a zero emissioni",
+      "bannerPrompt": "Scatto panoramico cinematografico di una metropoli costiera nel 2030 all'alba, torri in vetro solare, navette silenziose, giardini verticali, risoluzione 8k."
+    },
+    "era-2035": {
+      "title": "La Sintesi Biomeccanica",
+      "yearLabel": "EPOCA // 2035",
+      "story": "Interfacce neurali permettono di interagire con i sistemi digitali attraverso il pensiero. La medicina preventiva opera a livello cellulare continuo tramite nanosensori biocompatibili.",
+      "breakthroughs": [
+        "Sensori optoelettronici sottocutanei per il monitoraggio continuo dei parametri biologici",
+        "Decodificatori non invasivi della corteccia motoria per il recupero della mobilità articolare",
+        "Bioreattori miceliali e microbici per la sintesi di materiali strutturali ad alta resistenza"
+      ],
+      "bannerAlt": "Veduta cinematografica di una città verticale con cupole biofile e ferrovie a levitazione magnetica",
+      "bannerPrompt": "Panoramica cinematografica di città verticale nel 2035 con gallerie di transito maglev e cupole aeroponiche, tramonto, risoluzione 8k."
+    },
+    "era-2050": {
+      "title": "L'Orizzonte Planetario e Orbitale",
+      "yearLabel": "EPOCA // 2050",
+      "story": "L'industria manifatturiera pesante è stata delocalizzata nello spazio in stazioni orbitali a gravità zero. I reattori a fusione e le economie a ciclo chiuso ristabiliscono l'equilibrio della biosfera terrestre.",
+      "breakthroughs": [
+        "Reattori a fusione nucleare commerciali attivi per fornitura continua di elettricità pulita",
+        "Insediamenti lunari stabili al polo sud per estrazione di risorse e carburante spaziale",
+        "Complessi di biologia sintetica globale per la cattura e stabilizzazione su vasta scala della CO2"
+      ],
+      "bannerAlt": "Visione della Terra dallo spazio con moduli di transito orbitale e stazioni scientifiche",
+      "bannerPrompt": "Vista cinematografica del globo terrestre dallo spazio con nodi orbitali di attracco, orizzonte azzurro illuminato, spazio profondo, risoluzione 8k."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Progetto // TL-2030-1",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2030-1",
+      "prompt": "Fotografia architettonica cinematografica, tl-2030-1, risoluzione 8k."
+    },
+    "tl-2030-2": {
+      "title": "Progetto // TL-2030-2",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2030-2",
+      "prompt": "Fotografia architettonica cinematografica, tl-2030-2, risoluzione 8k."
+    },
+    "tl-2030-3": {
+      "title": "Progetto // TL-2030-3",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2030-3",
+      "prompt": "Fotografia architettonica cinematografica, tl-2030-3, risoluzione 8k."
+    },
+    "tl-2030-4": {
+      "title": "Progetto // TL-2030-4",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2030-4",
+      "prompt": "Fotografia architettonica cinematografica, tl-2030-4, risoluzione 8k."
+    },
+    "tl-2035-1": {
+      "title": "Progetto // TL-2035-1",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2035-1",
+      "prompt": "Fotografia architettonica cinematografica, tl-2035-1, risoluzione 8k."
+    },
+    "tl-2035-2": {
+      "title": "Progetto // TL-2035-2",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2035-2",
+      "prompt": "Fotografia architettonica cinematografica, tl-2035-2, risoluzione 8k."
+    },
+    "tl-2035-3": {
+      "title": "Progetto // TL-2035-3",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2035-3",
+      "prompt": "Fotografia architettonica cinematografica, tl-2035-3, risoluzione 8k."
+    },
+    "tl-2035-4": {
+      "title": "Progetto // TL-2035-4",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2035-4",
+      "prompt": "Fotografia architettonica cinematografica, tl-2035-4, risoluzione 8k."
+    },
+    "tl-2050-1": {
+      "title": "Progetto // TL-2050-1",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2050-1",
+      "prompt": "Fotografia architettonica cinematografica, tl-2050-1, risoluzione 8k."
+    },
+    "tl-2050-2": {
+      "title": "Progetto // TL-2050-2",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2050-2",
+      "prompt": "Fotografia architettonica cinematografica, tl-2050-2, risoluzione 8k."
+    },
+    "tl-2050-3": {
+      "title": "Progetto // TL-2050-3",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2050-3",
+      "prompt": "Fotografia architettonica cinematografica, tl-2050-3, risoluzione 8k."
+    },
+    "tl-2050-4": {
+      "title": "Progetto // TL-2050-4",
+      "description": "Specifiche ingegneristiche avanzate e architettura a emissioni zero per il periodo 2030-2050.",
+      "breakthrough": "Principi fisici avanzati e massima ottimizzazione delle risorse.",
+      "alt": "Rappresentazione tecnica di tl-2050-4",
+      "prompt": "Fotografia architettonica cinematografica, tl-2050-4, risoluzione 8k."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Tecnologia // TECH-AI-1",
+      "description": "Sistema innovativo TECH-AI-1 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-ai-1",
+      "prompt": "Fotografia di design industriale, tech-ai-1, risoluzione 8k."
+    },
+    "tech-ai-2": {
+      "title": "Tecnologia // TECH-AI-2",
+      "description": "Sistema innovativo TECH-AI-2 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-ai-2",
+      "prompt": "Fotografia di design industriale, tech-ai-2, risoluzione 8k."
+    },
+    "tech-ai-3": {
+      "title": "Tecnologia // TECH-AI-3",
+      "description": "Sistema innovativo TECH-AI-3 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-ai-3",
+      "prompt": "Fotografia di design industriale, tech-ai-3, risoluzione 8k."
+    },
+    "tech-ai-4": {
+      "title": "Tecnologia // TECH-AI-4",
+      "description": "Sistema innovativo TECH-AI-4 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-ai-4",
+      "prompt": "Fotografia di design industriale, tech-ai-4, risoluzione 8k."
+    },
+    "tech-ai-5": {
+      "title": "Tecnologia // TECH-AI-5",
+      "description": "Sistema innovativo TECH-AI-5 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-ai-5",
+      "prompt": "Fotografia di design industriale, tech-ai-5, risoluzione 8k."
+    },
+    "tech-ai-6": {
+      "title": "Tecnologia // TECH-AI-6",
+      "description": "Sistema innovativo TECH-AI-6 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-ai-6",
+      "prompt": "Fotografia di design industriale, tech-ai-6, risoluzione 8k."
+    },
+    "tech-veh-1": {
+      "title": "Tecnologia // TECH-VEH-1",
+      "description": "Sistema innovativo TECH-VEH-1 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-veh-1",
+      "prompt": "Fotografia di design industriale, tech-veh-1, risoluzione 8k."
+    },
+    "tech-veh-2": {
+      "title": "Tecnologia // TECH-VEH-2",
+      "description": "Sistema innovativo TECH-VEH-2 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-veh-2",
+      "prompt": "Fotografia di design industriale, tech-veh-2, risoluzione 8k."
+    },
+    "tech-veh-3": {
+      "title": "Tecnologia // TECH-VEH-3",
+      "description": "Sistema innovativo TECH-VEH-3 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-veh-3",
+      "prompt": "Fotografia di design industriale, tech-veh-3, risoluzione 8k."
+    },
+    "tech-veh-4": {
+      "title": "Tecnologia // TECH-VEH-4",
+      "description": "Sistema innovativo TECH-VEH-4 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-veh-4",
+      "prompt": "Fotografia di design industriale, tech-veh-4, risoluzione 8k."
+    },
+    "tech-veh-5": {
+      "title": "Tecnologia // TECH-VEH-5",
+      "description": "Sistema innovativo TECH-VEH-5 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-veh-5",
+      "prompt": "Fotografia di design industriale, tech-veh-5, risoluzione 8k."
+    },
+    "tech-veh-6": {
+      "title": "Tecnologia // TECH-VEH-6",
+      "description": "Sistema innovativo TECH-VEH-6 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-veh-6",
+      "prompt": "Fotografia di design industriale, tech-veh-6, risoluzione 8k."
+    },
+    "tech-dev-1": {
+      "title": "Tecnologia // TECH-DEV-1",
+      "description": "Sistema innovativo TECH-DEV-1 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-dev-1",
+      "prompt": "Fotografia di design industriale, tech-dev-1, risoluzione 8k."
+    },
+    "tech-dev-2": {
+      "title": "Tecnologia // TECH-DEV-2",
+      "description": "Sistema innovativo TECH-DEV-2 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-dev-2",
+      "prompt": "Fotografia di design industriale, tech-dev-2, risoluzione 8k."
+    },
+    "tech-dev-3": {
+      "title": "Tecnologia // TECH-DEV-3",
+      "description": "Sistema innovativo TECH-DEV-3 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-dev-3",
+      "prompt": "Fotografia di design industriale, tech-dev-3, risoluzione 8k."
+    },
+    "tech-dev-4": {
+      "title": "Tecnologia // TECH-DEV-4",
+      "description": "Sistema innovativo TECH-DEV-4 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-dev-4",
+      "prompt": "Fotografia di design industriale, tech-dev-4, risoluzione 8k."
+    },
+    "tech-dev-5": {
+      "title": "Tecnologia // TECH-DEV-5",
+      "description": "Sistema innovativo TECH-DEV-5 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-dev-5",
+      "prompt": "Fotografia di design industriale, tech-dev-5, risoluzione 8k."
+    },
+    "tech-dev-6": {
+      "title": "Tecnologia // TECH-DEV-6",
+      "description": "Sistema innovativo TECH-DEV-6 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-dev-6",
+      "prompt": "Fotografia di design industriale, tech-dev-6, risoluzione 8k."
+    },
+    "tech-home-1": {
+      "title": "Tecnologia // TECH-HOME-1",
+      "description": "Sistema innovativo TECH-HOME-1 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-home-1",
+      "prompt": "Fotografia di design industriale, tech-home-1, risoluzione 8k."
+    },
+    "tech-home-2": {
+      "title": "Tecnologia // TECH-HOME-2",
+      "description": "Sistema innovativo TECH-HOME-2 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-home-2",
+      "prompt": "Fotografia di design industriale, tech-home-2, risoluzione 8k."
+    },
+    "tech-home-3": {
+      "title": "Tecnologia // TECH-HOME-3",
+      "description": "Sistema innovativo TECH-HOME-3 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-home-3",
+      "prompt": "Fotografia di design industriale, tech-home-3, risoluzione 8k."
+    },
+    "tech-home-4": {
+      "title": "Tecnologia // TECH-HOME-4",
+      "description": "Sistema innovativo TECH-HOME-4 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-home-4",
+      "prompt": "Fotografia di design industriale, tech-home-4, risoluzione 8k."
+    },
+    "tech-home-5": {
+      "title": "Tecnologia // TECH-HOME-5",
+      "description": "Sistema innovativo TECH-HOME-5 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-home-5",
+      "prompt": "Fotografia di design industriale, tech-home-5, risoluzione 8k."
+    },
+    "tech-home-6": {
+      "title": "Tecnologia // TECH-HOME-6",
+      "description": "Sistema innovativo TECH-HOME-6 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-home-6",
+      "prompt": "Fotografia di design industriale, tech-home-6, risoluzione 8k."
+    },
+    "tech-hlth-1": {
+      "title": "Tecnologia // TECH-HLTH-1",
+      "description": "Sistema innovativo TECH-HLTH-1 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-hlth-1",
+      "prompt": "Fotografia di design industriale, tech-hlth-1, risoluzione 8k."
+    },
+    "tech-hlth-2": {
+      "title": "Tecnologia // TECH-HLTH-2",
+      "description": "Sistema innovativo TECH-HLTH-2 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-hlth-2",
+      "prompt": "Fotografia di design industriale, tech-hlth-2, risoluzione 8k."
+    },
+    "tech-hlth-3": {
+      "title": "Tecnologia // TECH-HLTH-3",
+      "description": "Sistema innovativo TECH-HLTH-3 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-hlth-3",
+      "prompt": "Fotografia di design industriale, tech-hlth-3, risoluzione 8k."
+    },
+    "tech-hlth-4": {
+      "title": "Tecnologia // TECH-HLTH-4",
+      "description": "Sistema innovativo TECH-HLTH-4 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-hlth-4",
+      "prompt": "Fotografia di design industriale, tech-hlth-4, risoluzione 8k."
+    },
+    "tech-hlth-5": {
+      "title": "Tecnologia // TECH-HLTH-5",
+      "description": "Sistema innovativo TECH-HLTH-5 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-hlth-5",
+      "prompt": "Fotografia di design industriale, tech-hlth-5, risoluzione 8k."
+    },
+    "tech-hlth-6": {
+      "title": "Tecnologia // TECH-HLTH-6",
+      "description": "Sistema innovativo TECH-HLTH-6 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-hlth-6",
+      "prompt": "Fotografia di design industriale, tech-hlth-6, risoluzione 8k."
+    },
+    "tech-nrg-1": {
+      "title": "Tecnologia // TECH-NRG-1",
+      "description": "Sistema innovativo TECH-NRG-1 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-nrg-1",
+      "prompt": "Fotografia di design industriale, tech-nrg-1, risoluzione 8k."
+    },
+    "tech-nrg-2": {
+      "title": "Tecnologia // TECH-NRG-2",
+      "description": "Sistema innovativo TECH-NRG-2 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-nrg-2",
+      "prompt": "Fotografia di design industriale, tech-nrg-2, risoluzione 8k."
+    },
+    "tech-nrg-3": {
+      "title": "Tecnologia // TECH-NRG-3",
+      "description": "Sistema innovativo TECH-NRG-3 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-nrg-3",
+      "prompt": "Fotografia di design industriale, tech-nrg-3, risoluzione 8k."
+    },
+    "tech-nrg-4": {
+      "title": "Tecnologia // TECH-NRG-4",
+      "description": "Sistema innovativo TECH-NRG-4 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-nrg-4",
+      "prompt": "Fotografia di design industriale, tech-nrg-4, risoluzione 8k."
+    },
+    "tech-nrg-5": {
+      "title": "Tecnologia // TECH-NRG-5",
+      "description": "Sistema innovativo TECH-NRG-5 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-nrg-5",
+      "prompt": "Fotografia di design industriale, tech-nrg-5, risoluzione 8k."
+    },
+    "tech-nrg-6": {
+      "title": "Tecnologia // TECH-NRG-6",
+      "description": "Sistema innovativo TECH-NRG-6 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-nrg-6",
+      "prompt": "Fotografia di design industriale, tech-nrg-6, risoluzione 8k."
+    },
+    "tech-spc-1": {
+      "title": "Tecnologia // TECH-SPC-1",
+      "description": "Sistema innovativo TECH-SPC-1 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-spc-1",
+      "prompt": "Fotografia di design industriale, tech-spc-1, risoluzione 8k."
+    },
+    "tech-spc-2": {
+      "title": "Tecnologia // TECH-SPC-2",
+      "description": "Sistema innovativo TECH-SPC-2 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-spc-2",
+      "prompt": "Fotografia di design industriale, tech-spc-2, risoluzione 8k."
+    },
+    "tech-spc-3": {
+      "title": "Tecnologia // TECH-SPC-3",
+      "description": "Sistema innovativo TECH-SPC-3 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-spc-3",
+      "prompt": "Fotografia di design industriale, tech-spc-3, risoluzione 8k."
+    },
+    "tech-spc-4": {
+      "title": "Tecnologia // TECH-SPC-4",
+      "description": "Sistema innovativo TECH-SPC-4 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-spc-4",
+      "prompt": "Fotografia di design industriale, tech-spc-4, risoluzione 8k."
+    },
+    "tech-spc-5": {
+      "title": "Tecnologia // TECH-SPC-5",
+      "description": "Sistema innovativo TECH-SPC-5 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-spc-5",
+      "prompt": "Fotografia di design industriale, tech-spc-5, risoluzione 8k."
+    },
+    "tech-spc-6": {
+      "title": "Tecnologia // TECH-SPC-6",
+      "description": "Sistema innovativo TECH-SPC-6 progettato per operazioni autonome e sostenibili nel lungo termine.",
+      "howItWorks": "Funzionamento basato su principi fisici e computazionali a impatto climatico zero.",
+      "alt": "Rendering concettuale di tech-spc-6",
+      "prompt": "Fotografia di design industriale, tech-spc-6, risoluzione 8k."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Luogo // PLACE-1",
+      "location": "Habitat Internazionale PLACE-1",
+      "story": "La comunità vive integrata con ecosistemi a ciclo chiuso e tecnologie a impatto zero.",
+      "infrastructureTags": [
+        "Rete Intelligente",
+        "Mobilità Pulita",
+        "Energia Verde",
+        "Biosistemi"
+      ],
+      "alt": "Visualizzazione realistica di place-1",
+      "prompt": "Veduta urbana cinematografica, place-1, risoluzione 8k."
+    },
+    "place-2": {
+      "title": "Luogo // PLACE-2",
+      "location": "Habitat Internazionale PLACE-2",
+      "story": "La comunità vive integrata con ecosistemi a ciclo chiuso e tecnologie a impatto zero.",
+      "infrastructureTags": [
+        "Rete Intelligente",
+        "Mobilità Pulita",
+        "Energia Verde",
+        "Biosistemi"
+      ],
+      "alt": "Visualizzazione realistica di place-2",
+      "prompt": "Veduta urbana cinematografica, place-2, risoluzione 8k."
+    },
+    "place-3": {
+      "title": "Luogo // PLACE-3",
+      "location": "Habitat Internazionale PLACE-3",
+      "story": "La comunità vive integrata con ecosistemi a ciclo chiuso e tecnologie a impatto zero.",
+      "infrastructureTags": [
+        "Rete Intelligente",
+        "Mobilità Pulita",
+        "Energia Verde",
+        "Biosistemi"
+      ],
+      "alt": "Visualizzazione realistica di place-3",
+      "prompt": "Veduta urbana cinematografica, place-3, risoluzione 8k."
+    },
+    "place-4": {
+      "title": "Luogo // PLACE-4",
+      "location": "Habitat Internazionale PLACE-4",
+      "story": "La comunità vive integrata con ecosistemi a ciclo chiuso e tecnologie a impatto zero.",
+      "infrastructureTags": [
+        "Rete Intelligente",
+        "Mobilità Pulita",
+        "Energia Verde",
+        "Biosistemi"
+      ],
+      "alt": "Visualizzazione realistica di place-4",
+      "prompt": "Veduta urbana cinematografica, place-4, risoluzione 8k."
+    },
+    "place-5": {
+      "title": "Luogo // PLACE-5",
+      "location": "Habitat Internazionale PLACE-5",
+      "story": "La comunità vive integrata con ecosistemi a ciclo chiuso e tecnologie a impatto zero.",
+      "infrastructureTags": [
+        "Rete Intelligente",
+        "Mobilità Pulita",
+        "Energia Verde",
+        "Biosistemi"
+      ],
+      "alt": "Visualizzazione realistica di place-5",
+      "prompt": "Veduta urbana cinematografica, place-5, risoluzione 8k."
+    },
+    "place-6": {
+      "title": "Luogo // PLACE-6",
+      "location": "Habitat Internazionale PLACE-6",
+      "story": "La comunità vive integrata con ecosistemi a ciclo chiuso e tecnologie a impatto zero.",
+      "infrastructureTags": [
+        "Rete Intelligente",
+        "Mobilità Pulita",
+        "Energia Verde",
+        "Biosistemi"
+      ],
+      "alt": "Visualizzazione realistica di place-6",
+      "prompt": "Veduta urbana cinematografica, place-6, risoluzione 8k."
+    },
+    "place-7": {
+      "title": "Luogo // PLACE-7",
+      "location": "Habitat Internazionale PLACE-7",
+      "story": "La comunità vive integrata con ecosistemi a ciclo chiuso e tecnologie a impatto zero.",
+      "infrastructureTags": [
+        "Rete Intelligente",
+        "Mobilità Pulita",
+        "Energia Verde",
+        "Biosistemi"
+      ],
+      "alt": "Visualizzazione realistica di place-7",
+      "prompt": "Veduta urbana cinematografica, place-7, risoluzione 8k."
+    },
+    "place-8": {
+      "title": "Luogo // PLACE-8",
+      "location": "Habitat Internazionale PLACE-8",
+      "story": "La comunità vive integrata con ecosistemi a ciclo chiuso e tecnologie a impatto zero.",
+      "infrastructureTags": [
+        "Rete Intelligente",
+        "Mobilità Pulita",
+        "Energia Verde",
+        "Biosistemi"
+      ],
+      "alt": "Visualizzazione realistica di place-8",
+      "prompt": "Veduta urbana cinematografica, place-8, risoluzione 8k."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Progetti revisionati e sincronizzati direttamente da Aliya Khan.",
+    "emptyLive": "Nessun sistema pubblico attualmente online. Nuovi progetti saranno inseriti a breve.",
+    "emptyInProgress": "I progetti di ingegneria in corso saranno elencati al raggiungimento delle pietre miliari.",
+    "emptyIdeas": "Le proposte di ricerca teorica saranno indicizzate qui."
+  }
+}

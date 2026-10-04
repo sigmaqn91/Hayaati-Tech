@@ -11,7 +11,6 @@ export function ContactSection() {
     email: '',
     message: '',
   });
-
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -32,7 +31,6 @@ export function ContactSection() {
 
       const contentType = res.headers.get('content-type') || '';
       let data: { success?: boolean; error?: string } = {};
-
       if (contentType.includes('application/json')) {
         data = await res.json();
       } else {
@@ -52,7 +50,7 @@ export function ContactSection() {
       setErrorMessage(
         err instanceof Error
           ? err.message
-          : 'Transmission failed. Please email Hayaati.Technology@gmail.com directly.'
+          : t.contact.form.sendError
       );
     }
   };
@@ -60,7 +58,7 @@ export function ContactSection() {
   return (
     <section
       id="contact"
-      aria-label="Contact Section"
+      aria-label={t.contact.title}
       className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
     >
       <div className="mb-12">
@@ -81,12 +79,11 @@ export function ContactSection() {
         <div className="lg:col-span-5 space-y-6">
           <div className="p-6 bg-[#0b0f17] border border-[#1e293b] space-y-4 hud-frame">
             <h3 className="text-lg font-bold text-white font-mono uppercase tracking-wider">
-              Communication Relay
+              {t.contact.title}
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed font-sans">
-              Transmit technical inquiries, strategic collaborations, advisory requests, or queries regarding future timeline blueprints directly to our architecture desk.
+              {t.contact.subtitle}
             </p>
-
             <div className="p-4 bg-[#070a0f] border border-[#1e293b] space-y-2">
               <span className="text-[10px] font-mono text-slate-500 uppercase block">
                 {t.contact.emailLabel}
@@ -99,10 +96,9 @@ export function ContactSection() {
                 <span>{t.contact.directEmail}</span>
               </a>
             </div>
-
             <div className="p-4 bg-[#070a0f] border border-[#1e293b] space-y-2">
               <span className="text-[10px] font-mono text-slate-500 uppercase block">
-                Production Web Infrastructure
+                {t.footer.liveDomainLabel}
               </span>
               <a
                 href="https://www.hayaatiweb.site"
@@ -113,10 +109,6 @@ export function ContactSection() {
                 <Globe className="w-4 h-4 text-[#38e8ff]" />
                 <span>www.hayaatiweb.site</span>
               </a>
-            </div>
-
-            <div className="pt-2 text-[10px] font-mono text-slate-500">
-              RESPONSE HORIZON: Typically reviewed within 24 to 48 standard Earth operational hours.
             </div>
           </div>
         </div>
@@ -136,8 +128,9 @@ export function ContactSection() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Your full name"
-                className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
+                placeholder={t.contact.form.placeholderName}
+                style={{ fontSize: '16px' }}
+                className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
               />
             </div>
 
@@ -150,8 +143,9 @@ export function ContactSection() {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="your.email@domain.com"
-                className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
+                placeholder={t.contact.form.placeholderEmail}
+                style={{ fontSize: '16px' }}
+                className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
               />
             </div>
 
@@ -164,8 +158,9 @@ export function ContactSection() {
                 rows={5}
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                placeholder="Inquire regarding technical specifications, collaboration, or advisory..."
-                className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff]"
+                placeholder={t.contact.form.placeholderMessage}
+                style={{ fontSize: '16px' }}
+                className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff]"
               />
             </div>
 

@@ -38,7 +38,7 @@ export function HeroStarfield() {
     );
     observer.observe(canvas);
 
-    // Max 60 particles
+    // Max 50 particles
     const particleCount = 50;
     const particles: Array<{
       x: number;
@@ -65,7 +65,6 @@ export function HeroStarfield() {
         animationFrameId = requestAnimationFrame(render);
         return;
       }
-
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw faint connections
@@ -74,7 +73,6 @@ export function HeroStarfield() {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-
           if (dist < 90) {
             ctx.beginPath();
             ctx.strokeStyle = `rgba(56, 232, 255, ${0.12 * (1 - dist / 90)})`;

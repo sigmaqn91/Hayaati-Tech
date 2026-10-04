@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "code": "ja",
+    "languageName": "Japanese",
+    "nativeName": "日本語",
+    "rtl": false
+  },
+  "nav": {
+    "home": "ホーム",
+    "timeline": "未来年表",
+    "tech": "未来テクノロジー",
+    "places": "都市と居住区",
+    "projects": "開発プロジェクト",
+    "advertise": "掲載 / プロジェクト提案",
+    "about": "概要",
+    "contact": "お問い合わせ",
+    "assistant": "AI アシスタント",
+    "language": "言語",
+    "menu": "ナビゲーションメニューを開く",
+    "close": "ナビゲーションメニューを閉じる",
+    "brandSubtitle": "最先端技術 // 2030-2050",
+    "menuSysHeader": "システムメニュー",
+    "locationDomain": "アクセス先: WWW.HAYAATIWEB.SITE"
+  },
+  "hero": {
+    "systemStatus": "システム//ノード.2030-2050",
+    "online": "全システム正常稼働中",
+    "headline": "未来は偶然訪れるものではない。私たちが共に築くものだ。",
+    "subtitle": "2030年から2050年に至る人類の技術革新、自律的認知機械、軌道上コロニー、持続可能な都市生態系の映画的ブループリント。Aliya Khan によって設計・構築。",
+    "exploreCta": "2030 2050 を探求する",
+    "projectsCta": "プロジェクト一覧を見る",
+    "coordinates": "位置情報: 28.6139° N, 77.2090° E // 推進エンジン稼働",
+    "timelineSpan": "時間軸の展望 2030 — 2050",
+    "liveTelemetry": "稼働状態: 正常",
+    "scrollDown": "スクロールして年表を探索",
+    "imageAlt": "2030-2050年の未来都市を描いた映画的景観"
+  },
+  "timeline": {
+    "sectionTag": "時系列マップ // 2030 -> 2050",
+    "title": "人類の技術革新クロニクル",
+    "subtitle": "2030年の遍在するエッジ知能から、2050年の惑星間重力圏産業まで。",
+    "chronoMap": "年表設計図",
+    "eraHeading": "時代の地平",
+    "storyTitle": "この時代の一日",
+    "breakthroughsTitle": "革新的技術のマイルストーン",
+    "viewEraDetails": "時代の詳細資料を見る",
+    "jumpToEra": "この時代へ移動",
+    "statusPrefix": "状態",
+    "eraBreakthroughsHeading": "技術的躍進",
+    "specificationsCount": "設計仕様"
+  },
+  "tech": {
+    "sectionTag": "システムインデックス // 42の最先端領域",
+    "title": "未来テクノロジーカタログ",
+    "subtitle": "7つの根幹領域にわたる包括的なシステム設計図と科学的動作原理。",
+    "systemsIndex": "カタログインデックス",
+    "howItWorksLabel": "想定動作メカニズム",
+    "architectureMechanics": "工学アーキテクチャと機構",
+    "underlyingMechanism": "基礎物理原理",
+    "searchPlaceholder": "テクノロジー、システム、科学的躍進を検索...",
+    "searchNoResults": "条件に一致する技術システムは見つかりませんでした。",
+    "filterAll": "すべての領域",
+    "modalClose": "資料を閉じる",
+    "viewDossier": "技術仕様書を開く",
+    "yearLabel": "年",
+    "statusLabel": "ステータス",
+    "activeStatus": "有効な仕様",
+    "promptLabel": "プロンプト",
+    "categories": {
+      "all": "すべての領域",
+      "ai": "未来のAI",
+      "vehicles": "次世代モビリティ",
+      "devices": "デバイス＆バイオニクス",
+      "homeWork": "住居と労働環境",
+      "health": "医療＆生命科学",
+      "energy": "クリーンエネルギー＆気候",
+      "space": "深宇宙探査"
+    }
+  },
+  "places": {
+    "sectionTag": "居住空間インデックス // 2030-2050",
+    "title": "未来の都市と居住地の絵葉書",
+    "subtitle": "地球上および軌道上に誕生する新たな人類居住地の高精細記録とインフラ詳細設計書。",
+    "horizonLabel": "展望",
+    "aDayInPlace": "この場所での一日",
+    "infrastructureLabel": "基幹インフラ",
+    "viewLocation": "居住地計画を精査する",
+    "promptLabel": "画像生成プロンプト"
+  },
+  "projects": {
+    "sectionTag": "創設者主導プロジェクト // ALIYA KHAN",
+    "title": "開発プロジェクト",
+    "subtitle": "Aliya Khan が主導する実稼働ソフトウェアシステム、学術研究アーカイブ、工学アーキテクチャ。",
+    "tabs": {
+      "live": "公開中システム",
+      "inProgress": "開発中",
+      "futureIdeas": "未来の構想"
+    },
+    "visit": "システムリンクを開く",
+    "emptyLive": "現在公開中の実稼働システムはありません。新たなリリースをお待ちください。",
+    "emptyInProgress": "開発目標に到達次第、工学設計図を順次公開します。",
+    "emptyIdeas": "理論的研究提案および構想をここに順次掲載します。",
+    "pendingNotice": "すべてのプロジェクトは Aliya Khan によって直接検証および同期されています。"
+  },
+  "advertise": {
+    "sectionTag": "プロジェクト提案 // 掲載申請",
+    "title": "プロジェクトの掲載・提案",
+    "subtitle": "画期的な革新技術や持続可能な取り組みを、Aliya Khan による審査へご提案ください。",
+    "reviewNotice": "すべての提案は Aliya Khan が個人的に審査します。無差別な宣伝は排除されます。",
+    "pricingNote": "掲載条件や提携方針の詳細は、個別のお問い合わせにてご案内します。",
+    "form": {
+      "name": "お名前",
+      "email": "ご連絡先メールアドレス",
+      "projectName": "プロジェクト名 / 組織名",
+      "projectLink": "システムURL / 技術白書リンク",
+      "category": "専門領域",
+      "selectCategory": "カテゴリーを選択...",
+      "budget": "想定予算 / 資金調達ステージ",
+      "budgetPlaceholder": "例: 10,000ドル〜50,000ドル、研究助成金",
+      "description": "プロジェクト概要および技術的革新性",
+      "submitBtn": "審査のために送信する",
+      "sending": "暗号化して送信中...",
+      "sentSuccess": "提案が正常に送信されました。Aliya Khan が内容を精査いたします。",
+      "sendError": "通信エラーが発生しました。公式メールアドレス宛に直接ご連絡ください。"
+    }
+  },
+  "about": {
+    "sectionTag": "チーフアーキテクト資料",
+    "title": "プロフィール — Aliya Khan",
+    "subtitle": "Hayaati Web Technology 創設者、ソフトウェアアーキテクト、未来システム研究者。",
+    "ownerName": "Aliya Khan",
+    "architectTitle": "創設者 兼 チーフアーキテクト",
+    "leadArchitect": "2030〜2050年を見据えた次世代分散システムと高性能デジタルインフラの設計を先導。",
+    "bioPlaceholder": "Aliya Khan は、分散システム、人工認知知能、長期宇宙居住環境の融合領域を探求するソフトウェアアーキテクトです。Hayaati Web Technology は、客観的な工学的知見に基づき人類の技術進化を提示する独立系プラットフォームです。",
+    "contactDirect": "直接のお問い合わせ",
+    "photoAlt": "Aliya Khan（創設者 兼 チーフアーキテクト）"
+  },
+  "contact": {
+    "sectionTag": "セキュア通信チャンネル",
+    "title": "直接コミュニケーション",
+    "subtitle": "高度な技術的協議、研究パートナーシップ、プロジェクトに関するご相談はこちらから。",
+    "emailLabel": "公式通信アドレス",
+    "directEmail": "Hayaati.Technology@gmail.com",
+    "form": {
+      "name": "お名前",
+      "email": "メールアドレス",
+      "message": "メッセージ本文 / お問い合わせ内容",
+      "submitBtn": "暗号化メッセージを送信",
+      "sending": "送信中...",
+      "sentSuccess": "メッセージは正常に配信されました。公式チャンネルより折り返しご連絡いたします。",
+      "sendError": "送信に失敗しました。公式メールアドレス宛に直接お送りください。",
+      "placeholderName": "お名前を入力してください...",
+      "placeholderEmail": "メールアドレスを入力してください...",
+      "placeholderMessage": "お問い合わせ内容や提案をご記入ください..."
+    }
+  },
+  "assistant": {
+    "buttonLabel": "AI アシスタント",
+    "panelTitle": "HAYAATI 認知インターフェース",
+    "subtitle": "認知的地平 // 2030-2050",
+    "welcomeMessage": "こんにちは！Hayaati アシスタントです。未来技術の展望について何でもご質問いただくか、トピックをお選びください。",
+    "chips": [
+      "2030年の社会はどのように変わる？",
+      "未来の医療イノベーションを教えて",
+      "Hayaati と Aliya Khan について知りたい"
+    ],
+    "inputPlaceholder": "2030-2050年の年表、テクノロジー、都市について質問...",
+    "sendBtn": "送信",
+    "retryBtn": "再試行",
+    "voiceBtn": "音声接続を開始",
+    "voiceStopBtn": "音声セッションを終了",
+    "voiceListening": "聴き取り中...",
+    "voiceSpeaking": "Hayaati が話しています...",
+    "voiceConnecting": "音声接続を確立中...",
+    "voiceUnsupported": "お使いのブラウザはマイク入力に対応していません。",
+    "voiceNotAvailableLang": "この言語の音声対話は準備中です。テキストチャットをご利用ください。",
+    "rateLimitBanner": "リクエスト頻度制御が有効です。",
+    "talkTo": "音声で対話する",
+    "typeInstead": "文字入力に切り替える",
+    "returnToOrb": "音声球体に戻る",
+    "muteMic": "マイクをミュート",
+    "unmuteMic": "ミュート解除",
+    "micLabel": "マイク",
+    "mutedLabel": "消音中",
+    "endSession": "セッション終了",
+    "endLabel": "終了",
+    "userTag": "あなた",
+    "assistantTag": "HAYAATI",
+    "cognitiveLink": "ダイレクト認知リンク",
+    "orb": {
+      "ready": "待機中",
+      "listening": "聴き取り中...",
+      "thinking": "処理中...",
+      "speaking": "発答中...",
+      "tapToStart": "開始をタップして会話を始める",
+      "start": "開始"
+    },
+    "errors": {
+      "quotaReached": "アシスタントの計算容量上限に達しました。時間をおいて再度お試しください。サイトの閲覧は引き続き可能です。",
+      "serverBusy": "システムが混雑しています。しばらくしてからもう一度お試しください。",
+      "networkError": "ネットワーク接続が切断されました。通信環境をご確認ください。",
+      "micBlocked": "マイクの使用が拒否されました。ブラウザの設定でマイクを許可してください。",
+      "sessionEnded": "通話制限時間に達したため音声セッションを終了しました。いつでも新しいセッションを開始できます。",
+      "genericError": "エラーが発生しました。「再試行」をクリックしてください。"
+    }
+  },
+  "footer": {
+    "copyright": "Hayaati Web Technology. Aliya Khan によって設立。",
+    "disclaimer": "Hayaati Web Technology は独立した思索的技術探求プロジェクトです。すべての予測は2030-2050年に向けた工学的仮説です。",
+    "liveDomainLabel": "公式ドメイン",
+    "quickLinks": "サイト内インデックス",
+    "systemDesignation": "HAYAATI コアエンジン // 認証済み",
+    "allRightsReserved": "All rights reserved."
+  },
+  "common": {
+    "year": "年",
+    "status": "状態",
+    "operational": "稼働中",
+    "close": "閉じる",
+    "back": "戻る",
+    "retry": "再試行",
+    "error": "エラー",
+    "success": "成功",
+    "loading": "読み込み中..."
+  },
+  "languageSelector": {
+    "selectLanguage": "表示言語を選択",
+    "dialogTitle": "言語セレクター",
+    "searchPlaceholder": "言語を検索（例: 日本語、English、Français）...",
+    "languagesCountSuffix": "言語"
+  },
+  "imageSlot": {
+    "opticalChannel": "光学チャンネル",
+    "framePending": "画像生成中",
+    "sysDim": "SYS//800x500"
+  },
+  "notFound": {
+    "errorTag": "エラー 404 // 該当セクターなし",
+    "title": "深宇宙にて信号を見失いました",
+    "description": "要求された座標は、登録されたいかなる未来システムや居住区にも一致しません。",
+    "returnBtn": "軌道司令部へ戻る"
+  }
+}

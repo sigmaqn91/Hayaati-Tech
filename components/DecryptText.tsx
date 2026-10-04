@@ -17,8 +17,8 @@ export function DecryptText({ text, className = '', speed = 25 }: DecryptTextPro
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
     if (prefersReducedMotion) {
+      setDisplayText(text);
       return;
     }
 
@@ -43,7 +43,6 @@ export function DecryptText({ text, className = '', speed = 25 }: DecryptTextPro
         clearInterval(interval);
         setDisplayText(text);
       }
-
       iteration += 1;
     }, speed);
 

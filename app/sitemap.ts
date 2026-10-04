@@ -1,9 +1,8 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://www.hayaatiweb.site';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://www.hayaatiweb.site';
   const lastModified = new Date();
-
   return [
     {
       url: baseUrl,

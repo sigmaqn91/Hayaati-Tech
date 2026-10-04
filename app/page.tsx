@@ -11,6 +11,7 @@ import { AdvertiseSection } from '@/components/AdvertiseSection';
 import { AboutSection } from '@/components/AboutSection';
 import { ContactSection } from '@/components/ContactSection';
 import { AssistantPanel } from '@/components/AssistantPanel';
+import { FloatingVoiceTrigger } from '@/components/FloatingVoiceTrigger';
 import { Footer } from '@/components/Footer';
 
 export default function HomePage() {
@@ -18,13 +19,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#05070a] text-slate-100 flex flex-col selection:bg-[#38e8ff]/20 selection:text-[#38e8ff]">
-      {/* Fixed Solid Navigation with Language Selector & Assistant Trigger */}
-      <Navbar onOpenAssistant={() => setAssistantModalOpen(true)} />
+      {/* Fixed Navigation with Language Selector */}
+      <Navbar />
 
       {/* Main Content Sections */}
       <main className="flex-1">
-        {/* 1. Hero Section */}
-        <Hero />
+        {/* 1. Hero Section with Prominent "Talk to Hayaati" Center Orb Button */}
+        <Hero onOpenAssistant={() => setAssistantModalOpen(true)} />
 
         {/* 2. Future Timeline (2030 -> 2035 -> 2050) */}
         <TimelineSection />
@@ -48,7 +49,10 @@ export default function HomePage() {
         <ContactSection />
       </main>
 
-      {/* Built-in Gemini Cognitive Assistant with Real-Time Live Voice & Chat */}
+      {/* Floating Glowing Orb Button */}
+      <FloatingVoiceTrigger onOpen={() => setAssistantModalOpen(true)} />
+
+      {/* Modern Center Orb Voice Assistant Full-Screen Overlay */}
       <AssistantPanel
         isOpen={assistantModalOpen}
         onClose={() => setAssistantModalOpen(false)}

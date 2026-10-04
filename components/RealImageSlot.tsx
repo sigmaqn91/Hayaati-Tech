@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface RealImageSlotProps {
   src: string;
@@ -24,6 +25,7 @@ export function RealImageSlot({
   className = '',
   sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
 }: RealImageSlotProps) {
+  const { t } = useLanguage();
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -53,7 +55,7 @@ export function RealImageSlot({
       {(!isLoaded || hasError) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-[#070a0f] border border-[#1e293b]">
           <div className="absolute top-2 left-2 text-[10px] font-mono text-[#38e8ff]/60 tracking-wider">
-            OPTICAL CHANNEL
+            {t.imageSlot.opticalChannel}
           </div>
           <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#38e8ff]/50 rounded-full" />
           
@@ -61,11 +63,11 @@ export function RealImageSlot({
             {title}
           </span>
           <span className="text-[10px] font-mono text-slate-600 mt-2">
-            PHOTOREALISTIC FRAME PENDING
+            {t.imageSlot.framePending}
           </span>
           
           <div className="absolute bottom-2 left-2 text-[9px] font-mono text-slate-700">
-            SYS//800x500
+            {t.imageSlot.sysDim}
           </div>
         </div>
       )}

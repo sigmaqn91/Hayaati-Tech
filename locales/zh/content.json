@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "认知智能基石",
+      "yearLabel": "时代 // 2030",
+      "story": "清晨的城市伴随着泛在环境人工智能苏醒，在你安睡时，电网负荷已被精准调优。静音电动飞梭与地下管道无人配送舱穿行于城市的专属脉络中。",
+      "breakthroughs": [
+        "完全无需云端回传的低延迟端侧嵌入式环境学习助手",
+        "可支持1000公里城市无间断运行的固态锂金属高密电池组",
+        "全自主运行的点对点城市低空空中的士正式获得民航运营认证"
+      ],
+      "bannerAlt": "2030年具备绿色物流走廊的生态智能超级大都市全景",
+      "bannerPrompt": "2030年拂晓时分的生态海滨未来都市电影级全景摄影，太阳能光伏玻璃大厦，无声静音电动交通舱，立体垂直生态花园，8k分辨率。"
+    },
+    "era-2035": {
+      "title": "生物机械融合",
+      "yearLabel": "时代 // 2035",
+      "story": "高带宽非侵入式神经接口让意念成为直接的控制工具。微型化生物纳米传感器在细胞级别开展全天候健康监控，预防性医学成为日常标准。",
+      "breakthroughs": [
+        "皮下光电复合传感器，实现全天候代谢与生物标志物连续监测",
+        "高分辨率运动皮层无创解码器，完全恢复肢体运动机能",
+        "菌丝体与基因工程微生物生物反应器，规模化生产高强度生态建筑结构材料"
+      ],
+      "bannerAlt": "拥有生物温室穹顶与磁悬浮交通轨道的立体垂直都市电影级景象",
+      "bannerPrompt": "2035年暮色下的垂直生态摩天都市电影质感全景，真空管道磁悬浮交通网络与气雾水培温室穹顶，8k分辨率。"
+    },
+    "era-2050": {
+      "title": "行星与近地轨道视野",
+      "yearLabel": "时代 // 2050",
+      "story": "重工业制造体系已彻底搬离地球生物圈，转移至微重力轨道精炼加工平台。商用可控核聚变发电与闭环生态经济使地球的海洋与大气重归自然平衡。",
+      "breakthroughs": [
+        "商用磁约束受控核聚变堆全面并网，提供取之不尽的清洁基荷电力",
+        "月球南极永久科考科研基地，实现原位水冰资源提取与深空推进剂制备",
+        "行星级超大规模合成生物圈设施，实现亿吨级大气温室气体固化工程"
+      ],
+      "bannerAlt": "从近地轨道眺望地球以及轨道空间站和人类居住舱",
+      "bannerPrompt": "从近地轨道俯瞰地球与环形空间转运站的电影级宏伟构图，弧形蓝色大气地平线，深邃漆黑太空，8k分辨率。"
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "项目工程 // TL-2030-1",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2030-1 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2030-1，8k分辨率。"
+    },
+    "tl-2030-2": {
+      "title": "项目工程 // TL-2030-2",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2030-2 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2030-2，8k分辨率。"
+    },
+    "tl-2030-3": {
+      "title": "项目工程 // TL-2030-3",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2030-3 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2030-3，8k分辨率。"
+    },
+    "tl-2030-4": {
+      "title": "项目工程 // TL-2030-4",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2030-4 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2030-4，8k分辨率。"
+    },
+    "tl-2035-1": {
+      "title": "项目工程 // TL-2035-1",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2035-1 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2035-1，8k分辨率。"
+    },
+    "tl-2035-2": {
+      "title": "项目工程 // TL-2035-2",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2035-2 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2035-2，8k分辨率。"
+    },
+    "tl-2035-3": {
+      "title": "项目工程 // TL-2035-3",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2035-3 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2035-3，8k分辨率。"
+    },
+    "tl-2035-4": {
+      "title": "项目工程 // TL-2035-4",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2035-4 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2035-4，8k分辨率。"
+    },
+    "tl-2050-1": {
+      "title": "项目工程 // TL-2050-1",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2050-1 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2050-1，8k分辨率。"
+    },
+    "tl-2050-2": {
+      "title": "项目工程 // TL-2050-2",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2050-2 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2050-2，8k分辨率。"
+    },
+    "tl-2050-3": {
+      "title": "项目工程 // TL-2050-3",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2050-3 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2050-3，8k分辨率。"
+    },
+    "tl-2050-4": {
+      "title": "项目工程 // TL-2050-4",
+      "description": "面向 2030-2050 年代的零碳排放先进工业设计蓝图与技术规范。",
+      "breakthrough": "基于突破性物理定律的高效资源闭环利用机制。",
+      "alt": "tl-2050-4 的精密技术图解",
+      "prompt": "电影级建筑工业摄影，tl-2050-4，8k分辨率。"
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "前沿技术 // TECH-AI-1",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-AI-1。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-ai-1 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-ai-1，8k分辨率。"
+    },
+    "tech-ai-2": {
+      "title": "前沿技术 // TECH-AI-2",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-AI-2。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-ai-2 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-ai-2，8k分辨率。"
+    },
+    "tech-ai-3": {
+      "title": "前沿技术 // TECH-AI-3",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-AI-3。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-ai-3 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-ai-3，8k分辨率。"
+    },
+    "tech-ai-4": {
+      "title": "前沿技术 // TECH-AI-4",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-AI-4。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-ai-4 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-ai-4，8k分辨率。"
+    },
+    "tech-ai-5": {
+      "title": "前沿技术 // TECH-AI-5",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-AI-5。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-ai-5 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-ai-5，8k分辨率。"
+    },
+    "tech-ai-6": {
+      "title": "前沿技术 // TECH-AI-6",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-AI-6。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-ai-6 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-ai-6，8k分辨率。"
+    },
+    "tech-veh-1": {
+      "title": "前沿技术 // TECH-VEH-1",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-VEH-1。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-veh-1 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-veh-1，8k分辨率。"
+    },
+    "tech-veh-2": {
+      "title": "前沿技术 // TECH-VEH-2",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-VEH-2。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-veh-2 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-veh-2，8k分辨率。"
+    },
+    "tech-veh-3": {
+      "title": "前沿技术 // TECH-VEH-3",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-VEH-3。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-veh-3 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-veh-3，8k分辨率。"
+    },
+    "tech-veh-4": {
+      "title": "前沿技术 // TECH-VEH-4",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-VEH-4。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-veh-4 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-veh-4，8k分辨率。"
+    },
+    "tech-veh-5": {
+      "title": "前沿技术 // TECH-VEH-5",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-VEH-5。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-veh-5 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-veh-5，8k分辨率。"
+    },
+    "tech-veh-6": {
+      "title": "前沿技术 // TECH-VEH-6",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-VEH-6。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-veh-6 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-veh-6，8k分辨率。"
+    },
+    "tech-dev-1": {
+      "title": "前沿技术 // TECH-DEV-1",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-DEV-1。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-dev-1 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-dev-1，8k分辨率。"
+    },
+    "tech-dev-2": {
+      "title": "前沿技术 // TECH-DEV-2",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-DEV-2。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-dev-2 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-dev-2，8k分辨率。"
+    },
+    "tech-dev-3": {
+      "title": "前沿技术 // TECH-DEV-3",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-DEV-3。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-dev-3 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-dev-3，8k分辨率。"
+    },
+    "tech-dev-4": {
+      "title": "前沿技术 // TECH-DEV-4",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-DEV-4。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-dev-4 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-dev-4，8k分辨率。"
+    },
+    "tech-dev-5": {
+      "title": "前沿技术 // TECH-DEV-5",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-DEV-5。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-dev-5 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-dev-5，8k分辨率。"
+    },
+    "tech-dev-6": {
+      "title": "前沿技术 // TECH-DEV-6",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-DEV-6。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-dev-6 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-dev-6，8k分辨率。"
+    },
+    "tech-home-1": {
+      "title": "前沿技术 // TECH-HOME-1",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HOME-1。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-home-1 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-home-1，8k分辨率。"
+    },
+    "tech-home-2": {
+      "title": "前沿技术 // TECH-HOME-2",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HOME-2。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-home-2 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-home-2，8k分辨率。"
+    },
+    "tech-home-3": {
+      "title": "前沿技术 // TECH-HOME-3",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HOME-3。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-home-3 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-home-3，8k分辨率。"
+    },
+    "tech-home-4": {
+      "title": "前沿技术 // TECH-HOME-4",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HOME-4。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-home-4 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-home-4，8k分辨率。"
+    },
+    "tech-home-5": {
+      "title": "前沿技术 // TECH-HOME-5",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HOME-5。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-home-5 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-home-5，8k分辨率。"
+    },
+    "tech-home-6": {
+      "title": "前沿技术 // TECH-HOME-6",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HOME-6。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-home-6 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-home-6，8k分辨率。"
+    },
+    "tech-hlth-1": {
+      "title": "前沿技术 // TECH-HLTH-1",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HLTH-1。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-hlth-1 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-hlth-1，8k分辨率。"
+    },
+    "tech-hlth-2": {
+      "title": "前沿技术 // TECH-HLTH-2",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HLTH-2。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-hlth-2 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-hlth-2，8k分辨率。"
+    },
+    "tech-hlth-3": {
+      "title": "前沿技术 // TECH-HLTH-3",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HLTH-3。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-hlth-3 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-hlth-3，8k分辨率。"
+    },
+    "tech-hlth-4": {
+      "title": "前沿技术 // TECH-HLTH-4",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HLTH-4。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-hlth-4 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-hlth-4，8k分辨率。"
+    },
+    "tech-hlth-5": {
+      "title": "前沿技术 // TECH-HLTH-5",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HLTH-5。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-hlth-5 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-hlth-5，8k分辨率。"
+    },
+    "tech-hlth-6": {
+      "title": "前沿技术 // TECH-HLTH-6",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-HLTH-6。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-hlth-6 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-hlth-6，8k分辨率。"
+    },
+    "tech-nrg-1": {
+      "title": "前沿技术 // TECH-NRG-1",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-NRG-1。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-nrg-1 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-nrg-1，8k分辨率。"
+    },
+    "tech-nrg-2": {
+      "title": "前沿技术 // TECH-NRG-2",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-NRG-2。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-nrg-2 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-nrg-2，8k分辨率。"
+    },
+    "tech-nrg-3": {
+      "title": "前沿技术 // TECH-NRG-3",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-NRG-3。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-nrg-3 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-nrg-3，8k分辨率。"
+    },
+    "tech-nrg-4": {
+      "title": "前沿技术 // TECH-NRG-4",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-NRG-4。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-nrg-4 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-nrg-4，8k分辨率。"
+    },
+    "tech-nrg-5": {
+      "title": "前沿技术 // TECH-NRG-5",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-NRG-5。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-nrg-5 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-nrg-5，8k分辨率。"
+    },
+    "tech-nrg-6": {
+      "title": "前沿技术 // TECH-NRG-6",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-NRG-6。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-nrg-6 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-nrg-6，8k分辨率。"
+    },
+    "tech-spc-1": {
+      "title": "前沿技术 // TECH-SPC-1",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-SPC-1。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-spc-1 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-spc-1，8k分辨率。"
+    },
+    "tech-spc-2": {
+      "title": "前沿技术 // TECH-SPC-2",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-SPC-2。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-spc-2 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-spc-2，8k分辨率。"
+    },
+    "tech-spc-3": {
+      "title": "前沿技术 // TECH-SPC-3",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-SPC-3。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-spc-3 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-spc-3，8k分辨率。"
+    },
+    "tech-spc-4": {
+      "title": "前沿技术 // TECH-SPC-4",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-SPC-4。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-spc-4 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-spc-4，8k分辨率。"
+    },
+    "tech-spc-5": {
+      "title": "前沿技术 // TECH-SPC-5",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-SPC-5。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-spc-5 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-spc-5，8k分辨率。"
+    },
+    "tech-spc-6": {
+      "title": "前沿技术 // TECH-SPC-6",
+      "description": "为可持续自治化长期运行而设计的未来科技子系统 TECH-SPC-6。",
+      "howItWorks": "基于前沿物理模型与高能效算法设计，实现零环境足迹。",
+      "alt": "tech-spc-6 的工程概念图",
+      "prompt": "工业设计概念摄影，tech-spc-6，8k分辨率。"
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "人居聚落 // PLACE-1",
+      "location": "国际科研定居示范区 PLACE-1",
+      "story": "居民依托先进的生态闭环技术生活，与自然环境实现和谐共生。",
+      "infrastructureTags": [
+        "智能自愈电网",
+        "清洁微出行",
+        "绿色聚变能源",
+        "生态循环舱"
+      ],
+      "alt": "place-1 的超清实景再现",
+      "prompt": "电影级城市景观摄影，place-1，8k分辨率。"
+    },
+    "place-2": {
+      "title": "人居聚落 // PLACE-2",
+      "location": "国际科研定居示范区 PLACE-2",
+      "story": "居民依托先进的生态闭环技术生活，与自然环境实现和谐共生。",
+      "infrastructureTags": [
+        "智能自愈电网",
+        "清洁微出行",
+        "绿色聚变能源",
+        "生态循环舱"
+      ],
+      "alt": "place-2 的超清实景再现",
+      "prompt": "电影级城市景观摄影，place-2，8k分辨率。"
+    },
+    "place-3": {
+      "title": "人居聚落 // PLACE-3",
+      "location": "国际科研定居示范区 PLACE-3",
+      "story": "居民依托先进的生态闭环技术生活，与自然环境实现和谐共生。",
+      "infrastructureTags": [
+        "智能自愈电网",
+        "清洁微出行",
+        "绿色聚变能源",
+        "生态循环舱"
+      ],
+      "alt": "place-3 的超清实景再现",
+      "prompt": "电影级城市景观摄影，place-3，8k分辨率。"
+    },
+    "place-4": {
+      "title": "人居聚落 // PLACE-4",
+      "location": "国际科研定居示范区 PLACE-4",
+      "story": "居民依托先进的生态闭环技术生活，与自然环境实现和谐共生。",
+      "infrastructureTags": [
+        "智能自愈电网",
+        "清洁微出行",
+        "绿色聚变能源",
+        "生态循环舱"
+      ],
+      "alt": "place-4 的超清实景再现",
+      "prompt": "电影级城市景观摄影，place-4，8k分辨率。"
+    },
+    "place-5": {
+      "title": "人居聚落 // PLACE-5",
+      "location": "国际科研定居示范区 PLACE-5",
+      "story": "居民依托先进的生态闭环技术生活，与自然环境实现和谐共生。",
+      "infrastructureTags": [
+        "智能自愈电网",
+        "清洁微出行",
+        "绿色聚变能源",
+        "生态循环舱"
+      ],
+      "alt": "place-5 的超清实景再现",
+      "prompt": "电影级城市景观摄影，place-5，8k分辨率。"
+    },
+    "place-6": {
+      "title": "人居聚落 // PLACE-6",
+      "location": "国际科研定居示范区 PLACE-6",
+      "story": "居民依托先进的生态闭环技术生活，与自然环境实现和谐共生。",
+      "infrastructureTags": [
+        "智能自愈电网",
+        "清洁微出行",
+        "绿色聚变能源",
+        "生态循环舱"
+      ],
+      "alt": "place-6 的超清实景再现",
+      "prompt": "电影级城市景观摄影，place-6，8k分辨率。"
+    },
+    "place-7": {
+      "title": "人居聚落 // PLACE-7",
+      "location": "国际科研定居示范区 PLACE-7",
+      "story": "居民依托先进的生态闭环技术生活，与自然环境实现和谐共生。",
+      "infrastructureTags": [
+        "智能自愈电网",
+        "清洁微出行",
+        "绿色聚变能源",
+        "生态循环舱"
+      ],
+      "alt": "place-7 的超清实景再现",
+      "prompt": "电影级城市景观摄影，place-7，8k分辨率。"
+    },
+    "place-8": {
+      "title": "人居聚落 // PLACE-8",
+      "location": "国际科研定居示范区 PLACE-8",
+      "story": "居民依托先进的生态闭环技术生活，与自然环境实现和谐共生。",
+      "infrastructureTags": [
+        "智能自愈电网",
+        "清洁微出行",
+        "绿色聚变能源",
+        "生态循环舱"
+      ],
+      "alt": "place-8 的超清实景再现",
+      "prompt": "电影级城市景观摄影，place-8，8k分辨率。"
+    }
+  },
+  "projects": {
+    "pendingNotice": "所有收录项目均经 Aliya Khan 亲自审核与系统校准。",
+    "emptyLive": "暂无公开展出的运行系统。全新研发成果即将于此上线。",
+    "emptyInProgress": "达到关键阶段里程碑后，核心工程蓝图将在此公布。",
+    "emptyIdeas": "前沿理论探索与研究方案将陆续在此收录。"
+  }
+}

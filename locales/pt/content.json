@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "A Fundação Cognitiva",
+      "yearLabel": "ÉPOCA // 2030",
+      "story": "As manhãs iniciam com inteligência sintética ambiente que equilibrou as redes de energia durante o repouso. A metrópole opera com condutas elétricas silenciosas e cápsulas de entrega automatizadas em túneis dedicados.",
+      "breakthroughs": [
+        "Assistentes de aprendizagem automática locais no dispositivo sem dependência de nuvem",
+        "Baterias de lítio-metal em estado sólido com autonomia de 1.000 km para transporte urbano",
+        "Homologação comercial de táxis aéreos autónomos ponto a ponto nos principais corredores"
+      ],
+      "bannerAlt": "Vista cinematográfica de uma metrópole sustentável em 2030 com corredores de transporte limpos",
+      "bannerPrompt": "Fotografia panorâmica cinematográfica de cidade costeira ecológica em 2030 ao amanhecer, torres envidraçadas solares, lançadeiras elétricas, jardins verticais, resolução 8k."
+    },
+    "era-2035": {
+      "title": "A Síntese Biomecânica",
+      "yearLabel": "ÉPOCA // 2035",
+      "story": "Interfaces neurais permitem a interação com sistemas de informação através do pensamento. A medicina preventiva decorre em tempo real à escala celular mediante nanossensores biocompatíveis.",
+      "breakthroughs": [
+        "Sensores optoeletrónicos subdérmicos para monitorização contínua de biomarcadores metabólicos",
+        "Descodificadores não invasivos do córtex motor que restauram a função muscular",
+        "Biorreatores miceliais e bacterianos para produção de novos materiais de construção sustentáveis"
+      ],
+      "bannerAlt": "Perspetiva cinematográfica de uma urbe vertical com biodomos e linhas de levitação magnética",
+      "bannerPrompt": "Panorâmica cinematográfica de cidade vertical em 2035 com condutas de trânsito maglev e cúpulas aeropónicas, entardecer, resolução 8k."
+    },
+    "era-2050": {
+      "title": "O Horizonte Planetário e Orbital",
+      "yearLabel": "ÉPOCA // 2050",
+      "story": "A indústria pesada foi transferida para plataformas orbitais em microgravidade. Reatores de fusão nuclear e ciclos fechados de materiais restauram a harmonia climática dos oceanos e da atmosfera terrestre.",
+      "breakthroughs": [
+        "Reatores de fusão nuclear comerciais a fornecer eletricidade limpa constante",
+        "Bases permanentes no polo sul lunar para extração de voláteis e propulsores espaciais",
+        "Centros globais de biologia sintética dedicados à remoção massiva de carbono atmosférico"
+      ],
+      "bannerAlt": "Visão da Terra a partir da órbita com complexos espaciais e estações habitacionais",
+      "bannerPrompt": "Visual cinematográfico da Terra vista do espaço com docas orbitais de transferência, horizonte azul curvado, espaço profundo, resolução 8k."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Projeto // TL-2030-1",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2030-1",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2030-1, resolução 8k."
+    },
+    "tl-2030-2": {
+      "title": "Projeto // TL-2030-2",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2030-2",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2030-2, resolução 8k."
+    },
+    "tl-2030-3": {
+      "title": "Projeto // TL-2030-3",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2030-3",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2030-3, resolução 8k."
+    },
+    "tl-2030-4": {
+      "title": "Projeto // TL-2030-4",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2030-4",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2030-4, resolução 8k."
+    },
+    "tl-2035-1": {
+      "title": "Projeto // TL-2035-1",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2035-1",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2035-1, resolução 8k."
+    },
+    "tl-2035-2": {
+      "title": "Projeto // TL-2035-2",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2035-2",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2035-2, resolução 8k."
+    },
+    "tl-2035-3": {
+      "title": "Projeto // TL-2035-3",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2035-3",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2035-3, resolução 8k."
+    },
+    "tl-2035-4": {
+      "title": "Projeto // TL-2035-4",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2035-4",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2035-4, resolução 8k."
+    },
+    "tl-2050-1": {
+      "title": "Projeto // TL-2050-1",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2050-1",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2050-1, resolução 8k."
+    },
+    "tl-2050-2": {
+      "title": "Projeto // TL-2050-2",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2050-2",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2050-2, resolução 8k."
+    },
+    "tl-2050-3": {
+      "title": "Projeto // TL-2050-3",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2050-3",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2050-3, resolução 8k."
+    },
+    "tl-2050-4": {
+      "title": "Projeto // TL-2050-4",
+      "description": "Especificação de engenharia avançada com neutralidade carbónica para o período 2030-2050.",
+      "breakthrough": "Fundamentos científicos avançados e eficiência de recursos.",
+      "alt": "Visualização técnica de tl-2050-4",
+      "prompt": "Fotografia arquitetónica cinematográfica, tl-2050-4, resolução 8k."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Tecnologia // TECH-AI-1",
+      "description": "Subsistema pioneiro TECH-AI-1 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-ai-1",
+      "prompt": "Conceito de engenharia industrial, tech-ai-1, resolução 8k."
+    },
+    "tech-ai-2": {
+      "title": "Tecnologia // TECH-AI-2",
+      "description": "Subsistema pioneiro TECH-AI-2 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-ai-2",
+      "prompt": "Conceito de engenharia industrial, tech-ai-2, resolução 8k."
+    },
+    "tech-ai-3": {
+      "title": "Tecnologia // TECH-AI-3",
+      "description": "Subsistema pioneiro TECH-AI-3 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-ai-3",
+      "prompt": "Conceito de engenharia industrial, tech-ai-3, resolução 8k."
+    },
+    "tech-ai-4": {
+      "title": "Tecnologia // TECH-AI-4",
+      "description": "Subsistema pioneiro TECH-AI-4 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-ai-4",
+      "prompt": "Conceito de engenharia industrial, tech-ai-4, resolução 8k."
+    },
+    "tech-ai-5": {
+      "title": "Tecnologia // TECH-AI-5",
+      "description": "Subsistema pioneiro TECH-AI-5 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-ai-5",
+      "prompt": "Conceito de engenharia industrial, tech-ai-5, resolução 8k."
+    },
+    "tech-ai-6": {
+      "title": "Tecnologia // TECH-AI-6",
+      "description": "Subsistema pioneiro TECH-AI-6 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-ai-6",
+      "prompt": "Conceito de engenharia industrial, tech-ai-6, resolução 8k."
+    },
+    "tech-veh-1": {
+      "title": "Tecnologia // TECH-VEH-1",
+      "description": "Subsistema pioneiro TECH-VEH-1 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-veh-1",
+      "prompt": "Conceito de engenharia industrial, tech-veh-1, resolução 8k."
+    },
+    "tech-veh-2": {
+      "title": "Tecnologia // TECH-VEH-2",
+      "description": "Subsistema pioneiro TECH-VEH-2 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-veh-2",
+      "prompt": "Conceito de engenharia industrial, tech-veh-2, resolução 8k."
+    },
+    "tech-veh-3": {
+      "title": "Tecnologia // TECH-VEH-3",
+      "description": "Subsistema pioneiro TECH-VEH-3 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-veh-3",
+      "prompt": "Conceito de engenharia industrial, tech-veh-3, resolução 8k."
+    },
+    "tech-veh-4": {
+      "title": "Tecnologia // TECH-VEH-4",
+      "description": "Subsistema pioneiro TECH-VEH-4 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-veh-4",
+      "prompt": "Conceito de engenharia industrial, tech-veh-4, resolução 8k."
+    },
+    "tech-veh-5": {
+      "title": "Tecnologia // TECH-VEH-5",
+      "description": "Subsistema pioneiro TECH-VEH-5 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-veh-5",
+      "prompt": "Conceito de engenharia industrial, tech-veh-5, resolução 8k."
+    },
+    "tech-veh-6": {
+      "title": "Tecnologia // TECH-VEH-6",
+      "description": "Subsistema pioneiro TECH-VEH-6 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-veh-6",
+      "prompt": "Conceito de engenharia industrial, tech-veh-6, resolução 8k."
+    },
+    "tech-dev-1": {
+      "title": "Tecnologia // TECH-DEV-1",
+      "description": "Subsistema pioneiro TECH-DEV-1 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-dev-1",
+      "prompt": "Conceito de engenharia industrial, tech-dev-1, resolução 8k."
+    },
+    "tech-dev-2": {
+      "title": "Tecnologia // TECH-DEV-2",
+      "description": "Subsistema pioneiro TECH-DEV-2 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-dev-2",
+      "prompt": "Conceito de engenharia industrial, tech-dev-2, resolução 8k."
+    },
+    "tech-dev-3": {
+      "title": "Tecnologia // TECH-DEV-3",
+      "description": "Subsistema pioneiro TECH-DEV-3 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-dev-3",
+      "prompt": "Conceito de engenharia industrial, tech-dev-3, resolução 8k."
+    },
+    "tech-dev-4": {
+      "title": "Tecnologia // TECH-DEV-4",
+      "description": "Subsistema pioneiro TECH-DEV-4 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-dev-4",
+      "prompt": "Conceito de engenharia industrial, tech-dev-4, resolução 8k."
+    },
+    "tech-dev-5": {
+      "title": "Tecnologia // TECH-DEV-5",
+      "description": "Subsistema pioneiro TECH-DEV-5 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-dev-5",
+      "prompt": "Conceito de engenharia industrial, tech-dev-5, resolução 8k."
+    },
+    "tech-dev-6": {
+      "title": "Tecnologia // TECH-DEV-6",
+      "description": "Subsistema pioneiro TECH-DEV-6 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-dev-6",
+      "prompt": "Conceito de engenharia industrial, tech-dev-6, resolução 8k."
+    },
+    "tech-home-1": {
+      "title": "Tecnologia // TECH-HOME-1",
+      "description": "Subsistema pioneiro TECH-HOME-1 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-home-1",
+      "prompt": "Conceito de engenharia industrial, tech-home-1, resolução 8k."
+    },
+    "tech-home-2": {
+      "title": "Tecnologia // TECH-HOME-2",
+      "description": "Subsistema pioneiro TECH-HOME-2 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-home-2",
+      "prompt": "Conceito de engenharia industrial, tech-home-2, resolução 8k."
+    },
+    "tech-home-3": {
+      "title": "Tecnologia // TECH-HOME-3",
+      "description": "Subsistema pioneiro TECH-HOME-3 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-home-3",
+      "prompt": "Conceito de engenharia industrial, tech-home-3, resolução 8k."
+    },
+    "tech-home-4": {
+      "title": "Tecnologia // TECH-HOME-4",
+      "description": "Subsistema pioneiro TECH-HOME-4 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-home-4",
+      "prompt": "Conceito de engenharia industrial, tech-home-4, resolução 8k."
+    },
+    "tech-home-5": {
+      "title": "Tecnologia // TECH-HOME-5",
+      "description": "Subsistema pioneiro TECH-HOME-5 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-home-5",
+      "prompt": "Conceito de engenharia industrial, tech-home-5, resolução 8k."
+    },
+    "tech-home-6": {
+      "title": "Tecnologia // TECH-HOME-6",
+      "description": "Subsistema pioneiro TECH-HOME-6 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-home-6",
+      "prompt": "Conceito de engenharia industrial, tech-home-6, resolução 8k."
+    },
+    "tech-hlth-1": {
+      "title": "Tecnologia // TECH-HLTH-1",
+      "description": "Subsistema pioneiro TECH-HLTH-1 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-hlth-1",
+      "prompt": "Conceito de engenharia industrial, tech-hlth-1, resolução 8k."
+    },
+    "tech-hlth-2": {
+      "title": "Tecnologia // TECH-HLTH-2",
+      "description": "Subsistema pioneiro TECH-HLTH-2 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-hlth-2",
+      "prompt": "Conceito de engenharia industrial, tech-hlth-2, resolução 8k."
+    },
+    "tech-hlth-3": {
+      "title": "Tecnologia // TECH-HLTH-3",
+      "description": "Subsistema pioneiro TECH-HLTH-3 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-hlth-3",
+      "prompt": "Conceito de engenharia industrial, tech-hlth-3, resolução 8k."
+    },
+    "tech-hlth-4": {
+      "title": "Tecnologia // TECH-HLTH-4",
+      "description": "Subsistema pioneiro TECH-HLTH-4 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-hlth-4",
+      "prompt": "Conceito de engenharia industrial, tech-hlth-4, resolução 8k."
+    },
+    "tech-hlth-5": {
+      "title": "Tecnologia // TECH-HLTH-5",
+      "description": "Subsistema pioneiro TECH-HLTH-5 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-hlth-5",
+      "prompt": "Conceito de engenharia industrial, tech-hlth-5, resolução 8k."
+    },
+    "tech-hlth-6": {
+      "title": "Tecnologia // TECH-HLTH-6",
+      "description": "Subsistema pioneiro TECH-HLTH-6 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-hlth-6",
+      "prompt": "Conceito de engenharia industrial, tech-hlth-6, resolução 8k."
+    },
+    "tech-nrg-1": {
+      "title": "Tecnologia // TECH-NRG-1",
+      "description": "Subsistema pioneiro TECH-NRG-1 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-nrg-1",
+      "prompt": "Conceito de engenharia industrial, tech-nrg-1, resolução 8k."
+    },
+    "tech-nrg-2": {
+      "title": "Tecnologia // TECH-NRG-2",
+      "description": "Subsistema pioneiro TECH-NRG-2 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-nrg-2",
+      "prompt": "Conceito de engenharia industrial, tech-nrg-2, resolução 8k."
+    },
+    "tech-nrg-3": {
+      "title": "Tecnologia // TECH-NRG-3",
+      "description": "Subsistema pioneiro TECH-NRG-3 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-nrg-3",
+      "prompt": "Conceito de engenharia industrial, tech-nrg-3, resolução 8k."
+    },
+    "tech-nrg-4": {
+      "title": "Tecnologia // TECH-NRG-4",
+      "description": "Subsistema pioneiro TECH-NRG-4 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-nrg-4",
+      "prompt": "Conceito de engenharia industrial, tech-nrg-4, resolução 8k."
+    },
+    "tech-nrg-5": {
+      "title": "Tecnologia // TECH-NRG-5",
+      "description": "Subsistema pioneiro TECH-NRG-5 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-nrg-5",
+      "prompt": "Conceito de engenharia industrial, tech-nrg-5, resolução 8k."
+    },
+    "tech-nrg-6": {
+      "title": "Tecnologia // TECH-NRG-6",
+      "description": "Subsistema pioneiro TECH-NRG-6 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-nrg-6",
+      "prompt": "Conceito de engenharia industrial, tech-nrg-6, resolução 8k."
+    },
+    "tech-spc-1": {
+      "title": "Tecnologia // TECH-SPC-1",
+      "description": "Subsistema pioneiro TECH-SPC-1 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-spc-1",
+      "prompt": "Conceito de engenharia industrial, tech-spc-1, resolução 8k."
+    },
+    "tech-spc-2": {
+      "title": "Tecnologia // TECH-SPC-2",
+      "description": "Subsistema pioneiro TECH-SPC-2 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-spc-2",
+      "prompt": "Conceito de engenharia industrial, tech-spc-2, resolução 8k."
+    },
+    "tech-spc-3": {
+      "title": "Tecnologia // TECH-SPC-3",
+      "description": "Subsistema pioneiro TECH-SPC-3 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-spc-3",
+      "prompt": "Conceito de engenharia industrial, tech-spc-3, resolução 8k."
+    },
+    "tech-spc-4": {
+      "title": "Tecnologia // TECH-SPC-4",
+      "description": "Subsistema pioneiro TECH-SPC-4 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-spc-4",
+      "prompt": "Conceito de engenharia industrial, tech-spc-4, resolução 8k."
+    },
+    "tech-spc-5": {
+      "title": "Tecnologia // TECH-SPC-5",
+      "description": "Subsistema pioneiro TECH-SPC-5 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-spc-5",
+      "prompt": "Conceito de engenharia industrial, tech-spc-5, resolução 8k."
+    },
+    "tech-spc-6": {
+      "title": "Tecnologia // TECH-SPC-6",
+      "description": "Subsistema pioneiro TECH-SPC-6 concebido para operações sustentáveis e autónomas.",
+      "howItWorks": "Alimentado por princípios físicos e algoritmos computacionais sem pegada carbónica.",
+      "alt": "Imagem conceitual de tech-spc-6",
+      "prompt": "Conceito de engenharia industrial, tech-spc-6, resolução 8k."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Local // PLACE-1",
+      "location": "Colónia Internacional PLACE-1",
+      "story": "Os residentes usufruem de infraestruturas ecológicas de ciclo fechado em simbiose com a natureza.",
+      "infrastructureTags": [
+        "Rede Inteligente",
+        "Mobilidade Limpa",
+        "Energia Descarbonizada",
+        "Biossistemas"
+      ],
+      "alt": "Imagem fotorrealista de place-1",
+      "prompt": "Cenário urbano cinematográfico, place-1, resolução 8k."
+    },
+    "place-2": {
+      "title": "Local // PLACE-2",
+      "location": "Colónia Internacional PLACE-2",
+      "story": "Os residentes usufruem de infraestruturas ecológicas de ciclo fechado em simbiose com a natureza.",
+      "infrastructureTags": [
+        "Rede Inteligente",
+        "Mobilidade Limpa",
+        "Energia Descarbonizada",
+        "Biossistemas"
+      ],
+      "alt": "Imagem fotorrealista de place-2",
+      "prompt": "Cenário urbano cinematográfico, place-2, resolução 8k."
+    },
+    "place-3": {
+      "title": "Local // PLACE-3",
+      "location": "Colónia Internacional PLACE-3",
+      "story": "Os residentes usufruem de infraestruturas ecológicas de ciclo fechado em simbiose com a natureza.",
+      "infrastructureTags": [
+        "Rede Inteligente",
+        "Mobilidade Limpa",
+        "Energia Descarbonizada",
+        "Biossistemas"
+      ],
+      "alt": "Imagem fotorrealista de place-3",
+      "prompt": "Cenário urbano cinematográfico, place-3, resolução 8k."
+    },
+    "place-4": {
+      "title": "Local // PLACE-4",
+      "location": "Colónia Internacional PLACE-4",
+      "story": "Os residentes usufruem de infraestruturas ecológicas de ciclo fechado em simbiose com a natureza.",
+      "infrastructureTags": [
+        "Rede Inteligente",
+        "Mobilidade Limpa",
+        "Energia Descarbonizada",
+        "Biossistemas"
+      ],
+      "alt": "Imagem fotorrealista de place-4",
+      "prompt": "Cenário urbano cinematográfico, place-4, resolução 8k."
+    },
+    "place-5": {
+      "title": "Local // PLACE-5",
+      "location": "Colónia Internacional PLACE-5",
+      "story": "Os residentes usufruem de infraestruturas ecológicas de ciclo fechado em simbiose com a natureza.",
+      "infrastructureTags": [
+        "Rede Inteligente",
+        "Mobilidade Limpa",
+        "Energia Descarbonizada",
+        "Biossistemas"
+      ],
+      "alt": "Imagem fotorrealista de place-5",
+      "prompt": "Cenário urbano cinematográfico, place-5, resolução 8k."
+    },
+    "place-6": {
+      "title": "Local // PLACE-6",
+      "location": "Colónia Internacional PLACE-6",
+      "story": "Os residentes usufruem de infraestruturas ecológicas de ciclo fechado em simbiose com a natureza.",
+      "infrastructureTags": [
+        "Rede Inteligente",
+        "Mobilidade Limpa",
+        "Energia Descarbonizada",
+        "Biossistemas"
+      ],
+      "alt": "Imagem fotorrealista de place-6",
+      "prompt": "Cenário urbano cinematográfico, place-6, resolução 8k."
+    },
+    "place-7": {
+      "title": "Local // PLACE-7",
+      "location": "Colónia Internacional PLACE-7",
+      "story": "Os residentes usufruem de infraestruturas ecológicas de ciclo fechado em simbiose com a natureza.",
+      "infrastructureTags": [
+        "Rede Inteligente",
+        "Mobilidade Limpa",
+        "Energia Descarbonizada",
+        "Biossistemas"
+      ],
+      "alt": "Imagem fotorrealista de place-7",
+      "prompt": "Cenário urbano cinematográfico, place-7, resolução 8k."
+    },
+    "place-8": {
+      "title": "Local // PLACE-8",
+      "location": "Colónia Internacional PLACE-8",
+      "story": "Os residentes usufruem de infraestruturas ecológicas de ciclo fechado em simbiose com a natureza.",
+      "infrastructureTags": [
+        "Rede Inteligente",
+        "Mobilidade Limpa",
+        "Energia Descarbonizada",
+        "Biossistemas"
+      ],
+      "alt": "Imagem fotorrealista de place-8",
+      "prompt": "Cenário urbano cinematográfico, place-8, resolução 8k."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Projetos revistos e sincronizados diretamente por Aliya Khan.",
+    "emptyLive": "Nenhum sistema público ativo de momento. Novos lançamentos serão apresentados aqui.",
+    "emptyInProgress": "Projetos de engenharia em curso serão listados assim que atingirem os marcos definidos.",
+    "emptyIdeas": "Propostas de pesquisa teórica serão indexadas aqui."
+  }
+}

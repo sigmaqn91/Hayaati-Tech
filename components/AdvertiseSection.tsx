@@ -11,11 +11,10 @@ export function AdvertiseSection() {
     email: '',
     projectName: '',
     projectLink: '',
-    category: 'Future AI & Robotics',
+    category: 'ai',
     budget: '',
     description: '',
   });
-
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -36,7 +35,6 @@ export function AdvertiseSection() {
 
       const contentType = res.headers.get('content-type') || '';
       let data: { success?: boolean; error?: string } = {};
-
       if (contentType.includes('application/json')) {
         data = await res.json();
       } else {
@@ -55,7 +53,7 @@ export function AdvertiseSection() {
         email: '',
         projectName: '',
         projectLink: '',
-        category: 'Future AI & Robotics',
+        category: 'ai',
         budget: '',
         description: '',
       });
@@ -64,7 +62,7 @@ export function AdvertiseSection() {
       setErrorMessage(
         err instanceof Error
           ? err.message
-          : 'Transmission failed. Please email Hayaati.Technology@gmail.com directly.'
+          : t.advertise.form.sendError
       );
     }
   };
@@ -72,7 +70,7 @@ export function AdvertiseSection() {
   return (
     <section
       id="advertise"
-      aria-label="Advertise and List Project Section"
+      aria-label={t.advertise.title}
       className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-[#1e293b]"
     >
       <div className="mb-12">
@@ -93,16 +91,16 @@ export function AdvertiseSection() {
         <div className="lg:col-span-5 space-y-6">
           <div className="p-6 bg-[#0b0f17] border border-[#1e293b] space-y-4 hud-frame">
             <h3 className="text-lg font-bold text-white font-mono uppercase tracking-wider">
-              Showcase Guidelines
+              {t.advertise.title}
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed font-sans">
-              Hayaati Web Technology features frontier technologies, research initiatives, and ambitious hardware/software prototypes steering society towards 2030–2050.
+              {t.advertise.subtitle}
             </p>
 
             <div className="p-4 bg-[#070a0f] border border-[#38e8ff]/30 space-y-2">
               <div className="flex items-center gap-2 text-xs font-mono text-[#38e8ff] font-bold">
                 <ShieldCheck className="w-4 h-4 text-[#38e8ff]" />
-                <span>Manual Verification</span>
+                <span>{t.common.operational}</span>
               </div>
               <p className="text-[11px] text-slate-300 leading-relaxed">
                 {t.advertise.reviewNotice}
@@ -133,8 +131,9 @@ export function AdvertiseSection() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Your full name"
-                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
+                  placeholder={t.advertise.form.name}
+                  style={{ fontSize: '16px' }}
+                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
                 />
               </div>
 
@@ -147,8 +146,9 @@ export function AdvertiseSection() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="contact@company.com"
-                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
+                  placeholder={t.advertise.form.email}
+                  style={{ fontSize: '16px' }}
+                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
                 />
               </div>
             </div>
@@ -163,8 +163,9 @@ export function AdvertiseSection() {
                   required
                   value={formData.projectName}
                   onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
-                  placeholder="e.g. Crystalline Solar Array"
-                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
+                  placeholder={t.advertise.form.projectName}
+                  style={{ fontSize: '16px' }}
+                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
                 />
               </div>
 
@@ -176,8 +177,9 @@ export function AdvertiseSection() {
                   type="url"
                   value={formData.projectLink}
                   onChange={(e) => setFormData({ ...formData, projectLink: e.target.value })}
-                  placeholder="https://yourproject.site"
-                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
+                  placeholder="https://..."
+                  style={{ fontSize: '16px' }}
+                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
                 />
               </div>
             </div>
@@ -190,15 +192,16 @@ export function AdvertiseSection() {
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
+                  style={{ fontSize: '16px' }}
+                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
                 >
-                  <option value="Future AI & Robotics">Future AI & Robotics</option>
-                  <option value="Autonomous Vehicles & Transit">Autonomous Vehicles & Transit</option>
-                  <option value="Bionics & Neural Devices">Bionics & Neural Devices</option>
-                  <option value="Clean Energy & Fusion">Clean Energy & Fusion</option>
-                  <option value="Biotech & Longevity">Biotech & Longevity</option>
-                  <option value="Deep Space & Orbital">Deep Space & Orbital</option>
-                  <option value="Smart Cities & Architecture">Smart Cities & Architecture</option>
+                  <option value="ai">{t.tech.categories.ai}</option>
+                  <option value="vehicles">{t.tech.categories.vehicles}</option>
+                  <option value="devices">{t.tech.categories.devices}</option>
+                  <option value="energy">{t.tech.categories.energy}</option>
+                  <option value="health">{t.tech.categories.health}</option>
+                  <option value="space">{t.tech.categories.space}</option>
+                  <option value="homeWork">{t.tech.categories.homeWork}</option>
                 </select>
               </div>
 
@@ -210,8 +213,9 @@ export function AdvertiseSection() {
                   type="text"
                   value={formData.budget}
                   onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                  placeholder="e.g. Standard Tier / Research"
-                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
+                  placeholder={t.advertise.form.budgetPlaceholder}
+                  style={{ fontSize: '16px' }}
+                  className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff] min-h-[44px]"
                 />
               </div>
             </div>
@@ -225,8 +229,9 @@ export function AdvertiseSection() {
                 rows={4}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Detail technical novelty, readiness level, and trajectory toward 2030-2050..."
-                className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-xs font-mono text-white focus:outline-none focus:border-[#38e8ff]"
+                placeholder={t.advertise.form.description}
+                style={{ fontSize: '16px' }}
+                className="w-full px-4 py-2.5 bg-[#05070a] border border-[#1e293b] text-base sm:text-sm font-mono text-white focus:outline-none focus:border-[#38e8ff]"
               />
             </div>
 

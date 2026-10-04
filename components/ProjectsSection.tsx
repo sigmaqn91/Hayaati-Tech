@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { projectsData, ProjectItem } from '@/data/projects';
+import { projectsData, ProjectItemData } from '@/data/projects';
 import { useLanguage } from '@/context/LanguageContext';
 import { FolderGit2, ExternalLink, AlertCircle, Clock } from 'lucide-react';
 
@@ -13,7 +13,7 @@ export function ProjectsSection() {
   const inProgressProjects = projectsData.filter((p) => p.status === 'in-progress');
   const futureIdeasProjects = projectsData.filter((p) => p.status === 'future-idea');
 
-  const currentList: ProjectItem[] =
+  const currentList: ProjectItemData[] =
     activeTab === 'live'
       ? liveProjects
       : activeTab === 'in-progress'
@@ -23,7 +23,7 @@ export function ProjectsSection() {
   return (
     <section
       id="projects"
-      aria-label="My Projects Section"
+      aria-label={t.projects.title}
       className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-[#1e293b]"
     >
       {/* Section Header */}
@@ -55,7 +55,6 @@ export function ProjectsSection() {
             {liveProjects.length}
           </span>
         </button>
-
         <button
           onClick={() => setActiveTab('in-progress')}
           className={`flex items-center gap-2 px-5 py-2.5 min-h-[44px] text-xs font-mono uppercase tracking-wider transition-all border cursor-pointer ${
@@ -69,7 +68,6 @@ export function ProjectsSection() {
             {inProgressProjects.length}
           </span>
         </button>
-
         <button
           onClick={() => setActiveTab('future-idea')}
           className={`flex items-center gap-2 px-5 py-2.5 min-h-[44px] text-xs font-mono uppercase tracking-wider transition-all border cursor-pointer ${
@@ -99,15 +97,7 @@ export function ProjectsSection() {
                     {project.status}
                   </span>
                 </div>
-                <h3 className="text-xl font-bold text-white">{project.name}</h3>
-                <p className="text-xs text-slate-300 leading-relaxed font-sans">
-                  {project.tagline}
-                </p>
-                {project.description && (
-                  <p className="text-xs text-slate-400 font-sans">
-                    {project.description}
-                  </p>
-                )}
+                <h3 className="text-xl font-bold text-white">{project.id}</h3>
                 <div className="flex flex-wrap gap-1.5 pt-2">
                   {project.techTags.map((tech, i) => (
                     <span
@@ -137,27 +127,28 @@ export function ProjectsSection() {
           ))}
         </div>
       ) : (
-        /* Honest Coming Soon State (Per Master Spec Section 0 & 3) */
+        /* Honest Coming Soon State */
         <div className="p-8 sm:p-12 bg-[#0b0f17] border border-[#1e293b] text-center max-w-2xl mx-auto hud-frame">
           <div className="w-12 h-12 bg-[#070a0f] border border-[#ffb020]/40 flex items-center justify-center text-[#ffb020] mx-auto mb-4">
             <Clock className="w-6 h-6 animate-pulse" />
           </div>
-
           <h3 className="text-lg font-bold text-white uppercase font-mono tracking-wider mb-2">
-            Portfolio Curation in Progress
-          </h3>
-
-          <p className="text-xs text-slate-400 leading-relaxed max-w-lg mx-auto mb-6">
             {t.projects.pendingNotice}
+          </h3>
+          <p className="text-xs text-slate-400 leading-relaxed max-w-lg mx-auto mb-6">
+            {activeTab === 'live'
+              ? t.projects.emptyLive
+              : activeTab === 'in-progress'
+              ? t.projects.emptyInProgress
+              : t.projects.emptyIdeas}
           </p>
-
           <div className="p-4 bg-[#070a0f] border border-[#1e293b] text-[11px] font-mono text-slate-400 flex items-start gap-2.5 text-left">
             <AlertCircle className="w-4 h-4 text-[#38e8ff] shrink-0 mt-0.5" />
             <div>
               <span className="text-slate-200 font-semibold block mb-0.5">
-                Honesty Protocol:
+                {t.common.status}: {t.common.operational}
               </span>
-              Per the master build specification, no fictitious projects, client statistics, or simulated ratings are fabricated. Real deployments will be listed directly from <code className="text-[#38e8ff]">data/projects.ts</code> as supplied by owner Aliya Khan.
+              <span>{t.projects.pendingNotice}</span>
             </div>
           </div>
         </div>

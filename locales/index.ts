@@ -1,5 +1,6 @@
-import { en } from './en';
-import { SupportedLanguage, TranslationSchema } from './types';
+import { SupportedLanguage, LanguageBundle, TranslationSchema, ContentSchema } from './types';
+import enUi from './en/ui.json';
+import enContent from './en/content.json';
 
 export const languageList: Array<{
   code: SupportedLanguage;
@@ -20,6 +21,7 @@ export const languageList: Array<{
   { code: 'kn', name: 'Kannada', native: 'ಕನ್ನಡ', rtl: false },
   { code: 'ml', name: 'Malayalam', native: 'മലയാളം', rtl: false },
   { code: 'ne', name: 'Nepali', native: 'नेपाली', rtl: false },
+  { code: 'vi', name: 'Vietnamese', native: 'Tiếng Việt', rtl: false },
   { code: 'fr', name: 'French', native: 'Français', rtl: false },
   { code: 'de', name: 'German', native: 'Deutsch', rtl: false },
   { code: 'es', name: 'Spanish', native: 'Español', rtl: false },
@@ -33,455 +35,39 @@ export const languageList: Array<{
   { code: 'id', name: 'Indonesian', native: 'Bahasa Indonesia', rtl: false },
 ];
 
-export const hi: TranslationSchema = {
-  meta: { code: 'hi', languageName: 'Hindi', nativeName: 'हिन्दी', rtl: false, humanReviewRequired: true },
-  nav: {
-    home: 'होम',
-    timeline: 'भविष्य की समयरेखा',
-    tech: 'भविष्य की तकनीक',
-    places: 'शहर और स्थान',
-    projects: 'मेरी परियोजनाएं',
-    advertise: 'विज्ञापन / लिस्टिंग',
-    about: 'परिचय',
-    contact: 'संपर्क',
-    assistant: 'एआई सहायक',
-    language: 'भाषा',
-  },
-  hero: {
-    systemStatus: 'सिस्टम//नोड.2030-2050',
-    online: 'सिस्टम ऑनलाइन',
-    headline: 'भविष्य आ नहीं रहा है। इसे बनाया जा रहा है।',
-    subtitle: 'मानव नवाचार, संवादात्मक बुद्धिमत्ता और 2030 से 2050 तक के सतत आवासों का एक सिनेमाई खाका।',
-    exploreCta: '2030–2050 का अन्वेषण करें',
-    projectsCta: 'मेरी परियोजनाएं देखें',
-    coordinates: 'स्थान: 28.6139° N, 77.2090° E // भविष्य इंजन',
-    timelineSpan: 'समय क्षितिज 2030 — 2050',
-  },
-  timeline: {
-    sectionTag: 'कालक्रम // 2030–2050',
-    title: 'भविष्य की समयरेखा',
-    subtitle: 'गणना, जैव-एकीकरण और गहन अंतरिक्ष अवसंरचना के तीन महत्वपूर्ण युग।',
-    storyTitle: 'इस युग का एक दिन',
-    breakthroughsTitle: 'प्रमुख सफलताएं',
-  },
-  tech: {
-    sectionTag: 'तकनीकी कैटलॉग',
-    title: 'भविष्य की तकनीक सूची',
-    subtitle: 'उभरती हुई प्रौद्योगिकियों और उनके सिद्धांतों का विस्तृत विश्लेषण।',
-    howItWorksLabel: 'यह कैसे काम कर सकता है',
-    categories: {
-      all: 'सभी श्रेणियां',
-      ai: 'भविष्य का एआई',
-      vehicles: 'वाहन और परिवहन',
-      devices: 'उपकरण और बायोनिक्स',
-      homeWork: 'घर और कार्यस्थल',
-      health: 'स्वास्थ्य और जीवविज्ञान',
-      energy: 'ऊर्जा और जलवायु',
-      space: 'गहन अंतरिक्ष',
-    },
-  },
-  places: {
-    sectionTag: 'स्थान और आवास',
-    title: 'शहर और स्थान',
-    subtitle: 'पृथ्वी से लेकर अंतरग्रहीय सीमाओं तक के यथार्थवादी दृश्य और विवरण।',
-    aDayInPlace: 'इस स्थान पर एक दिन',
-    infrastructure: 'प्रमुख बुनियादी ढांचा',
-  },
-  projects: {
-    sectionTag: 'पोर्टफोलियो',
-    title: 'मेरी परियोजनाएं',
-    subtitle: 'आलिया खान द्वारा विकसित वेब सिस्टम और प्रयोग।',
-    tabs: { live: 'सक्रिय प्रोजेक्ट्स', inProgress: 'प्रगति में', futureIdeas: 'भविष्य के विचार' },
-    visit: 'प्रोजेक्ट देखें',
-    emptyLive: 'अभी तक कोई लाइव प्रोजेक्ट सूचीबद्ध नहीं है। जल्द आ रहा है।',
-    emptyInProgress: 'सक्रिय प्रोजेक्ट फाइलों पर काम जारी है।',
-    emptyIdeas: 'भविष्य के विचार जल्द ही प्रदर्शित किए जाएंगे।',
-    pendingNotice: 'परियोजनाओं का आधिकारिक डेटा आलिया खान द्वारा उपलब्ध कराया जाना बाकी है।',
-  },
-  advertise: {
-    sectionTag: 'भागीदारी',
-    title: 'विज्ञापन दें / अपना प्रोजेक्ट जोड़ें',
-    subtitle: 'अपनी अग्रणी तकनीक या शोध को वैश्विक दर्शकों के सामने प्रदर्शित करें।',
-    reviewNotice: 'प्रकाशन से पहले प्रत्येक प्रविष्टि की आलिया खान द्वारा व्यक्तिगत समीक्षा की जाती है।',
-    pricingNote: 'मूल्य निर्धारण: विशेष लिस्टिंग शर्तों के लिए हमसे संपर्क करें।',
-    form: {
-      name: 'आपका पूरा नाम',
-      email: 'संपर्क ईमेल',
-      projectName: 'प्रोजेक्ट / कंपनी का नाम',
-      projectLink: 'वेबसाइट लिंक या डॉक्स',
-      category: 'श्रेणी',
-      budget: 'अनुमानित बजट (वैकल्पिक)',
-      description: 'प्रोजेक्ट विवरण',
-      submitBtn: 'समीक्षा के लिए जमा करें',
-      sending: 'प्रसारित हो रहा है...',
-      sentSuccess: 'आवेदन प्राप्त हुआ। हम जल्द संपर्क करेंगे।',
-      sendError: 'विफल रहा। कृपया सीधे ईमेल करें।',
-    },
-  },
-  about: {
-    sectionTag: 'संस्थापक परिचय',
-    title: 'परिचय — आलिया खान',
-    subtitle: 'हयाती वेब टेक्नोलॉजी की संस्थापक और मुख्य आर्किटेक्ट।',
-    ownerName: 'आलिया खान',
-    bioPlaceholder: 'आधिकारिक जीवनी और फोटो आलिया खान द्वारा जारी किए जाने की प्रतीक्षा में हैं।',
-    contactDirect: 'सीधा संपर्क',
-  },
-  contact: {
-    sectionTag: 'संपर्क सूत्र',
-    title: 'संपर्क करें',
-    subtitle: 'तकनीकी पूछताछ और सहयोग के लिए सीधा संपर्क चैनल।',
-    emailLabel: 'आधिकारिक ईमेल',
-    directEmail: 'Hayaati.Technology@gmail.com',
-    form: {
-      name: 'आपका नाम',
-      email: 'आपका ईमेल',
-      message: 'संदेश',
-      submitBtn: 'संदेश भेजें',
-      sending: 'भेजा जा रहा है...',
-      sentSuccess: 'संदेश प्राप्त हुआ। हम शीघ्र उत्तर देंगे।',
-      sendError: 'विफल रहा। कृपया Hayaati.Technology@gmail.com पर ईमेल करें।',
-    },
-  },
-  assistant: {
-    buttonLabel: 'एआई सहायक',
-    panelTitle: 'हयाती इंटरफेस',
-    welcomeMessage: 'हयाती वेब टेक्नोलॉजी में आपका स्वागत है। मैं भविष्य के अन्वेषण में आपकी क्या सहायता कर सकता हूँ?',
-    inputPlaceholder: '2030-2050 समयरेखा या तकनीक के बारे में पूछें...',
-    sendBtn: 'भेजें',
-    voiceBtn: 'ध्वनि प्रारंभ करें',
-    voiceStopBtn: 'ध्वनि बंद करें',
-    voiceListening: 'सुन रहा हूँ...',
-    voiceSpeaking: 'उत्तर तैयार हो रहा है...',
-    quotaWarning: 'सिस्टम दर सीमा समाप्त। कृपया प्रतीक्षा करें।',
-    micDeniedWarning: 'माइक्रोफ़ोन अनुमति अस्वीकृत हुई।',
-    notSupportedWarning: 'ब्राउज़र में ध्वनि समर्थित नहीं है।',
-    rateLimitWarning: 'सूचना: संसाधनों के संरक्षण के लिए दर सीमित है।',
-  },
-  footer: {
-    copyright: '© 2026 हयाती वेब टेक्नोलॉजी। सर्वाधिकार सुरक्षित।',
-    disclaimer: 'प्रस्तुत भविष्यवाणियां सिनेमाई दृष्टिकोण हैं, कोई निश्चित वित्तीय वादे नहीं।',
-    liveDomainLabel: 'लाइव डोमेन: www.hayaatiweb.site',
-    quickLinks: 'नेविगेशन',
-    systemDesignation: 'हयाती कोर // संस्करण 2.4',
-  },
+export const defaultBundle: LanguageBundle = {
+  ui: enUi as unknown as TranslationSchema,
+  content: enContent as unknown as ContentSchema,
 };
 
-export const ur: TranslationSchema = {
-  meta: { code: 'ur', languageName: 'Urdu', nativeName: 'اردو', rtl: true, humanReviewRequired: true },
-  nav: {
-    home: 'ہوم',
-    timeline: 'مستقبل کا ٹائم لائن',
-    tech: 'مستقبل کی ٹیکنالوجی',
-    places: 'شہر اور مقامات',
-    projects: 'میرے منصوبے',
-    advertise: 'اشتہار دیں / منصوبہ شامل کریں',
-    about: 'تعارف',
-    contact: 'رابطہ',
-    assistant: 'اے آئی اسسٹنٹ',
-    language: 'زبان',
-  },
-  hero: {
-    systemStatus: 'سسٹم//نوڈ.2030-2050',
-    online: 'سسٹم آن لائن',
-    headline: 'مستقبل آ نہیں رہا۔ اسے تعمیر کیا جا رہا ہے۔',
-    subtitle: 'اگلی تین دہائیوں میں انسانی جدت، مصنوعی ذہانت اور پائیدار بستیوں کا ایک شاندار خاکہ۔',
-    exploreCta: '2030–2050 کا جائزہ لیں',
-    projectsCta: 'میرے منصوبے دیکھیں',
-    coordinates: 'مقام: 28.6139° N, 77.2090° E // مستقبل کا انجن',
-    timelineSpan: 'افق 2030 — 2050',
-  },
-  timeline: {
-    sectionTag: 'تاریخی افق // 2030–2050',
-    title: 'مستقبل کا ٹائم لائن',
-    subtitle: 'کمپیوٹیشنل ترقی، بائیو انٹیگریشن اور خلائی بنیادی ڈھانچے کے تین اہم ادوار۔',
-    storyTitle: 'اس دور کا ایک دن',
-    breakthroughsTitle: 'اہم کامیابیاں',
-  },
-  tech: {
-    sectionTag: 'ٹیکنالوجی آرکائیو',
-    title: 'مستقبل کا ٹیکنالوجی کیٹلاگ',
-    subtitle: 'نئی تکنیکی اختراعات اور نظریاتی طریقہ کار کا جامع جائزہ۔',
-    howItWorksLabel: 'یہ کیسے کام کر سکتا ہے',
-    categories: {
-      all: 'تمام اقسام',
-      ai: 'مستقبل کی اے آئی',
-      vehicles: 'گاڑیاں اور نقل و حمل',
-      devices: 'آلات اور بائیونکس',
-      homeWork: 'گھر اور کام کی جگہ',
-      health: 'صحت اور حیاتیات',
-      energy: 'توانائی اور ماحول',
-      space: 'گہری خلائی تحقیق',
-    },
-  },
-  places: {
-    sectionTag: 'نقشہ اور بستیاں',
-    title: 'شہر اور مقامات',
-    subtitle: 'زمین سے لے کر بین السیاروی سرحدوں تک حقیقت پسندانہ مناظر۔',
-    aDayInPlace: 'اس مقام پر ایک دن',
-    infrastructure: 'اہم بنیادی ڈھانچہ',
-  },
-  projects: {
-    sectionTag: 'پورٹ فولیو',
-    title: 'میرے منصوبے',
-    subtitle: 'عالیہ خان کے تیار کردہ ویب سسٹمز اور تجربات۔',
-    tabs: { live: 'لائیو پروجیکٹس', inProgress: 'زیر تعمیر', futureIdeas: 'مستقبل کے نظریات' },
-    visit: 'منصوبہ دیکھیں',
-    emptyLive: 'ابھی تک کوئی لائیو منصوبہ درج نہیں ہے۔ جلد آرہا ہے۔',
-    emptyInProgress: 'فائلوں پر کام جاری ہے۔',
-    emptyIdeas: 'مستقبل کے نظریات جلد پیش کیے جائیں گے۔',
-    pendingNotice: 'منصوبوں کی باقاعدہ تفصیلات عالیہ خان کی جانب سے موصول ہونا باقی ہیں۔',
-  },
-  advertise: {
-    sectionTag: 'شراکت داری',
-    title: 'اشتہار دیں / اپنا منصوبہ شامل کریں',
-    subtitle: 'اپنی جدید ٹیکنالوجی کو عالمی سامعین کے سامنے پیش کریں۔',
-    reviewNotice: 'ہر درخواست کا عالیہ خان خود جائزہ لیتی ہیں۔',
-    pricingNote: 'قیمتیں: خصوصی شرائط کے لیے رابطہ کریں۔',
-    form: {
-      name: 'آپ کا مکمل نام',
-      email: 'رابطہ ای میل',
-      projectName: 'منصوبے کا نام',
-      projectLink: 'ویب سائٹ لنک',
-      category: 'کیٹیگری',
-      budget: 'تخمینی بجٹ (اختیاری)',
-      description: 'منصوبے کی تفصیل',
-      submitBtn: 'جائزہ کے لیے جمع کریں',
-      sending: 'بھیجا جا رہا ہے...',
-      sentSuccess: 'درخواست موصول ہو گئی۔ ہم جلد رابطہ کریں گے۔',
-      sendError: 'خرابی پیش آگئی۔ براہ راست ای میل کریں۔',
-    },
-  },
-  about: {
-    sectionTag: 'تعارف',
-    title: 'تعارف — عالیہ خان',
-    subtitle: 'حیاتی ویب ٹیکنالوجی کی بانی اور لیڈ آرکیٹیکٹ۔',
-    ownerName: 'عالیہ خان',
-    bioPlaceholder: 'عالیہ خان کا باقاعدہ تعارف اور تصویر جلد شامل کی جائے گی۔',
-    contactDirect: 'براہ راست رابطہ',
-  },
-  contact: {
-    sectionTag: 'رابطہ کا ذریعہ',
-    title: 'رابطہ قائم کریں',
-    subtitle: 'تکنیکی سوالات اور تعاون کے لیے براہ راست چینل۔',
-    emailLabel: 'سرکاری ای میل',
-    directEmail: 'Hayaati.Technology@gmail.com',
-    form: {
-      name: 'آپ کا نام',
-      email: 'آپ کی ای میل',
-      message: 'پیغام',
-      submitBtn: 'پیغام بھیجیں',
-      sending: 'بھیجا جا رہا ہے...',
-      sentSuccess: 'پیغام موصول ہو گیا۔ شکریہ۔',
-      sendError: 'خرابی پیش آگئی۔ براہ کرم Hayaati.Technology@gmail.com پر لکھیں۔',
-    },
-  },
-  assistant: {
-    buttonLabel: 'اے آئی اسسٹنٹ',
-    panelTitle: 'حیاتی انٹرفیس',
-    welcomeMessage: 'حیاتی ویب ٹیکنالوجی میں خوش آمدید۔ میں مستقبل کی تلاش میں آپ کی کیا مدد کر سکتا ہوں؟',
-    inputPlaceholder: '2030-2050 ٹائم لائن یا ٹیکنالوجی کے بارے میں پوچھیں...',
-    sendBtn: 'ارسال',
-    voiceBtn: 'آواز شروع کریں',
-    voiceStopBtn: 'آواز بند کریں',
-    voiceListening: 'سن رہا ہوں...',
-    voiceSpeaking: 'جواب دیا جا رہا ہے...',
-    quotaWarning: 'سسٹم کی حد ختم ہو گئی۔ براہ کرم انتظار کریں۔',
-    micDeniedWarning: 'مائیکروفون کی اجازت نہیں ملی۔',
-    notSupportedWarning: 'اس براؤزر میں لائیو آڈیو کی سہولت موجود نہیں۔',
-    rateLimitWarning: 'نوٹ: عوامی اسسٹنٹ کے وسائل محدود ہیں۔',
-  },
-  footer: {
-    copyright: '© 2026 حیاتی ویب ٹیکنالوجی۔ جملہ حقوق محفوظ ہیں۔',
-    disclaimer: 'مستقبل کے یہ خاکے نظریاتی تصورات ہیں، کوئی حتمی مالی یا مصنوعاتی دعوی نہیں۔',
-    liveDomainLabel: 'لائیو ڈومین: www.hayaatiweb.site',
-    quickLinks: 'فہرست',
-    systemDesignation: 'حیاتی کور // ورژن 2.4',
-  },
-};
+// Cache dynamically loaded bundles
+const bundleCache = new Map<SupportedLanguage, LanguageBundle>();
+bundleCache.set('en', defaultBundle);
 
-export const ar: TranslationSchema = {
-  meta: { code: 'ar', languageName: 'Arabic', nativeName: 'العربية', rtl: true, humanReviewRequired: true },
-  nav: {
-    home: 'الرئيسية',
-    timeline: 'الخط الزمني للمستقبل',
-    tech: 'تقنيات المستقبل',
-    places: 'مدن وأماكن',
-    projects: 'مشاريعي',
-    advertise: 'أعلن / أضف مشروعك',
-    about: 'عن المؤسس',
-    contact: 'اتصل بنا',
-    assistant: 'المساعد الذكي',
-    language: 'اللغة',
-  },
-  hero: {
-    systemStatus: 'النظام//عقدة.2030-2050',
-    online: 'النظام متصل',
-    headline: 'المستقبل لا يأتي من تلقاء نفسه. إنه يُبنى الآن.',
-    subtitle: 'مخطط سينمائي للابتكار البشري والآلات الذكية والمستوطنات الفضائية عبر العقود الثلاثة القادمة.',
-    exploreCta: 'استكشف 2030–2050',
-    projectsCta: 'شاهد مشاريعي',
-    coordinates: 'الموقع: 28.6139° N, 77.2090° E // محرك التنبؤ',
-    timelineSpan: 'أفق 2030 — 2050',
-  },
-  timeline: {
-    sectionTag: 'التسلسل الزمني // 2030–2050',
-    title: 'الخط الزمني للمستقبل',
-    subtitle: 'اجتياز ثلاثة عصور محورية في الحوسبة والتكامل الحيوي والبنية التحتية الفضائية.',
-    storyTitle: 'يوم في هذا العصر',
-    breakthroughsTitle: 'أبرز الإنجازات',
-  },
-  tech: {
-    sectionTag: 'دليل التقنيات',
-    title: 'كتالوج تقنيات المستقبل',
-    subtitle: 'تحليل شامل للأنماط التقنية الناشئة والميكانيكا النظرية.',
-    howItWorksLabel: 'كيف يمكن أن تعمل',
-    categories: {
-      all: 'جميع المجالات',
-      ai: 'ذكاء المستقبل',
-      vehicles: 'المركبات والنقل',
-      devices: 'الأجهزة والبيونيك',
-      homeWork: 'المنزل ومكان العمل',
-      health: 'الصحة والبيولوجيا',
-      energy: 'الطاقة والمناخ',
-      space: 'الفضاء السحيق',
-    },
-  },
-  places: {
-    sectionTag: 'المدن والموائل',
-    title: 'مدن وأماكن مستقبلية',
-    subtitle: 'مشاهد واقعية وبطاقات تعريفية من الأرض إلى آفاق الكواكب الأخرى.',
-    aDayInPlace: 'يوم في هذا المكان',
-    infrastructure: 'البنية التحتية الأساسية',
-  },
-  projects: {
-    sectionTag: 'المعرض والمشاريع',
-    title: 'مشاريعي',
-    subtitle: 'أنظمة ويب وتجارب متقدمة طورتها علياء خان.',
-    tabs: { live: 'مشاريع نشطة', inProgress: 'قيد التطوير', futureIdeas: 'أفكار مستقبلية' },
-    visit: 'زيارة المشروع',
-    emptyLive: 'لا توجد مشاريع نشطة مدرجة حالياً. قريباً.',
-    emptyInProgress: 'ملفات المشاريع الحالية قيد المعايرة.',
-    emptyIdeas: 'المخططات المستقبلية بانتظار الفهرسة.',
-    pendingNotice: 'بيانات المشاريع الرسمية بانتظار تزويدها من علياء خان.',
-  },
-  advertise: {
-    sectionTag: 'الشراكات',
-    title: 'أعلن / أدرج مشروعك',
-    subtitle: 'اعرض تقنيتك الرائدة أمام جمهور عالمي مهتم بالمستقبل.',
-    reviewNotice: 'تتم مراجعة كل طلب شخصياً بواسطة علياء خان قبل النشر.',
-    pricingNote: 'الأسعار: تواصل معنا لمعرفة شروط الإدراج.',
-    form: {
-      name: 'الاسم الكامل',
-      email: 'البريد الإلكتروني',
-      projectName: 'اسم المشروع أو الشركة',
-      projectLink: 'رابط الموقع أو الوثائق',
-      category: 'التصنيف',
-      budget: 'الميزانية التقديرية (اختياري)',
-      description: 'نظرة عامة على المشروع',
-      submitBtn: 'إرسال للمراجعة',
-      sending: 'جاري الإرسال...',
-      sentSuccess: 'تم استلام طلبك بنجاح. سنراجع طلبك قريباً.',
-      sendError: 'فشل الإرسال. يرجى التواصل عبر البريد مباشرة.',
-    },
-  },
-  about: {
-    sectionTag: 'ملف المؤسس',
-    title: 'عن المؤسس — علياء خان',
-    subtitle: 'المؤسسة والمهندسة الرئيسية لـ Hayaati Web Technology.',
-    ownerName: 'علياء خان',
-    bioPlaceholder: 'السيرة الذاتية الرسمية والصورة الشخصية بانتظار الاعتماد من علياء خان.',
-    contactDirect: 'الاتصال المباشر',
-  },
-  contact: {
-    sectionTag: 'قناة الاتصال',
-    title: 'تواصل معنا',
-    subtitle: 'قناة مباشرة للاستفسارات التقنية والتعاون الاستراتيجي.',
-    emailLabel: 'البريد الإلكتروني الرسمي',
-    directEmail: 'Hayaati.Technology@gmail.com',
-    form: {
-      name: 'اسمك',
-      email: 'بريدك الإلكتروني',
-      message: 'الرسالة',
-      submitBtn: 'إرسال الرسالة',
-      sending: 'جاري الإرسال...',
-      sentSuccess: 'تم استلام رسالتك. سنرد عليك في أقرب وقت.',
-      sendError: 'حدث خطأ. يرجى المراسلة على Hayaati.Technology@gmail.com مباشرة.',
-    },
-  },
-  assistant: {
-    buttonLabel: 'المساعد الذكي',
-    panelTitle: 'واجهة حياة المعرفية',
-    welcomeMessage: 'مرحباً بك في Hayaati Web Technology. كيف يمكنني مساعدتك في استكشاف المستقبل؟',
-    inputPlaceholder: 'اسأل عن خط 2030-2050 أو التقنيات أو المدن...',
-    sendBtn: 'إرسال',
-    voiceBtn: 'بدء المحادثة الصوتية',
-    voiceStopBtn: 'إيقاف الصوت',
-    voiceListening: 'جاري الاستماع...',
-    voiceSpeaking: 'جاري التحدث...',
-    quotaWarning: 'تم تجاوز الحد الأقصى للمعدل. يرجى الانتظار قليلاً.',
-    micDeniedWarning: 'تم رفض إذن الميكروفون.',
-    notSupportedWarning: 'الصوت التفاعلي غير مدعوم في هذا المتصفح.',
-    rateLimitWarning: 'تنبيه: المساعد العام محدد المعدل للحفاظ على الموارد.',
-  },
-  footer: {
-    copyright: '© 2026 Hayaati Web Technology. جميع الحقوق محفوظة.',
-    disclaimer: 'التوقعات المستقبلية المعروضة هي رؤى سينمائية ومفاهيم نظرية وليست وعوداً مالية.',
-    liveDomainLabel: 'النطاق المباشر: www.hayaatiweb.site',
-    quickLinks: 'روابط سريعة',
-    systemDesignation: 'HAYAATI-CORE // v2.4',
-  },
-};
-
-export const localeRegistry: Record<SupportedLanguage, () => TranslationSchema> = {
-  en: () => en,
-  hi: () => hi,
-  ur: () => ur,
-  ar: () => ar,
-  // Other languages return localized fallback objects with honest human-review required note
-  bn: () => createFallbackLocale('bn', 'Bengali', 'বাংলা', false),
-  pa: () => createFallbackLocale('pa', 'Punjabi', 'ਪੰਜਾਬੀ', false),
-  mr: () => createFallbackLocale('mr', 'Marathi', 'मराठी', false),
-  gu: () => createFallbackLocale('gu', 'Gujarati', 'ગુજરાતી', false),
-  ta: () => createFallbackLocale('ta', 'Tamil', 'தமிழ்', false),
-  te: () => createFallbackLocale('te', 'Telugu', 'తెలుగు', false),
-  kn: () => createFallbackLocale('kn', 'Kannada', 'ಕನ್ನಡ', false),
-  ml: () => createFallbackLocale('ml', 'Malayalam', 'മലയാളം', false),
-  ne: () => createFallbackLocale('ne', 'Nepali', 'नेपाली', false),
-  fr: () => createFallbackLocale('fr', 'French', 'Français', false),
-  de: () => createFallbackLocale('de', 'German', 'Deutsch', false),
-  es: () => createFallbackLocale('es', 'Spanish', 'Español', false),
-  pt: () => createFallbackLocale('pt', 'Portuguese', 'Português', false),
-  it: () => createFallbackLocale('it', 'Italian', 'Italiano', false),
-  zh: () => createFallbackLocale('zh', 'Chinese', '中文', false),
-  ja: () => createFallbackLocale('ja', 'Japanese', '日本語', false),
-  ko: () => createFallbackLocale('ko', 'Korean', '한국어', false),
-  ru: () => createFallbackLocale('ru', 'Russian', 'Русский', false),
-  tr: () => createFallbackLocale('tr', 'Turkish', 'Türkçe', false),
-  id: () => createFallbackLocale('id', 'Indonesian', 'Bahasa Indonesia', false),
-};
-
-function createFallbackLocale(
-  code: string,
-  name: string,
-  native: string,
-  rtl: boolean
-): TranslationSchema {
-  return {
-    ...en,
-    meta: {
-      code,
-      languageName: name,
-      nativeName: native,
-      rtl,
-      humanReviewRequired: true,
-    },
-  };
-}
-
-export function getTranslation(lang: string): TranslationSchema {
-  const normalized = (lang || 'en').slice(0, 2).toLowerCase() as SupportedLanguage;
-  if (normalized in localeRegistry) {
-    return localeRegistry[normalized]();
+export async function loadLanguageBundle(code: SupportedLanguage): Promise<LanguageBundle> {
+  if (bundleCache.has(code)) {
+    return bundleCache.get(code)!;
   }
-  return en;
+
+  if (code === 'en') {
+    return defaultBundle;
+  }
+
+  try {
+    const [uiMod, contentMod] = await Promise.all([
+      import(`./${code}/ui.json`),
+      import(`./${code}/content.json`),
+    ]);
+
+    const bundle: LanguageBundle = {
+      ui: (uiMod.default || uiMod) as TranslationSchema,
+      content: (contentMod.default || contentMod) as ContentSchema,
+    };
+
+    bundleCache.set(code, bundle);
+    return bundle;
+  } catch (err) {
+    console.warn(`Failed to dynamically import bundle for ${code}, falling back to English.`, err);
+    return defaultBundle;
+  }
 }

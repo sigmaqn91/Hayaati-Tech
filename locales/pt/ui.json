@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "code": "pt",
+    "languageName": "Portuguese",
+    "nativeName": "Português",
+    "rtl": false
+  },
+  "nav": {
+    "home": "Início",
+    "timeline": "Linha do Tempo",
+    "tech": "Tecnologia Futura",
+    "places": "Cidades e Lugares",
+    "projects": "Meus Projetos",
+    "advertise": "Anunciar / Listar",
+    "about": "Sobre",
+    "contact": "Fale Conosco",
+    "assistant": "Assistente IA",
+    "language": "Idioma",
+    "menu": "Abrir menu de navegação",
+    "close": "Fechar menu de navegação",
+    "brandSubtitle": "TECNOLOGIA // 2030-2050",
+    "menuSysHeader": "MENU DO SISTEMA",
+    "locationDomain": "LOCALIZAÇÃO: WWW.HAYAATIWEB.SITE"
+  },
+  "hero": {
+    "systemStatus": "SISTEMA//NÓ.2030-2050",
+    "online": "SISTEMAS ONLINE",
+    "headline": "O futuro não acontece por acaso. Estamos a construí-lo juntos.",
+    "subtitle": "Um roteiro cinematográfico de inovação humana, máquinas cognitivas, colónias orbitais e habitats sustentáveis de 2030 a 2050. Criado por Aliya Khan.",
+    "exploreCta": "Explorar 2030 2050",
+    "projectsCta": "Ver Meus Projetos",
+    "coordinates": "COORDENADAS: 28.6139° N, 77.2090° E // MOTOR ATIVO",
+    "timelineSpan": "HORIZONTE TEMPORAL 2030 — 2050",
+    "liveTelemetry": "TELEMETRIA: NOMINAL",
+    "scrollDown": "Deslize para explorar a linha do tempo",
+    "imageAlt": "Visão cinematográfica de uma metrópole futurista 2030 2050"
+  },
+  "timeline": {
+    "sectionTag": "MAPA_CRONOLÓGICO // 2030 -> 2050",
+    "title": "Cronologia da Inovação Humana",
+    "subtitle": "Da inteligência de borda omnipresente em 2030 à indústria pesada interplanetária em 2050.",
+    "chronoMap": "PLANO CRONOLÓGICO",
+    "eraHeading": "HORIZONTE DA ÉPOCA",
+    "storyTitle": "Um Dia Nesta Época",
+    "breakthroughsTitle": "Marcos Tecnológicos Decisivos",
+    "viewEraDetails": "Examinar Dossier da Época",
+    "jumpToEra": "Ir para esta Época",
+    "statusPrefix": "ESTADO",
+    "eraBreakthroughsHeading": "Avanços",
+    "specificationsCount": "Especificações"
+  },
+  "tech": {
+    "sectionTag": "ÍNDICE_SISTEMAS // 42 FRONTEIRAS",
+    "title": "Catálogo de Tecnologias Futuras",
+    "subtitle": "Projetos detalhados e mecanismos teóricos em 7 fronteiras tecnológicas essenciais.",
+    "systemsIndex": "ÍNDICE DO CATÁLOGO",
+    "howItWorksLabel": "COMO PODERÁ FUNCIONAR",
+    "architectureMechanics": "ARQUITETURA TÉCNICA E MECÂNICA",
+    "underlyingMechanism": "PRINCÍPIO FÍSICO SUBJACENTE",
+    "searchPlaceholder": "Pesquisar tecnologias, sistemas ou inovações...",
+    "searchNoResults": "Nenhuma tecnologia correspondente encontrada.",
+    "filterAll": "Todas as Fronteiras",
+    "modalClose": "Fechar Dossier",
+    "viewDossier": "Ver Ficha Técnica",
+    "yearLabel": "ANO",
+    "statusLabel": "ESTADO",
+    "activeStatus": "ESPECIFICAÇÃO ATIVA",
+    "promptLabel": "INSTRUÇÃO",
+    "categories": {
+      "all": "Todas as Fronteiras",
+      "ai": "IA do Futuro",
+      "vehicles": "Veículos e Trânsito",
+      "devices": "Dispositivos e Biónica",
+      "homeWork": "Habitação e Trabalho",
+      "health": "Saúde e Biologia",
+      "energy": "Energia e Clima",
+      "space": "Espaço Profundo"
+    }
+  },
+  "places": {
+    "sectionTag": "ÍNDICE_HÁBITATS // 2030-2050",
+    "title": "Postais de Cidades e Lugares",
+    "subtitle": "Postais fotorrealistas e relatórios de infraestruturas de colónias humanas emergentes na Terra e no espaço.",
+    "horizonLabel": "PERSPECTIVA",
+    "aDayInPlace": "Um Dia Neste Local",
+    "infrastructureLabel": "Infraestruturas Críticas",
+    "viewLocation": "Examinar Plano do Habitat",
+    "promptLabel": "INSTRUÇÃO"
+  },
+  "projects": {
+    "sectionTag": "PROJETOS_FUNDADORA // ALIYA KHAN",
+    "title": "Meus Projetos",
+    "subtitle": "Sistemas de software ativos, arquivos de pesquisa e projetos de arquitetura concebidos por Aliya Khan.",
+    "tabs": {
+      "live": "Sistemas em Execução",
+      "inProgress": "Em Desenvolvimento",
+      "futureIdeas": "Conceitos Futuros"
+    },
+    "visit": "Abrir Ligação do Sistema",
+    "emptyLive": "Nenhum sistema público ativo de momento. Novos lançamentos serão apresentados aqui.",
+    "emptyInProgress": "Projetos de engenharia em curso serão listados assim que atingirem os marcos definidos.",
+    "emptyIdeas": "Propostas de pesquisa teórica serão indexadas aqui.",
+    "pendingNotice": "Projetos revistos e sincronizados diretamente por Aliya Khan."
+  },
+  "advertise": {
+    "sectionTag": "SUBMISSÃO_DE_PROJETO // LISTAGEM",
+    "title": "Anunciar / Submeter Projeto",
+    "subtitle": "Submeta inovações tecnológicas ou projetos ecológicos para análise direta por Aliya Khan.",
+    "reviewNotice": "Todas as propostas são avaliadas pessoalmente por Aliya Khan. Comunicações não solicitadas serão rejeitadas.",
+    "pricingNote": "Parâmetros de posicionamento e condições serão transmitidos por contacto direto.",
+    "form": {
+      "name": "Nome Completo",
+      "email": "Endereço de Correio Eletrónico",
+      "projectName": "Título do Projeto / Empresa",
+      "projectLink": "Ligação do Sistema / Relatório Técnico",
+      "category": "Área Tecnológica",
+      "selectCategory": "Selecione uma categoria...",
+      "budget": "Orçamento Estimado / Fase de Financiamento",
+      "budgetPlaceholder": "ex.: 10.000€-50.000€, Bolsa de Investigação",
+      "description": "Sinopse do Projeto e Inovação Principal",
+      "submitBtn": "Submeter Projeto para Revisão",
+      "sending": "A encriptar e enviar...",
+      "sentSuccess": "Submissão transmitida com sucesso. Aliya Khan analisará a sua proposta.",
+      "sendError": "Falha na transmissão. Por favor, envie uma mensagem direta por email."
+    }
+  },
+  "about": {
+    "sectionTag": "ARQUITETA_CHEFE // DOSSIER",
+    "title": "Sobre — Aliya Khan",
+    "subtitle": "Fundadora, arquiteta de software e investigadora de sistemas na Hayaati Web Technology.",
+    "ownerName": "Aliya Khan",
+    "architectTitle": "FUNDADORA E ARQUITETA CHEFE",
+    "leadArchitect": "Líder no desenvolvimento de arquiteturas de sistemas futuros e infraestruturas digitais de elevado rendimento.",
+    "bioPlaceholder": "Aliya Khan é arquiteta de software e investigadora dedicada à convergência de sistemas distribuídos, inteligência artificial e habitats espaciais a longo prazo. A Hayaati Web Technology é uma iniciativa independente para visualização de avanços tecnológicos.",
+    "contactDirect": "Contacto Direto",
+    "photoAlt": "Aliya Khan, Fundadora e Arquiteta Chefe"
+  },
+  "contact": {
+    "sectionTag": "CANAL_DE_TRANSMISSÃO // SEGURO",
+    "title": "Comunicação Direta",
+    "subtitle": "Envie consultas técnicas especializadas, parcerias de investigação ou propostas de projetos.",
+    "emailLabel": "Canal de Comunicação Oficial",
+    "directEmail": "Hayaati.Technology@gmail.com",
+    "form": {
+      "name": "Nome Completo",
+      "email": "Endereço Eletrónico",
+      "message": "Mensagem / Descrição da Transmissão",
+      "submitBtn": "Enviar Mensagem Encriptada",
+      "sending": "A transmitir dados...",
+      "sentSuccess": "Mensagem recebida com sucesso. Responderemos através do canal oficial.",
+      "sendError": "Erro no envio. Por favor envie mensagem direta para o email oficial.",
+      "placeholderName": "Introduza o seu nome...",
+      "placeholderEmail": "Introduza o seu endereço de email...",
+      "placeholderMessage": "Escreva a sua consulta ou mensagem técnica..."
+    }
+  },
+  "assistant": {
+    "buttonLabel": "Assistente IA",
+    "panelTitle": "INTERFACE COGNITIVA HAYAATI",
+    "subtitle": "HORIZONTE COGNITIVO // 2030-2050",
+    "welcomeMessage": "Olá! Sou a interface inteligente da Hayaati. Coloque questões sobre tecnologias de ponta ou escolha um tema para explorar.",
+    "chips": [
+      "Como será o ano de 2030?",
+      "Mostre-me as inovações na saúde futura",
+      "Conte-me mais sobre a Hayaati e a Aliya Khan"
+    ],
+    "inputPlaceholder": "Pergunte sobre a cronologia 2030-2050, inovações ou cidades futuras...",
+    "sendBtn": "Enviar",
+    "retryBtn": "Repetir",
+    "voiceBtn": "Iniciar Ligação de Voz",
+    "voiceStopBtn": "Terminar Sessão de Voz",
+    "voiceListening": "A escutar...",
+    "voiceSpeaking": "A responder...",
+    "voiceConnecting": "A estabelecer ligação de voz...",
+    "voiceUnsupported": "O acesso ao microfone não é suportado pelo seu navegador.",
+    "voiceNotAvailableLang": "A conversação por voz ainda não se encontra ativa neste idioma. Pode comunicar por texto.",
+    "rateLimitBanner": "Controlo de pedidos por visitante ativo.",
+    "talkTo": "Falar com a Hayaati",
+    "typeInstead": "Prefiro escrever",
+    "returnToOrb": "Voltar ao Orbe de Voz",
+    "muteMic": "Silenciar microfone",
+    "unmuteMic": "Ativar microfone",
+    "micLabel": "Microfone",
+    "mutedLabel": "Silenciado",
+    "endSession": "Encerrar Sessão",
+    "endLabel": "Fim",
+    "userTag": "VOCÊ",
+    "assistantTag": "HAYAATI",
+    "cognitiveLink": "LIGAÇÃO COGNITIVA DIRETA",
+    "orb": {
+      "ready": "Pronto",
+      "listening": "A escutar...",
+      "thinking": "A processar...",
+      "speaking": "A falar...",
+      "tapToStart": "Toque em Iniciar para falar",
+      "start": "Iniciar"
+    },
+    "errors": {
+      "quotaReached": "O assistente atingiu a capacidade de processamento temporária. Por favor tente mais tarde.",
+      "serverBusy": "O servidor está com tráfego elevado. Por favor tente dentro de instantes.",
+      "networkError": "Ligação de rede perdida. Verifique a sua ligação à internet.",
+      "micBlocked": "Acesso ao microfone recusado. Permita a utilização do microfone no navegador.",
+      "sessionEnded": "Sessão de voz concluída (limite de duração alcançado). Pode iniciar uma nova sessão a qualquer momento.",
+      "genericError": "Ocorreu uma anomalia no processamento. Por favor selecione Repetir."
+    }
+  },
+  "footer": {
+    "copyright": "Hayaati Web Technology. Fundado por Aliya Khan.",
+    "disclaimer": "A Hayaati Web Technology é um repositório especulativo independente. Todas as projeções constituem hipóteses de engenharia para 2030 2050.",
+    "liveDomainLabel": "DOMÍNIO OFICIAL",
+    "quickLinks": "Índice Geral",
+    "systemDesignation": "MOTOR CENTRAL HAYAATI // AUTENTICADO",
+    "allRightsReserved": "Todos os direitos reservados."
+  },
+  "common": {
+    "year": "Ano",
+    "status": "Estado",
+    "operational": "Operacional",
+    "close": "Fechar",
+    "back": "Voltar",
+    "retry": "Tentar novamente",
+    "error": "Erro",
+    "success": "Sucesso",
+    "loading": "A carregar..."
+  },
+  "languageSelector": {
+    "selectLanguage": "Selecionar idioma internacional",
+    "dialogTitle": "Seletor de Idioma",
+    "searchPlaceholder": "Filtrar idiomas (ex.: Português, English, Français)...",
+    "languagesCountSuffix": "Idiomas"
+  },
+  "imageSlot": {
+    "opticalChannel": "CANAL ÓPTICO",
+    "framePending": "IMAGEM EM PROCESSAMENTO",
+    "sysDim": "SYS//800x500"
+  },
+  "notFound": {
+    "errorTag": "ERRO 404 // SETOR NÃO ENCONTRADO",
+    "title": "Sinal Perdido no Espaço Profundo",
+    "description": "As coordenadas especificadas não correspondem a nenhum subsistema ou habitat futuro catalogado.",
+    "returnBtn": "Regressar ao Comando Orbital"
+  }
+}

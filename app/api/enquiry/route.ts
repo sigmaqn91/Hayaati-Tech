@@ -9,12 +9,10 @@ function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const timestamps = rateLimitMap.get(ip) || [];
   const validTimestamps = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-
   if (validTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
     rateLimitMap.set(ip, validTimestamps);
     return true;
   }
-
   validTimestamps.push(now);
   rateLimitMap.set(ip, validTimestamps);
   return false;
@@ -34,7 +32,6 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown-client';
-
     if (isRateLimited(ip)) {
       return NextResponse.json(
         {
@@ -55,7 +52,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
     if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim()) || email.length > 120) {
       return NextResponse.json(
         { success: false, error: 'A valid email address is required.' },
@@ -93,21 +89,18 @@ export async function POST(req: NextRequest) {
       `;
     } else if (type === 'project_submission') {
       const { projectName, projectLink, category, budget, description } = body;
-
       if (!projectName || typeof projectName !== 'string' || projectName.trim().length < 2) {
         return NextResponse.json(
           { success: false, error: 'Project name is required.' },
           { status: 400 }
         );
       }
-
       if (!description || typeof description !== 'string' || description.trim().length < 20) {
         return NextResponse.json(
           { success: false, error: 'Please provide a comprehensive project description (min 20 characters).' },
           { status: 400 }
         );
       }
-
       const safeProjectName = escapeHtml(projectName.trim());
       const safeProjectLink = projectLink ? escapeHtml(String(projectLink).trim()) : 'None supplied';
       const safeCategory = category ? escapeHtml(String(category).trim()) : 'General Tech';
@@ -139,20 +132,17 @@ export async function POST(req: NextRequest) {
     }
 
     const resendApiKey = process.env.RESEND_API_KEY;
-
-    if (!resendApiKey) {
-      // Per Section 7: Honest states: sending / sent / failed. Never show a fake "success" screen.
+    if (!resendApiKey || resendApiKey === 'disabled') {
       return NextResponse.json(
         {
           success: false,
           error:
-            'Transmission failed: Email delivery service (RESEND_API_KEY) is not yet configured on this server. Please contact Aliya Khan directly at Hayaati.Technology@gmail.com.',
+            'Sending is not set up yet. Please email Aliya Khan directly at Hayaati.Technology@gmail.com.',
         },
         { status: 503 }
       );
     }
 
-    // Call Resend REST API directly via plain fetch (no extra packages needed)
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {

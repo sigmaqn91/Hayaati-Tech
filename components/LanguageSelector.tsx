@@ -1,25 +1,90 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { SupportedLanguage } from '@/locales/types';
-import { Globe, X, Search, Check, AlertCircle } from 'lucide-react';
+import { Globe, X, Search, Check } from 'lucide-react';
 
 export function LanguageSelector() {
   const { language, setLanguage, languages, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const modalRef = useRef<HTMLDivElement>(null);
+  const triggerButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const modalContainerRef = useRef<HTMLDivElement>(null);
 
+  const handleOpen = () => {
+    setIsOpen(true);
+    setIsClosing(false);
+  };
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+      triggerButtonRef.current?.focus();
+    }, 220);
+  }, []);
+
+  // Manage body scroll lock and initial non-autofocus focus
   useEffect(() => {
+    if (!isOpen) return;
+    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
+    document.body.style.overflow = 'hidden';
+    if (scrollBarWidth > 0) {
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
+    }
+
+    requestAnimationFrame(() => {
+      closeButtonRef.current?.focus();
+    });
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+    };
+  }, [isOpen]);
+
+  // Keyboard navigation & Focus trap
+  useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false);
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && modalContainerRef.current) {
+        const focusable = modalContainerRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const firstElement = focusable[0];
+        const lastElement = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   const filtered = languages.filter(
     (lang) =>
@@ -33,69 +98,80 @@ export function LanguageSelector() {
   return (
     <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={triggerButtonRef}
+        onClick={handleOpen}
         aria-expanded={isOpen}
-        aria-label="Select international language"
+        aria-haspopup="dialog"
+        aria-label={t.languageSelector.selectLanguage}
+        suppressHydrationWarning
         className="flex items-center gap-1.5 px-2.5 py-1.5 min-h-[44px] text-xs font-mono text-slate-300 hover:text-[#38e8ff] bg-[#080b11] border border-[#1e293b] hover:border-[#38e8ff]/50 transition-colors cursor-pointer"
       >
         <Globe className="w-3.5 h-3.5 text-[#38e8ff]" />
-        <span className="uppercase">{currentLangObj.code}</span>
-        <span className="hidden sm:inline text-slate-400">({currentLangObj.native})</span>
+        <span className="uppercase" suppressHydrationWarning>{currentLangObj.code}</span>
+        <span className="hidden sm:inline text-slate-400" suppressHydrationWarning>({currentLangObj.native})</span>
       </button>
 
       {isOpen && (
         <div
-          ref={modalRef}
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85"
+          aria-label={t.languageSelector.dialogTitle}
+          className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/90 transition-opacity duration-200 ${
+            !isClosing ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleClose();
+          }}
         >
-          <div className="w-full max-w-lg bg-[#0b0f17] border border-[#38e8ff]/40 shadow-2xl relative">
+          <div
+            ref={modalContainerRef}
+            className={`w-full sm:max-w-lg bg-[#0b0f17] border border-[#38e8ff]/40 shadow-2xl relative flex flex-col max-h-[85vh] sm:max-h-[80vh] rounded-t-xl sm:rounded-none transition-all duration-200 ease-out transform ${
+              !isClosing
+                ? 'translate-y-0 scale-100 opacity-100'
+                : 'translate-y-8 sm:translate-y-0 sm:scale-95 opacity-0'
+            }`}
+            style={{
+              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            }}
+          >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#1e293b] bg-[#070a0f]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#1e293b] bg-[#070a0f] shrink-0">
               <div className="flex items-center gap-2">
                 <Globe className="w-4 h-4 text-[#38e8ff]" />
-                <span className="text-sm font-mono tracking-wider text-slate-100 uppercase">
-                  {t.nav.language} Selector (24 Languages)
-                </span>
+                <h2 className="text-sm font-mono tracking-wider text-slate-100 uppercase">
+                  {t.languageSelector.dialogTitle} ({languages.length} {t.languageSelector.languagesCountSuffix})
+                </h2>
               </div>
               <button
-                onClick={() => setIsOpen(false)}
-                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-white"
-                aria-label="Close language selector"
+                ref={closeButtonRef}
+                onClick={handleClose}
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+                aria-label={t.common.close}
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Honest Review Notice */}
-            <div className="p-4 bg-[#080b11] border-b border-[#1e293b] text-xs text-slate-400 flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-[#ffb020] shrink-0 mt-0.5" />
-              <div>
-                <span className="text-slate-200 font-medium block">
-                  Linguistic Integrity Disclosure:
-                </span>
-                English is the authored primary text. Non-English translations are generated computationally and are pending certified human linguistic review. RTL formatting is enabled for Urdu and Arabic.
-              </div>
-            </div>
-
-            {/* Search */}
-            <div className="p-4 border-b border-[#1e293b] bg-[#070a0f]">
+            {/* Search Input */}
+            <div className="p-3.5 sm:p-4 border-b border-[#1e293b] bg-[#070a0f] shrink-0">
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="Filter language (e.g. Hindi, Français, 日本語)..."
+                  placeholder={t.languageSelector.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 text-xs bg-[#05070a] border border-[#1e293b] text-white focus:outline-none focus:border-[#38e8ff] font-mono"
-                  autoFocus
+                  style={{ fontSize: '16px' }}
+                  className="w-full pl-9 pr-4 py-2.5 text-base sm:text-sm bg-[#05070a] border border-[#1e293b] text-white focus:outline-none focus:border-[#38e8ff] font-mono rounded-none"
                 />
               </div>
             </div>
 
             {/* Language Grid */}
-            <div className="p-4 max-h-[340px] overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div
+              className="p-3.5 sm:p-4 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-2 flex-1"
+              style={{ overscrollBehavior: 'contain' }}
+            >
               {filtered.map((item) => {
                 const isSelected = item.code === language;
                 return (
@@ -103,7 +179,7 @@ export function LanguageSelector() {
                     key={item.code}
                     onClick={() => {
                       setLanguage(item.code as SupportedLanguage);
-                      setIsOpen(false);
+                      handleClose();
                     }}
                     className={`flex items-center justify-between px-3 py-2 text-left min-h-[44px] text-xs border transition-colors cursor-pointer ${
                       isSelected
@@ -112,24 +188,24 @@ export function LanguageSelector() {
                     }`}
                   >
                     <div>
-                      <div className="font-medium">{item.native}</div>
+                      <div className="font-medium text-xs sm:text-sm">{item.native}</div>
                       <div className="text-[10px] text-slate-500 font-mono">
                         {item.name} {item.rtl ? '(RTL)' : ''}
                       </div>
                     </div>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-[#38e8ff]" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-[#38e8ff] shrink-0" />}
                   </button>
                 );
               })}
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-t border-[#1e293b] bg-[#070a0f] flex justify-end">
+            <div className="p-3 border-t border-[#1e293b] bg-[#070a0f] flex justify-end shrink-0">
               <button
-                onClick={() => setIsOpen(false)}
-                className="px-4 py-1.5 text-xs font-mono bg-[#111723] text-slate-300 hover:text-white border border-[#1e293b]"
+                onClick={handleClose}
+                className="px-5 py-2 text-xs font-mono bg-[#111723] text-slate-300 hover:text-white border border-[#1e293b] min-h-[44px] cursor-pointer"
               >
-                Close
+                {t.common.close}
               </button>
             </div>
           </div>

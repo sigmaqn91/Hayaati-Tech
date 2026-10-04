@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "Pondasi Kognitif",
+      "yearLabel": "ZAMAN // 2030",
+      "story": "Pagi hari dimulai dengan kecerdasan sintetis lingkungan yang telah menyeimbangkan jaringan listrik saat Anda tidur. Kota berdenyut dengan kendaraan ulang-alik listrik yang sunyi dan kapsul pengiriman bawah tanah.",
+      "breakthroughs": [
+        "Asisten pembelajaran mesin di perangkat tanpa latensi awan untuk ritme hidup sehari-hari",
+        "Paket baterai litium-logam padat yang mendukung transportasi kota hingga 1.000 km",
+        "Sertifikasi komersial taksi udara perkotaan nirawak di koridor metropolitan utama"
+      ],
+      "bannerAlt": "Pemandangan sinematik kota metropolitan ramah lingkungan 2030 dengan jalur transit bersih",
+      "bannerPrompt": "Foto panorama sinematik kota pesisir ramah lingkungan 2030 saat fajar, gedung kaca surya, kendaraan listrik sunyi, taman vertikal, resolusi 8k."
+    },
+    "era-2035": {
+      "title": "Sintesis Biomekanis",
+      "yearLabel": "ZAMAN // 2035",
+      "story": "Antarmuka saraf memungkinkan pengendalian sistem digital secara intuitif lewat pikiran. Pengobatan pencegahan bekerja 24 jam di tingkat sel melalui sensor nano biokompatibel.",
+      "breakthroughs": [
+        "Sensor optoelektronik subdermal untuk pemantauan metabolik berkelanjutan",
+        "Dekoder korteks motorik non-invasif untuk memulihkan mobilitas fisik secara alami",
+        "Bioreaktor miselium dan mikroba untuk menghasilkan material bangunan ramah lingkungan yang kokoh"
+      ],
+      "bannerAlt": "Pemandangan sinematik kota vertikal dengan kubah biologi dan jalur kereta maglev",
+      "bannerPrompt": "Pemandangan sinematik kota vertikal 2035 saat senja dengan tabung maglev dan kubah aeroponik, resolusi 8k."
+    },
+    "era-2050": {
+      "title": "Cakrawala Planet dan Orbit",
+      "yearLabel": "ZAMAN // 2050",
+      "story": "Industri manufaktur berat telah dipindahkan keluar dari biosfer Bumi ke stasiun pemurnian gravitasi mikro di orbit. Energi fusi dan ekonomi sirkular memulihkan keseimbangan laut dan atmosfer Bumi.",
+      "breakthroughs": [
+        "Pembangkit fusi nuklir komersial yang memasok listrik bersih tanpa henti",
+        "Pangkalan tetap di kutub selatan Bulan untuk ekstraksi es air dan bahan bakar roket",
+        "Fasilitas biologi sintetis skala planet untuk menyerap miliaran ton karbon dioksida atmosfer"
+      ],
+      "bannerAlt": "Pemandangan Bumi dari orbit rendah melewati stasiun luar angkasa dan modul pemukiman",
+      "bannerPrompt": "Tampilan megah Bumi dari orbit luar angkasa dengan dok transfer antariksa, lengkungan biru Bumi, kegelapan ruang angkasa, resolusi 8k."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Proyek // TL-2030-1",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2030-1",
+      "prompt": "Fotografi arsitektur sinematik, tl-2030-1, resolusi 8k."
+    },
+    "tl-2030-2": {
+      "title": "Proyek // TL-2030-2",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2030-2",
+      "prompt": "Fotografi arsitektur sinematik, tl-2030-2, resolusi 8k."
+    },
+    "tl-2030-3": {
+      "title": "Proyek // TL-2030-3",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2030-3",
+      "prompt": "Fotografi arsitektur sinematik, tl-2030-3, resolusi 8k."
+    },
+    "tl-2030-4": {
+      "title": "Proyek // TL-2030-4",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2030-4",
+      "prompt": "Fotografi arsitektur sinematik, tl-2030-4, resolusi 8k."
+    },
+    "tl-2035-1": {
+      "title": "Proyek // TL-2035-1",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2035-1",
+      "prompt": "Fotografi arsitektur sinematik, tl-2035-1, resolusi 8k."
+    },
+    "tl-2035-2": {
+      "title": "Proyek // TL-2035-2",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2035-2",
+      "prompt": "Fotografi arsitektur sinematik, tl-2035-2, resolusi 8k."
+    },
+    "tl-2035-3": {
+      "title": "Proyek // TL-2035-3",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2035-3",
+      "prompt": "Fotografi arsitektur sinematik, tl-2035-3, resolusi 8k."
+    },
+    "tl-2035-4": {
+      "title": "Proyek // TL-2035-4",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2035-4",
+      "prompt": "Fotografi arsitektur sinematik, tl-2035-4, resolusi 8k."
+    },
+    "tl-2050-1": {
+      "title": "Proyek // TL-2050-1",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2050-1",
+      "prompt": "Fotografi arsitektur sinematik, tl-2050-1, resolusi 8k."
+    },
+    "tl-2050-2": {
+      "title": "Proyek // TL-2050-2",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2050-2",
+      "prompt": "Fotografi arsitektur sinematik, tl-2050-2, resolusi 8k."
+    },
+    "tl-2050-3": {
+      "title": "Proyek // TL-2050-3",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2050-3",
+      "prompt": "Fotografi arsitektur sinematik, tl-2050-3, resolusi 8k."
+    },
+    "tl-2050-4": {
+      "title": "Proyek // TL-2050-4",
+      "description": "Spesifikasi rekayasa mutakhir bebas emisi untuk periode 2030-2050.",
+      "breakthrough": "Penerapan hukum fisika mutakhir dan efisiensi sumber daya total.",
+      "alt": "Visualisasi teknis tl-2050-4",
+      "prompt": "Fotografi arsitektur sinematik, tl-2050-4, resolusi 8k."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Teknologi // TECH-AI-1",
+      "description": "Subsistem terdepan TECH-AI-1 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-ai-1",
+      "prompt": "Fotografi konsep industri, tech-ai-1, resolusi 8k."
+    },
+    "tech-ai-2": {
+      "title": "Teknologi // TECH-AI-2",
+      "description": "Subsistem terdepan TECH-AI-2 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-ai-2",
+      "prompt": "Fotografi konsep industri, tech-ai-2, resolusi 8k."
+    },
+    "tech-ai-3": {
+      "title": "Teknologi // TECH-AI-3",
+      "description": "Subsistem terdepan TECH-AI-3 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-ai-3",
+      "prompt": "Fotografi konsep industri, tech-ai-3, resolusi 8k."
+    },
+    "tech-ai-4": {
+      "title": "Teknologi // TECH-AI-4",
+      "description": "Subsistem terdepan TECH-AI-4 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-ai-4",
+      "prompt": "Fotografi konsep industri, tech-ai-4, resolusi 8k."
+    },
+    "tech-ai-5": {
+      "title": "Teknologi // TECH-AI-5",
+      "description": "Subsistem terdepan TECH-AI-5 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-ai-5",
+      "prompt": "Fotografi konsep industri, tech-ai-5, resolusi 8k."
+    },
+    "tech-ai-6": {
+      "title": "Teknologi // TECH-AI-6",
+      "description": "Subsistem terdepan TECH-AI-6 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-ai-6",
+      "prompt": "Fotografi konsep industri, tech-ai-6, resolusi 8k."
+    },
+    "tech-veh-1": {
+      "title": "Teknologi // TECH-VEH-1",
+      "description": "Subsistem terdepan TECH-VEH-1 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-veh-1",
+      "prompt": "Fotografi konsep industri, tech-veh-1, resolusi 8k."
+    },
+    "tech-veh-2": {
+      "title": "Teknologi // TECH-VEH-2",
+      "description": "Subsistem terdepan TECH-VEH-2 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-veh-2",
+      "prompt": "Fotografi konsep industri, tech-veh-2, resolusi 8k."
+    },
+    "tech-veh-3": {
+      "title": "Teknologi // TECH-VEH-3",
+      "description": "Subsistem terdepan TECH-VEH-3 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-veh-3",
+      "prompt": "Fotografi konsep industri, tech-veh-3, resolusi 8k."
+    },
+    "tech-veh-4": {
+      "title": "Teknologi // TECH-VEH-4",
+      "description": "Subsistem terdepan TECH-VEH-4 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-veh-4",
+      "prompt": "Fotografi konsep industri, tech-veh-4, resolusi 8k."
+    },
+    "tech-veh-5": {
+      "title": "Teknologi // TECH-VEH-5",
+      "description": "Subsistem terdepan TECH-VEH-5 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-veh-5",
+      "prompt": "Fotografi konsep industri, tech-veh-5, resolusi 8k."
+    },
+    "tech-veh-6": {
+      "title": "Teknologi // TECH-VEH-6",
+      "description": "Subsistem terdepan TECH-VEH-6 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-veh-6",
+      "prompt": "Fotografi konsep industri, tech-veh-6, resolusi 8k."
+    },
+    "tech-dev-1": {
+      "title": "Teknologi // TECH-DEV-1",
+      "description": "Subsistem terdepan TECH-DEV-1 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-dev-1",
+      "prompt": "Fotografi konsep industri, tech-dev-1, resolusi 8k."
+    },
+    "tech-dev-2": {
+      "title": "Teknologi // TECH-DEV-2",
+      "description": "Subsistem terdepan TECH-DEV-2 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-dev-2",
+      "prompt": "Fotografi konsep industri, tech-dev-2, resolusi 8k."
+    },
+    "tech-dev-3": {
+      "title": "Teknologi // TECH-DEV-3",
+      "description": "Subsistem terdepan TECH-DEV-3 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-dev-3",
+      "prompt": "Fotografi konsep industri, tech-dev-3, resolusi 8k."
+    },
+    "tech-dev-4": {
+      "title": "Teknologi // TECH-DEV-4",
+      "description": "Subsistem terdepan TECH-DEV-4 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-dev-4",
+      "prompt": "Fotografi konsep industri, tech-dev-4, resolusi 8k."
+    },
+    "tech-dev-5": {
+      "title": "Teknologi // TECH-DEV-5",
+      "description": "Subsistem terdepan TECH-DEV-5 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-dev-5",
+      "prompt": "Fotografi konsep industri, tech-dev-5, resolusi 8k."
+    },
+    "tech-dev-6": {
+      "title": "Teknologi // TECH-DEV-6",
+      "description": "Subsistem terdepan TECH-DEV-6 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-dev-6",
+      "prompt": "Fotografi konsep industri, tech-dev-6, resolusi 8k."
+    },
+    "tech-home-1": {
+      "title": "Teknologi // TECH-HOME-1",
+      "description": "Subsistem terdepan TECH-HOME-1 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-home-1",
+      "prompt": "Fotografi konsep industri, tech-home-1, resolusi 8k."
+    },
+    "tech-home-2": {
+      "title": "Teknologi // TECH-HOME-2",
+      "description": "Subsistem terdepan TECH-HOME-2 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-home-2",
+      "prompt": "Fotografi konsep industri, tech-home-2, resolusi 8k."
+    },
+    "tech-home-3": {
+      "title": "Teknologi // TECH-HOME-3",
+      "description": "Subsistem terdepan TECH-HOME-3 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-home-3",
+      "prompt": "Fotografi konsep industri, tech-home-3, resolusi 8k."
+    },
+    "tech-home-4": {
+      "title": "Teknologi // TECH-HOME-4",
+      "description": "Subsistem terdepan TECH-HOME-4 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-home-4",
+      "prompt": "Fotografi konsep industri, tech-home-4, resolusi 8k."
+    },
+    "tech-home-5": {
+      "title": "Teknologi // TECH-HOME-5",
+      "description": "Subsistem terdepan TECH-HOME-5 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-home-5",
+      "prompt": "Fotografi konsep industri, tech-home-5, resolusi 8k."
+    },
+    "tech-home-6": {
+      "title": "Teknologi // TECH-HOME-6",
+      "description": "Subsistem terdepan TECH-HOME-6 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-home-6",
+      "prompt": "Fotografi konsep industri, tech-home-6, resolusi 8k."
+    },
+    "tech-hlth-1": {
+      "title": "Teknologi // TECH-HLTH-1",
+      "description": "Subsistem terdepan TECH-HLTH-1 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-hlth-1",
+      "prompt": "Fotografi konsep industri, tech-hlth-1, resolusi 8k."
+    },
+    "tech-hlth-2": {
+      "title": "Teknologi // TECH-HLTH-2",
+      "description": "Subsistem terdepan TECH-HLTH-2 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-hlth-2",
+      "prompt": "Fotografi konsep industri, tech-hlth-2, resolusi 8k."
+    },
+    "tech-hlth-3": {
+      "title": "Teknologi // TECH-HLTH-3",
+      "description": "Subsistem terdepan TECH-HLTH-3 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-hlth-3",
+      "prompt": "Fotografi konsep industri, tech-hlth-3, resolusi 8k."
+    },
+    "tech-hlth-4": {
+      "title": "Teknologi // TECH-HLTH-4",
+      "description": "Subsistem terdepan TECH-HLTH-4 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-hlth-4",
+      "prompt": "Fotografi konsep industri, tech-hlth-4, resolusi 8k."
+    },
+    "tech-hlth-5": {
+      "title": "Teknologi // TECH-HLTH-5",
+      "description": "Subsistem terdepan TECH-HLTH-5 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-hlth-5",
+      "prompt": "Fotografi konsep industri, tech-hlth-5, resolusi 8k."
+    },
+    "tech-hlth-6": {
+      "title": "Teknologi // TECH-HLTH-6",
+      "description": "Subsistem terdepan TECH-HLTH-6 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-hlth-6",
+      "prompt": "Fotografi konsep industri, tech-hlth-6, resolusi 8k."
+    },
+    "tech-nrg-1": {
+      "title": "Teknologi // TECH-NRG-1",
+      "description": "Subsistem terdepan TECH-NRG-1 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-nrg-1",
+      "prompt": "Fotografi konsep industri, tech-nrg-1, resolusi 8k."
+    },
+    "tech-nrg-2": {
+      "title": "Teknologi // TECH-NRG-2",
+      "description": "Subsistem terdepan TECH-NRG-2 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-nrg-2",
+      "prompt": "Fotografi konsep industri, tech-nrg-2, resolusi 8k."
+    },
+    "tech-nrg-3": {
+      "title": "Teknologi // TECH-NRG-3",
+      "description": "Subsistem terdepan TECH-NRG-3 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-nrg-3",
+      "prompt": "Fotografi konsep industri, tech-nrg-3, resolusi 8k."
+    },
+    "tech-nrg-4": {
+      "title": "Teknologi // TECH-NRG-4",
+      "description": "Subsistem terdepan TECH-NRG-4 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-nrg-4",
+      "prompt": "Fotografi konsep industri, tech-nrg-4, resolusi 8k."
+    },
+    "tech-nrg-5": {
+      "title": "Teknologi // TECH-NRG-5",
+      "description": "Subsistem terdepan TECH-NRG-5 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-nrg-5",
+      "prompt": "Fotografi konsep industri, tech-nrg-5, resolusi 8k."
+    },
+    "tech-nrg-6": {
+      "title": "Teknologi // TECH-NRG-6",
+      "description": "Subsistem terdepan TECH-NRG-6 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-nrg-6",
+      "prompt": "Fotografi konsep industri, tech-nrg-6, resolusi 8k."
+    },
+    "tech-spc-1": {
+      "title": "Teknologi // TECH-SPC-1",
+      "description": "Subsistem terdepan TECH-SPC-1 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-spc-1",
+      "prompt": "Fotografi konsep industri, tech-spc-1, resolusi 8k."
+    },
+    "tech-spc-2": {
+      "title": "Teknologi // TECH-SPC-2",
+      "description": "Subsistem terdepan TECH-SPC-2 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-spc-2",
+      "prompt": "Fotografi konsep industri, tech-spc-2, resolusi 8k."
+    },
+    "tech-spc-3": {
+      "title": "Teknologi // TECH-SPC-3",
+      "description": "Subsistem terdepan TECH-SPC-3 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-spc-3",
+      "prompt": "Fotografi konsep industri, tech-spc-3, resolusi 8k."
+    },
+    "tech-spc-4": {
+      "title": "Teknologi // TECH-SPC-4",
+      "description": "Subsistem terdepan TECH-SPC-4 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-spc-4",
+      "prompt": "Fotografi konsep industri, tech-spc-4, resolusi 8k."
+    },
+    "tech-spc-5": {
+      "title": "Teknologi // TECH-SPC-5",
+      "description": "Subsistem terdepan TECH-SPC-5 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-spc-5",
+      "prompt": "Fotografi konsep industri, tech-spc-5, resolusi 8k."
+    },
+    "tech-spc-6": {
+      "title": "Teknologi // TECH-SPC-6",
+      "description": "Subsistem terdepan TECH-SPC-6 yang dirancang untuk operasi berkelanjutan dan mandiri.",
+      "howItWorks": "Bekerja berdasarkan hukum fisika mutakhir tanpa emisi lingkungan.",
+      "alt": "Konsep rekayasa tech-spc-6",
+      "prompt": "Fotografi konsep industri, tech-spc-6, resolusi 8k."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Pemukiman // PLACE-1",
+      "location": "Habitat Internasional PLACE-1",
+      "story": "Warga hidup selaras dengan alam didukung ekosistem siklus tertutup ramah lingkungan.",
+      "infrastructureTags": [
+        "Jaringan Cerdas",
+        "Transportasi Bersih",
+        "Energi Fusi",
+        "Biosfer"
+      ],
+      "alt": "Pemandangan fotorealistik place-1",
+      "prompt": "Pemandangan lanskap masa depan, place-1, resolusi 8k."
+    },
+    "place-2": {
+      "title": "Pemukiman // PLACE-2",
+      "location": "Habitat Internasional PLACE-2",
+      "story": "Warga hidup selaras dengan alam didukung ekosistem siklus tertutup ramah lingkungan.",
+      "infrastructureTags": [
+        "Jaringan Cerdas",
+        "Transportasi Bersih",
+        "Energi Fusi",
+        "Biosfer"
+      ],
+      "alt": "Pemandangan fotorealistik place-2",
+      "prompt": "Pemandangan lanskap masa depan, place-2, resolusi 8k."
+    },
+    "place-3": {
+      "title": "Pemukiman // PLACE-3",
+      "location": "Habitat Internasional PLACE-3",
+      "story": "Warga hidup selaras dengan alam didukung ekosistem siklus tertutup ramah lingkungan.",
+      "infrastructureTags": [
+        "Jaringan Cerdas",
+        "Transportasi Bersih",
+        "Energi Fusi",
+        "Biosfer"
+      ],
+      "alt": "Pemandangan fotorealistik place-3",
+      "prompt": "Pemandangan lanskap masa depan, place-3, resolusi 8k."
+    },
+    "place-4": {
+      "title": "Pemukiman // PLACE-4",
+      "location": "Habitat Internasional PLACE-4",
+      "story": "Warga hidup selaras dengan alam didukung ekosistem siklus tertutup ramah lingkungan.",
+      "infrastructureTags": [
+        "Jaringan Cerdas",
+        "Transportasi Bersih",
+        "Energi Fusi",
+        "Biosfer"
+      ],
+      "alt": "Pemandangan fotorealistik place-4",
+      "prompt": "Pemandangan lanskap masa depan, place-4, resolusi 8k."
+    },
+    "place-5": {
+      "title": "Pemukiman // PLACE-5",
+      "location": "Habitat Internasional PLACE-5",
+      "story": "Warga hidup selaras dengan alam didukung ekosistem siklus tertutup ramah lingkungan.",
+      "infrastructureTags": [
+        "Jaringan Cerdas",
+        "Transportasi Bersih",
+        "Energi Fusi",
+        "Biosfer"
+      ],
+      "alt": "Pemandangan fotorealistik place-5",
+      "prompt": "Pemandangan lanskap masa depan, place-5, resolusi 8k."
+    },
+    "place-6": {
+      "title": "Pemukiman // PLACE-6",
+      "location": "Habitat Internasional PLACE-6",
+      "story": "Warga hidup selaras dengan alam didukung ekosistem siklus tertutup ramah lingkungan.",
+      "infrastructureTags": [
+        "Jaringan Cerdas",
+        "Transportasi Bersih",
+        "Energi Fusi",
+        "Biosfer"
+      ],
+      "alt": "Pemandangan fotorealistik place-6",
+      "prompt": "Pemandangan lanskap masa depan, place-6, resolusi 8k."
+    },
+    "place-7": {
+      "title": "Pemukiman // PLACE-7",
+      "location": "Habitat Internasional PLACE-7",
+      "story": "Warga hidup selaras dengan alam didukung ekosistem siklus tertutup ramah lingkungan.",
+      "infrastructureTags": [
+        "Jaringan Cerdas",
+        "Transportasi Bersih",
+        "Energi Fusi",
+        "Biosfer"
+      ],
+      "alt": "Pemandangan fotorealistik place-7",
+      "prompt": "Pemandangan lanskap masa depan, place-7, resolusi 8k."
+    },
+    "place-8": {
+      "title": "Pemukiman // PLACE-8",
+      "location": "Habitat Internasional PLACE-8",
+      "story": "Warga hidup selaras dengan alam didukung ekosistem siklus tertutup ramah lingkungan.",
+      "infrastructureTags": [
+        "Jaringan Cerdas",
+        "Transportasi Bersih",
+        "Energi Fusi",
+        "Biosfer"
+      ],
+      "alt": "Pemandangan fotorealistik place-8",
+      "prompt": "Pemandangan lanskap masa depan, place-8, resolusi 8k."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Proyek ditinjau dan disinkronkan langsung oleh Aliya Khan.",
+    "emptyLive": "Belum ada sistem publik yang aktif saat ini. Peluncuran baru akan dipublikasikan di sini.",
+    "emptyInProgress": "Cetak biru rekayasa aktif akan dicatat di sini seiring pencapaian target.",
+    "emptyIdeas": "Proposal riset teoretis akan dikatalogkan di sini."
+  }
+}

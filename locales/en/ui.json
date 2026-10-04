@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "code": "en",
+    "languageName": "English",
+    "nativeName": "English",
+    "rtl": false
+  },
+  "nav": {
+    "home": "Home",
+    "timeline": "Future Timeline",
+    "tech": "Future Tech",
+    "places": "Cities & Places",
+    "projects": "My Projects",
+    "advertise": "Advertise / List",
+    "about": "About",
+    "contact": "Contact",
+    "assistant": "AI Assistant",
+    "language": "Language",
+    "menu": "Open Navigation Menu",
+    "close": "Close Navigation Menu",
+    "brandSubtitle": "TECHNOLOGY // 2030-2050",
+    "menuSysHeader": "SYS.MENU",
+    "locationDomain": "LOC: WWW.HAYAATIWEB.SITE"
+  },
+  "hero": {
+    "systemStatus": "SYSTEM//NODE.2030-2050",
+    "online": "SYSTEMS ONLINE",
+    "headline": "The future is not arriving. It is being architected.",
+    "subtitle": "A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030 2050. Built by Aliya Khan.",
+    "exploreCta": "Explore 2030 2050",
+    "projectsCta": "View My Projects",
+    "coordinates": "GEO: 28.6139° N, 77.2090° E // ENGINE ACTIVE",
+    "timelineSpan": "HORIZON 2030 — 2050",
+    "liveTelemetry": "TELEMETRY: NOMINAL",
+    "scrollDown": "Scroll to explore chronological timeline",
+    "imageAlt": "Cinematic vision of futuristic metropolis 2030 2050"
+  },
+  "timeline": {
+    "sectionTag": "CHRONO_MAP // 2030 -> 2050",
+    "title": "Human Innovation Chronology",
+    "subtitle": "From ubiquitous edge intelligence in 2030 to interplanetary heavy industry by 2050.",
+    "chronoMap": "CHRONOLOGICAL BLUEPRINT",
+    "eraHeading": "ERA HORIZON",
+    "storyTitle": "A Day in This Era",
+    "breakthroughsTitle": "Catalytic Technological Milestones",
+    "viewEraDetails": "Examine Era Dossier",
+    "jumpToEra": "Jump to Era",
+    "statusPrefix": "STATUS",
+    "eraBreakthroughsHeading": "Breakthroughs",
+    "specificationsCount": "Specifications"
+  },
+  "tech": {
+    "sectionTag": "SYSTEMS_INDEX // 42 FRONTIERS",
+    "title": "Future Technology Catalogue",
+    "subtitle": "Comprehensive blueprints and theoretical mechanisms across 7 foundational technological frontiers.",
+    "systemsIndex": "CATALOGUE INDEX",
+    "howItWorksLabel": "HOW IT COULD WORK",
+    "architectureMechanics": "TECHNICAL ARCHITECTURE & MECHANICS",
+    "underlyingMechanism": "UNDERLYING PHYSICAL PRINCIPLE",
+    "searchPlaceholder": "Search technologies, mechanisms, or breakthroughs...",
+    "searchNoResults": "No technologies found matching query parameter.",
+    "filterAll": "All Frontiers",
+    "modalClose": "Close Dossier",
+    "viewDossier": "View Technical Dossier",
+    "yearLabel": "YEAR",
+    "statusLabel": "STATUS",
+    "activeStatus": "ACTIVE SPECIFICATION",
+    "promptLabel": "PROMPT",
+    "categories": {
+      "all": "All Frontiers",
+      "ai": "Future AI",
+      "vehicles": "Vehicles & Transit",
+      "devices": "Devices & Bionics",
+      "homeWork": "Home & Workplace",
+      "health": "Health & Biology",
+      "energy": "Energy & Climate",
+      "space": "Deep Space"
+    }
+  },
+  "places": {
+    "sectionTag": "HABITAT_INDEX // 2030-2050",
+    "title": "Cities & Places Postcards",
+    "subtitle": "Photorealistic postcards and infrastructural dossiers from emergent terrestrial and off-world settlements.",
+    "horizonLabel": "HORIZON",
+    "aDayInPlace": "A Day in This Place",
+    "infrastructureLabel": "Key Infrastructure Deployments",
+    "viewLocation": "Inspect Habitat Blueprint",
+    "promptLabel": "PROMPT"
+  },
+  "projects": {
+    "sectionTag": "FOUNDER_VENTURES // ALIYA KHAN",
+    "title": "My Projects",
+    "subtitle": "Active software, research archives, and architectural systems created by Aliya Khan.",
+    "tabs": {
+      "live": "Live Systems",
+      "inProgress": "In Development",
+      "futureIdeas": "Horizon Concepts"
+    },
+    "visit": "Launch System Link",
+    "emptyLive": "No active production deployments listed at this moment. New ventures will be calibrated here.",
+    "emptyInProgress": "Active engineering blueprints will be indexed here as milestones are reached.",
+    "emptyIdeas": "Conceptual research proposals and technical RFCs will be catalogued here.",
+    "pendingNotice": "Projects are directly verified and synchronized by Aliya Khan."
+  },
+  "advertise": {
+    "sectionTag": "VENTURE_INGESTION // LISTINGS",
+    "title": "Advertise / List Your Project",
+    "subtitle": "Submit pioneering technologies, research ventures, or sustainable initiatives for personal evaluation by Aliya Khan.",
+    "reviewNotice": "All submissions are reviewed personally by Aliya Khan. No automated commercial listings or spam will be approved.",
+    "pricingNote": "Listing tier and placement details will be transmitted directly via official correspondence.",
+    "form": {
+      "name": "Your Full Name",
+      "email": "Direct Contact Email",
+      "projectName": "Venture or Project Title",
+      "projectLink": "System / Whitepaper Link",
+      "category": "Disciplinary Category",
+      "selectCategory": "Select frontier category...",
+      "budget": "Estimated Budget / Funding Tier",
+      "budgetPlaceholder": "e.g., $10k-$50k, Research Grant, Seed",
+      "description": "Venture Synopsis & Technical Breakthrough",
+      "submitBtn": "Transmit Project for Review",
+      "sending": "Encrypting and Transmitting...",
+      "sentSuccess": "Submission transmitted successfully. Aliya Khan will review your dossier.",
+      "sendError": "Transmission encountered an error. Please email directly."
+    }
+  },
+  "about": {
+    "sectionTag": "LEAD_ARCHITECT // DOSSIER",
+    "title": "About — Aliya Khan",
+    "subtitle": "Founder, Software Architect, and Systems Researcher leading Hayaati Web Technology.",
+    "ownerName": "Aliya Khan",
+    "architectTitle": "FOUNDER & LEAD ARCHITECT",
+    "leadArchitect": "Leading future systems architecture and high-performance digital infrastructure.",
+    "bioPlaceholder": "Aliya Khan is a software architect and researcher exploring the intersection of distributed systems, artificial intelligence, and long-horizon human habitats. Hayaati Web Technology is an independent platform dedicated to visualizing the technological milestones shaping our planetary horizon.",
+    "contactDirect": "Direct Relay",
+    "photoAlt": "Aliya Khan, Founder & Lead Architect"
+  },
+  "contact": {
+    "sectionTag": "TRANSMISSION_RELAY // SECURE",
+    "title": "Direct Communication Relay",
+    "subtitle": "Send direct technical inquiries, partnership proposals, or project invitations.",
+    "emailLabel": "Official Transmission Channel",
+    "directEmail": "Hayaati.Technology@gmail.com",
+    "form": {
+      "name": "Full Name",
+      "email": "Email Address",
+      "message": "Message / Transmission Content",
+      "submitBtn": "Transmit Encrypted Message",
+      "sending": "Relaying Transmission...",
+      "sentSuccess": "Transmission relayed successfully. We will reply via official channel.",
+      "sendError": "Transmission failed to deliver. Please email directly.",
+      "placeholderName": "Enter your name...",
+      "placeholderEmail": "Enter your email address...",
+      "placeholderMessage": "Compose your inquiry or briefing..."
+    }
+  },
+  "assistant": {
+    "buttonLabel": "AI Assistant",
+    "panelTitle": "HAYAATI COGNITIVE INTERFACE",
+    "subtitle": "COGNITIVE HORIZON // 2030-2050",
+    "welcomeMessage": "Hi! I'm the Hayaati assistant. Ask me anything about the future technologies here, or tell me what you'd like to explore.",
+    "chips": [
+      "What will 2030 look like?",
+      "Show me future health technology",
+      "Tell me about Hayaati & Aliya Khan"
+    ],
+    "inputPlaceholder": "Inquire about 2030-2050 timeline, tech, or places...",
+    "sendBtn": "Send",
+    "retryBtn": "Retry Transmission",
+    "voiceBtn": "Start Voice Link",
+    "voiceStopBtn": "Stop Voice Link",
+    "voiceListening": "Listening to your voice...",
+    "voiceSpeaking": "Hayaati Voice Speaking...",
+    "voiceConnecting": "Initializing studio voice link...",
+    "voiceUnsupported": "Microphone access is not supported in this browser.",
+    "voiceNotAvailableLang": "Voice conversation is not available in this language yet. You can chat by text.",
+    "rateLimitBanner": "Rate-limited per visitor for project safety.",
+    "talkTo": "Talk to Hayaati",
+    "typeInstead": "Type instead",
+    "returnToOrb": "Return to voice orb",
+    "muteMic": "Mute microphone",
+    "unmuteMic": "Unmute microphone",
+    "micLabel": "Mic",
+    "mutedLabel": "Muted",
+    "endSession": "End session",
+    "endLabel": "End",
+    "userTag": "YOU",
+    "assistantTag": "HAYAATI",
+    "cognitiveLink": "LIVE COGNITIVE LINK",
+    "orb": {
+      "ready": "Ready",
+      "listening": "Listening...",
+      "thinking": "Thinking...",
+      "speaking": "Speaking...",
+      "tapToStart": "Tap Start to begin voice session",
+      "start": "Start"
+    },
+    "errors": {
+      "quotaReached": "The assistant has reached its computational limit. Please try again later. You can still read the entire website.",
+      "serverBusy": "The cognitive service is temporarily busy. Please retry in a few moments.",
+      "networkError": "Network connection lost. Please check your internet and retry.",
+      "micBlocked": "Microphone permission was denied. Please allow microphone access in your browser settings to enable voice.",
+      "sessionEnded": "Voice session completed (maximum duration reached). You may start a new link anytime.",
+      "genericError": "Something went wrong while processing your request. Please click Retry."
+    }
+  },
+  "footer": {
+    "copyright": "Hayaati Web Technology. Founded by Aliya Khan.",
+    "disclaimer": "Hayaati Web Technology is an independent speculative research archive. All technical projections represent engineering hypotheses for 2030 2050.",
+    "liveDomainLabel": "OFFICIAL DOMAIN",
+    "quickLinks": "Navigation Index",
+    "systemDesignation": "HAYAATI CORE ENGINE // VERIFIED",
+    "allRightsReserved": "All Rights Reserved."
+  },
+  "common": {
+    "year": "Year",
+    "status": "Status",
+    "operational": "Operational",
+    "close": "Close",
+    "back": "Back",
+    "retry": "Retry",
+    "error": "Error",
+    "success": "Success",
+    "loading": "Loading..."
+  },
+  "languageSelector": {
+    "selectLanguage": "Select international language",
+    "dialogTitle": "Language Selector",
+    "searchPlaceholder": "Filter language (e.g. Hindi, Français, العربية)...",
+    "languagesCountSuffix": "Languages"
+  },
+  "imageSlot": {
+    "opticalChannel": "OPTICAL CHANNEL",
+    "framePending": "PHOTOREALISTIC FRAME PENDING",
+    "sysDim": "SYS//800x500"
+  },
+  "notFound": {
+    "errorTag": "ERROR 404 // SECTOR NOT FOUND",
+    "title": "Signal Lost in Deep Space",
+    "description": "The requested coordinates do not correspond to any known future system or habitat.",
+    "returnBtn": "Return to Orbital Command"
+  }
+}

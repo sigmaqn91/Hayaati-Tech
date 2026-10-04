@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "Bilişsel Temel",
+      "yearLabel": "DÖNEM // 2030",
+      "story": "Sabahlar, siz uyurken enerji şebekelerini dengeleyen ortam yapay zekasıyla başlar. Şehir, sessiz elektrikli servisler ve yer altı özel tünellerindeki teslimat kapsülleriyle akıcı bir şekilde işler.",
+      "breakthroughs": [
+        "Bulut gecikmesi olmadan günlük yaşam ritmini optimize eden cihaz içi ortam yapay zeka asistanları",
+        "Şehir içi ulaşımı 1.000 km kesintisiz destekleyen katı hal lityum-metal batarya paketleri",
+        "Önemli kentsel hava koridorlarında otonom hava taksilerinin resmi ticari sertifikasyonu"
+      ],
+      "bannerAlt": "Temiz ulaşım koridorlarına sahip sürdürülebilir 2030 metropolünün sinematik görünümü",
+      "bannerPrompt": "Şafak vaktinde sürdürülebilir bir sahil metropolünün sinematik panoraması, güneş enerjili cam kuleler, elektrikli servisler, dikey bahçeler, 8k çözünürlük."
+    },
+    "era-2035": {
+      "title": "Biyomekanik Sentez",
+      "yearLabel": "DÖNEM // 2035",
+      "story": "Nöral arayüzler, düşünce gücüyle dijital sistemleri zahmetsizce yönlendirmeyi sağlar. Koruyucu tıp, biyouyumlu nano sensörler aracılığıyla hücresel düzeyde 7/24 çalışır.",
+      "breakthroughs": [
+        "Sürekli metabolik izleme sağlayan deri altı optoelektronik sensörler",
+        "Fiziksel hareket kabiliyetini geri kazandıran invaziv olmayan motor korteks çözücüler",
+        "Geri dönüştürülebilir ultra dayanıklı yapı malzemeleri üreten endüstriyel miselyum biyoreaktörleri"
+      ],
+      "bannerAlt": "Biyo-kubbeler ve manyetik raylı hatlar içeren dikey şehrin sinematik görünümü",
+      "bannerPrompt": "Alacakaranlıkta maglev tüpleri ve aeroponik seraları olan dikey şehir panoraması, 8k çözünürlük."
+    },
+    "era-2050": {
+      "title": "Gezegensel ve Yörüngesel Ufuk",
+      "yearLabel": "DÖNEM // 2050",
+      "story": "Ağır sanayi üretimi Dünya biyosferinden yörüngedeki mikro yerçekimi rafinerilerine taşındı. Ticari füzyon enerjisi ve kapalı döngü ekonomiler okyanus ve atmosfer dengesini yeniden sağladı.",
+      "breakthroughs": [
+        "Sürekli temiz temel yük elektriği sağlayan ticari manyetik hapsetmeli nükleer füzyon santralleri",
+        "Ay güney kutbunda su buzu çıkarma ve uzay yakıtı üretimi için kalıcı üsler",
+        "Milyarlarca ton atmosferik karbonu bağlamak üzere tasarlanmış gezegensel sentetik biyoloji tesisleri"
+      ],
+      "bannerAlt": "Yörünge istasyonları ve yaşam modülleri arasından Dünya'ya bakış",
+      "bannerPrompt": "Alçak Dünya yörüngesindeki uzay transfer istasyonundan Dünya'nın sinematik görünümü, mavi yerküre eğrisi, derin uzay boşluğu, 8k."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Proje // TL-2030-1",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2030-1 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2030-1, 8k çözünürlük."
+    },
+    "tl-2030-2": {
+      "title": "Proje // TL-2030-2",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2030-2 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2030-2, 8k çözünürlük."
+    },
+    "tl-2030-3": {
+      "title": "Proje // TL-2030-3",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2030-3 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2030-3, 8k çözünürlük."
+    },
+    "tl-2030-4": {
+      "title": "Proje // TL-2030-4",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2030-4 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2030-4, 8k çözünürlük."
+    },
+    "tl-2035-1": {
+      "title": "Proje // TL-2035-1",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2035-1 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2035-1, 8k çözünürlük."
+    },
+    "tl-2035-2": {
+      "title": "Proje // TL-2035-2",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2035-2 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2035-2, 8k çözünürlük."
+    },
+    "tl-2035-3": {
+      "title": "Proje // TL-2035-3",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2035-3 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2035-3, 8k çözünürlük."
+    },
+    "tl-2035-4": {
+      "title": "Proje // TL-2035-4",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2035-4 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2035-4, 8k çözünürlük."
+    },
+    "tl-2050-1": {
+      "title": "Proje // TL-2050-1",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2050-1 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2050-1, 8k çözünürlük."
+    },
+    "tl-2050-2": {
+      "title": "Proje // TL-2050-2",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2050-2 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2050-2, 8k çözünürlük."
+    },
+    "tl-2050-3": {
+      "title": "Proje // TL-2050-3",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2050-3 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2050-3, 8k çözünürlük."
+    },
+    "tl-2050-4": {
+      "title": "Proje // TL-2050-4",
+      "description": "2030-2050 dönemi için sıfır emisyonlu gelişmiş mühendislik özellikleri ve tasarımı.",
+      "breakthrough": "Gelişmiş fizik ilkeleri ve üstün kaynak verimliliği.",
+      "alt": "tl-2050-4 teknik görselleştirmesi",
+      "prompt": "Sinematik mimari fotoğrafçılık, tl-2050-4, 8k çözünürlük."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Teknoloji // TECH-AI-1",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-AI-1.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-ai-1 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-ai-1, 8k çözünürlük."
+    },
+    "tech-ai-2": {
+      "title": "Teknoloji // TECH-AI-2",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-AI-2.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-ai-2 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-ai-2, 8k çözünürlük."
+    },
+    "tech-ai-3": {
+      "title": "Teknoloji // TECH-AI-3",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-AI-3.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-ai-3 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-ai-3, 8k çözünürlük."
+    },
+    "tech-ai-4": {
+      "title": "Teknoloji // TECH-AI-4",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-AI-4.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-ai-4 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-ai-4, 8k çözünürlük."
+    },
+    "tech-ai-5": {
+      "title": "Teknoloji // TECH-AI-5",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-AI-5.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-ai-5 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-ai-5, 8k çözünürlük."
+    },
+    "tech-ai-6": {
+      "title": "Teknoloji // TECH-AI-6",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-AI-6.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-ai-6 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-ai-6, 8k çözünürlük."
+    },
+    "tech-veh-1": {
+      "title": "Teknoloji // TECH-VEH-1",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-VEH-1.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-veh-1 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-veh-1, 8k çözünürlük."
+    },
+    "tech-veh-2": {
+      "title": "Teknoloji // TECH-VEH-2",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-VEH-2.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-veh-2 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-veh-2, 8k çözünürlük."
+    },
+    "tech-veh-3": {
+      "title": "Teknoloji // TECH-VEH-3",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-VEH-3.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-veh-3 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-veh-3, 8k çözünürlük."
+    },
+    "tech-veh-4": {
+      "title": "Teknoloji // TECH-VEH-4",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-VEH-4.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-veh-4 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-veh-4, 8k çözünürlük."
+    },
+    "tech-veh-5": {
+      "title": "Teknoloji // TECH-VEH-5",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-VEH-5.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-veh-5 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-veh-5, 8k çözünürlük."
+    },
+    "tech-veh-6": {
+      "title": "Teknoloji // TECH-VEH-6",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-VEH-6.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-veh-6 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-veh-6, 8k çözünürlük."
+    },
+    "tech-dev-1": {
+      "title": "Teknoloji // TECH-DEV-1",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-DEV-1.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-dev-1 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-dev-1, 8k çözünürlük."
+    },
+    "tech-dev-2": {
+      "title": "Teknoloji // TECH-DEV-2",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-DEV-2.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-dev-2 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-dev-2, 8k çözünürlük."
+    },
+    "tech-dev-3": {
+      "title": "Teknoloji // TECH-DEV-3",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-DEV-3.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-dev-3 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-dev-3, 8k çözünürlük."
+    },
+    "tech-dev-4": {
+      "title": "Teknoloji // TECH-DEV-4",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-DEV-4.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-dev-4 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-dev-4, 8k çözünürlük."
+    },
+    "tech-dev-5": {
+      "title": "Teknoloji // TECH-DEV-5",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-DEV-5.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-dev-5 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-dev-5, 8k çözünürlük."
+    },
+    "tech-dev-6": {
+      "title": "Teknoloji // TECH-DEV-6",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-DEV-6.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-dev-6 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-dev-6, 8k çözünürlük."
+    },
+    "tech-home-1": {
+      "title": "Teknoloji // TECH-HOME-1",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HOME-1.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-home-1 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-home-1, 8k çözünürlük."
+    },
+    "tech-home-2": {
+      "title": "Teknoloji // TECH-HOME-2",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HOME-2.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-home-2 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-home-2, 8k çözünürlük."
+    },
+    "tech-home-3": {
+      "title": "Teknoloji // TECH-HOME-3",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HOME-3.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-home-3 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-home-3, 8k çözünürlük."
+    },
+    "tech-home-4": {
+      "title": "Teknoloji // TECH-HOME-4",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HOME-4.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-home-4 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-home-4, 8k çözünürlük."
+    },
+    "tech-home-5": {
+      "title": "Teknoloji // TECH-HOME-5",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HOME-5.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-home-5 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-home-5, 8k çözünürlük."
+    },
+    "tech-home-6": {
+      "title": "Teknoloji // TECH-HOME-6",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HOME-6.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-home-6 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-home-6, 8k çözünürlük."
+    },
+    "tech-hlth-1": {
+      "title": "Teknoloji // TECH-HLTH-1",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HLTH-1.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-hlth-1 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-hlth-1, 8k çözünürlük."
+    },
+    "tech-hlth-2": {
+      "title": "Teknoloji // TECH-HLTH-2",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HLTH-2.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-hlth-2 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-hlth-2, 8k çözünürlük."
+    },
+    "tech-hlth-3": {
+      "title": "Teknoloji // TECH-HLTH-3",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HLTH-3.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-hlth-3 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-hlth-3, 8k çözünürlük."
+    },
+    "tech-hlth-4": {
+      "title": "Teknoloji // TECH-HLTH-4",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HLTH-4.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-hlth-4 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-hlth-4, 8k çözünürlük."
+    },
+    "tech-hlth-5": {
+      "title": "Teknoloji // TECH-HLTH-5",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HLTH-5.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-hlth-5 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-hlth-5, 8k çözünürlük."
+    },
+    "tech-hlth-6": {
+      "title": "Teknoloji // TECH-HLTH-6",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-HLTH-6.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-hlth-6 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-hlth-6, 8k çözünürlük."
+    },
+    "tech-nrg-1": {
+      "title": "Teknoloji // TECH-NRG-1",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-NRG-1.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-nrg-1 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-nrg-1, 8k çözünürlük."
+    },
+    "tech-nrg-2": {
+      "title": "Teknoloji // TECH-NRG-2",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-NRG-2.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-nrg-2 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-nrg-2, 8k çözünürlük."
+    },
+    "tech-nrg-3": {
+      "title": "Teknoloji // TECH-NRG-3",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-NRG-3.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-nrg-3 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-nrg-3, 8k çözünürlük."
+    },
+    "tech-nrg-4": {
+      "title": "Teknoloji // TECH-NRG-4",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-NRG-4.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-nrg-4 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-nrg-4, 8k çözünürlük."
+    },
+    "tech-nrg-5": {
+      "title": "Teknoloji // TECH-NRG-5",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-NRG-5.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-nrg-5 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-nrg-5, 8k çözünürlük."
+    },
+    "tech-nrg-6": {
+      "title": "Teknoloji // TECH-NRG-6",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-NRG-6.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-nrg-6 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-nrg-6, 8k çözünürlük."
+    },
+    "tech-spc-1": {
+      "title": "Teknoloji // TECH-SPC-1",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-SPC-1.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-spc-1 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-spc-1, 8k çözünürlük."
+    },
+    "tech-spc-2": {
+      "title": "Teknoloji // TECH-SPC-2",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-SPC-2.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-spc-2 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-spc-2, 8k çözünürlük."
+    },
+    "tech-spc-3": {
+      "title": "Teknoloji // TECH-SPC-3",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-SPC-3.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-spc-3 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-spc-3, 8k çözünürlük."
+    },
+    "tech-spc-4": {
+      "title": "Teknoloji // TECH-SPC-4",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-SPC-4.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-spc-4 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-spc-4, 8k çözünürlük."
+    },
+    "tech-spc-5": {
+      "title": "Teknoloji // TECH-SPC-5",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-SPC-5.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-spc-5 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-spc-5, 8k çözünürlük."
+    },
+    "tech-spc-6": {
+      "title": "Teknoloji // TECH-SPC-6",
+      "description": "Sürdürülebilir ve otonom uzun süreli operasyonlar için tasarlanmış öncü alt sistem TECH-SPC-6.",
+      "howItWorks": "Sıfır karbon ayak izine sahip yenilikçi fizik ve algoritmik prensipler üzerine kurulmuştur.",
+      "alt": "tech-spc-6 konsept tasarımı",
+      "prompt": "Endüstriyel tasarım fotoğrafı, tech-spc-6, 8k çözünürlük."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Yerleşim // PLACE-1",
+      "location": "Uluslararası Habitat PLACE-1",
+      "story": "Sakinler sıfır atıklı kapalı döngü sistemlerle doğayla tam uyum içinde yaşamaktadır.",
+      "infrastructureTags": [
+        "Akıllı Şebeke",
+        "Temiz Ulaşım",
+        "Füzyon Enerjisi",
+        "Biyosistemler"
+      ],
+      "alt": "place-1 gerçekçi görüntüsü",
+      "prompt": "Sinematik şehir manzarası, place-1, 8k çözünürlük."
+    },
+    "place-2": {
+      "title": "Yerleşim // PLACE-2",
+      "location": "Uluslararası Habitat PLACE-2",
+      "story": "Sakinler sıfır atıklı kapalı döngü sistemlerle doğayla tam uyum içinde yaşamaktadır.",
+      "infrastructureTags": [
+        "Akıllı Şebeke",
+        "Temiz Ulaşım",
+        "Füzyon Enerjisi",
+        "Biyosistemler"
+      ],
+      "alt": "place-2 gerçekçi görüntüsü",
+      "prompt": "Sinematik şehir manzarası, place-2, 8k çözünürlük."
+    },
+    "place-3": {
+      "title": "Yerleşim // PLACE-3",
+      "location": "Uluslararası Habitat PLACE-3",
+      "story": "Sakinler sıfır atıklı kapalı döngü sistemlerle doğayla tam uyum içinde yaşamaktadır.",
+      "infrastructureTags": [
+        "Akıllı Şebeke",
+        "Temiz Ulaşım",
+        "Füzyon Enerjisi",
+        "Biyosistemler"
+      ],
+      "alt": "place-3 gerçekçi görüntüsü",
+      "prompt": "Sinematik şehir manzarası, place-3, 8k çözünürlük."
+    },
+    "place-4": {
+      "title": "Yerleşim // PLACE-4",
+      "location": "Uluslararası Habitat PLACE-4",
+      "story": "Sakinler sıfır atıklı kapalı döngü sistemlerle doğayla tam uyum içinde yaşamaktadır.",
+      "infrastructureTags": [
+        "Akıllı Şebeke",
+        "Temiz Ulaşım",
+        "Füzyon Enerjisi",
+        "Biyosistemler"
+      ],
+      "alt": "place-4 gerçekçi görüntüsü",
+      "prompt": "Sinematik şehir manzarası, place-4, 8k çözünürlük."
+    },
+    "place-5": {
+      "title": "Yerleşim // PLACE-5",
+      "location": "Uluslararası Habitat PLACE-5",
+      "story": "Sakinler sıfır atıklı kapalı döngü sistemlerle doğayla tam uyum içinde yaşamaktadır.",
+      "infrastructureTags": [
+        "Akıllı Şebeke",
+        "Temiz Ulaşım",
+        "Füzyon Enerjisi",
+        "Biyosistemler"
+      ],
+      "alt": "place-5 gerçekçi görüntüsü",
+      "prompt": "Sinematik şehir manzarası, place-5, 8k çözünürlük."
+    },
+    "place-6": {
+      "title": "Yerleşim // PLACE-6",
+      "location": "Uluslararası Habitat PLACE-6",
+      "story": "Sakinler sıfır atıklı kapalı döngü sistemlerle doğayla tam uyum içinde yaşamaktadır.",
+      "infrastructureTags": [
+        "Akıllı Şebeke",
+        "Temiz Ulaşım",
+        "Füzyon Enerjisi",
+        "Biyosistemler"
+      ],
+      "alt": "place-6 gerçekçi görüntüsü",
+      "prompt": "Sinematik şehir manzarası, place-6, 8k çözünürlük."
+    },
+    "place-7": {
+      "title": "Yerleşim // PLACE-7",
+      "location": "Uluslararası Habitat PLACE-7",
+      "story": "Sakinler sıfır atıklı kapalı döngü sistemlerle doğayla tam uyum içinde yaşamaktadır.",
+      "infrastructureTags": [
+        "Akıllı Şebeke",
+        "Temiz Ulaşım",
+        "Füzyon Enerjisi",
+        "Biyosistemler"
+      ],
+      "alt": "place-7 gerçekçi görüntüsü",
+      "prompt": "Sinematik şehir manzarası, place-7, 8k çözünürlük."
+    },
+    "place-8": {
+      "title": "Yerleşim // PLACE-8",
+      "location": "Uluslararası Habitat PLACE-8",
+      "story": "Sakinler sıfır atıklı kapalı döngü sistemlerle doğayla tam uyum içinde yaşamaktadır.",
+      "infrastructureTags": [
+        "Akıllı Şebeke",
+        "Temiz Ulaşım",
+        "Füzyon Enerjisi",
+        "Biyosistemler"
+      ],
+      "alt": "place-8 gerçekçi görüntüsü",
+      "prompt": "Sinematik şehir manzarası, place-8, 8k çözünürlük."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Projeler doğrudan Aliya Khan tarafından incelenir ve senkronize edilir.",
+    "emptyLive": "Şu anda yayında olan bir sistem bulunmuyor. Yeni projeler yakında burada listelenecek.",
+    "emptyInProgress": "Aşamalar tamamlandıkça mühendislik taslakları burada yer alacaktır.",
+    "emptyIdeas": "Teorik araştırma önerileri burada kataloglanacaktır."
+  }
+}

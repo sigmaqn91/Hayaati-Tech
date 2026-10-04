@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "Nền Móng Nhận Thức",
+      "yearLabel": "KỶ NGUYÊN // 2030",
+      "story": "Buổi sáng bắt đầu với trí tuệ nhân tạo môi trường xung quanh đã tối ưu hóa lưới điện trong khi bạn ngủ. Đô thị vận hành nhịp nhàng với những chiếc xe buýt điện êm ái và khoang vận chuyển hàng hóa dưới đường hầm ngầm chuyên dụng.",
+      "breakthroughs": [
+        "Trợ lý máy học tại thiết bị không độ trễ đám mây phục vụ nhịp sống thường nhật",
+        "Bộ pin lithium-kim loại thể rắn cung cấp năng lượng cho 1.000 km hành trình đô thị",
+        "Cấp phép thương mại chính thức cho taxi bay đô thị tự hành điểm-điểm trên các tuyến bay huyết mạch"
+      ],
+      "bannerAlt": "Góc nhìn điện ảnh về siêu đô thị bền vững năm 2030 với hành lang giao thông xanh",
+      "bannerPrompt": "Ảnh toàn cảnh điện ảnh về thành phố ven biển bền vững năm 2030 lúc bình minh, tháp kính năng lượng mặt trời, xe đưa đón điện tĩnh lặng, vườn treo thẳng đứng, độ phân giải 8k."
+    },
+    "era-2035": {
+      "title": "Hợp Nhất Cơ Sinh Học",
+      "yearLabel": "KỶ NGUYÊN // 2035",
+      "story": "Giao diện thần kinh cho phép điều khiển hệ thống thông tin kỹ thuật số thông qua ý nghĩ. Y học phòng ngừa giám sát sức khỏe liên tục 24/7 ở cấp độ tế bào bằng các cảm biến nano tương thích sinh học.",
+      "breakthroughs": [
+        "Cảm biến quang điện tử dưới da theo dõi liên tục chỉ số trao đổi chất",
+        "Bộ giải mã vỏ não vận động không xâm lấn giúp phục hồi hoàn toàn chức năng vận động cơ thể",
+        "Lò phản ứng sinh học sợi nấm và vi sinh quy mô công nghiệp tổng hợp vật liệu xây dựng sinh thái siêu bền"
+      ],
+      "bannerAlt": "Toàn cảnh điện ảnh về thành phố thẳng đứng với mái vòm sinh học và đường tàu đệm từ",
+      "bannerPrompt": "Ảnh điện ảnh thành phố thẳng đứng năm 2035 lúc hoàng hôn với các ống tàu maglev và mái vòm khí canh, độ phân giải 8k."
+    },
+    "era-2050": {
+      "title": "Tầm Nhìn Hành Tinh & Quỹ Đạo",
+      "yearLabel": "KỶ NGUYÊN // 2050",
+      "story": "Công nghiệp sản xuất nặng đã được di dời khỏi sinh quyển Trái Đất lên các trạm tinh luyện vi trọng lực trên quỹ đạo. Năng lượng nhiệt hạch thương mại và nền kinh tế tuần hoàn khép kín đã phục hồi trạng thái cân bằng cho đại dương và bầu khí quyển Trái Đất.",
+      "breakthroughs": [
+        "Các nhà máy nhiệt hạch từ trường thương mại cung cấp nguồn điện sạch vô tận liên tục",
+        "Căn cứ thường trực tại cực nam Mặt Trăng để khai thác băng nước và nhiên liệu đẩy không gian",
+        "Tổ hợp sinh học tổng hợp quy mô hành tinh thu giữ hàng tỷ tấn carbon trong khí quyển"
+      ],
+      "bannerAlt": "Quang cảnh Trái Đất nhìn từ quỹ đạo thấp qua các trạm không gian và khoang cư trú",
+      "bannerPrompt": "Góc nhìn điện ảnh ngoạn mục nhìn về Trái Đất từ trạm trung chuyển không gian, đường cong xanh thẳm của Trái Đất giữa vũ trụ bao la, độ phân giải 8k."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Dự Án // TL-2030-1",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2030-1",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2030-1, độ phân giải 8k."
+    },
+    "tl-2030-2": {
+      "title": "Dự Án // TL-2030-2",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2030-2",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2030-2, độ phân giải 8k."
+    },
+    "tl-2030-3": {
+      "title": "Dự Án // TL-2030-3",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2030-3",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2030-3, độ phân giải 8k."
+    },
+    "tl-2030-4": {
+      "title": "Dự Án // TL-2030-4",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2030-4",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2030-4, độ phân giải 8k."
+    },
+    "tl-2035-1": {
+      "title": "Dự Án // TL-2035-1",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2035-1",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2035-1, độ phân giải 8k."
+    },
+    "tl-2035-2": {
+      "title": "Dự Án // TL-2035-2",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2035-2",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2035-2, độ phân giải 8k."
+    },
+    "tl-2035-3": {
+      "title": "Dự Án // TL-2035-3",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2035-3",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2035-3, độ phân giải 8k."
+    },
+    "tl-2035-4": {
+      "title": "Dự Án // TL-2035-4",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2035-4",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2035-4, độ phân giải 8k."
+    },
+    "tl-2050-1": {
+      "title": "Dự Án // TL-2050-1",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2050-1",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2050-1, độ phân giải 8k."
+    },
+    "tl-2050-2": {
+      "title": "Dự Án // TL-2050-2",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2050-2",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2050-2, độ phân giải 8k."
+    },
+    "tl-2050-3": {
+      "title": "Dự Án // TL-2050-3",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2050-3",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2050-3, độ phân giải 8k."
+    },
+    "tl-2050-4": {
+      "title": "Dự Án // TL-2050-4",
+      "description": "Thông số kỹ thuật và thiết kế tiên tiến không phát thải cho giai đoạn 2030-2050.",
+      "breakthrough": "Ứng dụng nguyên lý vật lý đột phá và tối ưu hóa tài nguyên tuần hoàn.",
+      "alt": "Bản vẽ kỹ thuật của tl-2050-4",
+      "prompt": "Nhiếp ảnh kiến trúc điện ảnh, tl-2050-4, độ phân giải 8k."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Công Nghệ // TECH-AI-1",
+      "description": "Phân hệ công nghệ tiên phong TECH-AI-1 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-ai-1",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-ai-1, độ phân giải 8k."
+    },
+    "tech-ai-2": {
+      "title": "Công Nghệ // TECH-AI-2",
+      "description": "Phân hệ công nghệ tiên phong TECH-AI-2 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-ai-2",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-ai-2, độ phân giải 8k."
+    },
+    "tech-ai-3": {
+      "title": "Công Nghệ // TECH-AI-3",
+      "description": "Phân hệ công nghệ tiên phong TECH-AI-3 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-ai-3",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-ai-3, độ phân giải 8k."
+    },
+    "tech-ai-4": {
+      "title": "Công Nghệ // TECH-AI-4",
+      "description": "Phân hệ công nghệ tiên phong TECH-AI-4 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-ai-4",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-ai-4, độ phân giải 8k."
+    },
+    "tech-ai-5": {
+      "title": "Công Nghệ // TECH-AI-5",
+      "description": "Phân hệ công nghệ tiên phong TECH-AI-5 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-ai-5",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-ai-5, độ phân giải 8k."
+    },
+    "tech-ai-6": {
+      "title": "Công Nghệ // TECH-AI-6",
+      "description": "Phân hệ công nghệ tiên phong TECH-AI-6 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-ai-6",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-ai-6, độ phân giải 8k."
+    },
+    "tech-veh-1": {
+      "title": "Công Nghệ // TECH-VEH-1",
+      "description": "Phân hệ công nghệ tiên phong TECH-VEH-1 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-veh-1",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-veh-1, độ phân giải 8k."
+    },
+    "tech-veh-2": {
+      "title": "Công Nghệ // TECH-VEH-2",
+      "description": "Phân hệ công nghệ tiên phong TECH-VEH-2 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-veh-2",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-veh-2, độ phân giải 8k."
+    },
+    "tech-veh-3": {
+      "title": "Công Nghệ // TECH-VEH-3",
+      "description": "Phân hệ công nghệ tiên phong TECH-VEH-3 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-veh-3",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-veh-3, độ phân giải 8k."
+    },
+    "tech-veh-4": {
+      "title": "Công Nghệ // TECH-VEH-4",
+      "description": "Phân hệ công nghệ tiên phong TECH-VEH-4 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-veh-4",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-veh-4, độ phân giải 8k."
+    },
+    "tech-veh-5": {
+      "title": "Công Nghệ // TECH-VEH-5",
+      "description": "Phân hệ công nghệ tiên phong TECH-VEH-5 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-veh-5",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-veh-5, độ phân giải 8k."
+    },
+    "tech-veh-6": {
+      "title": "Công Nghệ // TECH-VEH-6",
+      "description": "Phân hệ công nghệ tiên phong TECH-VEH-6 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-veh-6",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-veh-6, độ phân giải 8k."
+    },
+    "tech-dev-1": {
+      "title": "Công Nghệ // TECH-DEV-1",
+      "description": "Phân hệ công nghệ tiên phong TECH-DEV-1 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-dev-1",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-dev-1, độ phân giải 8k."
+    },
+    "tech-dev-2": {
+      "title": "Công Nghệ // TECH-DEV-2",
+      "description": "Phân hệ công nghệ tiên phong TECH-DEV-2 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-dev-2",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-dev-2, độ phân giải 8k."
+    },
+    "tech-dev-3": {
+      "title": "Công Nghệ // TECH-DEV-3",
+      "description": "Phân hệ công nghệ tiên phong TECH-DEV-3 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-dev-3",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-dev-3, độ phân giải 8k."
+    },
+    "tech-dev-4": {
+      "title": "Công Nghệ // TECH-DEV-4",
+      "description": "Phân hệ công nghệ tiên phong TECH-DEV-4 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-dev-4",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-dev-4, độ phân giải 8k."
+    },
+    "tech-dev-5": {
+      "title": "Công Nghệ // TECH-DEV-5",
+      "description": "Phân hệ công nghệ tiên phong TECH-DEV-5 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-dev-5",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-dev-5, độ phân giải 8k."
+    },
+    "tech-dev-6": {
+      "title": "Công Nghệ // TECH-DEV-6",
+      "description": "Phân hệ công nghệ tiên phong TECH-DEV-6 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-dev-6",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-dev-6, độ phân giải 8k."
+    },
+    "tech-home-1": {
+      "title": "Công Nghệ // TECH-HOME-1",
+      "description": "Phân hệ công nghệ tiên phong TECH-HOME-1 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-home-1",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-home-1, độ phân giải 8k."
+    },
+    "tech-home-2": {
+      "title": "Công Nghệ // TECH-HOME-2",
+      "description": "Phân hệ công nghệ tiên phong TECH-HOME-2 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-home-2",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-home-2, độ phân giải 8k."
+    },
+    "tech-home-3": {
+      "title": "Công Nghệ // TECH-HOME-3",
+      "description": "Phân hệ công nghệ tiên phong TECH-HOME-3 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-home-3",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-home-3, độ phân giải 8k."
+    },
+    "tech-home-4": {
+      "title": "Công Nghệ // TECH-HOME-4",
+      "description": "Phân hệ công nghệ tiên phong TECH-HOME-4 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-home-4",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-home-4, độ phân giải 8k."
+    },
+    "tech-home-5": {
+      "title": "Công Nghệ // TECH-HOME-5",
+      "description": "Phân hệ công nghệ tiên phong TECH-HOME-5 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-home-5",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-home-5, độ phân giải 8k."
+    },
+    "tech-home-6": {
+      "title": "Công Nghệ // TECH-HOME-6",
+      "description": "Phân hệ công nghệ tiên phong TECH-HOME-6 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-home-6",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-home-6, độ phân giải 8k."
+    },
+    "tech-hlth-1": {
+      "title": "Công Nghệ // TECH-HLTH-1",
+      "description": "Phân hệ công nghệ tiên phong TECH-HLTH-1 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-hlth-1",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-hlth-1, độ phân giải 8k."
+    },
+    "tech-hlth-2": {
+      "title": "Công Nghệ // TECH-HLTH-2",
+      "description": "Phân hệ công nghệ tiên phong TECH-HLTH-2 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-hlth-2",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-hlth-2, độ phân giải 8k."
+    },
+    "tech-hlth-3": {
+      "title": "Công Nghệ // TECH-HLTH-3",
+      "description": "Phân hệ công nghệ tiên phong TECH-HLTH-3 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-hlth-3",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-hlth-3, độ phân giải 8k."
+    },
+    "tech-hlth-4": {
+      "title": "Công Nghệ // TECH-HLTH-4",
+      "description": "Phân hệ công nghệ tiên phong TECH-HLTH-4 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-hlth-4",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-hlth-4, độ phân giải 8k."
+    },
+    "tech-hlth-5": {
+      "title": "Công Nghệ // TECH-HLTH-5",
+      "description": "Phân hệ công nghệ tiên phong TECH-HLTH-5 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-hlth-5",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-hlth-5, độ phân giải 8k."
+    },
+    "tech-hlth-6": {
+      "title": "Công Nghệ // TECH-HLTH-6",
+      "description": "Phân hệ công nghệ tiên phong TECH-HLTH-6 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-hlth-6",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-hlth-6, độ phân giải 8k."
+    },
+    "tech-nrg-1": {
+      "title": "Công Nghệ // TECH-NRG-1",
+      "description": "Phân hệ công nghệ tiên phong TECH-NRG-1 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-nrg-1",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-nrg-1, độ phân giải 8k."
+    },
+    "tech-nrg-2": {
+      "title": "Công Nghệ // TECH-NRG-2",
+      "description": "Phân hệ công nghệ tiên phong TECH-NRG-2 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-nrg-2",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-nrg-2, độ phân giải 8k."
+    },
+    "tech-nrg-3": {
+      "title": "Công Nghệ // TECH-NRG-3",
+      "description": "Phân hệ công nghệ tiên phong TECH-NRG-3 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-nrg-3",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-nrg-3, độ phân giải 8k."
+    },
+    "tech-nrg-4": {
+      "title": "Công Nghệ // TECH-NRG-4",
+      "description": "Phân hệ công nghệ tiên phong TECH-NRG-4 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-nrg-4",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-nrg-4, độ phân giải 8k."
+    },
+    "tech-nrg-5": {
+      "title": "Công Nghệ // TECH-NRG-5",
+      "description": "Phân hệ công nghệ tiên phong TECH-NRG-5 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-nrg-5",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-nrg-5, độ phân giải 8k."
+    },
+    "tech-nrg-6": {
+      "title": "Công Nghệ // TECH-NRG-6",
+      "description": "Phân hệ công nghệ tiên phong TECH-NRG-6 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-nrg-6",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-nrg-6, độ phân giải 8k."
+    },
+    "tech-spc-1": {
+      "title": "Công Nghệ // TECH-SPC-1",
+      "description": "Phân hệ công nghệ tiên phong TECH-SPC-1 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-spc-1",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-spc-1, độ phân giải 8k."
+    },
+    "tech-spc-2": {
+      "title": "Công Nghệ // TECH-SPC-2",
+      "description": "Phân hệ công nghệ tiên phong TECH-SPC-2 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-spc-2",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-spc-2, độ phân giải 8k."
+    },
+    "tech-spc-3": {
+      "title": "Công Nghệ // TECH-SPC-3",
+      "description": "Phân hệ công nghệ tiên phong TECH-SPC-3 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-spc-3",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-spc-3, độ phân giải 8k."
+    },
+    "tech-spc-4": {
+      "title": "Công Nghệ // TECH-SPC-4",
+      "description": "Phân hệ công nghệ tiên phong TECH-SPC-4 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-spc-4",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-spc-4, độ phân giải 8k."
+    },
+    "tech-spc-5": {
+      "title": "Công Nghệ // TECH-SPC-5",
+      "description": "Phân hệ công nghệ tiên phong TECH-SPC-5 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-spc-5",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-spc-5, độ phân giải 8k."
+    },
+    "tech-spc-6": {
+      "title": "Công Nghệ // TECH-SPC-6",
+      "description": "Phân hệ công nghệ tiên phong TECH-SPC-6 được thiết kế cho hoạt động tự hành và bền vững lâu dài.",
+      "howItWorks": "Vận hành dựa trên các nguyên lý vật lý và thuật toán tính toán tiên tiến không để lại dấu chân carbon.",
+      "alt": "Hình ảnh ý tưởng kỹ thuật của tech-spc-6",
+      "prompt": "Nhiếp ảnh thiết kế công nghiệp, tech-spc-6, độ phân giải 8k."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Khu Định Cư // PLACE-1",
+      "location": "Khu Vực Nghiên Cứu Quốc Tế PLACE-1",
+      "story": "Cư dân sinh sống hài hòa với thiên nhiên nhờ hạ tầng tuần hoàn khép kín không rác thải.",
+      "infrastructureTags": [
+        "Lưới Điện Thông Minh",
+        "Giao Thông Xanh",
+        "Năng Lượng Nhiệt Hạch",
+        "Sinh Quyển"
+      ],
+      "alt": "Hình ảnh thực tế của place-1",
+      "prompt": "Khung cảnh đô thị tương lai, place-1, độ phân giải 8k."
+    },
+    "place-2": {
+      "title": "Khu Định Cư // PLACE-2",
+      "location": "Khu Vực Nghiên Cứu Quốc Tế PLACE-2",
+      "story": "Cư dân sinh sống hài hòa với thiên nhiên nhờ hạ tầng tuần hoàn khép kín không rác thải.",
+      "infrastructureTags": [
+        "Lưới Điện Thông Minh",
+        "Giao Thông Xanh",
+        "Năng Lượng Nhiệt Hạch",
+        "Sinh Quyển"
+      ],
+      "alt": "Hình ảnh thực tế của place-2",
+      "prompt": "Khung cảnh đô thị tương lai, place-2, độ phân giải 8k."
+    },
+    "place-3": {
+      "title": "Khu Định Cư // PLACE-3",
+      "location": "Khu Vực Nghiên Cứu Quốc Tế PLACE-3",
+      "story": "Cư dân sinh sống hài hòa với thiên nhiên nhờ hạ tầng tuần hoàn khép kín không rác thải.",
+      "infrastructureTags": [
+        "Lưới Điện Thông Minh",
+        "Giao Thông Xanh",
+        "Năng Lượng Nhiệt Hạch",
+        "Sinh Quyển"
+      ],
+      "alt": "Hình ảnh thực tế của place-3",
+      "prompt": "Khung cảnh đô thị tương lai, place-3, độ phân giải 8k."
+    },
+    "place-4": {
+      "title": "Khu Định Cư // PLACE-4",
+      "location": "Khu Vực Nghiên Cứu Quốc Tế PLACE-4",
+      "story": "Cư dân sinh sống hài hòa với thiên nhiên nhờ hạ tầng tuần hoàn khép kín không rác thải.",
+      "infrastructureTags": [
+        "Lưới Điện Thông Minh",
+        "Giao Thông Xanh",
+        "Năng Lượng Nhiệt Hạch",
+        "Sinh Quyển"
+      ],
+      "alt": "Hình ảnh thực tế của place-4",
+      "prompt": "Khung cảnh đô thị tương lai, place-4, độ phân giải 8k."
+    },
+    "place-5": {
+      "title": "Khu Định Cư // PLACE-5",
+      "location": "Khu Vực Nghiên Cứu Quốc Tế PLACE-5",
+      "story": "Cư dân sinh sống hài hòa với thiên nhiên nhờ hạ tầng tuần hoàn khép kín không rác thải.",
+      "infrastructureTags": [
+        "Lưới Điện Thông Minh",
+        "Giao Thông Xanh",
+        "Năng Lượng Nhiệt Hạch",
+        "Sinh Quyển"
+      ],
+      "alt": "Hình ảnh thực tế của place-5",
+      "prompt": "Khung cảnh đô thị tương lai, place-5, độ phân giải 8k."
+    },
+    "place-6": {
+      "title": "Khu Định Cư // PLACE-6",
+      "location": "Khu Vực Nghiên Cứu Quốc Tế PLACE-6",
+      "story": "Cư dân sinh sống hài hòa với thiên nhiên nhờ hạ tầng tuần hoàn khép kín không rác thải.",
+      "infrastructureTags": [
+        "Lưới Điện Thông Minh",
+        "Giao Thông Xanh",
+        "Năng Lượng Nhiệt Hạch",
+        "Sinh Quyển"
+      ],
+      "alt": "Hình ảnh thực tế của place-6",
+      "prompt": "Khung cảnh đô thị tương lai, place-6, độ phân giải 8k."
+    },
+    "place-7": {
+      "title": "Khu Định Cư // PLACE-7",
+      "location": "Khu Vực Nghiên Cứu Quốc Tế PLACE-7",
+      "story": "Cư dân sinh sống hài hòa với thiên nhiên nhờ hạ tầng tuần hoàn khép kín không rác thải.",
+      "infrastructureTags": [
+        "Lưới Điện Thông Minh",
+        "Giao Thông Xanh",
+        "Năng Lượng Nhiệt Hạch",
+        "Sinh Quyển"
+      ],
+      "alt": "Hình ảnh thực tế của place-7",
+      "prompt": "Khung cảnh đô thị tương lai, place-7, độ phân giải 8k."
+    },
+    "place-8": {
+      "title": "Khu Định Cư // PLACE-8",
+      "location": "Khu Vực Nghiên Cứu Quốc Tế PLACE-8",
+      "story": "Cư dân sinh sống hài hòa với thiên nhiên nhờ hạ tầng tuần hoàn khép kín không rác thải.",
+      "infrastructureTags": [
+        "Lưới Điện Thông Minh",
+        "Giao Thông Xanh",
+        "Năng Lượng Nhiệt Hạch",
+        "Sinh Quyển"
+      ],
+      "alt": "Hình ảnh thực tế của place-8",
+      "prompt": "Khung cảnh đô thị tương lai, place-8, độ phân giải 8k."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Các dự án được Aliya Khan trực tiếp xem xét và đồng bộ hóa.",
+    "emptyLive": "Hiện chưa có hệ thống trực tuyến nào được niêm yết. Dự án mới sẽ được cập nhật tại đây.",
+    "emptyInProgress": "Các bản vẽ kỹ thuật đang triển khai sẽ hiển thị tại đây khi đạt cột mốc mới.",
+    "emptyIdeas": "Các đề xuất nghiên cứu lý thuyết sẽ được lưu trữ tại đây."
+  }
+}

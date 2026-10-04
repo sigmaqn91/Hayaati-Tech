@@ -1,25 +1,25 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { techCatalogue, TechCard } from '@/data/future';
+import { techCatalogue, TechCardData } from '@/data/future';
 import { RealImageSlot } from './RealImageSlot';
 import { TechCardModal } from './TechCardModal';
 import { useLanguage } from '@/context/LanguageContext';
 import { Cpu, Search, Sparkles, Filter, ArrowUpRight } from 'lucide-react';
 
 export function TechCatalogueSection() {
-  const { t } = useLanguage();
+  const { t, content } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedEra, setSelectedEra] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeModalCard, setActiveModalCard] = useState<TechCard | null>(null);
+  const [activeModalCard, setActiveModalCard] = useState<TechCardData | null>(null);
 
   const categories = [
     { id: 'all', label: t.tech.categories.all },
     { id: 'ai', label: t.tech.categories.ai },
     { id: 'vehicles', label: t.tech.categories.vehicles },
     { id: 'devices', label: t.tech.categories.devices },
-    { id: 'home-work', label: t.tech.categories.homeWork },
+    { id: 'homeWork', label: t.tech.categories.homeWork },
     { id: 'health', label: t.tech.categories.health },
     { id: 'energy', label: t.tech.categories.energy },
     { id: 'space', label: t.tech.categories.space },
@@ -29,22 +29,30 @@ export function TechCatalogueSection() {
 
   const filteredCards = useMemo(() => {
     return techCatalogue.filter((card) => {
+      const cardContent = content.techCards[card.id] || {
+        title: '',
+        description: '',
+        howItWorks: '',
+        alt: '',
+        prompt: '',
+      };
       const matchesCategory = selectedCategory === 'all' || card.category === selectedCategory;
       const matchesEra = selectedEra === 'all' || card.era === selectedEra;
+      const q = searchQuery.toLowerCase().trim();
       const matchesQuery =
-        searchQuery.trim() === '' ||
-        card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        card.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        card.howItWorks.toLowerCase().includes(searchQuery.toLowerCase());
+        q === '' ||
+        cardContent.title.toLowerCase().includes(q) ||
+        cardContent.description.toLowerCase().includes(q) ||
+        cardContent.howItWorks.toLowerCase().includes(q);
 
       return matchesCategory && matchesEra && matchesQuery;
     });
-  }, [selectedCategory, selectedEra, searchQuery]);
+  }, [selectedCategory, selectedEra, searchQuery, content]);
 
   return (
     <section
       id="tech"
-      aria-label="Future Tech Catalogue Section"
+      aria-label={t.tech.title}
       className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-[#1e293b]"
     >
       {/* Header */}
@@ -61,7 +69,7 @@ export function TechCatalogueSection() {
         </p>
       </div>
 
-      {/* Category Tabs (no page reload) */}
+      {/* Category Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-thin">
         {categories.map((cat) => {
           const isActive = selectedCategory === cat.id;
@@ -81,17 +89,18 @@ export function TechCatalogueSection() {
         })}
       </div>
 
-      {/* Secondary Filter Bar (Search + Era filter) */}
+      {/* Secondary Filter Bar */}
       <div className="p-4 bg-[#0b0f17] border border-[#1e293b] mb-10 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         {/* Search Input */}
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
-            placeholder="Search paradigm, materials, or theoretical mechanisms..."
+            placeholder={t.tech.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs bg-[#05070a] border border-[#1e293b] text-white focus:outline-none focus:border-[#38e8ff] font-mono min-h-[40px]"
+            style={{ fontSize: '16px' }}
+            className="w-full pl-9 pr-4 py-2 text-base sm:text-xs bg-[#05070a] border border-[#1e293b] text-white focus:outline-none focus:border-[#38e8ff] font-mono min-h-[44px]"
           />
         </div>
 
@@ -99,7 +108,7 @@ export function TechCatalogueSection() {
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-[11px] font-mono text-slate-500 uppercase flex items-center gap-1">
             <Filter className="w-3.5 h-3.5 text-[#38e8ff]" />
-            ERA:
+            {t.tech.yearLabel}:
           </span>
           <div className="flex items-center gap-1">
             {eraFilters.map((era) => (
@@ -112,7 +121,7 @@ export function TechCatalogueSection() {
                     : 'bg-[#070a0f] text-slate-400 border-[#1e293b] hover:text-white'
                 }`}
               >
-                {era === 'all' ? 'All' : era}
+                {era === 'all' ? t.tech.filterAll : era}
               </button>
             ))}
           </div>
@@ -121,65 +130,77 @@ export function TechCatalogueSection() {
 
       {/* Tech Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCards.map((card) => (
-          <div
-            key={card.id}
-            onClick={() => setActiveModalCard(card)}
-            className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
-          >
-            {/* Real Image Slot (800x500) */}
-            <div className="relative">
-              <RealImageSlot
-                src={card.image}
-                alt={card.alt}
-                title={card.title}
-                width={800}
-                height={500}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="w-full h-[220px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-              />
-              <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-[#38e8ff]">
-                HORIZON {card.era}
-              </div>
-              <div className="absolute top-2 left-2 px-2 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[9px] font-mono text-slate-400 uppercase">
-                {card.category}
-              </div>
-            </div>
+        {filteredCards.map((card) => {
+          const cardContent = content.techCards[card.id] || {
+            title: '',
+            description: '',
+            howItWorks: '',
+            alt: '',
+            prompt: '',
+          };
 
-            {/* Card Content */}
-            <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-bold text-white text-lg group-hover:text-[#38e8ff] transition-colors leading-snug">
-                    {card.title}
-                  </h3>
-                  <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-[#38e8ff] shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          const categoryLabel = t.tech.categories[card.category] || card.category;
+
+          return (
+            <div
+              key={card.id}
+              onClick={() => setActiveModalCard(card)}
+              className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
+            >
+              {/* Real Image Slot */}
+              <div className="relative">
+                <RealImageSlot
+                  src={card.image}
+                  alt={cardContent.alt || cardContent.title}
+                  title={cardContent.title}
+                  width={800}
+                  height={500}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="w-full h-[220px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                />
+                <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-[#38e8ff]">
+                  {t.places.horizonLabel} {card.era}
                 </div>
-                <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed font-sans">
-                  {card.description}
-                </p>
+                <div className="absolute top-2 left-2 px-2 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[9px] font-mono text-slate-400 uppercase">
+                  {categoryLabel}
+                </div>
               </div>
 
-              {/* How It Could Work */}
-              <div className="p-3 bg-[#070a0f] border-l-2 border-l-[#38e8ff] border-y border-r border-[#1e293b] space-y-1">
-                <div className="text-[10px] font-mono text-[#38e8ff] uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-3 h-3 text-[#38e8ff]" />
-                  <span>{t.tech.howItWorksLabel}</span>
+              {/* Card Content */}
+              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-white text-lg group-hover:text-[#38e8ff] transition-colors leading-snug">
+                      {cardContent.title}
+                    </h3>
+                    <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-[#38e8ff] shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </div>
+                  <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed font-sans">
+                    {cardContent.description}
+                  </p>
                 </div>
-                <p className="text-[11px] font-mono text-slate-400 line-clamp-2">
-                  {card.howItWorks}
-                </p>
+
+                {/* How It Could Work */}
+                <div className="p-3 bg-[#070a0f] border-l-2 border-l-[#38e8ff] border-y border-r border-[#1e293b] space-y-1">
+                  <div className="text-[10px] font-mono text-[#38e8ff] uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-3 h-3 text-[#38e8ff]" />
+                    <span>{t.tech.howItWorksLabel}</span>
+                  </div>
+                  <p className="text-[11px] font-mono text-slate-400 line-clamp-2">
+                    {cardContent.howItWorks}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Empty Search / Filter State */}
       {filteredCards.length === 0 && (
         <div className="p-12 text-center bg-[#0b0f17] border border-[#1e293b]">
           <p className="text-sm font-mono text-slate-400 mb-3">
-            No specifications found matching the current query or filter.
+            {t.tech.searchNoResults}
           </p>
           <button
             onClick={() => {
@@ -189,7 +210,7 @@ export function TechCatalogueSection() {
             }}
             className="px-4 py-2 bg-[#111723] border border-[#1e293b] text-xs font-mono text-[#38e8ff] hover:bg-[#38e8ff] hover:text-[#05070a] transition-colors cursor-pointer"
           >
-            Reset Filters
+            {t.tech.filterAll}
           </button>
         </div>
       )}

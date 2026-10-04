@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "Das Kognitive Fundament",
+      "yearLabel": "EPOCHE // 2030",
+      "story": "Der Morgen beginnt mit einer Umgebungskunstintelligenz, die die Energienetze synchronisiert hat, während Sie schliefen. Die Stadt pulsiert mit leisen elektrischen Shuttles und Lieferkapseln in unterirdischen Tunneln.",
+      "breakthroughs": [
+        "Geräte-interne KI-Assistenten ohne Cloud-Latenz für den täglichen Lebensrhythmus",
+        "Festkörper-Lithium-Metall-Batteriepakete für 1.000 km städtischen Nahverkehr",
+        "Zulassung autonomer Punkt-zu-Punkt-Lufttaxis im städtischen Luftraum"
+      ],
+      "bannerAlt": "Weitwinkelansicht einer nachhaltigen Metropole 2030 mit sauberen Verkehrskorridoren",
+      "bannerPrompt": "Cinematische Weitwinkelaufnahme einer nachhaltigen Küstenstadt 2030 bei Sonnenaufgang, solare Glastürme, elektrische Shuttles, vertikale Gärten, 8k Auflösung."
+    },
+    "era-2035": {
+      "title": "Die Biomechanische Synthese",
+      "yearLabel": "EPOCHE // 2035",
+      "story": "Neuronale Schnittstellen ermöglichen die mühelose Steuerung digitaler Systeme durch Gedanken. Die Gesundheitsvorsorge erfolgt rund um die Uhr auf zellulärer Ebene durch minimalinvasive Nanosensoren.",
+      "breakthroughs": [
+        "Subkutane optoelektronische Sensoren zur kontinuierlichen Stoffwechselüberwachung",
+        "Nicht-invasive Motor-Cortex-Decoder zur Wiederherstellung der Mobilität",
+        "Industrielle Myzel- und Mikroben-Bioreaktoren für nachhaltige Baumaterialien"
+      ],
+      "bannerAlt": "Cinematische Ansicht einer vertikalen Stadt mit Biodomen und Magnetschwebebahnen",
+      "bannerPrompt": "Panoramabild einer vertikalen Stadt 2035 mit erhöhten Magnetschwebebahn-Röhren und aeroponischen Kuppeln, Dämmerung, 8k Auflösung."
+    },
+    "era-2050": {
+      "title": "Der Planetare & Orbitale Horizont",
+      "yearLabel": "EPOCHE // 2050",
+      "story": "Die Schwerindustrie wurde aus der irdischen Biosphäre in orbitale Schwerelosigkeits-Raffinerien verlagert. Fusionsenergie und geschlossene Kreislaufökonomien stellen das Gleichgewicht von Ozeanen und Atmosphäre wieder her.",
+      "breakthroughs": [
+        "Kommerzielle Kernfusionsreaktoren für kontinuierliche saubere Grundlastenergie",
+        "Permanente lunare Südpol-Basen zur Gewinnung von Wassereis und Raketentreibstoff",
+        "Synthetisch-biologische Großanlagen zur Bindung von Gigatonnen atmosphärischem Kohlenstoff"
+      ],
+      "bannerAlt": "Blick auf die Erde aus dem erdnahen Orbit mit Raumstationen und Lebensräumen",
+      "bannerPrompt": "Cinematischer Blick auf die Erde aus dem Orbit mit einer Weltraum-Transferstation, blaue Erdkrümmung, schwarzes All, 8k Auflösung."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Projekt // TL-2030-1",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2030-1",
+      "prompt": "Cinematische Architekturfotografie, tl-2030-1, 8k Auflösung."
+    },
+    "tl-2030-2": {
+      "title": "Projekt // TL-2030-2",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2030-2",
+      "prompt": "Cinematische Architekturfotografie, tl-2030-2, 8k Auflösung."
+    },
+    "tl-2030-3": {
+      "title": "Projekt // TL-2030-3",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2030-3",
+      "prompt": "Cinematische Architekturfotografie, tl-2030-3, 8k Auflösung."
+    },
+    "tl-2030-4": {
+      "title": "Projekt // TL-2030-4",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2030-4",
+      "prompt": "Cinematische Architekturfotografie, tl-2030-4, 8k Auflösung."
+    },
+    "tl-2035-1": {
+      "title": "Projekt // TL-2035-1",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2035-1",
+      "prompt": "Cinematische Architekturfotografie, tl-2035-1, 8k Auflösung."
+    },
+    "tl-2035-2": {
+      "title": "Projekt // TL-2035-2",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2035-2",
+      "prompt": "Cinematische Architekturfotografie, tl-2035-2, 8k Auflösung."
+    },
+    "tl-2035-3": {
+      "title": "Projekt // TL-2035-3",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2035-3",
+      "prompt": "Cinematische Architekturfotografie, tl-2035-3, 8k Auflösung."
+    },
+    "tl-2035-4": {
+      "title": "Projekt // TL-2035-4",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2035-4",
+      "prompt": "Cinematische Architekturfotografie, tl-2035-4, 8k Auflösung."
+    },
+    "tl-2050-1": {
+      "title": "Projekt // TL-2050-1",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2050-1",
+      "prompt": "Cinematische Architekturfotografie, tl-2050-1, 8k Auflösung."
+    },
+    "tl-2050-2": {
+      "title": "Projekt // TL-2050-2",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2050-2",
+      "prompt": "Cinematische Architekturfotografie, tl-2050-2, 8k Auflösung."
+    },
+    "tl-2050-3": {
+      "title": "Projekt // TL-2050-3",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2050-3",
+      "prompt": "Cinematische Architekturfotografie, tl-2050-3, 8k Auflösung."
+    },
+    "tl-2050-4": {
+      "title": "Projekt // TL-2050-4",
+      "description": "Fortschrittlicher Konstruktionsplan und emissionsfreie technische Spezifikation für 2030-2050.",
+      "breakthrough": "Hocheffiziente physikalische Prinzipien und nachhaltige Energieeffizienz.",
+      "alt": "Technische Darstellung von tl-2050-4",
+      "prompt": "Cinematische Architekturfotografie, tl-2050-4, 8k Auflösung."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Technologie // TECH-AI-1",
+      "description": "Zukunftstechnologisches System TECH-AI-1 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-ai-1",
+      "prompt": "Industriekonzept-Fotografie, tech-ai-1, 8k Auflösung."
+    },
+    "tech-ai-2": {
+      "title": "Technologie // TECH-AI-2",
+      "description": "Zukunftstechnologisches System TECH-AI-2 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-ai-2",
+      "prompt": "Industriekonzept-Fotografie, tech-ai-2, 8k Auflösung."
+    },
+    "tech-ai-3": {
+      "title": "Technologie // TECH-AI-3",
+      "description": "Zukunftstechnologisches System TECH-AI-3 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-ai-3",
+      "prompt": "Industriekonzept-Fotografie, tech-ai-3, 8k Auflösung."
+    },
+    "tech-ai-4": {
+      "title": "Technologie // TECH-AI-4",
+      "description": "Zukunftstechnologisches System TECH-AI-4 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-ai-4",
+      "prompt": "Industriekonzept-Fotografie, tech-ai-4, 8k Auflösung."
+    },
+    "tech-ai-5": {
+      "title": "Technologie // TECH-AI-5",
+      "description": "Zukunftstechnologisches System TECH-AI-5 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-ai-5",
+      "prompt": "Industriekonzept-Fotografie, tech-ai-5, 8k Auflösung."
+    },
+    "tech-ai-6": {
+      "title": "Technologie // TECH-AI-6",
+      "description": "Zukunftstechnologisches System TECH-AI-6 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-ai-6",
+      "prompt": "Industriekonzept-Fotografie, tech-ai-6, 8k Auflösung."
+    },
+    "tech-veh-1": {
+      "title": "Technologie // TECH-VEH-1",
+      "description": "Zukunftstechnologisches System TECH-VEH-1 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-veh-1",
+      "prompt": "Industriekonzept-Fotografie, tech-veh-1, 8k Auflösung."
+    },
+    "tech-veh-2": {
+      "title": "Technologie // TECH-VEH-2",
+      "description": "Zukunftstechnologisches System TECH-VEH-2 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-veh-2",
+      "prompt": "Industriekonzept-Fotografie, tech-veh-2, 8k Auflösung."
+    },
+    "tech-veh-3": {
+      "title": "Technologie // TECH-VEH-3",
+      "description": "Zukunftstechnologisches System TECH-VEH-3 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-veh-3",
+      "prompt": "Industriekonzept-Fotografie, tech-veh-3, 8k Auflösung."
+    },
+    "tech-veh-4": {
+      "title": "Technologie // TECH-VEH-4",
+      "description": "Zukunftstechnologisches System TECH-VEH-4 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-veh-4",
+      "prompt": "Industriekonzept-Fotografie, tech-veh-4, 8k Auflösung."
+    },
+    "tech-veh-5": {
+      "title": "Technologie // TECH-VEH-5",
+      "description": "Zukunftstechnologisches System TECH-VEH-5 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-veh-5",
+      "prompt": "Industriekonzept-Fotografie, tech-veh-5, 8k Auflösung."
+    },
+    "tech-veh-6": {
+      "title": "Technologie // TECH-VEH-6",
+      "description": "Zukunftstechnologisches System TECH-VEH-6 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-veh-6",
+      "prompt": "Industriekonzept-Fotografie, tech-veh-6, 8k Auflösung."
+    },
+    "tech-dev-1": {
+      "title": "Technologie // TECH-DEV-1",
+      "description": "Zukunftstechnologisches System TECH-DEV-1 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-dev-1",
+      "prompt": "Industriekonzept-Fotografie, tech-dev-1, 8k Auflösung."
+    },
+    "tech-dev-2": {
+      "title": "Technologie // TECH-DEV-2",
+      "description": "Zukunftstechnologisches System TECH-DEV-2 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-dev-2",
+      "prompt": "Industriekonzept-Fotografie, tech-dev-2, 8k Auflösung."
+    },
+    "tech-dev-3": {
+      "title": "Technologie // TECH-DEV-3",
+      "description": "Zukunftstechnologisches System TECH-DEV-3 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-dev-3",
+      "prompt": "Industriekonzept-Fotografie, tech-dev-3, 8k Auflösung."
+    },
+    "tech-dev-4": {
+      "title": "Technologie // TECH-DEV-4",
+      "description": "Zukunftstechnologisches System TECH-DEV-4 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-dev-4",
+      "prompt": "Industriekonzept-Fotografie, tech-dev-4, 8k Auflösung."
+    },
+    "tech-dev-5": {
+      "title": "Technologie // TECH-DEV-5",
+      "description": "Zukunftstechnologisches System TECH-DEV-5 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-dev-5",
+      "prompt": "Industriekonzept-Fotografie, tech-dev-5, 8k Auflösung."
+    },
+    "tech-dev-6": {
+      "title": "Technologie // TECH-DEV-6",
+      "description": "Zukunftstechnologisches System TECH-DEV-6 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-dev-6",
+      "prompt": "Industriekonzept-Fotografie, tech-dev-6, 8k Auflösung."
+    },
+    "tech-home-1": {
+      "title": "Technologie // TECH-HOME-1",
+      "description": "Zukunftstechnologisches System TECH-HOME-1 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-home-1",
+      "prompt": "Industriekonzept-Fotografie, tech-home-1, 8k Auflösung."
+    },
+    "tech-home-2": {
+      "title": "Technologie // TECH-HOME-2",
+      "description": "Zukunftstechnologisches System TECH-HOME-2 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-home-2",
+      "prompt": "Industriekonzept-Fotografie, tech-home-2, 8k Auflösung."
+    },
+    "tech-home-3": {
+      "title": "Technologie // TECH-HOME-3",
+      "description": "Zukunftstechnologisches System TECH-HOME-3 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-home-3",
+      "prompt": "Industriekonzept-Fotografie, tech-home-3, 8k Auflösung."
+    },
+    "tech-home-4": {
+      "title": "Technologie // TECH-HOME-4",
+      "description": "Zukunftstechnologisches System TECH-HOME-4 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-home-4",
+      "prompt": "Industriekonzept-Fotografie, tech-home-4, 8k Auflösung."
+    },
+    "tech-home-5": {
+      "title": "Technologie // TECH-HOME-5",
+      "description": "Zukunftstechnologisches System TECH-HOME-5 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-home-5",
+      "prompt": "Industriekonzept-Fotografie, tech-home-5, 8k Auflösung."
+    },
+    "tech-home-6": {
+      "title": "Technologie // TECH-HOME-6",
+      "description": "Zukunftstechnologisches System TECH-HOME-6 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-home-6",
+      "prompt": "Industriekonzept-Fotografie, tech-home-6, 8k Auflösung."
+    },
+    "tech-hlth-1": {
+      "title": "Technologie // TECH-HLTH-1",
+      "description": "Zukunftstechnologisches System TECH-HLTH-1 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-hlth-1",
+      "prompt": "Industriekonzept-Fotografie, tech-hlth-1, 8k Auflösung."
+    },
+    "tech-hlth-2": {
+      "title": "Technologie // TECH-HLTH-2",
+      "description": "Zukunftstechnologisches System TECH-HLTH-2 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-hlth-2",
+      "prompt": "Industriekonzept-Fotografie, tech-hlth-2, 8k Auflösung."
+    },
+    "tech-hlth-3": {
+      "title": "Technologie // TECH-HLTH-3",
+      "description": "Zukunftstechnologisches System TECH-HLTH-3 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-hlth-3",
+      "prompt": "Industriekonzept-Fotografie, tech-hlth-3, 8k Auflösung."
+    },
+    "tech-hlth-4": {
+      "title": "Technologie // TECH-HLTH-4",
+      "description": "Zukunftstechnologisches System TECH-HLTH-4 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-hlth-4",
+      "prompt": "Industriekonzept-Fotografie, tech-hlth-4, 8k Auflösung."
+    },
+    "tech-hlth-5": {
+      "title": "Technologie // TECH-HLTH-5",
+      "description": "Zukunftstechnologisches System TECH-HLTH-5 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-hlth-5",
+      "prompt": "Industriekonzept-Fotografie, tech-hlth-5, 8k Auflösung."
+    },
+    "tech-hlth-6": {
+      "title": "Technologie // TECH-HLTH-6",
+      "description": "Zukunftstechnologisches System TECH-HLTH-6 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-hlth-6",
+      "prompt": "Industriekonzept-Fotografie, tech-hlth-6, 8k Auflösung."
+    },
+    "tech-nrg-1": {
+      "title": "Technologie // TECH-NRG-1",
+      "description": "Zukunftstechnologisches System TECH-NRG-1 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-nrg-1",
+      "prompt": "Industriekonzept-Fotografie, tech-nrg-1, 8k Auflösung."
+    },
+    "tech-nrg-2": {
+      "title": "Technologie // TECH-NRG-2",
+      "description": "Zukunftstechnologisches System TECH-NRG-2 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-nrg-2",
+      "prompt": "Industriekonzept-Fotografie, tech-nrg-2, 8k Auflösung."
+    },
+    "tech-nrg-3": {
+      "title": "Technologie // TECH-NRG-3",
+      "description": "Zukunftstechnologisches System TECH-NRG-3 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-nrg-3",
+      "prompt": "Industriekonzept-Fotografie, tech-nrg-3, 8k Auflösung."
+    },
+    "tech-nrg-4": {
+      "title": "Technologie // TECH-NRG-4",
+      "description": "Zukunftstechnologisches System TECH-NRG-4 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-nrg-4",
+      "prompt": "Industriekonzept-Fotografie, tech-nrg-4, 8k Auflösung."
+    },
+    "tech-nrg-5": {
+      "title": "Technologie // TECH-NRG-5",
+      "description": "Zukunftstechnologisches System TECH-NRG-5 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-nrg-5",
+      "prompt": "Industriekonzept-Fotografie, tech-nrg-5, 8k Auflösung."
+    },
+    "tech-nrg-6": {
+      "title": "Technologie // TECH-NRG-6",
+      "description": "Zukunftstechnologisches System TECH-NRG-6 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-nrg-6",
+      "prompt": "Industriekonzept-Fotografie, tech-nrg-6, 8k Auflösung."
+    },
+    "tech-spc-1": {
+      "title": "Technologie // TECH-SPC-1",
+      "description": "Zukunftstechnologisches System TECH-SPC-1 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-spc-1",
+      "prompt": "Industriekonzept-Fotografie, tech-spc-1, 8k Auflösung."
+    },
+    "tech-spc-2": {
+      "title": "Technologie // TECH-SPC-2",
+      "description": "Zukunftstechnologisches System TECH-SPC-2 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-spc-2",
+      "prompt": "Industriekonzept-Fotografie, tech-spc-2, 8k Auflösung."
+    },
+    "tech-spc-3": {
+      "title": "Technologie // TECH-SPC-3",
+      "description": "Zukunftstechnologisches System TECH-SPC-3 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-spc-3",
+      "prompt": "Industriekonzept-Fotografie, tech-spc-3, 8k Auflösung."
+    },
+    "tech-spc-4": {
+      "title": "Technologie // TECH-SPC-4",
+      "description": "Zukunftstechnologisches System TECH-SPC-4 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-spc-4",
+      "prompt": "Industriekonzept-Fotografie, tech-spc-4, 8k Auflösung."
+    },
+    "tech-spc-5": {
+      "title": "Technologie // TECH-SPC-5",
+      "description": "Zukunftstechnologisches System TECH-SPC-5 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-spc-5",
+      "prompt": "Industriekonzept-Fotografie, tech-spc-5, 8k Auflösung."
+    },
+    "tech-spc-6": {
+      "title": "Technologie // TECH-SPC-6",
+      "description": "Zukunftstechnologisches System TECH-SPC-6 für nachhaltigen und automatisierten Dauerbetrieb.",
+      "howItWorks": "Basiert auf fortschrittlichen physikalischen und rechnerischen Prinzipien ohne CO2-Emissionen.",
+      "alt": "Konzeptbild von tech-spc-6",
+      "prompt": "Industriekonzept-Fotografie, tech-spc-6, 8k Auflösung."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Ort // PLACE-1",
+      "location": "Internationales Habitat PLACE-1",
+      "story": "Bewohner nutzen modernste Infrastruktur und leben in einer schadstofffreien Umgebung im Einklang mit der Natur.",
+      "infrastructureTags": [
+        "Intelligentes Netz",
+        "Nachhaltiger Transit",
+        "Saubere Energie",
+        "Umweltschutz"
+      ],
+      "alt": "Realistisches Bild von place-1",
+      "prompt": "Cinematische Stadtansicht, place-1, 8k Auflösung."
+    },
+    "place-2": {
+      "title": "Ort // PLACE-2",
+      "location": "Internationales Habitat PLACE-2",
+      "story": "Bewohner nutzen modernste Infrastruktur und leben in einer schadstofffreien Umgebung im Einklang mit der Natur.",
+      "infrastructureTags": [
+        "Intelligentes Netz",
+        "Nachhaltiger Transit",
+        "Saubere Energie",
+        "Umweltschutz"
+      ],
+      "alt": "Realistisches Bild von place-2",
+      "prompt": "Cinematische Stadtansicht, place-2, 8k Auflösung."
+    },
+    "place-3": {
+      "title": "Ort // PLACE-3",
+      "location": "Internationales Habitat PLACE-3",
+      "story": "Bewohner nutzen modernste Infrastruktur und leben in einer schadstofffreien Umgebung im Einklang mit der Natur.",
+      "infrastructureTags": [
+        "Intelligentes Netz",
+        "Nachhaltiger Transit",
+        "Saubere Energie",
+        "Umweltschutz"
+      ],
+      "alt": "Realistisches Bild von place-3",
+      "prompt": "Cinematische Stadtansicht, place-3, 8k Auflösung."
+    },
+    "place-4": {
+      "title": "Ort // PLACE-4",
+      "location": "Internationales Habitat PLACE-4",
+      "story": "Bewohner nutzen modernste Infrastruktur und leben in einer schadstofffreien Umgebung im Einklang mit der Natur.",
+      "infrastructureTags": [
+        "Intelligentes Netz",
+        "Nachhaltiger Transit",
+        "Saubere Energie",
+        "Umweltschutz"
+      ],
+      "alt": "Realistisches Bild von place-4",
+      "prompt": "Cinematische Stadtansicht, place-4, 8k Auflösung."
+    },
+    "place-5": {
+      "title": "Ort // PLACE-5",
+      "location": "Internationales Habitat PLACE-5",
+      "story": "Bewohner nutzen modernste Infrastruktur und leben in einer schadstofffreien Umgebung im Einklang mit der Natur.",
+      "infrastructureTags": [
+        "Intelligentes Netz",
+        "Nachhaltiger Transit",
+        "Saubere Energie",
+        "Umweltschutz"
+      ],
+      "alt": "Realistisches Bild von place-5",
+      "prompt": "Cinematische Stadtansicht, place-5, 8k Auflösung."
+    },
+    "place-6": {
+      "title": "Ort // PLACE-6",
+      "location": "Internationales Habitat PLACE-6",
+      "story": "Bewohner nutzen modernste Infrastruktur und leben in einer schadstofffreien Umgebung im Einklang mit der Natur.",
+      "infrastructureTags": [
+        "Intelligentes Netz",
+        "Nachhaltiger Transit",
+        "Saubere Energie",
+        "Umweltschutz"
+      ],
+      "alt": "Realistisches Bild von place-6",
+      "prompt": "Cinematische Stadtansicht, place-6, 8k Auflösung."
+    },
+    "place-7": {
+      "title": "Ort // PLACE-7",
+      "location": "Internationales Habitat PLACE-7",
+      "story": "Bewohner nutzen modernste Infrastruktur und leben in einer schadstofffreien Umgebung im Einklang mit der Natur.",
+      "infrastructureTags": [
+        "Intelligentes Netz",
+        "Nachhaltiger Transit",
+        "Saubere Energie",
+        "Umweltschutz"
+      ],
+      "alt": "Realistisches Bild von place-7",
+      "prompt": "Cinematische Stadtansicht, place-7, 8k Auflösung."
+    },
+    "place-8": {
+      "title": "Ort // PLACE-8",
+      "location": "Internationales Habitat PLACE-8",
+      "story": "Bewohner nutzen modernste Infrastruktur und leben in einer schadstofffreien Umgebung im Einklang mit der Natur.",
+      "infrastructureTags": [
+        "Intelligentes Netz",
+        "Nachhaltiger Transit",
+        "Saubere Energie",
+        "Umweltschutz"
+      ],
+      "alt": "Realistisches Bild von place-8",
+      "prompt": "Cinematische Stadtansicht, place-8, 8k Auflösung."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Projekte werden direkt von Aliya Khan geprüft und synchronisiert.",
+    "emptyLive": "Derzeit sind keine Live-Systeme gelistet. Neue Projekte werden hier veröffentlicht.",
+    "emptyInProgress": "Aktive Projekte werden hier gelistet, sobald Meilensteine erreicht sind.",
+    "emptyIdeas": "Forschungsvorschläge und Konzepte werden hier katalogisiert."
+  }
+}

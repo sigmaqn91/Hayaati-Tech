@@ -3,14 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
-import { Menu, X, Bot, Compass } from 'lucide-react';
+import { Menu, X, Compass } from 'lucide-react';
 
-interface NavbarProps {
-  onOpenAssistant?: () => void;
-}
-
-export function Navbar({ onOpenAssistant }: NavbarProps) {
-  const { t, isRtl } = useLanguage();
+export function Navbar() {
+  const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -62,14 +58,14 @@ export function Navbar({ onOpenAssistant }: NavbarProps) {
               HAYAATI WEB
             </span>
             <span className="font-mono text-[9px] text-[#38e8ff]/70 tracking-widest -mt-0.5">
-              TECHNOLOGY // 2030-2050
+              {t.nav.brandSubtitle}
             </span>
           </div>
         </a>
 
         {/* Desktop Navigation Links */}
         <nav
-          aria-label="Primary Navigation"
+          aria-label={t.nav.home}
           className="hidden xl:flex items-center space-x-1 rtl:space-x-reverse"
         >
           {navLinks.map((link) => (
@@ -83,26 +79,13 @@ export function Navbar({ onOpenAssistant }: NavbarProps) {
           ))}
         </nav>
 
-        {/* Right Action Bar (Language + Assistant + Mobile Toggle) */}
+        {/* Right Action Bar (Language + Mobile Toggle) */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Language Selector */}
           <LanguageSelector />
-
-          {/* AI Assistant Button */}
-          <button
-            onClick={onOpenAssistant}
-            className="flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] bg-[#0b0f17] border border-[#38e8ff]/40 text-[#38e8ff] hover:bg-[#38e8ff]/10 hover:border-[#38e8ff] transition-colors cursor-pointer text-xs font-mono"
-            aria-label="Open AI Assistant"
-          >
-            <Bot className="w-3.5 h-3.5 animate-pulse" />
-            <span className="hidden sm:inline font-semibold">{t.assistant.buttonLabel}</span>
-          </button>
-
-          {/* Mobile Menu Hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="xl:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-300 hover:text-[#38e8ff] bg-[#0b0f17] border border-[#1e293b]"
-            aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
+            aria-label={mobileMenuOpen ? t.nav.close : t.nav.menu}
             aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -119,7 +102,7 @@ export function Navbar({ onOpenAssistant }: NavbarProps) {
         >
           <div className="flex flex-col space-y-2">
             <div className="text-[10px] font-mono text-[#38e8ff] tracking-widest mb-3 border-b border-[#1e293b] pb-2">
-              NAVIGATION INDEX // SYS.MENU
+              {t.footer.quickLinks} // {t.nav.menuSysHeader}
             </div>
             {navLinks.map((link) => (
               <a
@@ -132,20 +115,9 @@ export function Navbar({ onOpenAssistant }: NavbarProps) {
               </a>
             ))}
           </div>
-
           <div className="pt-6 border-t border-[#1e293b] mt-6 flex flex-col gap-3">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                if (onOpenAssistant) onOpenAssistant();
-              }}
-              className="w-full py-3 min-h-[44px] flex items-center justify-center gap-2 bg-[#0b0f17] border border-[#38e8ff]/60 text-[#38e8ff] font-mono text-xs"
-            >
-              <Bot className="w-4 h-4" />
-              {t.assistant.buttonLabel}
-            </button>
             <div className="text-[10px] font-mono text-slate-500 text-center">
-              LOC: WWW.HAYAATIWEB.SITE
+              {t.nav.locationDomain}
             </div>
           </div>
         </div>

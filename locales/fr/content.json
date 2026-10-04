@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "La Fondation Cognitive",
+      "yearLabel": "ÈRE // 2030",
+      "story": "Les matinées débutent avec une intelligence synthétique ambiante qui a synchronisé les réseaux d'énergie pendant votre sommeil. La métropole vibre de navettes électriques silencieuses et de capsules souterraines de livraison.",
+      "breakthroughs": [
+        "Assistants d'apprentissage automatique ambiants exécutés localement sans latence cloud",
+        "Batteries lithium-métal à état solide alimentant 1 000 km de transport urbain",
+        "Certification commerciale de taxis aériens urbains autonomes de point à point"
+      ],
+      "bannerAlt": "Vue panoramique d'une métropole écologique et intelligente en 2030 avec corridors de livraison autonomes",
+      "bannerPrompt": "Prise de vue panoramique cinématique d'une ville côtière durable en 2030 au lever du soleil, tours solaires en verre, navettes électriques silencieuses, 8k résolution."
+    },
+    "era-2035": {
+      "title": "La Synthèse Biomécanique",
+      "yearLabel": "ÈRE // 2035",
+      "story": "Les interfaces neurales permettent une interaction directe et fluide avec les systèmes numériques. La santé préventive opère en temps réel au niveau cellulaire grâce à des biocapteurs miniaturisés.",
+      "breakthroughs": [
+        "Capteurs optoélectroniques sous-cutanés pour le suivi endocrinien continu",
+        "Décodeurs moteurs non invasifs restaurant l'autonomie motrice de millions de personnes",
+        "Bioréacteurs microbiens produisant des matériaux de construction écologiques"
+      ],
+      "bannerAlt": "Vue cinématique d'une cité verticale comprenant des biodômes et des voies de transit suspendues",
+      "bannerPrompt": "Vue cinématique d'une cité verticale en 2035 avec des tubes de transport magnétique et des dômes aéroponiques, crépuscule, 8k résolution."
+    },
+    "era-2050": {
+      "title": "L'Horizon Planétaire et Orbital",
+      "yearLabel": "ÈRE // 2050",
+      "story": "L'industrie lourde est désormais délocalisée dans des raffineries orbitales en microgravité. Sur Terre, l'énergie de fusion commerciale et les écosystèmes en boucle fermée restaurent l'équilibre écologique mondial.",
+      "breakthroughs": [
+        "Réacteurs de fusion nucléaire commerciale fournissant une énergie de base illimitée",
+        "Infrastructures lunaires permanentes d'extraction de glace d'eau au pôle Sud",
+        "Complexes de biologie synthétique planétaires capturant des gigatonnes de carbone"
+      ],
+      "bannerAlt": "Vue de la Terre depuis l'orbite basse montrant des ascenseurs spatiaux et des habitats habités",
+      "bannerPrompt": "Vue cinématique de la Terre depuis l'espace avec station de transfert en nanotubes de carbone, courbure bleue de l'atmosphère, noirceur spatiale, 8k résolution."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Projet // TL-2030-1",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2030-1",
+      "prompt": "Photographie d'architecture cinématique, tl-2030-1, 8k résolution."
+    },
+    "tl-2030-2": {
+      "title": "Projet // TL-2030-2",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2030-2",
+      "prompt": "Photographie d'architecture cinématique, tl-2030-2, 8k résolution."
+    },
+    "tl-2030-3": {
+      "title": "Projet // TL-2030-3",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2030-3",
+      "prompt": "Photographie d'architecture cinématique, tl-2030-3, 8k résolution."
+    },
+    "tl-2030-4": {
+      "title": "Projet // TL-2030-4",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2030-4",
+      "prompt": "Photographie d'architecture cinématique, tl-2030-4, 8k résolution."
+    },
+    "tl-2035-1": {
+      "title": "Projet // TL-2035-1",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2035-1",
+      "prompt": "Photographie d'architecture cinématique, tl-2035-1, 8k résolution."
+    },
+    "tl-2035-2": {
+      "title": "Projet // TL-2035-2",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2035-2",
+      "prompt": "Photographie d'architecture cinématique, tl-2035-2, 8k résolution."
+    },
+    "tl-2035-3": {
+      "title": "Projet // TL-2035-3",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2035-3",
+      "prompt": "Photographie d'architecture cinématique, tl-2035-3, 8k résolution."
+    },
+    "tl-2035-4": {
+      "title": "Projet // TL-2035-4",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2035-4",
+      "prompt": "Photographie d'architecture cinématique, tl-2035-4, 8k résolution."
+    },
+    "tl-2050-1": {
+      "title": "Projet // TL-2050-1",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2050-1",
+      "prompt": "Photographie d'architecture cinématique, tl-2050-1, 8k résolution."
+    },
+    "tl-2050-2": {
+      "title": "Projet // TL-2050-2",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2050-2",
+      "prompt": "Photographie d'architecture cinématique, tl-2050-2, 8k résolution."
+    },
+    "tl-2050-3": {
+      "title": "Projet // TL-2050-3",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2050-3",
+      "prompt": "Photographie d'architecture cinématique, tl-2050-3, 8k résolution."
+    },
+    "tl-2050-4": {
+      "title": "Projet // TL-2050-4",
+      "description": "Plan d'ingénierie avancée et spécification technique à zéro émission pour la période 2030-2050.",
+      "breakthrough": "Principes scientifiques avancés garantissant une efficacité énergétique et environnementale optimale.",
+      "alt": "Illustration technique de tl-2050-4",
+      "prompt": "Photographie d'architecture cinématique, tl-2050-4, 8k résolution."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Technologie // TECH-AI-1",
+      "description": "Système technologique futur TECH-AI-1 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-ai-1",
+      "prompt": "Photographie de concept industriel, tech-ai-1, 8k résolution."
+    },
+    "tech-ai-2": {
+      "title": "Technologie // TECH-AI-2",
+      "description": "Système technologique futur TECH-AI-2 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-ai-2",
+      "prompt": "Photographie de concept industriel, tech-ai-2, 8k résolution."
+    },
+    "tech-ai-3": {
+      "title": "Technologie // TECH-AI-3",
+      "description": "Système technologique futur TECH-AI-3 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-ai-3",
+      "prompt": "Photographie de concept industriel, tech-ai-3, 8k résolution."
+    },
+    "tech-ai-4": {
+      "title": "Technologie // TECH-AI-4",
+      "description": "Système technologique futur TECH-AI-4 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-ai-4",
+      "prompt": "Photographie de concept industriel, tech-ai-4, 8k résolution."
+    },
+    "tech-ai-5": {
+      "title": "Technologie // TECH-AI-5",
+      "description": "Système technologique futur TECH-AI-5 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-ai-5",
+      "prompt": "Photographie de concept industriel, tech-ai-5, 8k résolution."
+    },
+    "tech-ai-6": {
+      "title": "Technologie // TECH-AI-6",
+      "description": "Système technologique futur TECH-AI-6 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-ai-6",
+      "prompt": "Photographie de concept industriel, tech-ai-6, 8k résolution."
+    },
+    "tech-veh-1": {
+      "title": "Technologie // TECH-VEH-1",
+      "description": "Système technologique futur TECH-VEH-1 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-veh-1",
+      "prompt": "Photographie de concept industriel, tech-veh-1, 8k résolution."
+    },
+    "tech-veh-2": {
+      "title": "Technologie // TECH-VEH-2",
+      "description": "Système technologique futur TECH-VEH-2 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-veh-2",
+      "prompt": "Photographie de concept industriel, tech-veh-2, 8k résolution."
+    },
+    "tech-veh-3": {
+      "title": "Technologie // TECH-VEH-3",
+      "description": "Système technologique futur TECH-VEH-3 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-veh-3",
+      "prompt": "Photographie de concept industriel, tech-veh-3, 8k résolution."
+    },
+    "tech-veh-4": {
+      "title": "Technologie // TECH-VEH-4",
+      "description": "Système technologique futur TECH-VEH-4 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-veh-4",
+      "prompt": "Photographie de concept industriel, tech-veh-4, 8k résolution."
+    },
+    "tech-veh-5": {
+      "title": "Technologie // TECH-VEH-5",
+      "description": "Système technologique futur TECH-VEH-5 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-veh-5",
+      "prompt": "Photographie de concept industriel, tech-veh-5, 8k résolution."
+    },
+    "tech-veh-6": {
+      "title": "Technologie // TECH-VEH-6",
+      "description": "Système technologique futur TECH-VEH-6 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-veh-6",
+      "prompt": "Photographie de concept industriel, tech-veh-6, 8k résolution."
+    },
+    "tech-dev-1": {
+      "title": "Technologie // TECH-DEV-1",
+      "description": "Système technologique futur TECH-DEV-1 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-dev-1",
+      "prompt": "Photographie de concept industriel, tech-dev-1, 8k résolution."
+    },
+    "tech-dev-2": {
+      "title": "Technologie // TECH-DEV-2",
+      "description": "Système technologique futur TECH-DEV-2 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-dev-2",
+      "prompt": "Photographie de concept industriel, tech-dev-2, 8k résolution."
+    },
+    "tech-dev-3": {
+      "title": "Technologie // TECH-DEV-3",
+      "description": "Système technologique futur TECH-DEV-3 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-dev-3",
+      "prompt": "Photographie de concept industriel, tech-dev-3, 8k résolution."
+    },
+    "tech-dev-4": {
+      "title": "Technologie // TECH-DEV-4",
+      "description": "Système technologique futur TECH-DEV-4 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-dev-4",
+      "prompt": "Photographie de concept industriel, tech-dev-4, 8k résolution."
+    },
+    "tech-dev-5": {
+      "title": "Technologie // TECH-DEV-5",
+      "description": "Système technologique futur TECH-DEV-5 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-dev-5",
+      "prompt": "Photographie de concept industriel, tech-dev-5, 8k résolution."
+    },
+    "tech-dev-6": {
+      "title": "Technologie // TECH-DEV-6",
+      "description": "Système technologique futur TECH-DEV-6 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-dev-6",
+      "prompt": "Photographie de concept industriel, tech-dev-6, 8k résolution."
+    },
+    "tech-home-1": {
+      "title": "Technologie // TECH-HOME-1",
+      "description": "Système technologique futur TECH-HOME-1 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-home-1",
+      "prompt": "Photographie de concept industriel, tech-home-1, 8k résolution."
+    },
+    "tech-home-2": {
+      "title": "Technologie // TECH-HOME-2",
+      "description": "Système technologique futur TECH-HOME-2 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-home-2",
+      "prompt": "Photographie de concept industriel, tech-home-2, 8k résolution."
+    },
+    "tech-home-3": {
+      "title": "Technologie // TECH-HOME-3",
+      "description": "Système technologique futur TECH-HOME-3 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-home-3",
+      "prompt": "Photographie de concept industriel, tech-home-3, 8k résolution."
+    },
+    "tech-home-4": {
+      "title": "Technologie // TECH-HOME-4",
+      "description": "Système technologique futur TECH-HOME-4 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-home-4",
+      "prompt": "Photographie de concept industriel, tech-home-4, 8k résolution."
+    },
+    "tech-home-5": {
+      "title": "Technologie // TECH-HOME-5",
+      "description": "Système technologique futur TECH-HOME-5 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-home-5",
+      "prompt": "Photographie de concept industriel, tech-home-5, 8k résolution."
+    },
+    "tech-home-6": {
+      "title": "Technologie // TECH-HOME-6",
+      "description": "Système technologique futur TECH-HOME-6 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-home-6",
+      "prompt": "Photographie de concept industriel, tech-home-6, 8k résolution."
+    },
+    "tech-hlth-1": {
+      "title": "Technologie // TECH-HLTH-1",
+      "description": "Système technologique futur TECH-HLTH-1 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-hlth-1",
+      "prompt": "Photographie de concept industriel, tech-hlth-1, 8k résolution."
+    },
+    "tech-hlth-2": {
+      "title": "Technologie // TECH-HLTH-2",
+      "description": "Système technologique futur TECH-HLTH-2 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-hlth-2",
+      "prompt": "Photographie de concept industriel, tech-hlth-2, 8k résolution."
+    },
+    "tech-hlth-3": {
+      "title": "Technologie // TECH-HLTH-3",
+      "description": "Système technologique futur TECH-HLTH-3 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-hlth-3",
+      "prompt": "Photographie de concept industriel, tech-hlth-3, 8k résolution."
+    },
+    "tech-hlth-4": {
+      "title": "Technologie // TECH-HLTH-4",
+      "description": "Système technologique futur TECH-HLTH-4 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-hlth-4",
+      "prompt": "Photographie de concept industriel, tech-hlth-4, 8k résolution."
+    },
+    "tech-hlth-5": {
+      "title": "Technologie // TECH-HLTH-5",
+      "description": "Système technologique futur TECH-HLTH-5 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-hlth-5",
+      "prompt": "Photographie de concept industriel, tech-hlth-5, 8k résolution."
+    },
+    "tech-hlth-6": {
+      "title": "Technologie // TECH-HLTH-6",
+      "description": "Système technologique futur TECH-HLTH-6 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-hlth-6",
+      "prompt": "Photographie de concept industriel, tech-hlth-6, 8k résolution."
+    },
+    "tech-nrg-1": {
+      "title": "Technologie // TECH-NRG-1",
+      "description": "Système technologique futur TECH-NRG-1 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-nrg-1",
+      "prompt": "Photographie de concept industriel, tech-nrg-1, 8k résolution."
+    },
+    "tech-nrg-2": {
+      "title": "Technologie // TECH-NRG-2",
+      "description": "Système technologique futur TECH-NRG-2 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-nrg-2",
+      "prompt": "Photographie de concept industriel, tech-nrg-2, 8k résolution."
+    },
+    "tech-nrg-3": {
+      "title": "Technologie // TECH-NRG-3",
+      "description": "Système technologique futur TECH-NRG-3 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-nrg-3",
+      "prompt": "Photographie de concept industriel, tech-nrg-3, 8k résolution."
+    },
+    "tech-nrg-4": {
+      "title": "Technologie // TECH-NRG-4",
+      "description": "Système technologique futur TECH-NRG-4 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-nrg-4",
+      "prompt": "Photographie de concept industriel, tech-nrg-4, 8k résolution."
+    },
+    "tech-nrg-5": {
+      "title": "Technologie // TECH-NRG-5",
+      "description": "Système technologique futur TECH-NRG-5 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-nrg-5",
+      "prompt": "Photographie de concept industriel, tech-nrg-5, 8k résolution."
+    },
+    "tech-nrg-6": {
+      "title": "Technologie // TECH-NRG-6",
+      "description": "Système technologique futur TECH-NRG-6 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-nrg-6",
+      "prompt": "Photographie de concept industriel, tech-nrg-6, 8k résolution."
+    },
+    "tech-spc-1": {
+      "title": "Technologie // TECH-SPC-1",
+      "description": "Système technologique futur TECH-SPC-1 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-spc-1",
+      "prompt": "Photographie de concept industriel, tech-spc-1, 8k résolution."
+    },
+    "tech-spc-2": {
+      "title": "Technologie // TECH-SPC-2",
+      "description": "Système technologique futur TECH-SPC-2 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-spc-2",
+      "prompt": "Photographie de concept industriel, tech-spc-2, 8k résolution."
+    },
+    "tech-spc-3": {
+      "title": "Technologie // TECH-SPC-3",
+      "description": "Système technologique futur TECH-SPC-3 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-spc-3",
+      "prompt": "Photographie de concept industriel, tech-spc-3, 8k résolution."
+    },
+    "tech-spc-4": {
+      "title": "Technologie // TECH-SPC-4",
+      "description": "Système technologique futur TECH-SPC-4 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-spc-4",
+      "prompt": "Photographie de concept industriel, tech-spc-4, 8k résolution."
+    },
+    "tech-spc-5": {
+      "title": "Technologie // TECH-SPC-5",
+      "description": "Système technologique futur TECH-SPC-5 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-spc-5",
+      "prompt": "Photographie de concept industriel, tech-spc-5, 8k résolution."
+    },
+    "tech-spc-6": {
+      "title": "Technologie // TECH-SPC-6",
+      "description": "Système technologique futur TECH-SPC-6 conçu pour une performance durable et autonome.",
+      "howItWorks": "Opère selon des lois physiques et algorithmiques de pointe garantissant une empreinte carbone nulle.",
+      "alt": "Rendu conceptuel de tech-spc-6",
+      "prompt": "Photographie de concept industriel, tech-spc-6, 8k résolution."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Lieu // PLACE-1",
+      "location": "Habitat International PLACE-1",
+      "story": "Les résidents profitent d'infrastructures de pointe et d'un environnement sans pollution en harmonie avec la technologie.",
+      "infrastructureTags": [
+        "Réseau intelligent",
+        "Transit durable",
+        "Énergie propre",
+        "Protection environnementale"
+      ],
+      "alt": "Vue réaliste de place-1",
+      "prompt": "Photographie cinématique urbaine, place-1, 8k résolution."
+    },
+    "place-2": {
+      "title": "Lieu // PLACE-2",
+      "location": "Habitat International PLACE-2",
+      "story": "Les résidents profitent d'infrastructures de pointe et d'un environnement sans pollution en harmonie avec la technologie.",
+      "infrastructureTags": [
+        "Réseau intelligent",
+        "Transit durable",
+        "Énergie propre",
+        "Protection environnementale"
+      ],
+      "alt": "Vue réaliste de place-2",
+      "prompt": "Photographie cinématique urbaine, place-2, 8k résolution."
+    },
+    "place-3": {
+      "title": "Lieu // PLACE-3",
+      "location": "Habitat International PLACE-3",
+      "story": "Les résidents profitent d'infrastructures de pointe et d'un environnement sans pollution en harmonie avec la technologie.",
+      "infrastructureTags": [
+        "Réseau intelligent",
+        "Transit durable",
+        "Énergie propre",
+        "Protection environnementale"
+      ],
+      "alt": "Vue réaliste de place-3",
+      "prompt": "Photographie cinématique urbaine, place-3, 8k résolution."
+    },
+    "place-4": {
+      "title": "Lieu // PLACE-4",
+      "location": "Habitat International PLACE-4",
+      "story": "Les résidents profitent d'infrastructures de pointe et d'un environnement sans pollution en harmonie avec la technologie.",
+      "infrastructureTags": [
+        "Réseau intelligent",
+        "Transit durable",
+        "Énergie propre",
+        "Protection environnementale"
+      ],
+      "alt": "Vue réaliste de place-4",
+      "prompt": "Photographie cinématique urbaine, place-4, 8k résolution."
+    },
+    "place-5": {
+      "title": "Lieu // PLACE-5",
+      "location": "Habitat International PLACE-5",
+      "story": "Les résidents profitent d'infrastructures de pointe et d'un environnement sans pollution en harmonie avec la technologie.",
+      "infrastructureTags": [
+        "Réseau intelligent",
+        "Transit durable",
+        "Énergie propre",
+        "Protection environnementale"
+      ],
+      "alt": "Vue réaliste de place-5",
+      "prompt": "Photographie cinématique urbaine, place-5, 8k résolution."
+    },
+    "place-6": {
+      "title": "Lieu // PLACE-6",
+      "location": "Habitat International PLACE-6",
+      "story": "Les résidents profitent d'infrastructures de pointe et d'un environnement sans pollution en harmonie avec la technologie.",
+      "infrastructureTags": [
+        "Réseau intelligent",
+        "Transit durable",
+        "Énergie propre",
+        "Protection environnementale"
+      ],
+      "alt": "Vue réaliste de place-6",
+      "prompt": "Photographie cinématique urbaine, place-6, 8k résolution."
+    },
+    "place-7": {
+      "title": "Lieu // PLACE-7",
+      "location": "Habitat International PLACE-7",
+      "story": "Les résidents profitent d'infrastructures de pointe et d'un environnement sans pollution en harmonie avec la technologie.",
+      "infrastructureTags": [
+        "Réseau intelligent",
+        "Transit durable",
+        "Énergie propre",
+        "Protection environnementale"
+      ],
+      "alt": "Vue réaliste de place-7",
+      "prompt": "Photographie cinématique urbaine, place-7, 8k résolution."
+    },
+    "place-8": {
+      "title": "Lieu // PLACE-8",
+      "location": "Habitat International PLACE-8",
+      "story": "Les résidents profitent d'infrastructures de pointe et d'un environnement sans pollution en harmonie avec la technologie.",
+      "infrastructureTags": [
+        "Réseau intelligent",
+        "Transit durable",
+        "Énergie propre",
+        "Protection environnementale"
+      ],
+      "alt": "Vue réaliste de place-8",
+      "prompt": "Photographie cinématique urbaine, place-8, 8k résolution."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Les projets sont directement vérifiés et synchronisés par Aliya Khan.",
+    "emptyLive": "Aucun déploiement en production pour le moment. Les nouveaux projets apparaîtront ici.",
+    "emptyInProgress": "Les plans d'ingénierie actifs seront répertoriés au fur et à mesure des étapes franchies.",
+    "emptyIdeas": "Les propositions de recherche conceptuelle seront cataloguées ici."
+  }
+}

@@ -1,42 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { checkChatRateLimit, RATE_CONFIG } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// In-memory rate limiting store for assistant chat
-const rateLimitMap = new Map<string, number[]>();
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_PROMPTS_PER_WINDOW = 60; // Generous limit for normal user conversation
-
-function isRateLimited(ip: string): boolean {
-  // If IP is generic or missing on serverless, don't penalize visitors
-  if (!ip || ip === 'unknown-client' || ip === '127.0.0.1') {
-    return false;
-  }
-
-  const now = Date.now();
-  const timestamps = rateLimitMap.get(ip) || [];
-  const validTimestamps = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-
-  if (validTimestamps.length >= MAX_PROMPTS_PER_WINDOW) {
-    rateLimitMap.set(ip, validTimestamps);
-    return true;
-  }
-
-  validTimestamps.push(now);
-  rateLimitMap.set(ip, validTimestamps);
-  return false;
-}
-
-const SYSTEM_INSTRUCTION = `
+const BASE_SYSTEM_INSTRUCTION = `
 You are the HAYAATI Cognitive Assistant, the built-in holographic navigation intelligence for Hayaati Web Technology (www.hayaatiweb.site).
-Owner & Lead Architect: Aliya Khan.
-Contact Email: Hayaati.Technology@gmail.com.
+Owner & Lead Architect: Aliya Khan. Contact Email: Hayaati.Technology@gmail.com.
 
 Mission & Persona:
 - You speak with calm, precise, cinematic authority (futuristic, polite, technical yet clear).
-- You can respond naturally in English, Urdu, Hindi, or any language the user addresses you in.
 - You guide visitors through the three eras of the future timeline:
   1. Era 2030: The Cognitive Foundation (edge AI, eVTOL urban sky taxis, solid-state battery storage, adaptive smart glass).
   2. Era 2035: The Biomechanical Synthesis (neural motor cortex links, autonomous medical pods, grown structural mycelium, maglev hyper-tubes).
@@ -49,30 +23,21 @@ Mission & Persona:
 - Keep responses concise (2 to 4 sentences usually, max 6 sentences).
 `;
 
-// Robust model candidates: try the most reliable models in sequence
-const CANDIDATE_MODELS = [
-  'gemini-2.0-flash',
-  'gemini-3.8-flash',
-  'gemini-1.5-flash',
-  'models/gemini-2.0-flash',
-  'models/gemini-3.8-flash',
-];
-
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown-client';
+    const forwarded = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '';
+    const ip = forwarded.split(',')[0].trim() || 'unknown-client';
 
-    if (isRateLimited(ip)) {
-      console.warn(`[Assistant Rate Limited] IP: ${ip}`);
+    // 1. Quota & Rate Limit Check
+    const rateCheck = await checkChatRateLimit(ip);
+    if (!rateCheck.allowed) {
+      console.warn(`[Assistant Rate Limited] IP: ${ip} Reason: ${rateCheck.reason}`);
       return NextResponse.json(
         {
-          error:
-            'Assistant query rate limit reached (60 queries per 10 minutes). Please wait a moment before sending another message.',
+          error: 'Rate limit or safety quota reached.',
+          code: 'quota_reached',
         },
-        {
-          status: 429,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -81,34 +46,36 @@ export async function POST(req: NextRequest) {
       body = await req.json();
     } catch {
       return NextResponse.json(
-        { error: 'Invalid JSON request payload.' },
+        { error: 'Invalid JSON payload.', code: 'generic_error' },
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const { message, history } = body;
-
+    const { message, history, language } = body;
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Message cannot be empty.' },
+        { error: 'Message cannot be empty.', code: 'generic_error' },
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    if (message.length > 500) {
+    if (message.length > RATE_CONFIG.maxMessageChars) {
       return NextResponse.json(
-        { error: 'Message exceeds maximum length of 500 characters.' },
+        {
+          error: `Message exceeds maximum allowed length of ${RATE_CONFIG.maxMessageChars} characters.`,
+          code: 'generic_error',
+        },
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.error('[Gemini API Error]: GEMINI_API_KEY environment variable is not defined on server.');
+    if (!apiKey || apiKey === 'disabled') {
+      console.warn('[Gemini Chat]: Missing or disabled GEMINI_API_KEY on server. AI assistant is safely offline.');
       return NextResponse.json(
         {
-          error:
-            'GEMINI_API_KEY is not configured on the server. Please verify your environment variable in Vercel.',
+          error: 'AI assistant is currently offline for calibration. You can explore all website sections.',
+          code: 'server_busy',
         },
         { status: 503, headers: { 'Content-Type': 'application/json' } }
       );
@@ -116,11 +83,30 @@ export async function POST(req: NextRequest) {
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // Format chat history safely if provided
-    const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
+    // Official Model Fallback Sequence (Prioritizing gemini-3.8-flash)
+    const primaryModel = process.env.GEMINI_CHAT_MODEL || 'gemini-3.8-flash';
+    const candidateModels = [
+      primaryModel,
+      'gemini-flash-latest',
+      'gemini-3.1-flash-lite',
+    ].filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx);
 
+    // Build language-specific system instruction
+    const userLang = typeof language === 'string' && language.trim() ? language.trim() : 'en';
+    const langInstruction = `
+Language Instructions:
+- Reply in the visitor's selected language: "${userLang}".
+- Use natural, native-level wording and phrasing.
+- If the visitor speaks or writes in another language or script (e.g., Hinglish / Urdu in Roman letters), reply naturally in that exact language and script.
+- Do NOT use literal mechanical translations. No English words unless they are brand names (Hayaati, Gemini) or technical proper nouns.
+`;
+
+    const systemInstruction = `${BASE_SYSTEM_INSTRUCTION}\n${langInstruction}`;
+
+    // Format chat history safely
+    const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
     if (Array.isArray(history)) {
-      for (const item of history.slice(-6)) {
+      for (const item of history.slice(-4)) {
         if (item.role === 'user' || item.role === 'model') {
           contents.push({
             role: item.role,
@@ -135,68 +121,80 @@ export async function POST(req: NextRequest) {
       parts: [{ text: message.trim() }],
     });
 
-    let replyText = '';
-    let lastError: Error | null = null;
+    let response: any = null;
+    let lastError: any = null;
 
-    // Iterate through candidates until one succeeds
-    for (const modelToUse of CANDIDATE_MODELS) {
+    // Model execution with automatic fallback
+    for (const modelName of candidateModels) {
       try {
-        const response = await ai.models.generateContent({
-          model: modelToUse,
+        response = await ai.models.generateContent({
+          model: modelName,
           contents,
           config: {
-            systemInstruction: SYSTEM_INSTRUCTION,
+            systemInstruction,
             temperature: 0.7,
             maxOutputTokens: 350,
           },
         });
-
-        const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text && text.trim().length > 0) {
-          replyText = text.trim();
-          break; // Success!
+        const replyText = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (replyText && replyText.trim().length > 0) {
+          break; // successfully generated
         }
-      } catch (genErr: unknown) {
-        lastError = genErr instanceof Error ? genErr : new Error(String(genErr));
-        console.warn(`[Gemini Attempt Failed on model: ${modelToUse}]:`, lastError.message);
-        // Continue to the next fallback candidate model!
-        continue;
+      } catch (modelErr: unknown) {
+        lastError = modelErr;
+        const errStatus = (modelErr as any)?.status || (modelErr as any)?.statusCode || 500;
+        const errName = modelErr instanceof Error ? modelErr.name : 'UnknownError';
+        const errMsg = modelErr instanceof Error ? modelErr.message : String(modelErr);
+        console.error(`[Gemini Chat Error] Attempt with model '${modelName}' failed:`, {
+          status: errStatus,
+          name: errName,
+          message: errMsg,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 300));
       }
     }
 
-    if (!replyText) {
-      throw lastError || new Error('All candidate models failed to return a response.');
-    }
-
-    return NextResponse.json(
-      { reply: replyText },
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
-  } catch (err: unknown) {
-    // Log the EXACT error to Vercel console for debugging
-    console.error('[HAYAATI CHAT API FATAL ERROR]:', err);
-
-    let cleanMessage = 'The cognitive assistant encountered an error. Please try again.';
-
-    if (err instanceof Error) {
-      const raw = err.message;
-      if (raw.includes('429') || raw.includes('quota') || raw.includes('RESOURCE_EXHAUSTED')) {
+    if (!response) {
+      const errMsg = lastError instanceof Error ? lastError.message : String(lastError || '');
+      console.error('[Gemini Chat Error]: All candidate models failed. Final error:', errMsg);
+      if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('RESOURCE_EXHAUSTED')) {
         return NextResponse.json(
-          {
-            error:
-              'The AI assistant has reached its computational rate limit. Please wait a brief moment before sending another query.',
-          },
+          { error: 'Rate limit or quota reached.', code: 'quota_reached' },
           { status: 429, headers: { 'Content-Type': 'application/json' } }
         );
-      } else if (raw.includes('API_KEY_INVALID') || raw.includes('403')) {
-        cleanMessage = 'Invalid GEMINI_API_KEY. Please verify your API key in Vercel settings.';
-      } else {
-        cleanMessage = 'Transmission interrupted. Please retry your inquiry.';
       }
+      if (errMsg.includes('503') || errMsg.includes('overloaded') || errMsg.includes('UNAVAILABLE') || errMsg.includes('busy')) {
+        return NextResponse.json(
+          { error: 'The AI model is temporarily busy. Please retry in a few seconds.', code: 'server_busy' },
+          { status: 503, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      return NextResponse.json(
+        { error: 'Cognitive service error.', code: 'generic_error' },
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const replyText = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!replyText || replyText.trim().length === 0) {
+      console.error('[Gemini Chat Error]: Model returned empty response text.');
+      return NextResponse.json(
+        { error: 'Empty response received.', code: 'generic_error' },
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     return NextResponse.json(
-      { error: cleanMessage },
+      { reply: replyText.trim() },
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (fatalErr: unknown) {
+    console.error('[Gemini Chat Fatal Exception]:', {
+      name: fatalErr instanceof Error ? fatalErr.name : 'FatalException',
+      message: fatalErr instanceof Error ? fatalErr.message : String(fatalErr),
+    });
+    return NextResponse.json(
+      { error: 'Fatal processing error.', code: 'generic_error' },
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
