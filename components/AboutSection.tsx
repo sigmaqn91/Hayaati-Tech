@@ -38,6 +38,7 @@ export function AboutSection() {
                 alt={t.about.photoAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 380px"
+                referrerPolicy="no-referrer"
                 className="object-cover"
               />
             ) : (
@@ -64,7 +65,7 @@ export function AboutSection() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-[#38e8ff]" />
                 <span className="font-mono text-xs text-[#38e8ff] uppercase tracking-wider font-bold">
-                  {t.about.architectTitle} // {aboutData.ownerName}
+                  {t.about.architectTitle} {'//'} {aboutData.ownerName}
                 </span>
               </div>
               <span className="font-mono text-[10px] text-slate-500">

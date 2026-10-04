@@ -138,13 +138,14 @@ export function Hero({ onOpenAssistant }: HeroProps) {
         {/* Main Headline Split into Two Balanced Lines */}
         <h1
           ref={headlineRef}
-          className={`font-bold tracking-tight text-white max-w-4xl text-center mx-auto mb-2 min-h-[5rem] sm:min-h-[6.5rem] md:min-h-[8rem] lg:min-h-[10rem] ${
+          className={`font-bold tracking-tight text-white max-w-4xl text-center mx-auto mb-2 min-h-[4.5rem] sm:min-h-[6rem] md:min-h-[7.5rem] lg:min-h-[9rem] ${
             isLatin ? 'leading-[1.18]' : 'leading-[1.45]'
           }`}
           style={{
-            fontSize: 'clamp(1.75rem, 5vw + 0.5rem, 4.25rem)',
+            fontSize: 'clamp(1.5rem, 4.2vw + 0.35rem, 3.85rem)',
             textWrap: 'balance',
-            wordBreak: 'keep-all',
+            overflowWrap: 'break-word',
+            wordBreak: isLatin ? 'normal' : 'break-word',
             minHeight: headlineHeight ? `${headlineHeight}px` : undefined,
           }}
         >
@@ -178,17 +179,18 @@ export function Hero({ onOpenAssistant }: HeroProps) {
           {/* Prominent Centered Orb Button: Talk to Hayaati */}
           <button
             onClick={onOpenAssistant}
-            className="group w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-3 bg-[#070a0f] border border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-xs font-bold uppercase tracking-wider shadow-[0_0_25px_rgba(56,232,255,0.35)] transition-all cursor-pointer rounded-full"
+            className="group w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-3 bg-[#070a0f] border border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-xs font-bold uppercase tracking-wider shadow-[0_0_25px_rgba(56,232,255,0.35)] hover:shadow-[0_0_35px_rgba(56,232,255,0.5)] transition-all cursor-pointer rounded-full"
             aria-label={talkToLabel}
           >
-            {/* Glowing Orb Icon */}
-            <div className="relative w-4 h-4 rounded-full flex items-center justify-center shrink-0">
-              <span className="absolute inset-0 rounded-full bg-[#38e8ff] opacity-75 animate-ping [animation-duration:2s]" />
+            {/* Holographic Glowing Orb Icon */}
+            <div className="relative w-5 h-5 rounded-full flex items-center justify-center shrink-0">
+              <span className="absolute inset-0 rounded-full bg-[#38e8ff] opacity-40 animate-ping [animation-duration:2.5s]" />
+              <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-[#38e8ff] via-[#818cf8] to-[#c084fc] opacity-60 blur-xs animate-pulse" />
               <span
-                className="relative z-10 w-3.5 h-3.5 rounded-full shadow-[0_0_8px_#38e8ff]"
+                className="relative z-10 w-4 h-4 rounded-full shadow-[0_0_10px_#38e8ff]"
                 style={{
                   background:
-                    'radial-gradient(circle at 35% 30%, #ffffff 0%, #38e8ff 40%, #1e40af 80%, #050b18 100%)',
+                    'radial-gradient(circle at 35% 30%, #ffffff 0%, #38e8ff 45%, #1e40af 80%, #050b18 100%)',
                 }}
               />
             </div>
@@ -200,6 +202,7 @@ export function Hero({ onOpenAssistant }: HeroProps) {
           {/* Primary Exploration CTA */}
           <a
             href="#timeline"
+            aria-label={t.hero.exploreCta}
             className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-2 bg-[#38e8ff] text-[#05070a] font-mono text-xs font-bold uppercase tracking-wider hover:bg-[#38e8ff]/90 shadow-[0_0_20px_rgba(56,232,255,0.25)] transition-all cursor-pointer rounded-none"
           >
             <span>{t.hero.exploreCta}</span>
@@ -209,6 +212,7 @@ export function Hero({ onOpenAssistant }: HeroProps) {
           {/* Secondary CTA */}
           <a
             href="#projects"
+            aria-label={t.hero.projectsCta}
             className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-2 bg-[#0b0f17] text-slate-200 border border-[#1e293b] hover:border-[#38e8ff]/50 hover:text-white font-mono text-xs font-medium uppercase tracking-wider transition-all cursor-pointer rounded-none"
           >
             <Layers className="w-3.5 h-3.5 text-[#38e8ff]" />

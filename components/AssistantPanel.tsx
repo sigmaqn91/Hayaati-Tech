@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { Mic, MicOff, X, MessageSquare, Send, ChevronDown, Play } from 'lucide-react';
+import { Mic, MicOff, X, MessageSquare, Send, ChevronDown, Play, Copy, Check } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -17,6 +17,7 @@ interface AssistantPanelProps {
   onClose: () => void;
 }
 
+// 14 verified Gemini Live supported native-voice languages
 const VOICE_SUPPORTED_LANGUAGES = new Set([
   'en', 'hi', 'es', 'fr', 'de', 'ja', 'ko', 'zh', 'ar', 'pt', 'it', 'ru', 'tr', 'id'
 ]);
@@ -43,7 +44,7 @@ function convertTo16kPcm(input: Float32Array, inputSampleRate: number): Int16Arr
     const pcm16 = new Int16Array(input.length);
     for (let i = 0; i < input.length; i++) {
       const s = Math.max(-1, Math.min(1, input[i]));
-      pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
     }
     return pcm16;
   }
@@ -53,7 +54,7 @@ function convertTo16kPcm(input: Float32Array, inputSampleRate: number): Int16Arr
   for (let i = 0; i < newLength; i++) {
     const originalIndex = Math.min(Math.floor(i * ratio), input.length - 1);
     const s = Math.max(-1, Math.min(1, input[originalIndex]));
-    pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
   }
   return pcm16;
 }
@@ -66,20 +67,52 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
     getReducedMotionServerSnapshot
   );
 
+  // Dedicated Voice State
   const [voiceSessionStarted, setVoiceSessionStarted] = useState(false);
   const [voiceState, setVoiceState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
   const [isMuted, setIsMuted] = useState(false);
-  const [showTypeSheet, setShowTypeSheet] = useState(false);
   const [lastCaption, setLastCaption] = useState<string>('');
   const [audioLoudness, setAudioLoudness] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Text chat state
+  // Separate Text Chat State (Fix F12: keep chat conversation history separate from voice state)
+  const [showTypeSheet, setShowTypeSheet] = useState(false);
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTextLoading, setIsTextLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  // Audio & Live refs
+  // Copy transcript handler
+  const handleCopyTranscript = useCallback(() => {
+    if (chatMessages.length === 0) return;
+    const transcriptText = chatMessages
+      .map((m) => `[${m.timestamp}] ${m.sender.toUpperCase()}: ${m.text}`)
+      .join('\n\n');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(transcriptText).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  }, [chatMessages]);
+
+  // Global Escape keyboard shortcut to close type sheet or panel
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showTypeSheet) {
+          setShowTypeSheet(false);
+        } else {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, showTypeSheet, onClose]);
+
+  // Audio & Live WebSocket refs
   const liveSessionRef = useRef<any>(null);
   const micStreamRef = useRef<MediaStream | null>(null);
   const inputAudioCtxRef = useRef<AudioContext | null>(null);
@@ -90,6 +123,8 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
   const nextPlayTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
   const voiceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sessionStartTimeRef = useRef<number | null>(null);
+  const voiceSessionStartedRef = useRef(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
@@ -104,6 +139,10 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
   useEffect(() => {
     voiceStateRef.current = voiceState;
   }, [voiceState]);
+
+  useEffect(() => {
+    voiceSessionStartedRef.current = voiceSessionStarted;
+  }, [voiceSessionStarted]);
 
   // Scroll lock when opened
   useEffect(() => {
@@ -155,7 +194,7 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Stop output audio playback cleanly
+  // Stop output audio playback immediately (used on interruption, session end, and unmount)
   const stopAudioPlayback = useCallback(() => {
     for (const src of activeSourcesRef.current) {
       try {
@@ -175,9 +214,9 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
     setAudioLoudness(0);
   }, []);
 
-  // Play model output audio at the exact sample rate returned by the Live API
+  // Play model output audio at the exact sample rate returned by the Live API with AnalyserNode
   const playModelAudioChunk = useCallback(
-    async (base64PcmData: string, sampleRate: number) => {
+    async (base64PcmData: string, sampleRate = 24000) => {
       try {
         if (typeof window === 'undefined') return;
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -199,49 +238,55 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
           analyser.connect(ctx.destination);
         }
 
-        // Decode 16-bit PCM little-endian
-        const binaryStr = window.atob(base64PcmData);
-        const bytes = new Uint8Array(binaryStr.length);
-        for (let i = 0; i < binaryStr.length; i++) {
-          bytes[i] = binaryStr.charCodeAt(i);
+        // Convert base64 PCM16 into Float32Array audio buffer
+        const binary = window.atob(base64PcmData);
+        const len = binary.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binary.charCodeAt(i);
         }
         const int16 = new Int16Array(bytes.buffer);
         const float32 = new Float32Array(int16.length);
         for (let i = 0; i < int16.length; i++) {
-          float32[i] = int16[i] / 32768.0;
+          float32[i] = int16[i] / 32768;
         }
 
         const audioBuffer = ctx.createBuffer(1, float32.length, sampleRate);
-        audioBuffer.getChannelData(0).set(float32);
+        audioBuffer.copyToChannel(float32, 0);
 
         const source = ctx.createBufferSource();
         source.buffer = audioBuffer;
-        source.connect(analyserRef.current);
+        source.connect(analyserRef.current || ctx.destination);
 
-        // Schedule continuous audio playback without clicks or gaps
         const now = ctx.currentTime;
-        const startTime = Math.max(now, nextPlayTimeRef.current);
-        source.start(startTime);
-        nextPlayTimeRef.current = startTime + audioBuffer.duration;
+        const playTime = Math.max(now, nextPlayTimeRef.current);
+        source.start(playTime);
+        nextPlayTimeRef.current = playTime + audioBuffer.duration;
 
         activeSourcesRef.current.push(source);
         setVoiceState('speaking');
 
-        // Loudness monitor loop
-        if (!animationFrameRef.current) {
-          const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+        // Monitor audio loudness via AnalyserNode while speaking
+        if (!animationFrameRef.current && analyserRef.current) {
+          const analyser = analyserRef.current;
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
           const updateLoudness = () => {
-            if (!analyserRef.current) return;
-            analyserRef.current.getByteFrequencyData(dataArray);
-            let sum = 0;
-            for (let i = 0; i < dataArray.length; i++) {
-              sum += dataArray[i];
+            if (activeSourcesRef.current.length > 0) {
+              analyser.getByteFrequencyData(dataArray);
+              let sum = 0;
+              for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+              }
+              const avg = sum / dataArray.length / 255;
+              setAudioLoudness(avg);
+              animationFrameRef.current = requestAnimationFrame(updateLoudness);
+            } else {
+              setAudioLoudness(0);
+              animationFrameRef.current = null;
             }
-            const average = sum / dataArray.length;
-            setAudioLoudness(average / 128);
-            animationFrameRef.current = requestAnimationFrame(updateLoudness);
           };
-          updateLoudness();
+          animationFrameRef.current = requestAnimationFrame(updateLoudness);
         }
 
         source.onended = () => {
@@ -265,8 +310,12 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
     []
   );
 
-  // Stop entire voice session and clean up all resources
-  const stopVoiceSession = useCallback(() => {
+  // Stop entire voice session, release resources, and notify backend release endpoint
+  const stopVoiceSession = useCallback(async () => {
+    const startTime = sessionStartTimeRef.current;
+    const durationSeconds = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
+    sessionStartTimeRef.current = null;
+
     stopAudioPlayback();
 
     // 1. Close Live WebSocket session
@@ -301,21 +350,41 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
       voiceTimeoutRef.current = null;
     }
 
+    // 4. Reset UI state back to idle
     setVoiceSessionStarted(false);
     setVoiceState('idle');
     setAudioLoudness(0);
+
+    // 5. Release concurrent slot & record duration on the backend
+    if (durationSeconds > 0 || voiceSessionStartedRef.current) {
+      try {
+        await fetch('/api/assistant/voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'release',
+            durationSeconds: Math.max(1, durationSeconds),
+          }),
+          keepalive: true,
+        });
+      } catch {
+        // Fallback catch to prevent unhandled rejection during cleanup
+      }
+    }
+    voiceSessionStartedRef.current = false;
   }, [stopAudioPlayback]);
 
-  // Start real-time Gemini Live session
+  // Start real-time Gemini Live WebSocket session
   const startVoiceSession = useCallback(async () => {
     setErrorMessage(null);
 
+    // Language compatibility check
     if (!VOICE_SUPPORTED_LANGUAGES.has(language)) {
       setErrorMessage(t.assistant.voiceNotAvailableLang);
       return;
     }
 
-    // Check getUserMedia availability
+    // Microphone API availability check
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
       setErrorMessage(t.assistant.voiceUnsupported);
       return;
@@ -324,7 +393,7 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
     setVoiceState('thinking');
 
     try {
-      // 1. Request short-lived session token from backend proxy (GEMINI_API_KEY is never exposed)
+      // 1. Request short-lived ephemeral token from server proxy (GEMINI_API_KEY is NEVER exposed to client)
       const res = await fetch('/api/assistant/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -340,6 +409,8 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
           setErrorMessage(t.assistant.errors.serverBusy);
         } else if (code === 'voice_not_supported') {
           setErrorMessage(t.assistant.voiceNotAvailableLang);
+        } else if (code === 'voice_connection_failed') {
+          setErrorMessage(t.assistant.errors.networkError);
         } else {
           setErrorMessage(t.assistant.errors.genericError);
         }
@@ -348,7 +419,7 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
       }
 
       const sessionData = await res.json();
-      const { token, model, voiceName } = sessionData;
+      const { token, model, voice, voiceName, sessionMaxSeconds } = sessionData;
 
       if (!token) {
         setErrorMessage(t.assistant.errors.genericError);
@@ -369,17 +440,16 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
           },
         });
         micStreamRef.current = stream;
-      } catch (micErr: any) {
+      } catch {
         setErrorMessage(t.assistant.errors.micBlocked);
         setVoiceState('idle');
         return;
       }
 
-      // 3. Connect to the official Gemini Live API WebSocket via @google/genai/web
+      // 3. Connect to Gemini Live API WebSocket via @google/genai/web using ephemeral token
       const { GoogleGenAI, Modality } = await import('@google/genai/web');
       const clientAi = new GoogleGenAI({
-        apiKey: token,
-        httpOptions: { apiVersion: 'v1alpha' },
+        apiKey: token, // Ephemeral single-use token only
       });
 
       const systemInstruction = `
@@ -397,7 +467,7 @@ Guidelines:
           speechConfig: {
             voiceConfig: {
               prebuiltVoiceConfig: {
-                voiceName: voiceName || 'Kore',
+                voiceName: voiceName || voice || 'Kore',
               },
             },
           },
@@ -406,17 +476,19 @@ Guidelines:
         callbacks: {
           onopen: () => {
             setVoiceSessionStarted(true);
+            voiceSessionStartedRef.current = true;
+            sessionStartTimeRef.current = Date.now();
             setVoiceState('listening');
           },
           onmessage: (msg: any) => {
-            // Check for model speech interruption
+            // Interruption handling: server interrupted flag
             if (msg.serverContent?.interrupted) {
               stopAudioPlayback();
               setVoiceState('listening');
               return;
             }
 
-            // Extract audio and text parts from model turn
+            // Extract audio and text caption parts from model turn
             const parts = msg.serverContent?.modelTurn?.parts;
             if (parts && Array.isArray(parts)) {
               for (const part of parts) {
@@ -427,14 +499,8 @@ Guidelines:
                   playModelAudioChunk(part.inlineData.data, sampleRate);
                 }
                 if (part.text) {
+                  // Keep live caption on orb screen separate from text chat conversation (Fix F12)
                   setLastCaption(part.text);
-                  const assistantMsg: Message = {
-                    id: `assistant-${Date.now()}-${Math.random()}`,
-                    sender: 'assistant',
-                    text: part.text,
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                  };
-                  setChatMessages((prev) => [...prev, assistantMsg]);
                 }
               }
             }
@@ -445,7 +511,7 @@ Guidelines:
             stopVoiceSession();
           },
           onclose: (e: any) => {
-            if (e.code !== 1000 && voiceSessionStarted) {
+            if (e.code !== 1000 && voiceSessionStartedRef.current) {
               setErrorMessage(t.assistant.errors.networkError);
             }
             stopVoiceSession();
@@ -455,7 +521,7 @@ Guidelines:
 
       liveSessionRef.current = session;
 
-      // 4. Capture microphone and stream 16 kHz PCM to Gemini Live session
+      // 4. Stream 16 kHz PCM microphone audio to Gemini Live session
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       const inputCtx = new AudioCtx({ sampleRate: 16000 });
       inputAudioCtxRef.current = inputCtx;
@@ -468,31 +534,42 @@ Guidelines:
       processorRef.current = processor;
 
       processor.onaudioprocess = (e) => {
-        if (isMutedRef.current || voiceStateRef.current === 'speaking') {
+        if (isMutedRef.current) {
           return;
         }
 
         const inputChannelData = e.inputBuffer.getChannelData(0);
 
-        // Calculate RMS loudness to animate orb during visitor speech
+        // Calculate RMS loudness to detect user speech and drive orb animation
         let sum = 0;
         for (let i = 0; i < inputChannelData.length; i++) {
           sum += inputChannelData[i] * inputChannelData[i];
         }
         const rms = Math.sqrt(sum / inputChannelData.length);
+
+        // Client-side interruption: if visitor speaks while assistant is speaking, stop playback immediately!
+        if (rms > 0.04 && voiceStateRef.current === 'speaking') {
+          stopAudioPlayback();
+          setVoiceState('listening');
+        }
+
+        if (voiceStateRef.current === 'speaking') {
+          return;
+        }
+
         if (rms > 0.02) {
           setAudioLoudness(Math.min(1, rms * 4));
           if (voiceStateRef.current !== 'listening') {
             setVoiceState('listening');
           }
-        } else {
+        } else if (voiceStateRef.current === 'listening') {
           setAudioLoudness(0);
         }
 
         // Convert to 16 kHz PCM
         const pcm16 = convertTo16kPcm(inputChannelData, inputCtx.sampleRate);
 
-        // Convert to base64
+        // Base64 encode
         let binary = '';
         const bytes = new Uint8Array(pcm16.buffer);
         for (let i = 0; i < bytes.byteLength; i++) {
@@ -500,15 +577,23 @@ Guidelines:
         }
         const base64Audio = window.btoa(binary);
 
-        // Stream 16 kHz PCM to Gemini Live session
+        // Send realtime audio chunks to Gemini Live WebSocket
         if (liveSessionRef.current) {
           try {
-            liveSessionRef.current.sendRealtimeInput({
-              audio: {
-                data: base64Audio,
-                mimeType: 'audio/pcm;rate=16000',
-              },
-            });
+            if (typeof liveSessionRef.current.send === 'function') {
+              liveSessionRef.current.send({
+                realtimeInput: {
+                  mediaChunks: [{ mimeType: 'audio/pcm;rate=16000', data: base64Audio }],
+                },
+              });
+            } else if (typeof liveSessionRef.current.sendRealtimeInput === 'function') {
+              liveSessionRef.current.sendRealtimeInput({
+                audio: {
+                  data: base64Audio,
+                  mimeType: 'audio/pcm;rate=16000',
+                },
+              });
+            }
           } catch {}
         }
       };
@@ -517,13 +602,16 @@ Guidelines:
       processor.connect(inputCtx.destination);
 
       setVoiceSessionStarted(true);
+      voiceSessionStartedRef.current = true;
+      sessionStartTimeRef.current = Date.now();
       setVoiceState('listening');
 
-      // Maximum session timeout (3 minutes)
+      // 5. Hard session timeout enforced from sessionMaxSeconds (default: 180 seconds)
+      const maxSeconds = typeof sessionMaxSeconds === 'number' && sessionMaxSeconds > 0 ? sessionMaxSeconds : 180;
       voiceTimeoutRef.current = setTimeout(() => {
         stopVoiceSession();
         setErrorMessage(t.assistant.errors.sessionEnded);
-      }, 180000);
+      }, maxSeconds * 1000);
     } catch (err: any) {
       console.error('Failed to start Live session:', err);
       setErrorMessage(t.assistant.errors.genericError);
@@ -537,7 +625,6 @@ Guidelines:
     t.assistant.errors,
     t.assistant.voiceNotAvailableLang,
     t.assistant.voiceUnsupported,
-    voiceSessionStarted,
   ]);
 
   const toggleMute = () => {
@@ -552,6 +639,7 @@ Guidelines:
     }
   };
 
+  // Dedicated Text Chat Sender (Fix F12: keep chat conversation history separate from voice state)
   const handleSendText = async () => {
     const text = inputValue.trim();
     if (!text || isTextLoading) return;
@@ -567,29 +655,6 @@ Guidelines:
     };
     setChatMessages((prev) => [...prev, userMsg]);
 
-    // If Live session is currently connected, send text directly through the Live session
-    if (liveSessionRef.current) {
-      try {
-        setVoiceState('thinking');
-        liveSessionRef.current.sendClientContent({
-          turns: [
-            {
-              role: 'user',
-              parts: [{ text }],
-            },
-          ],
-          turnComplete: true,
-        });
-        setIsTextLoading(false);
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 50);
-        return;
-      } catch {
-        // Fallback to text chat API
-      }
-    }
-
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -599,7 +664,13 @@ Guidelines:
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setErrorMessage(data.error || t.assistant.errors.serverBusy);
+        if (data.code === 'quota_reached' || data.code === 'rate_limited') {
+          setErrorMessage(t.assistant.errors.quotaReached);
+        } else if (data.code === 'server_busy') {
+          setErrorMessage(t.assistant.errors.serverBusy);
+        } else {
+          setErrorMessage(data.error || t.assistant.errors.genericError);
+        }
       } else {
         const data = await res.json();
         const reply = data.reply || '';
@@ -610,7 +681,6 @@ Guidelines:
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
         setChatMessages((prev) => [...prev, assistantMsg]);
-        setLastCaption(reply);
       }
     } catch {
       setErrorMessage(t.assistant.errors.networkError);
@@ -622,6 +692,7 @@ Guidelines:
     }
   };
 
+  // Clean cleanup on unmount: always stop audio and notify release endpoint
   useEffect(() => {
     return () => {
       stopVoiceSession();
@@ -758,6 +829,26 @@ Guidelines:
             </span>
           </div>
 
+          {/* Dynamic Audio Waveform Bars */}
+          {voiceSessionStarted && (voiceState === 'speaking' || voiceState === 'listening') && (
+            <div className="flex items-center justify-center gap-1 h-6 mt-3" aria-hidden="true">
+              {[0.4, 0.7, 1.0, 0.6, 0.9, 1.2, 0.8, 1.1, 0.7, 1.3, 0.5, 0.9, 0.6, 1.0, 0.4].map((mult, i) => {
+                const height = Math.max(4, Math.min(22, Math.round((audioLoudness * 18 + 4) * mult)));
+                return (
+                  <span
+                    key={i}
+                    className={`w-1 rounded-full transition-all duration-75 ${
+                      voiceState === 'speaking'
+                        ? 'bg-[#38e8ff] shadow-[0_0_6px_#38e8ff]'
+                        : 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]'
+                    }`}
+                    style={{ height: `${height}px` }}
+                  />
+                );
+              })}
+            </div>
+          )}
+
           {lastCaption && (
             <p className="mt-3 text-sm text-slate-300 max-w-sm line-clamp-3 leading-relaxed font-sans px-2">
               {lastCaption}
@@ -807,7 +898,7 @@ Guidelines:
 
         {/* Control 3: End Session */}
         <button
-          onClick={stopVoiceSession}
+          onClick={() => stopVoiceSession()}
           disabled={!voiceSessionStarted}
           className={`flex flex-col items-center gap-1.5 p-3 min-h-[52px] min-w-[52px] rounded-full border transition-colors cursor-pointer ${
             !voiceSessionStarted
@@ -837,17 +928,33 @@ Guidelines:
                 {t.assistant.panelTitle}
               </span>
             </div>
-            <button
-              onClick={() => setShowTypeSheet(false)}
-              className="p-2 text-slate-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-mono"
-              aria-label={t.assistant.returnToOrb}
-            >
-              <span>{t.assistant.returnToOrb}</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-3">
+              {chatMessages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleCopyTranscript}
+                  className="p-1.5 text-xs font-mono border border-[#1e293b] hover:border-[#38e8ff] text-slate-400 hover:text-[#38e8ff] transition-colors flex items-center justify-center cursor-pointer bg-[#0b0f17] min-h-[36px] min-w-[36px]"
+                  aria-label={copied ? t.common.success : t.assistant.panelTitle}
+                >
+                  {copied ? (
+                    <Check className="w-4 h-4 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-slate-400" />
+                  )}
+                </button>
+              )}
+              <button
+                onClick={() => setShowTypeSheet(false)}
+                className="p-2 text-slate-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-mono"
+                aria-label={t.assistant.returnToOrb}
+              >
+                <span>{t.assistant.returnToOrb}</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          {/* Messages Log */}
+          {/* Messages Log (Dedicated text chat) */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
             {allMessages.map((msg) => {
               const isUser = msg.sender === 'user';

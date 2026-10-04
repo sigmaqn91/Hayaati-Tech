@@ -25,23 +25,30 @@ Mission & Persona:
 
 export async function POST(req: NextRequest) {
   try {
-    const forwarded = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '';
-    const ip = forwarded.split(',')[0].trim() || 'unknown-client';
-
-    // 1. Quota & Rate Limit Check
-    const rateCheck = await checkChatRateLimit(ip);
+    // 1. Quota & Rate Limit Check via lib/rateLimit.ts (dual-key: cookie + salted IP hash)
+    const rateCheck = await checkChatRateLimit(req);
     if (!rateCheck.allowed) {
-      console.warn(`[Assistant Rate Limited] IP: ${ip} Reason: ${rateCheck.reason}`);
+      console.warn(`[Assistant Rate Limited] Reason: ${rateCheck.reason}, RetryAfter: ${rateCheck.retryAfterSeconds}s`);
+      const headers = new Headers({ 'Content-Type': 'application/json' });
+      if (rateCheck.cookieToSet) headers.set('Set-Cookie', rateCheck.cookieToSet);
+
+      const code = rateCheck.reason === 'global_cap' ? 'quota_reached' : 'rate_limited';
+      const userMessage =
+        rateCheck.reason === 'global_cap'
+          ? 'Daily conversation quota reached. Please return tomorrow.'
+          : 'Rate limit reached. Please pause a moment before sending another message.';
+
       return NextResponse.json(
         {
-          error: 'Rate limit or safety quota reached.',
-          code: 'quota_reached',
+          error: userMessage,
+          code,
+          retryAfterSeconds: rateCheck.retryAfterSeconds,
         },
-        { status: 429, headers: { 'Content-Type': 'application/json' } }
+        { status: 429, headers }
       );
     }
 
-    let body;
+    let body: any = {};
     try {
       body = await req.json();
     } catch {
@@ -51,7 +58,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { message, history, language } = body;
+    const { message, history, language, grounded } = body || {};
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
       return NextResponse.json(
         { error: 'Message cannot be empty.', code: 'generic_error' },
@@ -69,9 +76,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const userLang = typeof language === 'string' && language.trim() ? language.trim() : 'en';
     const apiKey = process.env.GEMINI_API_KEY;
+
+    // In dev mode, return fallback response if API key is not configured so the UI remains testable
     if (!apiKey || apiKey === 'disabled') {
-      console.warn('[Gemini Chat]: Missing or disabled GEMINI_API_KEY on server. AI assistant is safely offline.');
+      if (process.env.NODE_ENV === 'development') {
+        console.info('[Gemini Chat Dev Fallback]: Missing GEMINI_API_KEY in dev mode. Serving simulated response.');
+        const devReplies: Record<string, string> = {
+          en: `[Dev Mode Preview] Welcome to Hayaati Web Technology. I am calibrated to assist you across the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city postcards.`,
+          hi: `[डेव मोड पूर्वावलोकन] हयाती वेब टेक्नोलॉजी में आपका स्वागत है। मैं 2030, 2035 और 2050 की भविष्य की समयसीमा और तकनीकी कैटलॉग के साथ आपकी सहायता के लिए तैयार हूँ।`,
+          ar: `[معاينة وضع التطوير] مرحبًا بكم في هيااتي لتكنولوجيا الويب. يسعدني إرشادكم عبر آفاق 2030 و2035 و2050.`,
+          es: `[Modo Dev] Bienvenido a Hayaati Web Technology. Estoy calibrado para guiarle a través de los horizontes 2030, 2035 y 2050.`,
+          fr: `[Mode Dev] Bienvenue chez Hayaati Web Technology. Je suis calibré pour vous guider à travers les horizons 2030, 2035 et 2050.`,
+        };
+        const reply = devReplies[userLang] || devReplies['en'];
+        const headers = new Headers({ 'Content-Type': 'application/json' });
+        if (rateCheck.cookieToSet) headers.set('Set-Cookie', rateCheck.cookieToSet);
+        return NextResponse.json({ reply }, { status: 200, headers });
+      }
+
+      console.warn('[Gemini Chat]: Missing or disabled GEMINI_API_KEY on production server.');
       return NextResponse.json(
         {
           error: 'AI assistant is currently offline for calibration. You can explore all website sections.',
@@ -81,10 +106,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
 
-    // Official Model Fallback Sequence (Prioritizing gemini-3.8-flash)
-    const primaryModel = process.env.GEMINI_CHAT_MODEL || 'gemini-3.8-flash';
+    const primaryModel = process.env.GEMINI_CHAT_MODEL || 'gemini-flash-latest';
     const candidateModels = [
       primaryModel,
       'gemini-flash-latest',
@@ -92,7 +123,6 @@ export async function POST(req: NextRequest) {
     ].filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx);
 
     // Build language-specific system instruction
-    const userLang = typeof language === 'string' && language.trim() ? language.trim() : 'en';
     const langInstruction = `
 Language Instructions:
 - Reply in the visitor's selected language: "${userLang}".
@@ -103,14 +133,14 @@ Language Instructions:
 
     const systemInstruction = `${BASE_SYSTEM_INSTRUCTION}\n${langInstruction}`;
 
-    // Format chat history safely
+    // Pass conversation history safely
     const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
     if (Array.isArray(history)) {
-      for (const item of history.slice(-4)) {
-        if (item.role === 'user' || item.role === 'model') {
+      for (const item of history.slice(-6)) {
+        if ((item.role === 'user' || item.role === 'model') && typeof item.text === 'string' && item.text.trim()) {
           contents.push({
             role: item.role,
-            parts: [{ text: String(item.text).slice(0, 500) }],
+            parts: [{ text: item.text.trim().slice(0, 1000) }],
           });
         }
       }
@@ -121,10 +151,13 @@ Language Instructions:
       parts: [{ text: message.trim() }],
     });
 
+    // Grounding: search grounding only when grounded === true and appropriate, do NOT ground blindly
+    const tools = grounded === true ? [{ googleSearch: {} }] : undefined;
+
     let response: any = null;
     let lastError: any = null;
 
-    // Model execution with automatic fallback
+    // Model execution with prioritized fallback sequence
     for (const modelName of candidateModels) {
       try {
         response = await ai.models.generateContent({
@@ -133,45 +166,44 @@ Language Instructions:
           config: {
             systemInstruction,
             temperature: 0.7,
-            maxOutputTokens: 350,
+            maxOutputTokens: 400,
+            ...(tools ? { tools } : {}),
           },
         });
         const replyText = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (replyText && replyText.trim().length > 0) {
-          break; // successfully generated
+          break; // Successful generation
         }
-      } catch (modelErr: unknown) {
+      } catch (modelErr: any) {
         lastError = modelErr;
-        const errStatus = (modelErr as any)?.status || (modelErr as any)?.statusCode || 500;
-        const errName = modelErr instanceof Error ? modelErr.name : 'UnknownError';
-        const errMsg = modelErr instanceof Error ? modelErr.message : String(modelErr);
-        console.error(`[Gemini Chat Error] Attempt with model '${modelName}' failed:`, {
-          status: errStatus,
-          name: errName,
-          message: errMsg,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        const errStatus = modelErr?.status || modelErr?.statusCode || 500;
+        const errMsg = modelErr?.message || String(modelErr);
+        // Log exact error status code and sanitized message (never visitor words or API key)
+        console.error(`[Gemini Chat Model Error] Model: ${modelName}, Status: ${errStatus}, Error: ${errMsg.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`);
+        await new Promise((resolve) => setTimeout(resolve, 200));
       }
     }
 
     if (!response) {
-      const errMsg = lastError instanceof Error ? lastError.message : String(lastError || '');
-      console.error('[Gemini Chat Error]: All candidate models failed. Final error:', errMsg);
-      if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('RESOURCE_EXHAUSTED')) {
-        return NextResponse.json(
-          { error: 'Rate limit or quota reached.', code: 'quota_reached' },
-          { status: 429, headers: { 'Content-Type': 'application/json' } }
-        );
+      const errStatus = lastError?.status || lastError?.statusCode || 500;
+      const rawMsg = lastError?.message || String(lastError || '');
+      const errMsg = rawMsg.replace(/key=[^&\s]+/gi, 'key=REDACTED');
+      console.error(`[Gemini Chat Fatal Exhaustion] Status: ${errStatus}, Message: ${errMsg}`);
+
+      let code = 'generic_error';
+      let status = 500;
+
+      if (errStatus === 429 || /quota|resource_exhausted/i.test(rawMsg)) {
+        code = 'quota_reached';
+        status = 429;
+      } else if (errStatus === 503 || /overloaded|unavailable|busy/i.test(rawMsg)) {
+        code = 'server_busy';
+        status = 503;
       }
-      if (errMsg.includes('503') || errMsg.includes('overloaded') || errMsg.includes('UNAVAILABLE') || errMsg.includes('busy')) {
-        return NextResponse.json(
-          { error: 'The AI model is temporarily busy. Please retry in a few seconds.', code: 'server_busy' },
-          { status: 503, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+
       return NextResponse.json(
-        { error: 'Cognitive service error.', code: 'generic_error' },
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        { error: 'Cognitive service temporarily unavailable.', code },
+        { status, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -184,15 +216,17 @@ Language Instructions:
       );
     }
 
+    const headers = new Headers({ 'Content-Type': 'application/json' });
+    if (rateCheck.cookieToSet) headers.set('Set-Cookie', rateCheck.cookieToSet);
+
     return NextResponse.json(
       { reply: replyText.trim() },
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers }
     );
-  } catch (fatalErr: unknown) {
-    console.error('[Gemini Chat Fatal Exception]:', {
-      name: fatalErr instanceof Error ? fatalErr.name : 'FatalException',
-      message: fatalErr instanceof Error ? fatalErr.message : String(fatalErr),
-    });
+  } catch (fatalErr: any) {
+    const errStatus = fatalErr?.status || fatalErr?.statusCode || 500;
+    const rawMsg = fatalErr?.message || String(fatalErr);
+    console.error(`[Gemini Chat Fatal] Status: ${errStatus}, Message: ${rawMsg.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`);
     return NextResponse.json(
       { error: 'Fatal processing error.', code: 'generic_error' },
       { status: 500, headers: { 'Content-Type': 'application/json' } }

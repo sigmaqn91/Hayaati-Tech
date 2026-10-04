@@ -102,7 +102,7 @@ export function Navbar() {
         >
           <div className="flex flex-col space-y-2">
             <div className="text-[10px] font-mono text-[#38e8ff] tracking-widest mb-3 border-b border-[#1e293b] pb-2">
-              {t.footer.quickLinks} // {t.nav.menuSysHeader}
+              {t.footer.quickLinks} {'//'} {t.nav.menuSysHeader}
             </div>
             {navLinks.map((link) => (
               <a

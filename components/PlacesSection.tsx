@@ -81,6 +81,10 @@ export function PlacesSection() {
                 <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-[#38e8ff]">
                   {t.common.year} {place.year}
                 </div>
+                <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-slate-300 flex items-center gap-1.5 backdrop-blur-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#38e8ff]" />
+                  <span>{t.places.horizonLabel} {'//'} {t.places.infrastructureLabel}</span>
+                </div>
               </div>
 
               {/* Postcard Body */}
@@ -136,7 +140,7 @@ export function PlacesSection() {
               <div className="flex items-center gap-3">
                 <span className="w-2.5 h-2.5 bg-[#38e8ff]" />
                 <span className="font-mono text-xs text-[#38e8ff] uppercase tracking-widest">
-                  {t.places.horizonLabel} // {selectedPlace.id.toUpperCase()}
+                  {t.places.horizonLabel} {'//'} {selectedPlace.id.toUpperCase()}
                 </span>
               </div>
               <button
@@ -149,15 +153,21 @@ export function PlacesSection() {
             </div>
 
             <div className="p-6 md:p-8 space-y-6">
-              <RealImageSlot
-                src={selectedPlace.image}
-                alt={selectedPlace.alt}
-                title={selectedPlace.title}
-                width={1200}
-                height={650}
-                sizes="(max-width: 768px) 100vw, 800px"
-                className="w-full h-auto max-h-[360px] object-cover"
-              />
+              <div className="relative">
+                <RealImageSlot
+                  src={selectedPlace.image}
+                  alt={selectedPlace.alt}
+                  title={selectedPlace.title}
+                  width={1200}
+                  height={650}
+                  sizes="(max-width: 768px) 100vw, 800px"
+                  className="w-full h-auto max-h-[360px] object-cover"
+                />
+                <div className="absolute bottom-2.5 left-2.5 px-2.5 py-1 bg-[#05070a]/90 border border-[#38e8ff]/40 text-[11px] font-mono text-[#38e8ff] flex items-center gap-1.5 backdrop-blur-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#38e8ff] animate-pulse" />
+                  <span>{t.places.horizonLabel} {'//'} {t.places.infrastructureLabel}</span>
+                </div>
+              </div>
 
               <div className="flex flex-wrap items-center gap-3">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#070a0f] border border-[#38e8ff]/40 text-[#38e8ff] font-mono text-xs uppercase tracking-wider">
@@ -207,7 +217,7 @@ export function PlacesSection() {
               {selectedPlace.prompt ? (
                 <div className="p-3 bg-[#05070a] border border-[#1e293b] text-[11px] font-mono text-slate-500">
                   <span className="text-slate-400 block font-semibold mb-1 uppercase">
-                    {t.places.infrastructureLabel} // {t.places.promptLabel}:
+                    {t.places.infrastructureLabel} {'//'} {t.places.promptLabel}:
                   </span>
                   <span className="italic">{selectedPlace.prompt}</span>
                 </div>
@@ -216,7 +226,7 @@ export function PlacesSection() {
 
             <div className="flex items-center justify-between px-6 py-4 border-t border-[#1e293b] bg-[#070a0f]">
               <div className="text-[10px] font-mono text-slate-500 uppercase">
-                HAYAATI // {t.places.viewLocation}
+                HAYAATI {'//'} {t.places.viewLocation}
               </div>
               <button
                 onClick={() => setSelectedPlace(null)}

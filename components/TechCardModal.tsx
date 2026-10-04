@@ -55,7 +55,7 @@ export function TechCardModal({ card, onClose }: TechCardModalProps) {
           <div className="flex items-center gap-3">
             <span className="flex h-2 w-2 rounded-full bg-[#38e8ff]" />
             <span className="font-mono text-xs text-[#38e8ff] uppercase tracking-widest">
-              {t.tech.systemsIndex} // {card.id.toUpperCase()}
+              {t.tech.systemsIndex} {'//'} {card.id.toUpperCase()}
             </span>
           </div>
           <button
@@ -127,7 +127,7 @@ export function TechCardModal({ card, onClose }: TechCardModalProps) {
           {displayPrompt ? (
             <div className="p-3 bg-[#05070a] border border-[#1e293b] text-[11px] font-mono text-slate-500">
               <span className="text-slate-400 block font-semibold mb-1 uppercase">
-                {t.tech.architectureMechanics} // {t.tech.promptLabel}:
+                {t.tech.architectureMechanics} {'//'} {t.tech.promptLabel}:
               </span>
               <span className="italic">{displayPrompt}</span>
             </div>
@@ -137,7 +137,7 @@ export function TechCardModal({ card, onClose }: TechCardModalProps) {
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-[#1e293b] bg-[#070a0f]">
           <div className="text-[10px] font-mono text-slate-500 uppercase">
-            HAYAATI // {t.tech.viewDossier}
+            HAYAATI {'//'} {t.tech.viewDossier}
           </div>
           <button
             onClick={onClose}

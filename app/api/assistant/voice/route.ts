@@ -1,216 +1,200 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { checkVoiceSessionLimit, releaseVoiceSession } from '@/lib/rateLimit';
+import {
+  checkVoiceSessionLimit,
+  recordVoiceSessionStart,
+  refundVoiceSession,
+  releaseVoiceSession,
+  RATE_CONFIG,
+} from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// List of languages supported for Gemini native voice audio
+// The 14 official supported languages for Gemini native audio
 const VOICE_SUPPORTED_LANGUAGES = new Set([
   'en', 'hi', 'es', 'fr', 'de', 'ja', 'ko', 'zh', 'ar', 'pt', 'it', 'ru', 'tr', 'id'
 ]);
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown-client';
-
-    // 1. Quota & Session Limit Check
-    const sessionCheck = await checkVoiceSessionLimit(ip);
-    if (!sessionCheck.allowed) {
-      console.warn(`[Voice Session Blocked] IP: ${ip} Reason: ${sessionCheck.reason}`);
-      return NextResponse.json(
-        {
-          error: 'Voice session limit reached.',
-          code: sessionCheck.reason === 'concurrency_limit' ? 'server_busy' : 'quota_reached',
-        },
-        { status: 429, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    let body;
+    let body: any = {};
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json(
-        { error: 'Invalid JSON request.', code: 'generic_error' },
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      // Empty or non-JSON body defaults to session request
+      body = {};
     }
 
-    const { action, query, language } = body || {};
-    const userLang = typeof language === 'string' ? language.toLowerCase() : 'en';
+    const action = body?.action || 'session';
 
-    // 2. Check language voice compatibility
-    if (!VOICE_SUPPORTED_LANGUAGES.has(userLang)) {
-      releaseVoiceSession(0);
-      return NextResponse.json(
-        {
-          error: 'Voice conversation is not available in this language yet.',
-          code: 'voice_not_supported',
+    // 1. Session Release / End Action: release concurrency slot & track daily minutes
+    if (action === 'release' || action === 'end') {
+      const durationSeconds =
+        typeof body?.durationSeconds === 'number' && body.durationSeconds > 0
+          ? Math.min(body.durationSeconds, RATE_CONFIG.voiceSessionMaxSeconds)
+          : 0;
+      await releaseVoiceSession(durationSeconds);
+      return NextResponse.json({ success: true, released: true });
+    }
+
+    // 2. Heartbeat Action: keepalive indicator
+    if (action === 'heartbeat') {
+      return NextResponse.json({ success: true, active: true });
+    }
+
+    // 3. Read-Only Status Health Check Action (does not increment rate limits or consume session slots)
+    if (action === 'status') {
+      const apiKey = process.env.GEMINI_API_KEY;
+      const isConfigured = Boolean(apiKey && apiKey !== 'disabled');
+      const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
+
+      return NextResponse.json({
+        ok: true,
+        configured: isConfigured,
+        model: liveModel,
+        status: isConfigured ? 'operational' : 'missing_api_key',
+        sessionMaxSeconds: RATE_CONFIG.voiceSessionMaxSeconds,
+      });
+    }
+
+    // 3. New Session Request (action === 'session')
+    if (action === 'session') {
+      const { language } = body;
+      const userLang = typeof language === 'string' ? language.toLowerCase().trim() : 'en';
+
+      // Validate language against the 14 supported voice languages
+      if (!VOICE_SUPPORTED_LANGUAGES.has(userLang)) {
+        return NextResponse.json(
+          {
+            error: 'Voice conversation is not available in this language yet.',
+            code: 'voice_not_supported',
+          },
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check Rate, Concurrency, and Quota Limits
+      const sessionCheck = await checkVoiceSessionLimit(req);
+      if (!sessionCheck.allowed) {
+        console.warn(`[Voice Session Blocked] Reason: ${sessionCheck.reason}`);
+        const headers = new Headers({ 'Content-Type': 'application/json' });
+        if (sessionCheck.cookieToSet) headers.set('Set-Cookie', sessionCheck.cookieToSet);
+        return NextResponse.json(
+          {
+            error: 'Voice session limit reached.',
+            code: sessionCheck.reason === 'concurrency_limit' ? 'server_busy' : 'quota_reached',
+            retryAfterSeconds: sessionCheck.retryAfterSeconds,
+          },
+          { status: 429, headers }
+        );
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey || apiKey === 'disabled') {
+        console.warn('[Gemini Voice Server]: GEMINI_API_KEY is not configured or disabled on the server.');
+        return NextResponse.json(
+          { error: 'Voice transmission service is currently offline.', code: 'server_busy' },
+          { status: 503, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Gemini Live model and voice configurations
+      const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
+      if (!liveModel) {
+        return NextResponse.json(
+          { error: 'Voice model is not configured.', code: 'MODEL_NOT_CONFIGURED' },
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const voiceName = process.env.GEMINI_VOICE || 'Kore';
+
+      // Acquire concurrency slot & visitor hourly usage in shared store
+      await recordVoiceSessionStart(req);
+
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
         },
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+      });
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'disabled') {
-      releaseVoiceSession(0);
-      console.warn('[Gemini Voice Server]: GEMINI_API_KEY is not configured or disabled on the server.');
-      return NextResponse.json(
-        { error: 'Voice transmission service is currently offline.', code: 'server_busy' },
-        { status: 503, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Live model and voice configurations
-    const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
-    const voiceName = process.env.GEMINI_VOICE || 'Kore';
-    const ai = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        },
-      },
-    });
-
-    // 3. Ephemeral Live Token Creation for real-time WebSocket session
-    // Live models must NOT be called via unary generateContent. They connect via the Gemini Live API.
-    // We create a short-lived token on the server so GEMINI_API_KEY is never exposed in the browser.
-    if (action === 'session' || !query) {
+      // Create an ephemeral token on the server using ai.authTokens.create (uses: 1, expireTime: 30 minutes)
+      // The API key remains strictly server-side; client receives ONLY the short-lived single-use token.
       try {
         const token = await ai.authTokens.create({
           config: {
-            uses: 10,
+            uses: 1,
             expireTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
           },
         });
 
-        // Release rate limit counter safely
-        releaseVoiceSession(15);
+        const headers = new Headers({ 'Content-Type': 'application/json' });
+        if (sessionCheck.cookieToSet) headers.set('Set-Cookie', sessionCheck.cookieToSet);
 
         return NextResponse.json(
           {
             token: token.name,
             model: liveModel,
+            voice: voiceName,
             voiceName,
             language: userLang,
+            sessionMaxSeconds: RATE_CONFIG.voiceSessionMaxSeconds,
           },
-          { status: 200, headers: { 'Content-Type': 'application/json' } }
+          { status: 200, headers }
         );
       } catch (tokenErr: any) {
-        releaseVoiceSession(0);
+        // Token creation failed: refund session slot so visitor is not penalized
+        await refundVoiceSession(req);
         const status = tokenErr?.status || tokenErr?.statusCode || 500;
         const rawMessage = tokenErr?.message || String(tokenErr);
-        // Log exact error status code and message from Gemini API (never the key or visitor's words)
-        console.error(`[Gemini Voice Live Token Error] HTTP Status: ${status}, Message: ${rawMessage.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`);
+
+        console.error(
+          `[Gemini Voice Live Token Error] HTTP Status: ${status}, Message: ${rawMessage.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`
+        );
 
         let code = 'generic_error';
         if (status === 429 || /quota/i.test(rawMessage)) {
           code = 'quota_reached';
         } else if (status === 503 || /busy|unavailable/i.test(rawMessage)) {
           code = 'server_busy';
-        } else if (status === 404 || /not found/i.test(rawMessage)) {
-          code = 'model_not_found';
-        } else if (status === 401 || status === 403 || /permission/i.test(rawMessage)) {
-          code = 'permission_denied';
         }
 
         return NextResponse.json(
           {
-            error: `Voice session initialization failed: ${rawMessage.slice(0, 120)}`,
+            error: 'Voice connection failed. Unable to initialize secure voice session.',
             code,
             statusCode: status,
           },
-          { status: typeof status === 'number' && status >= 400 && status < 600 ? status : 500, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-    }
-
-    // 4. Fallback Unary Text-to-Speech (using proper TTS model for generateContent, NOT live model)
-    const systemInstruction = `
-You are the HAYAATI Voice Assistant for Hayaati Web Technology. You speak with a warm, calm, human, and conversational tone with native pronunciation and inflection for ${userLang}.
-Guidelines:
-- Reply in ${userLang}.
-- Pronounce names, phrases, and technical concepts with fluent native accent.
-- Keep responses short and conversational (1 to 3 sentences max).
-- If the visitor speaks in a different language, answer in that language.
-`;
-
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash-lite-tts',
-        contents: [
           {
-            role: 'user',
-            parts: [{ text: String(query).slice(0, 500) }],
-          },
-        ],
-        config: {
-          systemInstruction,
-          responseModalities: ['AUDIO'],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: {
-                voiceName,
-              },
-            },
-          },
-        },
-      });
-
-      const part = response?.candidates?.[0]?.content?.parts?.[0];
-      const base64Audio = part?.inlineData?.data;
-      const mimeType = part?.inlineData?.mimeType || 'audio/wav';
-
-      if (!base64Audio) {
-        releaseVoiceSession(0);
-        console.error('[Gemini Voice API Error] generateContent returned no audio part.');
-        return NextResponse.json(
-          { error: 'Speech synthesis returned empty audio data.', code: 'generic_error' },
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
+            status: typeof status === 'number' && status >= 400 && status < 600 ? status : 500,
+            headers: { 'Content-Type': 'application/json' },
+          }
         );
       }
-
-      releaseVoiceSession(15);
-      return NextResponse.json(
-        {
-          audioData: base64Audio,
-          mimeType,
-          replyText: response.text || '',
-        },
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      );
-    } catch (ttsErr: any) {
-      releaseVoiceSession(0);
-      const status = ttsErr?.status || ttsErr?.statusCode || 500;
-      const rawMessage = ttsErr?.message || String(ttsErr);
-      // Log exact status code and message from Gemini API, never the key or visitor's words
-      console.error(`[Gemini Voice TTS Error] HTTP Status: ${status}, Message: ${rawMessage.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`);
-
-      let code = 'generic_error';
-      if (status === 429 || /quota/i.test(rawMessage)) {
-        code = 'quota_reached';
-      } else if (status === 503 || /busy|unavailable/i.test(rawMessage)) {
-        code = 'server_busy';
-      }
-
-      return NextResponse.json(
-        {
-          error: `Audio generation failed (${status})`,
-          code,
-          statusCode: status,
-        },
-        { status: typeof status === 'number' && status >= 400 && status < 600 ? status : 500, headers: { 'Content-Type': 'application/json' } }
-      );
     }
+
+    // 4. Broken unary TTS fallback is completely replaced:
+    // Live models use bidiGenerateContent over WebSocket, NOT unary generateContent.
+    // Unary TTS and Live voice must never be conflated.
+    return NextResponse.json(
+      {
+        error: 'Voice connection failed. Real-time voice uses the Live WebSocket protocol.',
+        code: 'voice_connection_failed',
+      },
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    );
   } catch (err: any) {
-    releaseVoiceSession(0);
     const status = err?.status || err?.statusCode || 500;
     const msg = err?.message || String(err);
-    console.error(`[Gemini Voice Fatal] HTTP Status: ${status}, Message: ${msg.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`);
+    console.error(
+      `[Gemini Voice Fatal] HTTP Status: ${status}, Message: ${msg.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`
+    );
     return NextResponse.json(
-      { error: 'Voice transmission encountered an internal error.', code: 'generic_error' },
+      { error: 'Voice connection failed.', code: 'generic_error' },
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

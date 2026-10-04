@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
+import { getSiteUrl } from '@/lib/siteUrl';
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.hayaatiweb.site';
+const appUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: 'Hayaati Web Technology — Future (2030–2050)',

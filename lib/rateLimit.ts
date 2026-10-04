@@ -1,14 +1,21 @@
 /**
  * Rate Limiting & Safety Quota Manager for Hayaati Web Technology.
+ * 
  * Supports:
- * - Per-visitor chat message limits
- * - Per-visitor voice session limits
- * - Global daily safety cap (protects project from free-tier exhaustion)
- * - Distributed Upstash Redis / Vercel KV when configured
- * - In-memory fallback when KV is not configured (with note on serverless persistence)
+ * - Distributed Upstash Redis REST when configured; in-memory fallback with exactly ONE warning log
+ * - Dual-key visitor identity: HMAC-signed httpOnly cookie (SESSION_SIGNING_SECRET) + salted IP hash
+ * - Stricter key wins to prevent quota reset on cookie/cache clear
+ * - Fallback shared strict 'anonymous' bucket if neither cookie nor IP is available
+ * - Atomic increment with expiry for all counters (10 min chat, 1 hr voice, 1 day global)
+ * - F7 Fix: global daily counter increments ONLY for requests that pass visitor limits
+ * - Shared voice counters (hourly, daily minutes, concurrency) with retryAfterSeconds
+ * - Safe: Never prints or exposes secrets; never crashes
  */
 
-interface RateLimitConfig {
+import crypto from 'crypto';
+import type { NextRequest } from 'next/server';
+
+export interface RateLimitConfig {
   chatLimitPerVisitor: number; // default: 20 per 10 mins
   voiceSessionsPerHour: number; // default: 3 per hour
   voiceSessionMaxSeconds: number; // default: 180 seconds
@@ -28,40 +35,67 @@ export const RATE_CONFIG: RateLimitConfig = {
   maxMessageChars: parseInt(process.env.MAX_MESSAGE_CHARS || '500', 10),
 };
 
-// In-memory fallback maps
-const inMemoryChatMap = new Map<string, number[]>();
-const inMemoryVoiceMap = new Map<string, number[]>();
-let inMemoryDailyChatCount = 0;
-let inMemoryDailyChatDate = new Date().toISOString().slice(0, 10);
-let inMemoryDailyVoiceMinutes = 0;
-let inMemoryDailyVoiceDate = new Date().toISOString().slice(0, 10);
-let activeVoiceSessionsCount = 0;
+// ==========================================
+// 1. Storage & Upstash Redis REST Integration
+// ==========================================
 
 const rawUpstashUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const rawUpstashToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+
 const isRedisDisabled =
   !rawUpstashUrl ||
   !rawUpstashToken ||
   rawUpstashUrl.trim().toLowerCase() === 'disabled' ||
   rawUpstashToken.trim().toLowerCase() === 'disabled';
 
-const UPSTASH_URL = isRedisDisabled ? null : rawUpstashUrl;
+const UPSTASH_URL = isRedisDisabled ? null : rawUpstashUrl.replace(/\/+$/, '');
 const UPSTASH_TOKEN = isRedisDisabled ? null : rawUpstashToken;
 
 let hasLoggedRedisWarning = false;
 function logRedisWarningOnce() {
   if (!hasLoggedRedisWarning && isRedisDisabled) {
-    console.warn('[RateLimit]: Upstash Redis / KV is not configured or disabled. Using in-memory fallback counters.');
+    console.warn('[RateLimit]: Upstash Redis REST is not configured or disabled. Using in-memory fallback store.');
     hasLoggedRedisWarning = true;
   }
 }
 
-async function redisCommand(command: string[]): Promise<unknown> {
+let hasLoggedSigningSecretWarning = false;
+function logSigningSecretWarningOnce() {
+  if (!hasLoggedSigningSecretWarning && !process.env.SESSION_SIGNING_SECRET) {
+    console.warn('[RateLimit]: SESSION_SIGNING_SECRET is not configured. Visitor cookie signing disabled; using IP key only.');
+    hasLoggedSigningSecretWarning = true;
+  }
+}
+
+// In-Memory store for fallback or local execution
+interface InMemoryItem {
+  count: number;
+  expiresAt: number;
+}
+const inMemoryCounters = new Map<string, InMemoryItem>();
+let inMemoryActiveVoiceSessions = 0;
+
+// Clean expired items periodically
+function cleanInMemoryStore() {
+  const now = Date.now();
+  for (const [key, item] of inMemoryCounters.entries()) {
+    if (item.expiresAt <= now) {
+      inMemoryCounters.delete(key);
+    }
+  }
+}
+
+async function executeRedisCommand(command: (string | number)[]): Promise<unknown> {
   logRedisWarningOnce();
   if (!UPSTASH_URL || !UPSTASH_TOKEN) return null;
   try {
-    const res = await fetch(`${UPSTASH_URL}/${command.join('/')}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
+    const res = await fetch(UPSTASH_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(command),
       cache: 'no-store',
     });
     if (!res.ok) return null;
@@ -72,112 +106,506 @@ async function redisCommand(command: string[]): Promise<unknown> {
   }
 }
 
-export async function checkChatRateLimit(ip: string): Promise<{
+/**
+ * Atomic increment with TTL.
+ * Returns { count, ttlRemaining }
+ */
+async function atomicIncrement(key: string, ttlSeconds: number): Promise<{ count: number; ttlRemaining: number }> {
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    try {
+      const count = (await executeRedisCommand(['INCR', key])) as number;
+      if (typeof count === 'number') {
+        if (count === 1) {
+          await executeRedisCommand(['EXPIRE', key, ttlSeconds]);
+        }
+        let ttl = (await executeRedisCommand(['TTL', key])) as number;
+        if (typeof ttl !== 'number' || ttl < 0) {
+          ttl = ttlSeconds;
+        }
+        return { count, ttlRemaining: ttl };
+      }
+    } catch {
+      // Fall through to in-memory fallback
+    }
+  }
+
+  // In-Memory Fallback
+  cleanInMemoryStore();
+  const now = Date.now();
+  const existing = inMemoryCounters.get(key);
+  if (!existing || existing.expiresAt <= now) {
+    const expiresAt = now + ttlSeconds * 1000;
+    inMemoryCounters.set(key, { count: 1, expiresAt });
+    return { count: 1, ttlRemaining: ttlSeconds };
+  }
+
+  existing.count += 1;
+  const ttlRemaining = Math.max(1, Math.ceil((existing.expiresAt - now) / 1000));
+  return { count: existing.count, ttlRemaining };
+}
+
+/**
+ * Read-only check for a key's count and remaining TTL without incrementing.
+ */
+async function getCounter(key: string): Promise<{ count: number; ttlRemaining: number }> {
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    try {
+      const raw = await executeRedisCommand(['GET', key]);
+      const count = raw !== null && raw !== undefined ? parseInt(String(raw), 10) : 0;
+      let ttl = (await executeRedisCommand(['TTL', key])) as number;
+      if (typeof ttl !== 'number' || ttl < 0) ttl = 0;
+      return { count: isNaN(count) ? 0 : count, ttlRemaining: ttl };
+    } catch {
+      // Fall through
+    }
+  }
+
+  cleanInMemoryStore();
+  const existing = inMemoryCounters.get(key);
+  if (!existing || existing.expiresAt <= Date.now()) {
+    return { count: 0, ttlRemaining: 0 };
+  }
+  const ttlRemaining = Math.max(1, Math.ceil((existing.expiresAt - Date.now()) / 1000));
+  return { count: existing.count, ttlRemaining };
+}
+
+/**
+ * Decrement or decrement by amount (safe floor at 0).
+ */
+async function decrementCounter(key: string, amount = 1): Promise<number> {
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    try {
+      const res = await executeRedisCommand(['DECRBY', key, amount]);
+      if (typeof res === 'number') {
+        if (res < 0) await executeRedisCommand(['SET', key, 0]);
+        return Math.max(0, res);
+      }
+    } catch {
+      // Fall through
+    }
+  }
+
+  const existing = inMemoryCounters.get(key);
+  if (existing) {
+    existing.count = Math.max(0, existing.count - amount);
+    return existing.count;
+  }
+  return 0;
+}
+
+// ==========================================
+// 2. Visitor Identity: Signed Cookie & Salted IP Hash
+// ==========================================
+
+const COOKIE_NAME = '__hayaati_vid';
+const IP_SALT = 'hayaati_salt_v3_cognitive_horizon_2030';
+
+export interface VisitorIdentity {
+  visitorId: string | null;
+  ipHash: string | null;
+  cookieToSet?: string;
+  keys: string[];
+}
+
+function timingSafeEqualStr(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
+function signVisitorId(visitorId: string, secret: string): string {
+  const sig = crypto.createHmac('sha256', secret).update(visitorId).digest('hex');
+  return `${visitorId}.${sig}`;
+}
+
+function verifySignedVisitorId(cookieValue: string, secret: string): string | null {
+  const parts = cookieValue.split('.');
+  if (parts.length !== 2) return null;
+  const [visitorId, sig] = parts;
+  if (!visitorId || !sig) return null;
+  const expectedSig = crypto.createHmac('sha256', secret).update(visitorId).digest('hex');
+  if (timingSafeEqualStr(sig, expectedSig)) {
+    return visitorId;
+  }
+  return null;
+}
+
+function hashIp(rawIp: string): string | null {
+  const clean = rawIp.trim().toLowerCase();
+  if (
+    !clean ||
+    clean === 'unknown-client' ||
+    clean === 'unknown' ||
+    clean === '127.0.0.1' ||
+    clean === '::1' ||
+    clean.startsWith('10.') ||
+    clean.startsWith('192.168.') ||
+    clean.startsWith('172.')
+  ) {
+    return null;
+  }
+  return crypto.createHash('sha256').update(`${IP_SALT}:${clean}`).digest('hex').slice(0, 24);
+}
+
+/**
+ * Extracts and verifies visitor identity from request.
+ * Returns visitorId, salted ipHash, and cookieToSet if a fresh cookie was generated.
+ */
+export function getVisitorIdentity(reqOrIp: NextRequest | Request | string): VisitorIdentity {
+  const signingSecret = process.env.SESSION_SIGNING_SECRET?.trim() || null;
+  if (!signingSecret) {
+    logSigningSecretWarningOnce();
+  }
+
+  let cookieHeader: string | null = null;
+  let rawIp = '';
+
+  if (typeof reqOrIp === 'string') {
+    rawIp = reqOrIp;
+  } else if ('headers' in reqOrIp) {
+    const headers = reqOrIp.headers;
+    cookieHeader = headers.get('cookie') || null;
+    const xff = headers.get('x-forwarded-for') || headers.get('x-real-ip') || '';
+    rawIp = xff.split(',')[0].trim();
+  }
+
+  let visitorId: string | null = null;
+  let cookieToSet: string | undefined = undefined;
+
+  // 1. Verify existing cookie if secret is available
+  if (signingSecret && cookieHeader) {
+    const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${COOKIE_NAME}=([^;]+)`));
+    if (match && match[1]) {
+      visitorId = verifySignedVisitorId(decodeURIComponent(match[1]), signingSecret);
+    }
+  }
+
+  // 2. If no valid visitorId and secret is configured, issue a signed one
+  if (!visitorId && signingSecret) {
+    visitorId = crypto.randomUUID();
+    const signedValue = signVisitorId(visitorId, signingSecret);
+    const isProd = process.env.NODE_ENV === 'production';
+    cookieToSet = `${COOKIE_NAME}=${encodeURIComponent(signedValue)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000${
+      isProd ? '; Secure' : ''
+    }`;
+  }
+
+  const ipHash = hashIp(rawIp);
+
+  // 3. Assemble verification keys
+  const keys: string[] = [];
+  if (visitorId) keys.push(`vid:${visitorId}`);
+  if (ipHash) keys.push(`ip:${ipHash}`);
+
+  // 4. If neither visitorId nor ipHash can be resolved, use shared strict 'anon:shared' bucket
+  if (keys.length === 0) {
+    keys.push('anon:shared');
+  }
+
+  return { visitorId, ipHash, cookieToSet, keys };
+}
+
+// ==========================================
+// 3. Chat Rate Limiting (10 min window)
+// ==========================================
+
+export async function checkChatRateLimit(reqOrIp: NextRequest | Request | string): Promise<{
   allowed: boolean;
   reason?: 'visitor_limit' | 'global_cap';
   remaining?: number;
+  retryAfterSeconds?: number;
+  cookieToSet?: string;
 }> {
   logRedisWarningOnce();
+  const identity = getVisitorIdentity(reqOrIp);
+  const CHAT_WINDOW_SECONDS = 10 * 60; // 10 minutes
   const today = new Date().toISOString().slice(0, 10);
+  const globalKey = `global:chat:${today}`;
 
-  // 1. Check Global Daily Cap
-  if (UPSTASH_URL && UPSTASH_TOKEN) {
-    try {
-      const globalKey = `global:chat:${today}`;
-      const count = ((await redisCommand(['INCR', globalKey])) as number) || 1;
-      await redisCommand(['EXPIRE', globalKey, '86400']);
-      if (count > RATE_CONFIG.globalDailyChatCap) {
-        return { allowed: false, reason: 'global_cap' };
-      }
-    } catch {
-      // fallback to memory
-    }
-  } else {
-    if (inMemoryDailyChatDate !== today) {
-      inMemoryDailyChatDate = today;
-      inMemoryDailyChatCount = 0;
-    }
-    inMemoryDailyChatCount++;
-    if (inMemoryDailyChatCount > RATE_CONFIG.globalDailyChatCap) {
-      return { allowed: false, reason: 'global_cap' };
-    }
-  }
+  // STEP 1: Check visitor rate limits across BOTH keys (stricter result wins).
+  // Do NOT increment yet to protect global cap from rejected requests (Fix F7).
+  let maxUsage = 0;
+  let maxTtl = CHAT_WINDOW_SECONDS;
 
-  const cleanIp = ip?.trim().toLowerCase();
-  if (
-    !cleanIp ||
-    cleanIp === 'unknown-client' ||
-    cleanIp === '127.0.0.1' ||
-    cleanIp === '::1' ||
-    cleanIp.startsWith('10.') ||
-    cleanIp.startsWith('192.168.') ||
-    cleanIp.startsWith('172.')
-  ) {
-    return { allowed: true, remaining: RATE_CONFIG.chatLimitPerVisitor };
-  }
-
-  // 2. Check Visitor Limit (10 min window)
-  const now = Date.now();
-  const windowMs = 10 * 60 * 1000;
-  if (UPSTASH_URL && UPSTASH_TOKEN) {
-    try {
-      const key = `rate:chat:${ip}`;
-      const count = ((await redisCommand(['INCR', key])) as number) || 1;
-      if (count === 1) {
-        await redisCommand(['EXPIRE', key, '600']);
-      }
-      if (count > RATE_CONFIG.chatLimitPerVisitor) {
-        return { allowed: false, reason: 'visitor_limit', remaining: 0 };
-      }
-      return { allowed: true, remaining: Math.max(0, RATE_CONFIG.chatLimitPerVisitor - count) };
-    } catch {
-      // fallback to memory
+  for (const key of identity.keys) {
+    const chatKey = `rate:chat:${key}`;
+    const counter = await getCounter(chatKey);
+    if (counter.count > maxUsage) {
+      maxUsage = counter.count;
+    }
+    if (counter.ttlRemaining > 0) {
+      maxTtl = counter.ttlRemaining;
+    }
+    if (counter.count >= RATE_CONFIG.chatLimitPerVisitor) {
+      return {
+        allowed: false,
+        reason: 'visitor_limit',
+        remaining: 0,
+        retryAfterSeconds: counter.ttlRemaining || CHAT_WINDOW_SECONDS,
+        cookieToSet: identity.cookieToSet,
+      };
     }
   }
 
-  const timestamps = inMemoryChatMap.get(ip) || [];
-  const validTimestamps = timestamps.filter((t) => now - t < windowMs);
-  if (validTimestamps.length >= RATE_CONFIG.chatLimitPerVisitor) {
-    inMemoryChatMap.set(ip, validTimestamps);
-    return { allowed: false, reason: 'visitor_limit', remaining: 0 };
+  // STEP 2: Check Global Daily Chat Cap before incrementing
+  const globalCounter = await getCounter(globalKey);
+  if (globalCounter.count >= RATE_CONFIG.globalDailyChatCap) {
+    const secondsUntilMidnight = Math.max(
+      60,
+      Math.floor((new Date(today + 'T23:59:59.999Z').getTime() - Date.now()) / 1000)
+    );
+    return {
+      allowed: false,
+      reason: 'global_cap',
+      remaining: 0,
+      retryAfterSeconds: globalCounter.ttlRemaining || secondsUntilMidnight,
+      cookieToSet: identity.cookieToSet,
+    };
   }
-  validTimestamps.push(now);
-  inMemoryChatMap.set(ip, validTimestamps);
+
+  // STEP 3: Request passed visitor checks! Increment visitor counters for both keys atomically.
+  let strictestCount = 0;
+  for (const key of identity.keys) {
+    const chatKey = `rate:chat:${key}`;
+    const result = await atomicIncrement(chatKey, CHAT_WINDOW_SECONDS);
+    if (result.count > strictestCount) {
+      strictestCount = result.count;
+    }
+  }
+
+  // STEP 4: Increment Global Daily Chat Cap (Fix F7: only requests that passed visitor check increment global cap)
+  await atomicIncrement(globalKey, 86400);
+
+  const remaining = Math.max(0, RATE_CONFIG.chatLimitPerVisitor - strictestCount);
   return {
     allowed: true,
-    remaining: RATE_CONFIG.chatLimitPerVisitor - validTimestamps.length,
+    remaining,
+    cookieToSet: identity.cookieToSet,
   };
 }
 
-export async function checkVoiceSessionLimit(ip: string): Promise<{
+// ==========================================
+// 4. Voice Rate Limiting & Concurrency (Shared Store)
+// ==========================================
+
+const CONCURRENCY_KEY = 'concurrency:voice:active';
+
+export async function checkVoiceSessionLimit(reqOrIp: NextRequest | Request | string): Promise<{
   allowed: boolean;
   reason?: 'visitor_limit' | 'global_cap' | 'concurrency_limit';
+  retryAfterSeconds?: number;
+  cookieToSet?: string;
 }> {
+  logRedisWarningOnce();
+  const identity = getVisitorIdentity(reqOrIp);
+  const VOICE_HOUR_SECONDS = 60 * 60; // 1 hour
   const today = new Date().toISOString().slice(0, 10);
-  if (inMemoryDailyVoiceDate !== today) {
-    inMemoryDailyVoiceDate = today;
-    inMemoryDailyVoiceMinutes = 0;
+  const globalVoiceKey = `global:voice:minutes:${today}`;
+
+  // 1. Check Global Daily Voice Minutes Cap
+  const globalMinutes = await getCounter(globalVoiceKey);
+  if (globalMinutes.count >= RATE_CONFIG.globalDailyVoiceMinutesCap) {
+    const secondsUntilMidnight = Math.max(
+      60,
+      Math.floor((new Date(today + 'T23:59:59.999Z').getTime() - Date.now()) / 1000)
+    );
+    return {
+      allowed: false,
+      reason: 'global_cap',
+      retryAfterSeconds: globalMinutes.ttlRemaining || secondsUntilMidnight,
+      cookieToSet: identity.cookieToSet,
+    };
   }
-  if (inMemoryDailyVoiceMinutes >= RATE_CONFIG.globalDailyVoiceMinutesCap) {
-    return { allowed: false, reason: 'global_cap' };
+
+  // 2. Check Global Concurrency Limit
+  let activeConcurrency = 0;
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    try {
+      const activeRaw = await executeRedisCommand(['GET', CONCURRENCY_KEY]);
+      activeConcurrency = activeRaw ? parseInt(String(activeRaw), 10) : 0;
+    } catch {
+      activeConcurrency = inMemoryActiveVoiceSessions;
+    }
+  } else {
+    activeConcurrency = inMemoryActiveVoiceSessions;
   }
-  if (activeVoiceSessionsCount >= RATE_CONFIG.maxConcurrentVoiceSessions) {
-    return { allowed: false, reason: 'concurrency_limit' };
+
+  if (activeConcurrency >= RATE_CONFIG.maxConcurrentVoiceSessions) {
+    return {
+      allowed: false,
+      reason: 'concurrency_limit',
+      retryAfterSeconds: 30,
+      cookieToSet: identity.cookieToSet,
+    };
   }
-  const now = Date.now();
-  const windowMs = 60 * 60 * 1000;
-  const timestamps = inMemoryVoiceMap.get(ip) || [];
-  const validTimestamps = timestamps.filter((t) => now - t < windowMs);
-  if (validTimestamps.length >= RATE_CONFIG.voiceSessionsPerHour) {
-    return { allowed: false, reason: 'visitor_limit' };
+
+  // 3. Check Visitor Hourly Limit across both keys (stricter wins)
+  for (const key of identity.keys) {
+    const voiceKey = `rate:voice:hour:${key}`;
+    const counter = await getCounter(voiceKey);
+    if (counter.count >= RATE_CONFIG.voiceSessionsPerHour) {
+      return {
+        allowed: false,
+        reason: 'visitor_limit',
+        retryAfterSeconds: counter.ttlRemaining || VOICE_HOUR_SECONDS,
+        cookieToSet: identity.cookieToSet,
+      };
+    }
   }
-  validTimestamps.push(now);
-  inMemoryVoiceMap.set(ip, validTimestamps);
-  activeVoiceSessionsCount++;
-  return { allowed: true };
+
+  return {
+    allowed: true,
+    cookieToSet: identity.cookieToSet,
+  };
 }
 
-export function releaseVoiceSession(durationSeconds: number) {
-  activeVoiceSessionsCount = Math.max(0, activeVoiceSessionsCount - 1);
-  inMemoryDailyVoiceMinutes += Math.ceil(durationSeconds / 60);
+/**
+ * Records the start of a voice session:
+ * Increments visitor hourly count and concurrency slot in the shared store.
+ */
+export async function recordVoiceSessionStart(
+  reqOrIdentity: NextRequest | Request | VisitorIdentity | string
+): Promise<void> {
+  const identity =
+    typeof reqOrIdentity === 'object' && 'keys' in reqOrIdentity
+      ? (reqOrIdentity as VisitorIdentity)
+      : getVisitorIdentity(reqOrIdentity);
+
+  const VOICE_HOUR_SECONDS = 60 * 60;
+
+  // Increment hourly counter for both keys
+  for (const key of identity.keys) {
+    const voiceKey = `rate:voice:hour:${key}`;
+    await atomicIncrement(voiceKey, VOICE_HOUR_SECONDS);
+  }
+
+  // Increment active concurrency
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    try {
+      await executeRedisCommand(['INCR', CONCURRENCY_KEY]);
+      // Concurrency key safety TTL in case server crashes
+      await executeRedisCommand(['EXPIRE', CONCURRENCY_KEY, 300]);
+    } catch {
+      inMemoryActiveVoiceSessions += 1;
+    }
+  } else {
+    inMemoryActiveVoiceSessions += 1;
+  }
+}
+
+/**
+ * Refunds a voice session if token creation failed on our side.
+ */
+export async function refundVoiceSession(
+  reqOrIdentity: NextRequest | Request | VisitorIdentity | string
+): Promise<void> {
+  const identity =
+    typeof reqOrIdentity === 'object' && 'keys' in reqOrIdentity
+      ? (reqOrIdentity as VisitorIdentity)
+      : getVisitorIdentity(reqOrIdentity);
+
+  for (const key of identity.keys) {
+    const voiceKey = `rate:voice:hour:${key}`;
+    await decrementCounter(voiceKey, 1);
+  }
+
+  // Decrement concurrency
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    try {
+      await decrementCounter(CONCURRENCY_KEY, 1);
+    } catch {
+      inMemoryActiveVoiceSessions = Math.max(0, inMemoryActiveVoiceSessions - 1);
+    }
+  } else {
+    inMemoryActiveVoiceSessions = Math.max(0, inMemoryActiveVoiceSessions - 1);
+  }
+}
+
+/**
+ * Releases a voice session when finished.
+ * Safely decrements active concurrency and increments daily voice minutes.
+ */
+export async function releaseVoiceSession(durationSeconds: number): Promise<void> {
+  // Decrement active concurrency slot
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    try {
+      await decrementCounter(CONCURRENCY_KEY, 1);
+    } catch {
+      inMemoryActiveVoiceSessions = Math.max(0, inMemoryActiveVoiceSessions - 1);
+    }
+  } else {
+    inMemoryActiveVoiceSessions = Math.max(0, inMemoryActiveVoiceSessions - 1);
+  }
+
+  // Accumulate daily voice minutes
+  if (durationSeconds > 0) {
+    const minutes = Math.max(1, Math.ceil(durationSeconds / 60));
+    const today = new Date().toISOString().slice(0, 10);
+    const globalVoiceKey = `global:voice:minutes:${today}`;
+
+    if (UPSTASH_URL && UPSTASH_TOKEN) {
+      try {
+        await executeRedisCommand(['INCRBY', globalVoiceKey, minutes]);
+        await executeRedisCommand(['EXPIRE', globalVoiceKey, 86400]);
+      } catch {
+        // Fallback
+      }
+    } else {
+      const existing = inMemoryCounters.get(globalVoiceKey);
+      const expiresAt = Date.now() + 86400 * 1000;
+      if (existing) {
+        existing.count += minutes;
+      } else {
+        inMemoryCounters.set(globalVoiceKey, { count: minutes, expiresAt });
+      }
+    }
+  }
+}
+
+// ==========================================
+// 6. Enquiry / Form Submission Rate Limiting
+// ==========================================
+
+export async function checkEnquiryRateLimit(reqOrIp: NextRequest | Request | string): Promise<{
+  allowed: boolean;
+  reason?: 'visitor_limit';
+  retryAfterSeconds?: number;
+  cookieToSet?: string;
+}> {
+  logRedisWarningOnce();
+  const identity = getVisitorIdentity(reqOrIp);
+  const ENQUIRY_WINDOW_SECONDS = 10 * 60; // 10 minutes
+  const ENQUIRY_LIMIT = 5;
+
+  let maxUsage = 0;
+  let maxTtl = ENQUIRY_WINDOW_SECONDS;
+
+  for (const key of identity.keys) {
+    const enquiryKey = `rate:enquiry:${key}`;
+    const counter = await getCounter(enquiryKey);
+    if (counter.count > maxUsage) {
+      maxUsage = counter.count;
+    }
+    if (counter.ttlRemaining > 0) {
+      maxTtl = counter.ttlRemaining;
+    }
+    if (counter.count >= ENQUIRY_LIMIT) {
+      return {
+        allowed: false,
+        reason: 'visitor_limit',
+        retryAfterSeconds: counter.ttlRemaining || ENQUIRY_WINDOW_SECONDS,
+        cookieToSet: identity.cookieToSet,
+      };
+    }
+  }
+
+  // Increment across all identity keys
+  for (const key of identity.keys) {
+    const enquiryKey = `rate:enquiry:${key}`;
+    await atomicIncrement(enquiryKey, ENQUIRY_WINDOW_SECONDS);
+  }
+
+  return {
+    allowed: true,
+    cookieToSet: identity.cookieToSet,
+  };
 }

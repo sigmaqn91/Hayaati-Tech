@@ -29,12 +29,13 @@ export function AdvertiseSection() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'project_submission',
+          projectTitle: formData.projectName,
           ...formData,
         }),
       });
 
       const contentType = res.headers.get('content-type') || '';
-      let data: { success?: boolean; error?: string } = {};
+      let data: { success?: boolean; error?: string; code?: string } = {};
       if (contentType.includes('application/json')) {
         data = await res.json();
       } else {
@@ -44,7 +45,10 @@ export function AdvertiseSection() {
       }
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Server rejected transmission.');
+        if (data.code === 'rate_limited') {
+          throw new Error(data.error || 'Rate limit reached. Please wait a few minutes before submitting again.');
+        }
+        throw new Error(data.error || t.advertise.form.sendError);
       }
 
       setStatus('sent');
