@@ -1,5 +1,6 @@
 'use client';
 
+import DevBanner from './DevBanner';
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
@@ -71,6 +72,7 @@ export function Hero({ onOpenAssistant }: HeroProps) {
       aria-label={t.nav.home}
       className="relative min-h-[92vh] flex items-center justify-center pt-24 pb-16 overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
     >
+      <DevBanner />
       {/* Background Image Container with subtle parallax */}
       <div
         className="absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden"
