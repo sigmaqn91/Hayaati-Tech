@@ -70,7 +70,7 @@ export function Hero({ onOpenAssistant }: HeroProps) {
     <section
       id="hero"
       aria-label={t.nav.home}
-      className="relative min-h-[92vh] flex items-center justify-center pt-24 pb-16 overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
+      className="relative min-h-[92vh] flex items-center justify-center pt-56 pb-16 overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
     >
       <DevBanner />
       {/* Background Image Container with subtle parallax */}
