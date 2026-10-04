@@ -26,8 +26,6 @@ const CSS = `
 .dev-banner__box::before{content:'';position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent 0 60%,#ffb020 78%,#ffe0a3 87%,#38e8ff 94%,transparent 100%);animation:devSpin 4.5s linear infinite}
 .dev-banner__inner{position:relative;overflow:hidden;clip-path:${CHAMFER_IN};background:linear-gradient(rgba(56,232,255,.05) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,rgba(56,232,255,.05) 1px,transparent 1px) 0 0/22px 22px,rgba(8,14,22,.86);padding:16px 22px 14px;text-align:center;animation:devGrid 6s linear infinite}
 .dev-banner__inner::after{content:'';position:absolute;top:0;bottom:0;left:-45%;width:38%;background:linear-gradient(90deg,transparent,rgba(255,176,32,.16),transparent);animation:devScan 3.4s ease-in-out infinite}
-.dev-banner__leader{position:absolute;z-index:2;right:7px;bottom:7px;width:clamp(26px,7vw,72px);height:1px;transform-origin:0 0;transform:rotate(45deg);background:linear-gradient(90deg,rgba(255,176,32,.95),rgba(255,176,32,.25))}
-.dev-banner__leader::after{content:'';position:absolute;right:-3px;top:-2px;width:5px;height:5px;border-radius:50%;background:#ffb020;box-shadow:0 0 8px #ffb020;animation:devPulse 1.4s ease-in-out infinite}
 .dev-banner__row{display:flex;align-items:center;justify-content:center;gap:12px;position:relative;z-index:1}
 .dev-banner__dot{position:relative;width:10px;height:10px;border-radius:50%;background:#ffb020;box-shadow:0 0 12px #ffb020;animation:devPulse 1.4s ease-in-out infinite;flex:none}
 .dev-banner__dot::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(255,176,32,.6);animation:devRing 1.8s ease-out infinite}
@@ -49,7 +47,7 @@ const CSS = `
 @keyframes devOutR{from{left:-64px}to{left:100%}}
 @keyframes devGlitch{0%,92%,100%{text-shadow:none}93%{text-shadow:2px 0 rgba(56,232,255,.8),-2px 0 rgba(255,60,120,.6)}95%{text-shadow:-2px 0 rgba(56,232,255,.8),2px 0 rgba(255,60,120,.6)}97%{text-shadow:none}}
 @media (max-width:480px){.dev-banner{top:68px}.dev-banner__inner{padding:14px 16px 12px}}
-@media (prefers-reduced-motion:reduce){.dev-banner__wrap::before,.dev-banner__line::after,.dev-banner__box::before,.dev-banner__inner,.dev-banner__inner::after,.dev-banner__leader::after,.dev-banner__dot,.dev-banner__dot::after,.dev-banner__title,.dev-banner__segs span,.dev-banner__bar span{animation:none}.dev-banner__segs span{background:rgba(255,176,32,.5)}}
+@media (prefers-reduced-motion:reduce){.dev-banner__wrap::before,.dev-banner__line::after,.dev-banner__box::before,.dev-banner__inner,.dev-banner__inner::after,.dev-banner__dot,.dev-banner__dot::after,.dev-banner__title,.dev-banner__segs span,.dev-banner__bar span{animation:none}.dev-banner__segs span{background:rgba(255,176,32,.5)}}
 `;
 
 export default function DevBanner() {
@@ -98,7 +96,6 @@ export default function DevBanner() {
             </div>
           </div>
         </div>
-        <span className="dev-banner__leader" aria-hidden="true" />
       </div>
       <span className="dev-banner__line dev-banner__line--r" aria-hidden="true" />
     </div>
