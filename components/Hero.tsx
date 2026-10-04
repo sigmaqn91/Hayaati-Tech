@@ -1,5 +1,6 @@
 'use client';
 
+import HeroCosmos from './HeroCosmos';
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
@@ -70,8 +71,9 @@ export function Hero({ onOpenAssistant }: HeroProps) {
     <section
       id="hero"
       aria-label={t.nav.home}
-      className="relative min-h-[92vh] flex items-center justify-center pt-56 pb-16 overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
+      className="relative min-h-[92vh] flex items-center justify-center pt-64 pb-16 overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
     >
+      <HeroCosmos />
       <DevBanner />
       {/* Background Image Container with subtle parallax */}
       <div
