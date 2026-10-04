@@ -6,17 +6,28 @@ import { DEV_BANNER_TEXT } from '../lib/devBannerText';
 
 const SEGMENTS = Array.from({ length: 14 }, (_, i) => i);
 
+const CHAMFER = 'polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)';
+const CHAMFER_IN = 'polygon(12.5px 0,calc(100% - 12.5px) 0,100% 12.5px,100% calc(100% - 12.5px),calc(100% - 12.5px) 100%,12.5px 100%,0 calc(100% - 12.5px),0 12.5px)';
+
 const CSS = `
-.dev-banner{position:absolute;top:72px;left:0;right:0;z-index:20;display:flex;justify-content:center;padding:0 14px;pointer-events:none}
-.dev-banner__box{position:relative;width:min(92vw,520px);border-radius:14px;padding:1.5px;overflow:hidden;animation:devGlow 2.8s ease-in-out infinite}
-.dev-banner__box::before{content:'';position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent 0 62%,#ffb020 80%,#ffe0a3 88%,#38e8ff 94%,transparent 100%);animation:devSpin 4.5s linear infinite}
-.dev-banner__inner{position:relative;overflow:hidden;border-radius:13px;background:linear-gradient(rgba(56,232,255,.05) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,rgba(56,232,255,.05) 1px,transparent 1px) 0 0/22px 22px,#0a1119;padding:16px 20px 14px;text-align:center;animation:devGrid 6s linear infinite}
+.dev-banner{position:absolute;top:72px;left:0;right:0;z-index:20;display:flex;align-items:flex-start;justify-content:center;pointer-events:none}
+.dev-banner__line{position:relative;flex:1;min-width:0;height:1px;margin-top:14px}
+.dev-banner__line--l{background:linear-gradient(90deg,transparent,rgba(255,176,32,.75))}
+.dev-banner__line--r{background:linear-gradient(270deg,transparent,rgba(255,176,32,.75))}
+.dev-banner__line::before{content:'';position:absolute;top:-2px;width:5px;height:5px;border-radius:50%;background:#ffb020;box-shadow:0 0 8px #ffb020}
+.dev-banner__line--l::before{right:0}
+.dev-banner__line--r::before{left:0}
+.dev-banner__line::after{content:'';position:absolute;top:-1px;height:3px;width:64px;border-radius:2px;background:linear-gradient(90deg,transparent,#ffe0a3,transparent)}
+.dev-banner__line--l::after{animation:devOutL 3s linear infinite}
+.dev-banner__line--r::after{animation:devOutR 3s linear infinite}
+.dev-banner__wrap{position:relative;flex:none;width:min(88vw,520px)}
+.dev-banner__wrap::before{content:'';position:absolute;inset:-10px -18px;background:radial-gradient(ellipse at center,rgba(255,176,32,.24),transparent 70%);animation:devGlowPulse 2.8s ease-in-out infinite}
+.dev-banner__box{position:relative;z-index:1;padding:1.5px;overflow:hidden;clip-path:${CHAMFER}}
+.dev-banner__box::before{content:'';position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent 0 60%,#ffb020 78%,#ffe0a3 87%,#38e8ff 94%,transparent 100%);animation:devSpin 4.5s linear infinite}
+.dev-banner__inner{position:relative;overflow:hidden;clip-path:${CHAMFER_IN};background:linear-gradient(rgba(56,232,255,.05) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,rgba(56,232,255,.05) 1px,transparent 1px) 0 0/22px 22px,rgba(8,14,22,.86);padding:16px 22px 14px;text-align:center;animation:devGrid 6s linear infinite}
 .dev-banner__inner::after{content:'';position:absolute;top:0;bottom:0;left:-45%;width:38%;background:linear-gradient(90deg,transparent,rgba(255,176,32,.16),transparent);animation:devScan 3.4s ease-in-out infinite}
-.dev-banner__c{position:absolute;width:12px;height:12px;border:0 solid #ffb020;opacity:.9}
-.dev-banner__c1{top:7px;left:7px;border-top-width:2px;border-left-width:2px}
-.dev-banner__c2{top:7px;right:7px;border-top-width:2px;border-right-width:2px}
-.dev-banner__c3{bottom:7px;left:7px;border-bottom-width:2px;border-left-width:2px}
-.dev-banner__c4{bottom:7px;right:7px;border-bottom-width:2px;border-right-width:2px}
+.dev-banner__leader{position:absolute;z-index:2;right:7px;bottom:7px;width:clamp(26px,7vw,72px);height:1px;transform-origin:0 0;transform:rotate(45deg);background:linear-gradient(90deg,rgba(255,176,32,.95),rgba(255,176,32,.25))}
+.dev-banner__leader::after{content:'';position:absolute;right:-3px;top:-2px;width:5px;height:5px;border-radius:50%;background:#ffb020;box-shadow:0 0 8px #ffb020;animation:devPulse 1.4s ease-in-out infinite}
 .dev-banner__row{display:flex;align-items:center;justify-content:center;gap:12px;position:relative;z-index:1}
 .dev-banner__dot{position:relative;width:10px;height:10px;border-radius:50%;background:#ffb020;box-shadow:0 0 12px #ffb020;animation:devPulse 1.4s ease-in-out infinite;flex:none}
 .dev-banner__dot::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(255,176,32,.6);animation:devRing 1.8s ease-out infinite}
@@ -33,10 +44,12 @@ const CSS = `
 @keyframes devPulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
 @keyframes devSweep{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
 @keyframes devChase{0%,100%{background:rgba(255,176,32,.16);transform:scaleY(1)}35%{background:#ffb020;transform:scaleY(1.9)}}
-@keyframes devGlow{0%,100%{box-shadow:0 0 18px rgba(255,176,32,.14)}50%{box-shadow:0 0 34px rgba(255,176,32,.34)}}
+@keyframes devGlowPulse{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes devOutL{from{left:100%}to{left:-64px}}
+@keyframes devOutR{from{left:-64px}to{left:100%}}
 @keyframes devGlitch{0%,92%,100%{text-shadow:none}93%{text-shadow:2px 0 rgba(56,232,255,.8),-2px 0 rgba(255,60,120,.6)}95%{text-shadow:-2px 0 rgba(56,232,255,.8),2px 0 rgba(255,60,120,.6)}97%{text-shadow:none}}
-@media (max-width:480px){.dev-banner{top:68px}.dev-banner__inner{padding:14px 14px 12px}}
-@media (prefers-reduced-motion:reduce){.dev-banner__box,.dev-banner__box::before,.dev-banner__inner,.dev-banner__inner::after,.dev-banner__dot,.dev-banner__dot::after,.dev-banner__title,.dev-banner__segs span,.dev-banner__bar span{animation:none}.dev-banner__segs span{background:rgba(255,176,32,.5)}}
+@media (max-width:480px){.dev-banner{top:68px}.dev-banner__inner{padding:14px 16px 12px}}
+@media (prefers-reduced-motion:reduce){.dev-banner__wrap::before,.dev-banner__line::after,.dev-banner__box::before,.dev-banner__inner,.dev-banner__inner::after,.dev-banner__leader::after,.dev-banner__dot,.dev-banner__dot::after,.dev-banner__title,.dev-banner__segs span,.dev-banner__bar span{animation:none}.dev-banner__segs span{background:rgba(255,176,32,.5)}}
 `;
 
 export default function DevBanner() {
@@ -64,29 +77,30 @@ export default function DevBanner() {
   return (
     <div className="dev-banner" role="status" aria-live="polite">
       <style>{CSS}</style>
-      <div className="dev-banner__box">
-        <div className="dev-banner__inner">
-          <span className="dev-banner__c dev-banner__c1" aria-hidden="true" />
-          <span className="dev-banner__c dev-banner__c2" aria-hidden="true" />
-          <span className="dev-banner__c dev-banner__c3" aria-hidden="true" />
-          <span className="dev-banner__c dev-banner__c4" aria-hidden="true" />
-          <div className="dev-banner__row">
-            <span className="dev-banner__dot" aria-hidden="true" />
-            <span className="dev-banner__title">
-              <DecryptText key={`${lang}-${tick}`} text={t.title} />
-            </span>
-          </div>
-          <div className="dev-banner__sub">{t.sub}</div>
-          <div className="dev-banner__segs" aria-hidden="true">
-            {SEGMENTS.map((i) => (
-              <span key={i} style={{ animationDelay: `${i * 0.12}s` }} />
-            ))}
-          </div>
-          <div className="dev-banner__bar" aria-hidden="true">
-            <span />
+      <span className="dev-banner__line dev-banner__line--l" aria-hidden="true" />
+      <div className="dev-banner__wrap">
+        <div className="dev-banner__box">
+          <div className="dev-banner__inner">
+            <div className="dev-banner__row">
+              <span className="dev-banner__dot" aria-hidden="true" />
+              <span className="dev-banner__title">
+                <DecryptText key={`${lang}-${tick}`} text={t.title} />
+              </span>
+            </div>
+            <div className="dev-banner__sub">{t.sub}</div>
+            <div className="dev-banner__segs" aria-hidden="true">
+              {SEGMENTS.map((i) => (
+                <span key={i} style={{ animationDelay: `${i * 0.12}s` }} />
+              ))}
+            </div>
+            <div className="dev-banner__bar" aria-hidden="true">
+              <span />
+            </div>
           </div>
         </div>
+        <span className="dev-banner__leader" aria-hidden="true" />
       </div>
+      <span className="dev-banner__line dev-banner__line--r" aria-hidden="true" />
     </div>
   );
 }
