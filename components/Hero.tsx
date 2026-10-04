@@ -1,12 +1,12 @@
 'use client';
 
-import DevBanner from './DevBanner';
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { HeroStarfield } from './HeroStarfield';
 import { DecryptText } from './DecryptText';
 import { ArrowDown, Layers } from 'lucide-react';
+import DevBanner from './DevBanner';
 
 interface HeroProps {
   onOpenAssistant?: () => void;

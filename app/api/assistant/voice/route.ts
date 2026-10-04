@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { query, language } = body;
+    const { action, query, language } = body || {};
     const userLang = typeof language === 'string' ? language.toLowerCase() : 'en';
 
     // 2. Check language voice compatibility
@@ -55,17 +55,79 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'disabled') {
       releaseVoiceSession(0);
-      console.warn('[Gemini Voice]: GEMINI_API_KEY is not configured or disabled on the server. Voice is safely disabled.');
+      console.warn('[Gemini Voice Server]: GEMINI_API_KEY is not configured or disabled on the server.');
       return NextResponse.json(
-        { error: 'Voice transmission is currently offline for calibration.', code: 'server_busy' },
+        { error: 'Voice transmission service is currently offline.', code: 'server_busy' },
         { status: 503, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.1-flash-live-preview';
+    // Live model and voice configurations
+    const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
     const voiceName = process.env.GEMINI_VOICE || 'Kore';
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
 
+    // 3. Ephemeral Live Token Creation for real-time WebSocket session
+    // Live models must NOT be called via unary generateContent. They connect via the Gemini Live API.
+    // We create a short-lived token on the server so GEMINI_API_KEY is never exposed in the browser.
+    if (action === 'session' || !query) {
+      try {
+        const token = await ai.authTokens.create({
+          config: {
+            uses: 10,
+            expireTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+          },
+        });
+
+        // Release rate limit counter safely
+        releaseVoiceSession(15);
+
+        return NextResponse.json(
+          {
+            token: token.name,
+            model: liveModel,
+            voiceName,
+            language: userLang,
+          },
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      } catch (tokenErr: any) {
+        releaseVoiceSession(0);
+        const status = tokenErr?.status || tokenErr?.statusCode || 500;
+        const rawMessage = tokenErr?.message || String(tokenErr);
+        // Log exact error status code and message from Gemini API (never the key or visitor's words)
+        console.error(`[Gemini Voice Live Token Error] HTTP Status: ${status}, Message: ${rawMessage.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`);
+
+        let code = 'generic_error';
+        if (status === 429 || /quota/i.test(rawMessage)) {
+          code = 'quota_reached';
+        } else if (status === 503 || /busy|unavailable/i.test(rawMessage)) {
+          code = 'server_busy';
+        } else if (status === 404 || /not found/i.test(rawMessage)) {
+          code = 'model_not_found';
+        } else if (status === 401 || status === 403 || /permission/i.test(rawMessage)) {
+          code = 'permission_denied';
+        }
+
+        return NextResponse.json(
+          {
+            error: `Voice session initialization failed: ${rawMessage.slice(0, 120)}`,
+            code,
+            statusCode: status,
+          },
+          { status: typeof status === 'number' && status >= 400 && status < 600 ? status : 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // 4. Fallback Unary Text-to-Speech (using proper TTS model for generateContent, NOT live model)
     const systemInstruction = `
 You are the HAYAATI Voice Assistant for Hayaati Web Technology. You speak with a warm, calm, human, and conversational tone with native pronunciation and inflection for ${userLang}.
 Guidelines:
@@ -75,76 +137,80 @@ Guidelines:
 - If the visitor speaks in a different language, answer in that language.
 `;
 
-    // Attempt native audio generation
-    let base64Audio = '';
-    let replyText = '';
-    const modelsToTry = [
-      liveModel,
-      'gemini-2.5-flash-native-audio-preview-12-2025',
-      'gemini-3.8-flash-tts',
-      'gemini-3.8-flash',
-    ].filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx);
-
-    for (const modelName of modelsToTry) {
-      try {
-        const response = await ai.models.generateContent({
-          model: modelName,
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: String(query || 'Hello').slice(0, 500) }],
-            },
-          ],
-          config: {
-            systemInstruction,
-            responseModalities: ['AUDIO'],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {
-                  voiceName,
-                },
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash-lite-tts',
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: String(query).slice(0, 500) }],
+          },
+        ],
+        config: {
+          systemInstruction,
+          responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: {
+                voiceName,
               },
             },
           },
-        });
+        },
+      });
 
-        const part = response?.candidates?.[0]?.content?.parts?.[0];
-        if (part?.inlineData?.data) {
-          base64Audio = part.inlineData.data;
-          replyText = response.text || '';
-          break;
-        }
-      } catch (voiceErr: unknown) {
-        console.warn(`[Voice Model Fallback]: ${modelName} failed:`, voiceErr instanceof Error ? voiceErr.message : voiceErr);
-        continue;
+      const part = response?.candidates?.[0]?.content?.parts?.[0];
+      const base64Audio = part?.inlineData?.data;
+      const mimeType = part?.inlineData?.mimeType || 'audio/wav';
+
+      if (!base64Audio) {
+        releaseVoiceSession(0);
+        console.error('[Gemini Voice API Error] generateContent returned no audio part.');
+        return NextResponse.json(
+          { error: 'Speech synthesis returned empty audio data.', code: 'generic_error' },
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
       }
-    }
 
-    if (!base64Audio) {
-      releaseVoiceSession(0);
-      console.error('[Gemini Voice Error]: All native audio generation attempts failed.');
+      releaseVoiceSession(15);
       return NextResponse.json(
-        { error: 'Could not generate native voice audio.', code: 'generic_error' },
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        {
+          audioData: base64Audio,
+          mimeType,
+          replyText: response.text || '',
+        },
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    } catch (ttsErr: any) {
+      releaseVoiceSession(0);
+      const status = ttsErr?.status || ttsErr?.statusCode || 500;
+      const rawMessage = ttsErr?.message || String(ttsErr);
+      // Log exact status code and message from Gemini API, never the key or visitor's words
+      console.error(`[Gemini Voice TTS Error] HTTP Status: ${status}, Message: ${rawMessage.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`);
+
+      let code = 'generic_error';
+      if (status === 429 || /quota/i.test(rawMessage)) {
+        code = 'quota_reached';
+      } else if (status === 503 || /busy|unavailable/i.test(rawMessage)) {
+        code = 'server_busy';
+      }
+
+      return NextResponse.json(
+        {
+          error: `Audio generation failed (${status})`,
+          code,
+          statusCode: status,
+        },
+        { status: typeof status === 'number' && status >= 400 && status < 600 ? status : 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
-
-    // Release session counter
-    releaseVoiceSession(15);
-
-    return NextResponse.json(
-      {
-        audioData: base64Audio,
-        mimeType: 'audio/wav',
-        replyText,
-      },
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
-  } catch (err: unknown) {
+  } catch (err: any) {
     releaseVoiceSession(0);
-    console.error('[Gemini Voice Fatal]:', err);
+    const status = err?.status || err?.statusCode || 500;
+    const msg = err?.message || String(err);
+    console.error(`[Gemini Voice Fatal] HTTP Status: ${status}, Message: ${msg.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`);
     return NextResponse.json(
-      { error: 'Voice transmission failed.', code: 'generic_error' },
+      { error: 'Voice transmission encountered an internal error.', code: 'generic_error' },
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

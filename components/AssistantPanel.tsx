@@ -37,6 +37,27 @@ function getReducedMotionServerSnapshot() {
   return false;
 }
 
+// Convert Float32Array to 16 kHz signed 16-bit PCM little-endian
+function convertTo16kPcm(input: Float32Array, inputSampleRate: number): Int16Array {
+  if (inputSampleRate === 16000) {
+    const pcm16 = new Int16Array(input.length);
+    for (let i = 0; i < input.length; i++) {
+      const s = Math.max(-1, Math.min(1, input[i]));
+      pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    }
+    return pcm16;
+  }
+  const ratio = inputSampleRate / 16000;
+  const newLength = Math.max(1, Math.round(input.length / ratio));
+  const pcm16 = new Int16Array(newLength);
+  for (let i = 0; i < newLength; i++) {
+    const originalIndex = Math.min(Math.floor(i * ratio), input.length - 1);
+    const s = Math.max(-1, Math.min(1, input[originalIndex]));
+    pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+  }
+  return pcm16;
+}
+
 export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
   const { t, language } = useLanguage();
   const prefersReducedMotion = useSyncExternalStore(
@@ -58,16 +79,31 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
   const [inputValue, setInputValue] = useState('');
   const [isTextLoading, setIsTextLoading] = useState(false);
 
-  // Audio / Speech refs
-  const audioContextRef = useRef<AudioContext | null>(null);
+  // Audio & Live refs
+  const liveSessionRef = useRef<any>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
+  const inputAudioCtxRef = useRef<AudioContext | null>(null);
+  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const outputAudioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const activeSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const activeSourcesRef = useRef<AudioBufferSourceNode[]>([]);
+  const nextPlayTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
-  const recognitionRef = useRef<any>(null);
   const voiceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const modalRef = useRef<HTMLDivElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isMutedRef = useRef(false);
+  const voiceStateRef = useRef<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
+
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+
+  useEffect(() => {
+    voiceStateRef.current = voiceState;
+  }, [voiceState]);
 
   // Scroll lock when opened
   useEffect(() => {
@@ -119,14 +155,18 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Stop audio playback cleanly
+  // Stop output audio playback cleanly
   const stopAudioPlayback = useCallback(() => {
-    if (activeSourceRef.current) {
+    for (const src of activeSourcesRef.current) {
       try {
-        activeSourceRef.current.stop();
-        activeSourceRef.current.disconnect();
+        src.stop();
+        src.disconnect();
       } catch {}
-      activeSourceRef.current = null;
+    }
+    activeSourcesRef.current = [];
+
+    if (outputAudioCtxRef.current) {
+      nextPlayTimeRef.current = outputAudioCtxRef.current.currentTime;
     }
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -135,240 +175,380 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
     setAudioLoudness(0);
   }, []);
 
-  // Play native audio from Gemini
-  const playNativeAudio = useCallback(
-    async (base64Data: string) => {
+  // Play model output audio at the exact sample rate returned by the Live API
+  const playModelAudioChunk = useCallback(
+    async (base64PcmData: string, sampleRate: number) => {
       try {
         if (typeof window === 'undefined') return;
-        stopAudioPlayback();
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
         if (!AudioCtx) return;
-        if (!audioContextRef.current) {
-          audioContextRef.current = new AudioCtx({ sampleRate: 24000 });
+
+        if (!outputAudioCtxRef.current || outputAudioCtxRef.current.state === 'closed') {
+          outputAudioCtxRef.current = new AudioCtx({ sampleRate });
         }
-        const ctx = audioContextRef.current;
+        const ctx = outputAudioCtxRef.current;
         if (ctx.state === 'suspended') {
           await ctx.resume();
         }
 
-        // Decode base64 to ArrayBuffer
-        const binaryStr = window.atob(base64Data);
+        // Setup AnalyserNode for orb loudness pulsing
+        if (!analyserRef.current) {
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 64;
+          analyserRef.current = analyser;
+          analyser.connect(ctx.destination);
+        }
+
+        // Decode 16-bit PCM little-endian
+        const binaryStr = window.atob(base64PcmData);
         const bytes = new Uint8Array(binaryStr.length);
         for (let i = 0; i < binaryStr.length; i++) {
           bytes[i] = binaryStr.charCodeAt(i);
         }
-        const audioBuffer = await ctx.decodeAudioData(bytes.buffer.slice(0));
+        const int16 = new Int16Array(bytes.buffer);
+        const float32 = new Float32Array(int16.length);
+        for (let i = 0; i < int16.length; i++) {
+          float32[i] = int16[i] / 32768.0;
+        }
+
+        const audioBuffer = ctx.createBuffer(1, float32.length, sampleRate);
+        audioBuffer.getChannelData(0).set(float32);
+
         const source = ctx.createBufferSource();
         source.buffer = audioBuffer;
+        source.connect(analyserRef.current);
 
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 64;
-        analyserRef.current = analyser;
+        // Schedule continuous audio playback without clicks or gaps
+        const now = ctx.currentTime;
+        const startTime = Math.max(now, nextPlayTimeRef.current);
+        source.start(startTime);
+        nextPlayTimeRef.current = startTime + audioBuffer.duration;
 
-        source.connect(analyser);
-        analyser.connect(ctx.destination);
-        activeSourceRef.current = source;
-
+        activeSourcesRef.current.push(source);
         setVoiceState('speaking');
 
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        const updateLoudness = () => {
-          if (!analyserRef.current) return;
-          analyserRef.current.getByteFrequencyData(dataArray);
-          let sum = 0;
-          for (let i = 0; i < dataArray.length; i++) {
-            sum += dataArray[i];
-          }
-          const average = sum / dataArray.length;
-          setAudioLoudness(average / 128);
-          animationFrameRef.current = requestAnimationFrame(updateLoudness);
-        };
-        updateLoudness();
+        // Loudness monitor loop
+        if (!animationFrameRef.current) {
+          const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+          const updateLoudness = () => {
+            if (!analyserRef.current) return;
+            analyserRef.current.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+              sum += dataArray[i];
+            }
+            const average = sum / dataArray.length;
+            setAudioLoudness(average / 128);
+            animationFrameRef.current = requestAnimationFrame(updateLoudness);
+          };
+          updateLoudness();
+        }
 
         source.onended = () => {
-          stopAudioPlayback();
-          setVoiceState('idle');
-          if (voiceSessionStarted && !isMuted && recognitionRef.current) {
-            try {
-              recognitionRef.current.start();
-            } catch {}
+          const idx = activeSourcesRef.current.indexOf(source);
+          if (idx !== -1) {
+            activeSourcesRef.current.splice(idx, 1);
+          }
+          if (activeSourcesRef.current.length === 0 && ctx.currentTime >= nextPlayTimeRef.current - 0.05) {
+            if (animationFrameRef.current) {
+              cancelAnimationFrame(animationFrameRef.current);
+              animationFrameRef.current = null;
+            }
+            setAudioLoudness(0);
+            setVoiceState(isMutedRef.current ? 'idle' : 'listening');
           }
         };
-        source.start(0);
       } catch (err) {
-        console.error('Failed to decode or play native audio:', err);
-        stopAudioPlayback();
-        setVoiceState('idle');
+        console.error('Audio chunk playback error:', err);
       }
     },
-    [stopAudioPlayback, voiceSessionStarted, isMuted]
+    []
   );
 
-  // Send voice query to server proxy
-  const sendVoiceQuery = useCallback(
-    async (spokenText: string) => {
-      setVoiceState('thinking');
-      setLastCaption(`“${spokenText}”`);
-      setErrorMessage(null);
-
-      const userMsg: Message = {
-        id: `user-${Date.now()}`,
-        sender: 'user',
-        text: spokenText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-      setChatMessages((prev) => [...prev, userMsg]);
-
-      try {
-        const res = await fetch('/api/assistant/voice', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: spokenText, language }),
-        });
-
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          setErrorMessage(data.error || t.assistant.errors.serverBusy);
-          setVoiceState('idle');
-          return;
-        }
-
-        const data = await res.json();
-        const replyText = data.replyText || '';
-        if (replyText) {
-          setLastCaption(replyText);
-          const assistantMsg: Message = {
-            id: `assistant-${Date.now()}`,
-            sender: 'assistant',
-            text: replyText,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          };
-          setChatMessages((prev) => [...prev, assistantMsg]);
-        }
-
-        if (data.audioData) {
-          await playNativeAudio(data.audioData);
-        } else {
-          setVoiceState('idle');
-        }
-      } catch {
-        setErrorMessage(t.assistant.errors.networkError);
-        setVoiceState('idle');
-      }
-    },
-    [language, playNativeAudio, t.assistant.errors]
-  );
-
-  // Stop voice recognition session
+  // Stop entire voice session and clean up all resources
   const stopVoiceSession = useCallback(() => {
     stopAudioPlayback();
-    if (recognitionRef.current) {
+
+    // 1. Close Live WebSocket session
+    if (liveSessionRef.current) {
       try {
-        recognitionRef.current.stop();
+        liveSessionRef.current.close();
       } catch {}
-      recognitionRef.current = null;
+      liveSessionRef.current = null;
     }
+
+    // 2. Stop microphone tracks and processor
+    if (processorRef.current) {
+      try {
+        processorRef.current.disconnect();
+      } catch {}
+      processorRef.current = null;
+    }
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach((track) => track.stop());
+      micStreamRef.current = null;
+    }
+    if (inputAudioCtxRef.current && inputAudioCtxRef.current.state !== 'closed') {
+      try {
+        inputAudioCtxRef.current.close();
+      } catch {}
+      inputAudioCtxRef.current = null;
+    }
+
+    // 3. Clear session timer
     if (voiceTimeoutRef.current) {
       clearTimeout(voiceTimeoutRef.current);
       voiceTimeoutRef.current = null;
     }
+
     setVoiceSessionStarted(false);
     setVoiceState('idle');
+    setAudioLoudness(0);
   }, [stopAudioPlayback]);
 
-  // Start voice session on user gesture
-  const startVoiceSession = useCallback(() => {
+  // Start real-time Gemini Live session
+  const startVoiceSession = useCallback(async () => {
     setErrorMessage(null);
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (AudioCtx && !audioContextRef.current) {
-      audioContextRef.current = new AudioCtx({ sampleRate: 24000 });
-    }
-    if (audioContextRef.current?.state === 'suspended') {
-      audioContextRef.current.resume();
-    }
 
     if (!VOICE_SUPPORTED_LANGUAGES.has(language)) {
       setErrorMessage(t.assistant.voiceNotAvailableLang);
       return;
     }
 
-    const windowWithSpeech = window as any;
-    const SpeechRecognitionClass =
-      windowWithSpeech.SpeechRecognition || windowWithSpeech.webkitSpeechRecognition;
-
-    if (!SpeechRecognitionClass) {
+    // Check getUserMedia availability
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
       setErrorMessage(t.assistant.voiceUnsupported);
       return;
     }
 
+    setVoiceState('thinking');
+
     try {
-      const recognition = new SpeechRecognitionClass();
-      recognitionRef.current = recognition;
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang =
-        language === 'hi'
-          ? 'hi-IN'
-          : language === 'ur'
-          ? 'ur-PK'
-          : language === 'ar'
-          ? 'ar-SA'
-          : language === 'bn'
-          ? 'bn-BD'
-          : language === 'fr'
-          ? 'fr-FR'
-          : language === 'de'
-          ? 'de-DE'
-          : language === 'es'
-          ? 'es-ES'
-          : 'en-US';
+      // 1. Request short-lived session token from backend proxy (GEMINI_API_KEY is never exposed)
+      const res = await fetch('/api/assistant/voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'session', language }),
+      });
 
-      recognition.onstart = () => {
-        setVoiceSessionStarted(true);
-        setVoiceState('listening');
-      };
-      recognition.onresult = (event: any) => {
-        const transcript = event.results?.[0]?.[0]?.transcript;
-        if (transcript) {
-          sendVoiceQuery(transcript);
-        }
-      };
-      recognition.onerror = (event: any) => {
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-          setErrorMessage(t.assistant.errors.micBlocked);
-          stopVoiceSession();
-        } else if (event.error === 'no-speech') {
-          setVoiceState('idle');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const code = data.code;
+        if (code === 'quota_reached') {
+          setErrorMessage(t.assistant.errors.quotaReached);
+        } else if (code === 'server_busy') {
+          setErrorMessage(t.assistant.errors.serverBusy);
+        } else if (code === 'voice_not_supported') {
+          setErrorMessage(t.assistant.voiceNotAvailableLang);
         } else {
-          setVoiceState('idle');
+          setErrorMessage(t.assistant.errors.genericError);
+        }
+        setVoiceState('idle');
+        return;
+      }
+
+      const sessionData = await res.json();
+      const { token, model, voiceName } = sessionData;
+
+      if (!token) {
+        setErrorMessage(t.assistant.errors.genericError);
+        setVoiceState('idle');
+        return;
+      }
+
+      // 2. Request user microphone (16 kHz PCM)
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: 1,
+            sampleRate: 16000,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
+        });
+        micStreamRef.current = stream;
+      } catch (micErr: any) {
+        setErrorMessage(t.assistant.errors.micBlocked);
+        setVoiceState('idle');
+        return;
+      }
+
+      // 3. Connect to the official Gemini Live API WebSocket via @google/genai/web
+      const { GoogleGenAI, Modality } = await import('@google/genai/web');
+      const clientAi = new GoogleGenAI({
+        apiKey: token,
+        httpOptions: { apiVersion: 'v1alpha' },
+      });
+
+      const systemInstruction = `
+You are the HAYAATI Voice Assistant for Hayaati Web Technology. You speak with a warm, calm, human, and conversational tone with native pronunciation for ${language}.
+Guidelines:
+- Reply in ${language}.
+- Keep responses short, concise, and conversational (1 to 2 sentences max).
+- If the visitor speaks in another language, adapt smoothly.
+`;
+
+      const session = await clientAi.live.connect({
+        model: model || 'gemini-3.8-live',
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: {
+                voiceName: voiceName || 'Kore',
+              },
+            },
+          },
+          systemInstruction,
+        },
+        callbacks: {
+          onopen: () => {
+            setVoiceSessionStarted(true);
+            setVoiceState('listening');
+          },
+          onmessage: (msg: any) => {
+            // Check for model speech interruption
+            if (msg.serverContent?.interrupted) {
+              stopAudioPlayback();
+              setVoiceState('listening');
+              return;
+            }
+
+            // Extract audio and text parts from model turn
+            const parts = msg.serverContent?.modelTurn?.parts;
+            if (parts && Array.isArray(parts)) {
+              for (const part of parts) {
+                if (part.inlineData?.data) {
+                  const mimeType = part.inlineData.mimeType || 'audio/pcm;rate=24000';
+                  const rateMatch = mimeType.match(/rate=(\d+)/);
+                  const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+                  playModelAudioChunk(part.inlineData.data, sampleRate);
+                }
+                if (part.text) {
+                  setLastCaption(part.text);
+                  const assistantMsg: Message = {
+                    id: `assistant-${Date.now()}-${Math.random()}`,
+                    sender: 'assistant',
+                    text: part.text,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  };
+                  setChatMessages((prev) => [...prev, assistantMsg]);
+                }
+              }
+            }
+          },
+          onerror: (err: any) => {
+            console.error('Live WebSocket session error:', err);
+            setErrorMessage(t.assistant.errors.networkError);
+            stopVoiceSession();
+          },
+          onclose: (e: any) => {
+            if (e.code !== 1000 && voiceSessionStarted) {
+              setErrorMessage(t.assistant.errors.networkError);
+            }
+            stopVoiceSession();
+          },
+        },
+      });
+
+      liveSessionRef.current = session;
+
+      // 4. Capture microphone and stream 16 kHz PCM to Gemini Live session
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const inputCtx = new AudioCtx({ sampleRate: 16000 });
+      inputAudioCtxRef.current = inputCtx;
+      if (inputCtx.state === 'suspended') {
+        await inputCtx.resume();
+      }
+
+      const source = inputCtx.createMediaStreamSource(stream);
+      const processor = inputCtx.createScriptProcessor(4096, 1, 1);
+      processorRef.current = processor;
+
+      processor.onaudioprocess = (e) => {
+        if (isMutedRef.current || voiceStateRef.current === 'speaking') {
+          return;
+        }
+
+        const inputChannelData = e.inputBuffer.getChannelData(0);
+
+        // Calculate RMS loudness to animate orb during visitor speech
+        let sum = 0;
+        for (let i = 0; i < inputChannelData.length; i++) {
+          sum += inputChannelData[i] * inputChannelData[i];
+        }
+        const rms = Math.sqrt(sum / inputChannelData.length);
+        if (rms > 0.02) {
+          setAudioLoudness(Math.min(1, rms * 4));
+          if (voiceStateRef.current !== 'listening') {
+            setVoiceState('listening');
+          }
+        } else {
+          setAudioLoudness(0);
+        }
+
+        // Convert to 16 kHz PCM
+        const pcm16 = convertTo16kPcm(inputChannelData, inputCtx.sampleRate);
+
+        // Convert to base64
+        let binary = '';
+        const bytes = new Uint8Array(pcm16.buffer);
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const base64Audio = window.btoa(binary);
+
+        // Stream 16 kHz PCM to Gemini Live session
+        if (liveSessionRef.current) {
+          try {
+            liveSessionRef.current.sendRealtimeInput({
+              audio: {
+                data: base64Audio,
+                mimeType: 'audio/pcm;rate=16000',
+              },
+            });
+          } catch {}
         }
       };
-      recognition.start();
 
+      source.connect(processor);
+      processor.connect(inputCtx.destination);
+
+      setVoiceSessionStarted(true);
+      setVoiceState('listening');
+
+      // Maximum session timeout (3 minutes)
       voiceTimeoutRef.current = setTimeout(() => {
         stopVoiceSession();
         setErrorMessage(t.assistant.errors.sessionEnded);
       }, 180000);
-    } catch {
+    } catch (err: any) {
+      console.error('Failed to start Live session:', err);
       setErrorMessage(t.assistant.errors.genericError);
       stopVoiceSession();
     }
-  }, [language, sendVoiceQuery, stopVoiceSession, t.assistant.errors, t.assistant.voiceNotAvailableLang, t.assistant.voiceUnsupported]);
+  }, [
+    language,
+    playModelAudioChunk,
+    stopAudioPlayback,
+    stopVoiceSession,
+    t.assistant.errors,
+    t.assistant.voiceNotAvailableLang,
+    t.assistant.voiceUnsupported,
+    voiceSessionStarted,
+  ]);
 
   const toggleMute = () => {
     if (!voiceSessionStarted) return;
     if (isMuted) {
       setIsMuted(false);
-      try {
-        recognitionRef.current?.start();
-        setVoiceState('listening');
-      } catch {}
+      setVoiceState('listening');
     } else {
       setIsMuted(true);
-      try {
-        recognitionRef.current?.stop();
-      } catch {}
       setVoiceState('idle');
+      setAudioLoudness(0);
     }
   };
 
@@ -386,6 +566,29 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     setChatMessages((prev) => [...prev, userMsg]);
+
+    // If Live session is currently connected, send text directly through the Live session
+    if (liveSessionRef.current) {
+      try {
+        setVoiceState('thinking');
+        liveSessionRef.current.sendClientContent({
+          turns: [
+            {
+              role: 'user',
+              parts: [{ text }],
+            },
+          ],
+          turnComplete: true,
+        });
+        setIsTextLoading(false);
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 50);
+        return;
+      } catch {
+        // Fallback to text chat API
+      }
+    }
 
     try {
       const res = await fetch('/api/chat', {
@@ -602,67 +805,79 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
           </span>
         </button>
 
-        {/* Control 3: End session */}
+        {/* Control 3: End Session */}
         <button
-          onClick={() => {
-            stopVoiceSession();
-            onClose();
-          }}
-          className="flex flex-col items-center gap-1.5 p-3 min-h-[52px] min-w-[52px] rounded-full bg-[#0b0f17] text-slate-400 border border-[#1e293b] hover:border-rose-500 hover:text-rose-400 transition-colors cursor-pointer"
+          onClick={stopVoiceSession}
+          disabled={!voiceSessionStarted}
+          className={`flex flex-col items-center gap-1.5 p-3 min-h-[52px] min-w-[52px] rounded-full border transition-colors cursor-pointer ${
+            !voiceSessionStarted
+              ? 'opacity-40 cursor-not-allowed border-[#1e293b] bg-[#0b0f17] text-slate-500'
+              : 'bg-rose-950/40 text-rose-300 border-rose-500/50 hover:bg-rose-900/60 hover:border-rose-400'
+          }`}
           aria-label={t.assistant.endSession}
         >
           <X className="w-5 h-5" />
-          <span className="text-[10px] font-mono text-slate-400">{t.assistant.endLabel}</span>
+          <span className="text-[10px] font-mono text-rose-300/80">
+            {t.assistant.endLabel}
+          </span>
         </button>
       </div>
 
-      {/* SLIDE-UP TEXT CHAT SHEET */}
+      {/* SLIDE-OVER TYPE-INSTEAD TEXT SHEET */}
       {showTypeSheet && (
         <div
-          className="absolute inset-x-0 bottom-0 top-16 z-30 bg-[#070a0f] border-t border-[#38e8ff]/50 shadow-2xl flex flex-col transition-transform duration-250 animate-in slide-in-from-bottom"
+          className="absolute inset-0 z-30 bg-[#05070a]/95 backdrop-blur-md flex flex-col justify-between"
           style={{ overscrollBehavior: 'contain' }}
         >
-          <div className="flex items-center justify-between px-5 py-3 border-b border-[#1e293b] bg-[#0b0f17] shrink-0">
+          {/* Sheet Header */}
+          <div className="h-16 px-6 border-b border-[#1e293b] flex items-center justify-between bg-[#070a0f]">
             <div className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-[#38e8ff]" />
-              <span className="font-mono text-xs text-white uppercase tracking-wider">
-                {t.assistant.panelTitle} // {t.assistant.typeInstead}
+              <span className="font-mono text-xs uppercase tracking-widest text-slate-200 font-bold">
+                {t.assistant.panelTitle}
               </span>
             </div>
             <button
               onClick={() => setShowTypeSheet(false)}
-              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-white cursor-pointer"
+              className="p-2 text-slate-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-mono"
               aria-label={t.assistant.returnToOrb}
             >
-              <ChevronDown className="w-5 h-5" />
+              <span>{t.assistant.returnToOrb}</span>
+              <ChevronDown className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#05070a]">
+          {/* Messages Log */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
             {allMessages.map((msg) => {
               const isUser = msg.sender === 'user';
               return (
                 <div
                   key={msg.id}
-                  className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+                  className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                 >
+                  <div className="flex items-center gap-2 mb-1 px-1">
+                    <span className="text-[10px] font-mono text-[#38e8ff]">
+                      {isUser ? t.assistant.userTag : t.assistant.assistantTag}
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-500">
+                      {msg.timestamp}
+                    </span>
+                  </div>
                   <div
-                    className={`max-w-[85%] sm:max-w-[75%] p-3.5 text-xs sm:text-sm font-sans leading-relaxed border ${
+                    className={`max-w-[85%] sm:max-w-[75%] p-3.5 text-sm font-sans leading-relaxed ${
                       isUser
-                        ? 'bg-[#111723] border-[#38e8ff]/40 text-slate-100'
-                        : 'bg-[#0b0f17] border-[#1e293b] text-slate-200'
+                        ? 'bg-[#1e293b] text-white border border-[#38e8ff]/30'
+                        : 'bg-[#0b0f17] text-slate-200 border border-[#1e293b]'
                     }`}
                   >
-                    <div className="text-[10px] font-mono text-slate-500 mb-1">
-                      {isUser ? t.assistant.userTag : t.assistant.assistantTag} // {msg.timestamp}
-                    </div>
-                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                    {msg.text}
                   </div>
                 </div>
               );
             })}
             {isTextLoading && (
-              <div className="flex justify-start">
+              <div className="flex flex-col items-start">
                 <div className="p-3 bg-[#0b0f17] border border-[#1e293b] text-xs font-mono text-[#38e8ff] flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#38e8ff] animate-ping" />
                   <span>{t.assistant.orb.thinking}</span>
