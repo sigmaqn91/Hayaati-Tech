@@ -10,12 +10,19 @@ import { ProjectsSection } from '@/components/ProjectsSection';
 import { AdvertiseSection } from '@/components/AdvertiseSection';
 import { AboutSection } from '@/components/AboutSection';
 import { ContactSection } from '@/components/ContactSection';
-import { AssistantPanel } from '@/components/AssistantPanel';
+import dynamic from 'next/dynamic';
 import { FloatingVoiceTrigger } from '@/components/FloatingVoiceTrigger';
 import { Footer } from '@/components/Footer';
+import { useLanguage } from '@/context/LanguageContext';
+
+const JarvisOverlay = dynamic(
+  () => import('@/components/jarvis/JarvisOverlay').then((mod) => mod.JarvisOverlay),
+  { ssr: false }
+);
 
 export default function HomePage() {
   const [assistantModalOpen, setAssistantModalOpen] = useState(false);
+  const { language } = useLanguage();
 
   return (
     <div className="min-h-screen bg-[#05070a] text-slate-100 flex flex-col selection:bg-[#38e8ff]/20 selection:text-[#38e8ff]">
@@ -52,11 +59,14 @@ export default function HomePage() {
       {/* Floating Glowing Orb Button */}
       <FloatingVoiceTrigger onOpen={() => setAssistantModalOpen(true)} />
 
-      {/* Modern Center Orb Voice Assistant Full-Screen Overlay */}
-      <AssistantPanel
-        isOpen={assistantModalOpen}
-        onClose={() => setAssistantModalOpen(false)}
-      />
+      {/* Quantum Holographic 3D Arc-Reactor Neural Core Overlay */}
+      {assistantModalOpen && (
+        <JarvisOverlay
+          isOpen={assistantModalOpen}
+          onClose={() => setAssistantModalOpen(false)}
+          language={language}
+        />
+      )}
 
       {/* Footer */}
       <Footer />
