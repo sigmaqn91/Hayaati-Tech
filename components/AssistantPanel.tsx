@@ -38,6 +38,22 @@ function getReducedMotionServerSnapshot() {
   return false;
 }
 
+// Temporary debug logger active ONLY when URL contains ?voicedebug=1
+function isVoiceDebug(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return new URLSearchParams(window.location.search).get('voicedebug') === '1';
+  } catch {
+    return false;
+  }
+}
+
+function debugLog(message: string, ...args: any[]): void {
+  if (isVoiceDebug()) {
+    console.log(`[VoiceDebug] ${message}`, ...args);
+  }
+}
+
 // Convert Float32Array to 16 kHz signed 16-bit PCM little-endian
 function convertTo16kPcm(input: Float32Array, inputSampleRate: number): Int16Array {
   if (inputSampleRate === 16000) {
@@ -125,12 +141,30 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
   const voiceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sessionStartTimeRef = useRef<number | null>(null);
   const voiceSessionStartedRef = useRef(false);
+  const turnCompleteRef = useRef(false);
+  const turnCancelledRef = useRef(false);
+  const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const playbackEndTimeRef = useRef<number>(0);
+  const audioInputGuardUntilRef = useRef<number>(0);
+  const isSessionStartingRef = useRef(false);
+  const isStoppingSessionRef = useRef(false);
+  const hasReleasedSessionRef = useRef(true);
 
   const modalRef = useRef<HTMLDivElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMutedRef = useRef(false);
   const voiceStateRef = useRef<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
+
+  // Centralized voice state updater that logs state transitions when ?voicedebug=1 is present
+  const updateVoiceState = useCallback((newState: 'idle' | 'listening' | 'thinking' | 'speaking') => {
+    if (voiceStateRef.current !== newState) {
+      debugLog(
+        `State change: ${voiceStateRef.current} -> ${newState} (activeSources: ${activeSourcesRef.current.length})`
+      );
+      setVoiceState(newState);
+    }
+  }, []);
 
   useEffect(() => {
     isMutedRef.current = isMuted;
@@ -196,6 +230,12 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
 
   // Stop output audio playback immediately (used on interruption, session end, and unmount)
   const stopAudioPlayback = useCallback(() => {
+    playbackEndTimeRef.current = Date.now();
+    audioInputGuardUntilRef.current = Math.max(audioInputGuardUntilRef.current, Date.now() + 500);
+    if (fallbackTimeoutRef.current) {
+      clearTimeout(fallbackTimeoutRef.current);
+      fallbackTimeoutRef.current = null;
+    }
     for (const src of activeSourcesRef.current) {
       try {
         src.stop();
@@ -217,6 +257,17 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
   // Play model output audio at the exact sample rate returned by the Live API with AnalyserNode
   const playModelAudioChunk = useCallback(
     async (base64PcmData: string, sampleRate = 24000) => {
+      // If the current turn was interrupted/cancelled, drop any trailing chunks belonging to it
+      if (turnCancelledRef.current) {
+        return;
+      }
+
+      // New audio chunk arrived: clear the safety fallback timer
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current);
+        fallbackTimeoutRef.current = null;
+      }
+
       try {
         if (typeof window === 'undefined') return;
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -264,7 +315,11 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
         nextPlayTimeRef.current = playTime + audioBuffer.duration;
 
         activeSourcesRef.current.push(source);
-        setVoiceState('speaking');
+
+        // Call updateVoiceState('speaking') only when the state is not already 'speaking'
+        if (voiceStateRef.current !== 'speaking') {
+          updateVoiceState('speaking');
+        }
 
         // Monitor audio loudness via AnalyserNode while speaking
         if (!animationFrameRef.current && analyserRef.current) {
@@ -294,24 +349,64 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
           if (idx !== -1) {
             activeSourcesRef.current.splice(idx, 1);
           }
-          if (activeSourcesRef.current.length === 0 && ctx.currentTime >= nextPlayTimeRef.current - 0.05) {
+
+          // Check if queue has drained
+          const isQueueEmpty =
+            activeSourcesRef.current.length === 0 &&
+            ctx.currentTime >= nextPlayTimeRef.current - 0.05;
+
+          if (isQueueEmpty) {
             if (animationFrameRef.current) {
               cancelAnimationFrame(animationFrameRef.current);
               animationFrameRef.current = null;
             }
             setAudioLoudness(0);
-            setVoiceState(isMutedRef.current ? 'idle' : 'listening');
+
+            // The speaking state must end only when the Gemini turn is finished AND playback queue is empty
+            if (turnCompleteRef.current) {
+              playbackEndTimeRef.current = Date.now();
+              audioInputGuardUntilRef.current = Math.max(audioInputGuardUntilRef.current, Date.now() + 500);
+              if (fallbackTimeoutRef.current) {
+                clearTimeout(fallbackTimeoutRef.current);
+                fallbackTimeoutRef.current = null;
+              }
+              updateVoiceState(isMutedRef.current ? 'idle' : 'listening');
+            } else {
+              // Safety fallback: if no new audio chunk arrives for 1500 ms after the queue is empty, switch to 'listening'
+              if (fallbackTimeoutRef.current) {
+                clearTimeout(fallbackTimeoutRef.current);
+              }
+              fallbackTimeoutRef.current = setTimeout(() => {
+                if (voiceStateRef.current === 'speaking' && activeSourcesRef.current.length === 0) {
+                  playbackEndTimeRef.current = Date.now();
+                  audioInputGuardUntilRef.current = Math.max(audioInputGuardUntilRef.current, Date.now() + 500);
+                  turnCompleteRef.current = true;
+                  updateVoiceState(isMutedRef.current ? 'idle' : 'listening');
+                }
+                fallbackTimeoutRef.current = null;
+              }, 1500);
+            }
           }
         };
       } catch (err) {
         console.error('Audio chunk playback error:', err);
       }
     },
-    []
+    [updateVoiceState]
   );
 
-  // Stop entire voice session, release resources, and notify backend release endpoint
+  // Stop entire voice session, release resources, and notify backend release endpoint (idempotent)
   const stopVoiceSession = useCallback(async () => {
+    // Guard: ensure cleanup and release run only ONCE per session
+    if (isStoppingSessionRef.current) {
+      return;
+    }
+    isStoppingSessionRef.current = true;
+    isSessionStartingRef.current = false;
+
+    const wasActive = voiceSessionStartedRef.current;
+    voiceSessionStartedRef.current = false;
+
     const startTime = sessionStartTimeRef.current;
     const durationSeconds = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
     sessionStartTimeRef.current = null;
@@ -352,11 +447,19 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
 
     // 4. Reset UI state back to idle
     setVoiceSessionStarted(false);
-    setVoiceState('idle');
+    updateVoiceState('idle');
     setAudioLoudness(0);
+    turnCompleteRef.current = false;
+    turnCancelledRef.current = false;
+    if (fallbackTimeoutRef.current) {
+      clearTimeout(fallbackTimeoutRef.current);
+      fallbackTimeoutRef.current = null;
+    }
 
-    // 5. Release concurrent slot & record duration on the backend
-    if (durationSeconds > 0 || voiceSessionStartedRef.current) {
+    // 5. Release concurrent slot & record duration on the backend (sent only ONCE per session)
+    if ((durationSeconds > 0 || wasActive) && !hasReleasedSessionRef.current) {
+      hasReleasedSessionRef.current = true;
+      debugLog(`Releasing voice session on server (duration: ${durationSeconds}s)`);
       try {
         await fetch('/api/assistant/voice', {
           method: 'POST',
@@ -371,26 +474,37 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
         // Fallback catch to prevent unhandled rejection during cleanup
       }
     }
-    voiceSessionStartedRef.current = false;
-  }, [stopAudioPlayback]);
+  }, [stopAudioPlayback, updateVoiceState]);
 
   // Start real-time Gemini Live WebSocket session
   const startVoiceSession = useCallback(async () => {
+    // 1. Guard against duplicate starts: only one session starting or active
+    if (isSessionStartingRef.current || voiceSessionStartedRef.current) {
+      debugLog('startVoiceSession ignored: session is already starting or active');
+      return;
+    }
+    isSessionStartingRef.current = true;
+    isStoppingSessionRef.current = false;
+    hasReleasedSessionRef.current = false;
+    debugLog('Session start requested');
+
     setErrorMessage(null);
 
     // Language compatibility check
     if (!VOICE_SUPPORTED_LANGUAGES.has(language)) {
+      isSessionStartingRef.current = false;
       setErrorMessage(t.assistant.voiceNotAvailableLang);
       return;
     }
 
     // Microphone API availability check
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      isSessionStartingRef.current = false;
       setErrorMessage(t.assistant.voiceUnsupported);
       return;
     }
 
-    setVoiceState('thinking');
+    updateVoiceState('thinking');
 
     try {
       // 1. Request short-lived ephemeral token from server proxy (GEMINI_API_KEY is NEVER exposed to client)
@@ -401,6 +515,7 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
       });
 
       if (!res.ok) {
+        isSessionStartingRef.current = false;
         const data = await res.json().catch(() => ({}));
         const code = data.code;
         if (code === 'quota_reached') {
@@ -414,7 +529,7 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
         } else {
           setErrorMessage(t.assistant.errors.genericError);
         }
-        setVoiceState('idle');
+        updateVoiceState('idle');
         return;
       }
 
@@ -422,8 +537,9 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
       const { token, model, voice, voiceName, sessionMaxSeconds } = sessionData;
 
       if (!token) {
+        isSessionStartingRef.current = false;
         setErrorMessage(t.assistant.errors.genericError);
-        setVoiceState('idle');
+        updateVoiceState('idle');
         return;
       }
 
@@ -440,9 +556,12 @@ export function AssistantPanel({ isOpen, onClose }: AssistantPanelProps) {
           },
         });
         micStreamRef.current = stream;
+        // Batch 5 Requirement 2: Apply 500 ms audio-in guard immediately post-permission grant to avoid audio pop/tap noises
+        audioInputGuardUntilRef.current = Date.now() + 500;
       } catch {
+        isSessionStartingRef.current = false;
         setErrorMessage(t.assistant.errors.micBlocked);
-        setVoiceState('idle');
+        updateVoiceState('idle');
         return;
       }
 
@@ -475,16 +594,26 @@ Guidelines:
         },
         callbacks: {
           onopen: () => {
+            isSessionStartingRef.current = false;
             setVoiceSessionStarted(true);
             voiceSessionStartedRef.current = true;
             sessionStartTimeRef.current = Date.now();
-            setVoiceState('listening');
+            audioInputGuardUntilRef.current = Math.max(audioInputGuardUntilRef.current, Date.now() + 500);
+            debugLog('Session active and connected');
+            updateVoiceState('listening');
           },
           onmessage: (msg: any) => {
-            // Interruption handling: server interrupted flag
+            // Interruption handling: stop playback, clear the queue, mark old turn as cancelled, then go to 'listening'
             if (msg.serverContent?.interrupted) {
+              debugLog('interrupted signal received');
               stopAudioPlayback();
-              setVoiceState('listening');
+              turnCancelledRef.current = true;
+              turnCompleteRef.current = true;
+              if (fallbackTimeoutRef.current) {
+                clearTimeout(fallbackTimeoutRef.current);
+                fallbackTimeoutRef.current = null;
+              }
+              updateVoiceState('listening');
               return;
             }
 
@@ -502,6 +631,40 @@ Guidelines:
                   // Keep live caption on orb screen separate from text chat conversation (Fix F12)
                   setLastCaption(part.text);
                 }
+              }
+            }
+
+            // Check if Gemini turn is finished (turnComplete or generationComplete)
+            const isTurnComplete = Boolean(
+              msg.serverContent?.turnComplete ||
+              msg.serverContent?.generationComplete ||
+              msg.turnComplete
+            );
+
+            if (isTurnComplete) {
+              debugLog(`turnComplete received, activeSources: ${activeSourcesRef.current.length}`);
+              turnCompleteRef.current = true;
+              turnCancelledRef.current = false; // Turn complete, reset cancel flag for next turn
+
+              if (fallbackTimeoutRef.current) {
+                clearTimeout(fallbackTimeoutRef.current);
+                fallbackTimeoutRef.current = null;
+              }
+
+              // Switch to 'listening' only after BOTH turn is complete AND playback queue is empty
+              const ctx = outputAudioCtxRef.current;
+              const isQueueEmpty =
+                activeSourcesRef.current.length === 0 &&
+                (!ctx || ctx.currentTime >= nextPlayTimeRef.current - 0.05);
+
+              if (isQueueEmpty && voiceStateRef.current === 'speaking') {
+                playbackEndTimeRef.current = Date.now();
+                if (animationFrameRef.current) {
+                  cancelAnimationFrame(animationFrameRef.current);
+                  animationFrameRef.current = null;
+                }
+                setAudioLoudness(0);
+                updateVoiceState(isMutedRef.current ? 'idle' : 'listening');
               }
             }
           },
@@ -547,20 +710,22 @@ Guidelines:
         }
         const rms = Math.sqrt(sum / inputChannelData.length);
 
-        // Client-side interruption: if visitor speaks while assistant is speaking, stop playback immediately!
-        if (rms > 0.04 && voiceStateRef.current === 'speaking') {
-          stopAudioPlayback();
-          setVoiceState('listening');
-        }
-
+        // Half-duplex: while assistant is speaking, do not stream mic audio to Gemini
         if (voiceStateRef.current === 'speaking') {
           return;
         }
 
+        // Post-permission grant and post-playback guard: ignore mic input for 500 ms
+        if (Date.now() < audioInputGuardUntilRef.current || Date.now() - playbackEndTimeRef.current < 500) {
+          return;
+        }
+
         if (rms > 0.02) {
+          turnCancelledRef.current = false;
+          turnCompleteRef.current = false;
           setAudioLoudness(Math.min(1, rms * 4));
           if (voiceStateRef.current !== 'listening') {
-            setVoiceState('listening');
+            updateVoiceState('listening');
           }
         } else if (voiceStateRef.current === 'listening') {
           setAudioLoudness(0);
@@ -598,13 +763,12 @@ Guidelines:
         }
       };
 
+      // Connect ScriptProcessor through a GainNode with gain 0 so it stays active while guaranteed silent
       source.connect(processor);
-      processor.connect(inputCtx.destination);
-
-      setVoiceSessionStarted(true);
-      voiceSessionStartedRef.current = true;
-      sessionStartTimeRef.current = Date.now();
-      setVoiceState('listening');
+      const muteGain = inputCtx.createGain();
+      muteGain.gain.setValueAtTime(0, inputCtx.currentTime);
+      processor.connect(muteGain);
+      muteGain.connect(inputCtx.destination);
 
       // 5. Hard session timeout enforced from sessionMaxSeconds (default: 180 seconds)
       const maxSeconds = typeof sessionMaxSeconds === 'number' && sessionMaxSeconds > 0 ? sessionMaxSeconds : 180;
@@ -613,6 +777,7 @@ Guidelines:
         setErrorMessage(t.assistant.errors.sessionEnded);
       }, maxSeconds * 1000);
     } catch (err: any) {
+      isSessionStartingRef.current = false;
       console.error('Failed to start Live session:', err);
       setErrorMessage(t.assistant.errors.genericError);
       stopVoiceSession();
@@ -625,19 +790,51 @@ Guidelines:
     t.assistant.errors,
     t.assistant.voiceNotAvailableLang,
     t.assistant.voiceUnsupported,
+    updateVoiceState,
   ]);
 
   const toggleMute = () => {
     if (!voiceSessionStarted) return;
     if (isMuted) {
       setIsMuted(false);
-      setVoiceState('listening');
+      updateVoiceState('listening');
     } else {
       setIsMuted(true);
-      setVoiceState('idle');
+      updateVoiceState('idle');
       setAudioLoudness(0);
     }
   };
+
+  // Explicit interrupt on orb tap while speaking (Batch 2 requirement)
+  const handleOrbClick = useCallback(() => {
+    if (!voiceSessionStartedRef.current) {
+      startVoiceSession();
+      return;
+    }
+    if (voiceStateRef.current === 'speaking') {
+      debugLog('Orb tap interrupt triggered');
+      stopAudioPlayback();
+      turnCancelledRef.current = true;
+      turnCompleteRef.current = true;
+      playbackEndTimeRef.current = Date.now();
+      audioInputGuardUntilRef.current = Math.max(audioInputGuardUntilRef.current, Date.now() + 500);
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current);
+        fallbackTimeoutRef.current = null;
+      }
+      updateVoiceState(isMutedRef.current ? 'idle' : 'listening');
+    }
+  }, [startVoiceSession, stopAudioPlayback, updateVoiceState]);
+
+  const handleOrbKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleOrbClick();
+      }
+    },
+    [handleOrbClick]
+  );
 
   // Dedicated Text Chat Sender (Fix F12: keep chat conversation history separate from voice state)
   const handleSendText = async () => {
@@ -737,7 +934,7 @@ Guidelines:
       role="dialog"
       aria-modal="true"
       aria-label={t.assistant.panelTitle}
-      className="fixed inset-0 z-50 flex items-center justify-center p-0 bg-[#05070a] select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 bg-[#05070a] select-none overflow-x-hidden w-full max-w-full"
     >
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[#05070a] pointer-events-none">
@@ -746,7 +943,7 @@ Guidelines:
       </div>
 
       {/* Top Header Bar */}
-      <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-6 z-20 border-b border-[#1e293b]/60 bg-[#070a0f]/90">
+      <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-6 z-20 border-b border-[#1e293b]/60 bg-[#070a0f]/90 overflow-x-hidden">
         <div className="flex items-center gap-2.5">
           <div className="w-2.5 h-2.5 rounded-full bg-[#38e8ff] shadow-[0_0_10px_#38e8ff]" />
           <span className="font-mono text-xs tracking-widest text-slate-200 uppercase font-bold">
@@ -769,49 +966,58 @@ Guidelines:
       </div>
 
       {/* CENTER GLOSSY ORB CONTAINER */}
-      <div className="relative z-10 flex flex-col items-center justify-center max-w-md w-full px-6 py-12 text-center">
-        {voiceState === 'listening' && !prefersReducedMotion && (
-          <div className="absolute w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] pointer-events-none">
-            <div className="absolute inset-0 rounded-full border border-[#38e8ff]/40 animate-ping opacity-75" />
-            <div className="absolute -inset-4 rounded-full border border-[#818cf8]/30 animate-pulse opacity-50" />
-          </div>
-        )}
-
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={!voiceSessionStarted ? startVoiceSession : undefined}
-          aria-label={!voiceSessionStarted ? t.assistant.orb.tapToStart : stateText}
-          className={`relative w-[210px] h-[210px] sm:w-[260px] sm:h-[260px] rounded-full cursor-pointer transition-transform duration-150 flex items-center justify-center ${
-            !voiceSessionStarted ? 'hover:scale-105' : ''
-          }`}
-          style={{
-            transform: `scale(${orbScale})`,
-            background:
-              'radial-gradient(circle at 35% 30%, #ffffff 0%, #38e8ff 28%, #1e40af 65%, #050b18 95%)',
-            boxShadow: `0 0 ${glowSpread} rgba(56, 232, 255, 0.45), 0 0 100px rgba(129, 140, 248, 0.25), inset -10px -10px 30px rgba(0, 0, 0, 0.8), inset 10px 10px 25px rgba(255, 255, 255, 0.4)`,
-          }}
-        >
-          {voiceState === 'thinking' && !prefersReducedMotion && (
-            <div className="absolute inset-0 rounded-full animate-spin [animation-duration:3s] opacity-70 bg-[conic-gradient(from_0deg,transparent_0deg,#38e8ff_120deg,transparent_180deg,#818cf8_300deg,transparent_360deg)] pointer-events-none mix-blend-screen" />
-          )}
-
-          {voiceState === 'idle' && !prefersReducedMotion && (
-            <div className="absolute inset-2 rounded-full animate-pulse [animation-duration:4s] opacity-40 bg-[radial-gradient(circle_at_40%_40%,#ffffff_0%,transparent_60%)] pointer-events-none" />
-          )}
-
-          {!voiceSessionStarted && (
-            <div className="absolute inset-0 rounded-full flex flex-col items-center justify-center bg-black/35 hover:bg-black/20 transition-colors">
-              <Play className="w-12 h-12 text-white fill-white drop-shadow-[0_0_15px_rgba(56,232,255,0.8)] ml-1" />
-              <span className="font-mono text-xs uppercase tracking-widest text-[#38e8ff] mt-2 font-bold">
-                {t.assistant.orb.start}
-              </span>
+      <div className="relative z-10 flex flex-col items-center justify-center max-w-md w-full mx-auto px-6 py-12 text-center overflow-x-hidden">
+        <div className="relative w-full flex items-center justify-center">
+          {voiceState === 'listening' && !prefersReducedMotion && (
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] pointer-events-none">
+              <div className="absolute inset-0 rounded-full border border-[#38e8ff]/40 animate-ping opacity-75" />
+              <div className="absolute -inset-4 rounded-full border border-[#818cf8]/30 animate-pulse opacity-50" />
             </div>
           )}
+
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={handleOrbClick}
+            onKeyDown={handleOrbKeyDown}
+            aria-label={
+              !voiceSessionStarted
+                ? t.assistant.orb.tapToStart
+                : voiceState === 'speaking'
+                ? t.assistant.orb.speaking
+                : stateText
+            }
+            className={`relative w-[210px] h-[210px] sm:w-[260px] sm:h-[260px] rounded-full cursor-pointer transition-transform duration-150 flex items-center justify-center ${
+              !voiceSessionStarted ? 'hover:scale-105' : ''
+            }`}
+            style={{
+              transform: `scale(${orbScale})`,
+              background:
+                'radial-gradient(circle at 35% 30%, #ffffff 0%, #38e8ff 28%, #1e40af 65%, #050b18 95%)',
+              boxShadow: `0 0 ${glowSpread} rgba(56, 232, 255, 0.45), 0 0 100px rgba(129, 140, 248, 0.25), inset -10px -10px 30px rgba(0, 0, 0, 0.8), inset 10px 10px 25px rgba(255, 255, 255, 0.4)`,
+            }}
+          >
+            {voiceState === 'thinking' && !prefersReducedMotion && (
+              <div className="absolute inset-0 rounded-full animate-spin [animation-duration:3s] opacity-70 bg-[conic-gradient(from_0deg,transparent_0deg,#38e8ff_120deg,transparent_180deg,#818cf8_300deg,transparent_360deg)] pointer-events-none mix-blend-screen" />
+            )}
+
+            {voiceState === 'idle' && !prefersReducedMotion && (
+              <div className="absolute inset-2 rounded-full animate-pulse [animation-duration:4s] opacity-40 bg-[radial-gradient(circle_at_40%_40%,#ffffff_0%,transparent_60%)] pointer-events-none" />
+            )}
+
+            {!voiceSessionStarted && (
+              <div className="absolute inset-0 rounded-full flex flex-col items-center justify-center bg-black/35 hover:bg-black/20 transition-colors">
+                <Play className="w-12 h-12 text-white fill-white drop-shadow-[0_0_15px_rgba(56,232,255,0.8)] ml-1" />
+                <span className="font-mono text-xs uppercase tracking-widest text-[#38e8ff] mt-2 font-bold">
+                  {t.assistant.orb.start}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* State indicator line */}
-        <div className="mt-8 flex flex-col items-center gap-2">
+        {/* State indicator line - stable min-height prevents layout jumps across states */}
+        <div className="mt-8 flex flex-col items-center gap-2 min-h-[100px]">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0b0f17] border border-[#1e293b]">
             <span
               className={`w-2 h-2 rounded-full ${
@@ -829,10 +1035,10 @@ Guidelines:
             </span>
           </div>
 
-          {/* Dynamic Audio Waveform Bars */}
-          {voiceSessionStarted && (voiceState === 'speaking' || voiceState === 'listening') && (
-            <div className="flex items-center justify-center gap-1 h-6 mt-3" aria-hidden="true">
-              {[0.4, 0.7, 1.0, 0.6, 0.9, 1.2, 0.8, 1.1, 0.7, 1.3, 0.5, 0.9, 0.6, 1.0, 0.4].map((mult, i) => {
+          {/* Dynamic Audio Waveform Bars - Height reserved to prevent layout jumps */}
+          <div className="flex items-center justify-center gap-1 h-6 mt-3" aria-hidden="true">
+            {voiceSessionStarted && (voiceState === 'speaking' || voiceState === 'listening') ? (
+              [0.4, 0.7, 1.0, 0.6, 0.9, 1.2, 0.8, 1.1, 0.7, 1.3, 0.5, 0.9, 0.6, 1.0, 0.4].map((mult, i) => {
                 const height = Math.max(4, Math.min(22, Math.round((audioLoudness * 18 + 4) * mult)));
                 return (
                   <span
@@ -845,9 +1051,11 @@ Guidelines:
                     style={{ height: `${height}px` }}
                   />
                 );
-              })}
-            </div>
-          )}
+              })
+            ) : (
+              <span className="w-1 h-1 rounded-full bg-transparent" />
+            )}
+          </div>
 
           {lastCaption && (
             <p className="mt-3 text-sm text-slate-300 max-w-sm line-clamp-3 leading-relaxed font-sans px-2">
@@ -864,7 +1072,7 @@ Guidelines:
       </div>
 
       {/* CONTROLS AT BOTTOM */}
-      <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-6 z-20 px-6">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md flex items-center justify-center gap-6 z-20 px-6 overflow-x-hidden">
         {/* Control 1: Mute */}
         <button
           onClick={toggleMute}
@@ -917,7 +1125,7 @@ Guidelines:
       {/* SLIDE-OVER TYPE-INSTEAD TEXT SHEET */}
       {showTypeSheet && (
         <div
-          className="absolute inset-0 z-30 bg-[#05070a]/95 backdrop-blur-md flex flex-col justify-between"
+          className="absolute inset-0 z-30 bg-[#05070a]/95 backdrop-blur-md flex flex-col justify-between overflow-x-hidden w-full max-w-full"
           style={{ overscrollBehavior: 'contain' }}
         >
           {/* Sheet Header */}
