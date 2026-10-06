@@ -202,6 +202,19 @@
       "micBlocked": "Mikrofon erişimi reddedildi. Lütfen tarayıcı ayarlarından mikrofona izin verin.",
       "sessionEnded": "Sesli oturum azami süreye ulaştığı için sonlandırıldı. Yeni bir oturum başlatabilirsiniz.",
       "genericError": "Bir sorun oluştu. Lütfen Yeniden Dene'ye tıklayın."
+    },
+    "voiceErrors": {
+      "unsupported": "Bu tarayıcı ortamında mikrofon desteklenmiyor.",
+      "insecure": "Ses girişi için güvenli bir HTTPS bağlantısı gerekir.",
+      "denied": "Mikrofon izni reddedildi. Lütfen erişime izin verin.",
+      "noDevice": "Sistemde herhangi bir mikrofon aygıtı bulunamadı.",
+      "micFailed": "Ses kayıt aygıtı başlatılamadı.",
+      "rateLimit": "Ses limiti aşıldı. Lütfen biraz bekleyin.",
+      "providerQuota": "Ses servisi kotası doldu. Metin girişi etkin.",
+      "noKey": "Yapay zeka ses servisi anahtarı yapılandırılmamış.",
+      "modelFailed": "Ses sentezleme başarısız oldu. Metin yanıtı aşağıdadır.",
+      "network": "Ses iletimi sırasında ağ bağlantısı kesildi.",
+      "serverError": "Ses sunucusu hatası oluştu. Lütfen tekrar deneyin."
     }
   },
   "footer": {

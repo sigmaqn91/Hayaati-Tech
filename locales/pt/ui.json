@@ -202,6 +202,19 @@
       "micBlocked": "Acesso ao microfone recusado. Permita a utilização do microfone no navegador.",
       "sessionEnded": "Sessão de voz concluída (limite de duração alcançado). Pode iniciar uma nova sessão a qualquer momento.",
       "genericError": "Ocorreu uma anomalia no processamento. Por favor selecione Repetir."
+    },
+    "voiceErrors": {
+      "unsupported": "O microfone não é suportado neste navegador.",
+      "insecure": "A entrada de voz requer uma conexão HTTPS segura.",
+      "denied": "Permissão do microfone negada. Autorize o acesso.",
+      "noDevice": "Nenhum dispositivo de microfone encontrado no sistema.",
+      "micFailed": "Falha ao inicializar o dispositivo de gravação de áudio.",
+      "rateLimit": "Limite de voz atingido. Aguarde um momento.",
+      "providerQuota": "Cota de voz excedida. Entrada por texto continua ativa.",
+      "noKey": "Chave do serviço de voz neural não configurada.",
+      "modelFailed": "Síntese de voz falhou. Resposta em texto exibida abaixo.",
+      "network": "Conexão de rede perdida durante a transmissão de voz.",
+      "serverError": "Erro no servidor de voz. Tente novamente."
     }
   },
   "footer": {

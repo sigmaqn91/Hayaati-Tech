@@ -202,6 +202,19 @@
       "micBlocked": "Accès au microphone refusé. Autorisez le micro dans les paramètres de votre navigateur.",
       "sessionEnded": "Session vocale terminée (durée maximale atteinte). Vous pouvez démarrer une nouvelle session.",
       "genericError": "Une erreur est survenue lors du traitement. Cliquez sur Réessayer."
+    },
+    "voiceErrors": {
+      "unsupported": "Le microphone n’est pas pris en charge dans ce navigateur.",
+      "insecure": "La commande vocale requiert une connexion sécurisée HTTPS.",
+      "denied": "Autorisation du microphone refusée. Veuillez autoriser l’accès.",
+      "noDevice": "Aucun microphone détecté sur cet appareil.",
+      "micFailed": "Impossible d’initialiser l’enregistrement audio.",
+      "rateLimit": "Limite vocale atteinte. Veuillez patienter un instant.",
+      "providerQuota": "Quota vocal dépassé. La saisie textuelle reste active.",
+      "noKey": "Clé de service vocal neuronal non configurée.",
+      "modelFailed": "Synthèse vocale échouée. Réponse textuelle affichée ci-dessous.",
+      "network": "Connexion réseau perdue pendant la transmission vocale.",
+      "serverError": "Erreur du serveur vocal. Veuillez réessayer."
     }
   },
   "footer": {

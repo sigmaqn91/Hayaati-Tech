@@ -202,6 +202,19 @@
       "micBlocked": "Accesso al microfono negato. Autorizza il microfono nel tuo browser.",
       "sessionEnded": "Sessione vocale terminata (raggiunto tempo massimo). Puoi avviarne una nuova.",
       "genericError": "Si è verificata un'anomalia. Fai clic su Riprova."
+    },
+    "voiceErrors": {
+      "unsupported": "Il microfono non è supportato in questo browser.",
+      "insecure": "L’input vocale richiede una connessione protetta HTTPS.",
+      "denied": "Autorizzazione microfono negata. Si prega di concedere l’accesso.",
+      "noDevice": "Nessun microfono rilevato su questo sistema.",
+      "micFailed": "Impossibile inizializzare il dispositivo di registrazione.",
+      "rateLimit": "Limite vocale raggiunto. Si prega di attendere.",
+      "providerQuota": "Quota del servizio vocale esaurita. Input testuale attivo.",
+      "noKey": "Chiave del servizio vocale neurale non configurata.",
+      "modelFailed": "Sintesi vocale non riuscita. Risposta visualizzata in testo.",
+      "network": "Connessione di rete interrotta durante la trasmissione.",
+      "serverError": "Errore del server vocale. Riprova più tardi."
     }
   },
   "footer": {

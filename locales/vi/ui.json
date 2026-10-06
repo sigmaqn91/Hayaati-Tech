@@ -202,6 +202,19 @@
       "micBlocked": "Quyền truy cập micrô bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.",
       "sessionEnded": "Phiên thoại đã kết thúc do đạt thời gian tối đa. Bạn có thể bắt đầu phiên mới bất kỳ lúc nào.",
       "genericError": "Đã xảy ra lỗi trong quá trình xử lý. Vui lòng nhấn Thử Lại."
+    },
+    "voiceErrors": {
+      "unsupported": "Micro không được hỗ trợ trong môi trường trình duyệt này.",
+      "insecure": "Nhập giọng nói yêu cầu kết nối HTTPS an toàn.",
+      "denied": "Quyền sử dụng micro bị từ chối. Vui lòng cấp quyền truy cập.",
+      "noDevice": "Không tìm thấy thiết bị micro nào trên hệ thống này.",
+      "micFailed": "Không thể khởi tạo thiết bị ghi âm.",
+      "rateLimit": "Đã đạt giới hạn giọng nói. Vui lòng đợi trong giây lát.",
+      "providerQuota": "Đã hết hạn ngạch dịch vụ giọng nói. Nhập văn bản vẫn hoạt động.",
+      "noKey": "Khóa dịch vụ giọng nói nơ-ron chưa được định cấu hình.",
+      "modelFailed": "Tổng hợp giọng nói thất bại. Phản hồi dạng văn bản hiển thị bên dưới.",
+      "network": "Mất kết nối mạng trong quá trình truyền giọng nói.",
+      "serverError": "Đã xảy ra lỗi máy chủ giọng nói. Vui lòng thử lại."
     }
   },
   "footer": {

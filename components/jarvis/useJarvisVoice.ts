@@ -1,14 +1,25 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { AssistantVisualState } from './HologramCanvas';
+import {
+  unlockAudio,
+  recordUtterance,
+  transcribe,
+  fetchSpeech,
+  playSpeech,
+  VoiceError,
+  VoiceErrorCode,
+} from '@/lib/jarvisAudio';
 
 interface UseJarvisVoiceOptions {
   onTranscriptReady?: (transcript: string) => void;
   language?: string;
 }
 
-export function useJarvisVoice({ onTranscriptReady, language = 'en-IN' }: UseJarvisVoiceOptions = {}) {
+export function useJarvisVoice({
+  onTranscriptReady,
+  language = 'en',
+}: UseJarvisVoiceOptions = {}) {
   const [isSupported, setIsSupported] = useState<boolean>(true);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
@@ -16,239 +27,188 @@ export function useJarvisVoice({ onTranscriptReady, language = 'en-IN' }: UseJar
   const [transcript, setTranscript] = useState<string>('');
   const [speechError, setSpeechError] = useState<string | null>(null);
 
-  const recognitionRef = useRef<any>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const speechVolumeIntervalRef = useRef<any>(null);
+  // Active controllers and locks
+  const activeControllerRef = useRef<AbortController | null>(null);
+  const isTurnRunningRef = useRef<boolean>(false);
+  const isSpeakingRef = useRef<boolean>(false);
+  const languageRef = useRef<string>(language);
+  const onTranscriptReadyRef = useRef(onTranscriptReady);
 
-  // Stop Audio Monitoring Callback
-  const stopAudioMonitoring = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((t) => t.stop());
-      mediaStreamRef.current = null;
-    }
-    setAudioLevel(0);
-  }, []);
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
 
-  // Initialize Web Speech Recognition
+  useEffect(() => {
+    onTranscriptReadyRef.current = onTranscriptReady;
+  }, [onTranscriptReady]);
+
+  // Check browser audio support
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      setIsSupported(false);
-      return;
-    }
-
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = language || 'en-IN';
-
-      recognition.onstart = () => {
-        setIsListening(true);
-        setSpeechError(null);
-      };
-
-      recognition.onresult = (event: any) => {
-        let interimText = '';
-        let finalText = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const item = event.results[i];
-          if (item.isFinal) {
-            finalText += item[0].transcript;
-          } else {
-            interimText += item[0].transcript;
-          }
-        }
-
-        const currentText = finalText || interimText;
-        setTranscript(currentText);
-
-        if (finalText && onTranscriptReady) {
-          onTranscriptReady(finalText.trim());
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        if (event.error !== 'no-speech') {
-          console.warn('[Jarvis Voice Input Error]:', event.error);
-          setSpeechError(event.error);
-        }
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-        stopAudioMonitoring();
-      };
-
-      recognitionRef.current = recognition;
-    } catch (err) {
-      console.warn('[Speech Recognition Init Error]:', err);
-      setIsSupported(false);
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch {}
-      }
-      stopAudioMonitoring();
-    };
-  }, [language, onTranscriptReady, stopAudioMonitoring]);
-
-  // Start Mic Audio Monitoring with Web Audio API AnalyserNode
-  const startAudioMonitoring = useCallback(async () => {
-    try {
-      if (!audioContextRef.current) {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        audioContextRef.current = new AudioCtx();
-      }
-
-      if (audioContextRef.current.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true },
-      });
-      mediaStreamRef.current = stream;
-
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      const analyser = audioContextRef.current.createAnalyser();
-      analyser.fftSize = 64;
-      analyser.smoothingTimeConstant = 0.8;
-      source.connect(analyser);
-      analyserRef.current = analyser;
-
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-      const monitorLoop = () => {
-        if (!analyserRef.current) return;
-        analyserRef.current.getByteFrequencyData(dataArray);
-
-        let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          sum += dataArray[i];
-        }
-        const average = sum / (dataArray.length * 255);
-        setAudioLevel(Math.min(1.0, average * 2.2));
-
-        animationFrameRef.current = requestAnimationFrame(monitorLoop);
-      };
-
-      animationFrameRef.current = requestAnimationFrame(monitorLoop);
-    } catch {
-      // Audio permission not granted or unsupported; continue with simulated level
-    }
+    const hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    const hasAudioCtx = !!(window.AudioContext || (window as any).webkitAudioContext);
+    setIsSupported(hasMedia && hasAudioCtx);
   }, []);
 
-  // Start Voice Listening
-  const startListening = useCallback(() => {
-    if (!recognitionRef.current) return;
-    setTranscript('');
-    try {
-      recognitionRef.current.start();
-      startAudioMonitoring();
-    } catch (e) {
-      console.warn('[Speech Recognition Start Ignored]:', e);
+  // Stop active speech playback
+  const cancelSpeech = useCallback(() => {
+    if (activeControllerRef.current && isSpeakingRef.current) {
+      activeControllerRef.current.abort();
+      activeControllerRef.current = null;
     }
-  }, [startAudioMonitoring]);
+    isSpeakingRef.current = false;
+    setIsSpeaking(false);
+    setAudioLevel(0);
+  }, []);
 
-  // Stop Voice Listening
+  // Stop active recording
   const stopListening = useCallback(() => {
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch {}
+    if (activeControllerRef.current && !isSpeakingRef.current) {
+      activeControllerRef.current.abort();
+      activeControllerRef.current = null;
     }
     setIsListening(false);
-    stopAudioMonitoring();
-  }, [stopAudioMonitoring]);
-
-  // Speech Output with SpeechSynthesis
-  const speak = useCallback((text: string, onEnd?: () => void) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      if (onEnd) onEnd();
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    // Clean markdown and non-verbal tokens for natural speech
-    const cleanText = text
-      .replace(/[*_#`~>[\]]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    if (!cleanText) {
-      if (onEnd) onEnd();
-      return;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-
-    // Pick best available voice: prioritize Indian English (en-IN), Hindi (hi-IN), or natural low-pitched English
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice =
-      voices.find((v) => v.lang.includes('en-IN') || v.lang.includes('en_IN')) ||
-      voices.find((v) => v.lang.includes('hi-IN')) ||
-      voices.find((v) => v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('george')) ||
-      voices.find((v) => v.lang.startsWith('en')) ||
-      voices[0];
-
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-
-    utterance.pitch = 0.94; // Calm, authoritative lower tone
-    utterance.rate = 1.0; // Natural pacing
-
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      // Simulate voice output modulation on audio level
-      clearInterval(speechVolumeIntervalRef.current);
-      speechVolumeIntervalRef.current = setInterval(() => {
-        setAudioLevel(0.3 + Math.random() * 0.55);
-      }, 100);
-    };
-
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      clearInterval(speechVolumeIntervalRef.current);
-      setAudioLevel(0);
-      if (onEnd) onEnd();
-    };
-
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-      clearInterval(speechVolumeIntervalRef.current);
-      setAudioLevel(0);
-      if (onEnd) onEnd();
-    };
-
-    window.speechSynthesis.speak(utterance);
+    setAudioLevel(0);
+    isTurnRunningRef.current = false;
   }, []);
 
-  const cancelSpeech = useCallback(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+  // Speech Output with Gemini Neural TTS
+  const speak = useCallback((text: string, onEnd?: () => void) => {
+    if (!text || !text.trim()) {
+      if (onEnd) onEnd();
+      return;
     }
-    setIsSpeaking(false);
-    clearInterval(speechVolumeIntervalRef.current);
-    setAudioLevel(0);
+
+    // Cancel any ongoing speech or recording
+    if (activeControllerRef.current) {
+      activeControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    activeControllerRef.current = controller;
+    isSpeakingRef.current = true;
+    setIsSpeaking(true);
+    setSpeechError(null);
+
+    (async () => {
+      try {
+        // 1. Fetch neural audio from /api/jarvis/tts
+        const blob = await fetchSpeech(text, controller.signal);
+
+        // 2. Play speech and drive audio levels into orb animation
+        await playSpeech(blob, {
+          onLevel: (lvl) => {
+            if (!controller.signal.aborted) {
+              setAudioLevel(lvl);
+            }
+          },
+          signal: controller.signal,
+        });
+      } catch (err: any) {
+        if (err?.name !== 'AbortError') {
+          console.warn('[Jarvis TTS Playback Notice]:', err?.message || err);
+          if (err instanceof VoiceError) {
+            setSpeechError(err.code);
+          } else {
+            setSpeechError('MODEL_FAILED');
+          }
+        }
+      } finally {
+        if (activeControllerRef.current === controller) {
+          activeControllerRef.current = null;
+        }
+        isSpeakingRef.current = false;
+        setIsSpeaking(false);
+        setAudioLevel(0);
+        if (onEnd) onEnd();
+      }
+    })();
+  }, []);
+
+  // Start Voice Listening / Turn Loop
+  const startListening = useCallback(async () => {
+    // If speaking, interrupt speech immediately and transition to listening
+    if (isSpeakingRef.current) {
+      cancelSpeech();
+    }
+
+    // Guard: ignore if recording turn is already running
+    if (isTurnRunningRef.current) {
+      return;
+    }
+
+    isTurnRunningRef.current = true;
+
+    // Must unlock AudioContext inside the user gesture
+    try {
+      await unlockAudio();
+    } catch {
+      // AudioContext unlocking notice
+    }
+
+    const controller = new AbortController();
+    activeControllerRef.current = controller;
+
+    setTranscript('');
+    setSpeechError(null);
+    setIsListening(true);
+
+    try {
+      // 1. Record voice utterance with live audio levels fed to orb
+      const recordingBlob = await recordUtterance({
+        onLevel: (lvl) => {
+          if (!controller.signal.aborted) {
+            setAudioLevel(lvl);
+          }
+        },
+        signal: controller.signal,
+      });
+
+      setIsListening(false);
+      setAudioLevel(0);
+
+      // 2. Transcribe recorded audio with /api/jarvis/stt
+      const spokenText = await transcribe(
+        recordingBlob,
+        languageRef.current,
+        controller.signal
+      );
+
+      if (spokenText) {
+        setTranscript(spokenText);
+        if (onTranscriptReadyRef.current) {
+          onTranscriptReadyRef.current(spokenText);
+        }
+      }
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        console.warn('[Jarvis Voice Input Error]:', err?.message || err);
+        if (err instanceof VoiceError) {
+          setSpeechError(err.code);
+        } else {
+          setSpeechError('MIC_FAILED');
+        }
+      }
+    } finally {
+      if (activeControllerRef.current === controller) {
+        activeControllerRef.current = null;
+      }
+      setIsListening(false);
+      setAudioLevel(0);
+      isTurnRunningRef.current = false;
+    }
+  }, [cancelSpeech]);
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (activeControllerRef.current) {
+        activeControllerRef.current.abort();
+        activeControllerRef.current = null;
+      }
+      isTurnRunningRef.current = false;
+      isSpeakingRef.current = false;
+    };
   }, []);
 
   return {
@@ -258,7 +218,7 @@ export function useJarvisVoice({ onTranscriptReady, language = 'en-IN' }: UseJar
     audioLevel,
     transcript,
     speechError,
-    analyserNode: analyserRef.current,
+    analyserNode: null, // Audio level is directly streamed via onLevel
     startListening,
     stopListening,
     speak,

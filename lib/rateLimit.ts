@@ -609,3 +609,43 @@ export async function checkEnquiryRateLimit(reqOrIp: NextRequest | Request | str
     cookieToSet: identity.cookieToSet,
   };
 }
+
+// ==========================================
+// 7. Jarvis Voice (TTS / STT) Rate Limiting
+// ==========================================
+
+export async function checkVoiceActionLimit(
+  reqOrIp: NextRequest | Request | string,
+  kind = 'voice',
+  limit = 24,
+  windowSeconds = 600
+): Promise<{ ok: boolean; retryAfter?: number }> {
+  logRedisWarningOnce();
+  const identity = getVisitorIdentity(reqOrIp);
+  let maxUsage = 0;
+  let maxTtl = windowSeconds;
+
+  for (const key of identity.keys) {
+    const rateKey = `rate:jarvis_voice_${kind}:${key}`;
+    const counter = await getCounter(rateKey);
+    if (counter.count > maxUsage) {
+      maxUsage = counter.count;
+    }
+    if (counter.ttlRemaining > 0) {
+      maxTtl = counter.ttlRemaining;
+    }
+    if (counter.count >= limit) {
+      return {
+        ok: false,
+        retryAfter: counter.ttlRemaining || maxTtl || windowSeconds,
+      };
+    }
+  }
+
+  for (const key of identity.keys) {
+    const rateKey = `rate:jarvis_voice_${kind}:${key}`;
+    await atomicIncrement(rateKey, windowSeconds);
+  }
+
+  return { ok: true };
+}

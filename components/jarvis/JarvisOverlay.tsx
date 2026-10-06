@@ -24,6 +24,9 @@ import {
 } from 'lucide-react';
 import { HologramCanvas, AssistantVisualState } from './HologramCanvas';
 import { useJarvisVoice } from './useJarvisVoice';
+import { JarvisBackdrop } from './JarvisBackdrop';
+import { unlockAudio } from '@/lib/jarvisAudio';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface JarvisOverlayProps {
   isOpen: boolean;
@@ -41,6 +44,15 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [bootCompleted, setBootCompleted] = useState<boolean>(false);
   const [bootLogs, setBootLogs] = useState<string[]>([]);
+
+  // Orb Geometry for HUD Backdrop synchronization
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const orbContainerRef = useRef<HTMLDivElement | null>(null);
+  const [orbGeometry, setOrbGeometry] = useState<{ centerY: number; orbRadius: number }>({
+    centerY: 0.46,
+    orbRadius: 180,
+  });
+  const [mobileLogOpen, setMobileLogOpen] = useState<boolean>(false);
 
   // Input & Messages
   const [inputQuery, setInputQuery] = useState<string>('');
@@ -67,6 +79,8 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
   const sessionIdRef = useRef<string>(`sess-${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
+  const [conversationMode] = useState<boolean>(true);
 
   // Voice Hook
   const {
@@ -75,6 +89,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     isSpeaking,
     audioLevel,
     transcript,
+    speechError,
     analyserNode,
     startListening,
     stopListening,
@@ -89,6 +104,50 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     },
   });
 
+  // Tap handler: unlocks audio, interrupts if speaking, or toggles listening
+  const handleVoiceTap = async () => {
+    // 1. Must run inside user tap gesture
+    await unlockAudio().catch(() => {});
+
+    // 2. Interrupt: tapping while speaking aborts playback and starts listening
+    if (isSpeaking) {
+      cancelSpeech();
+      startListening();
+      return;
+    }
+
+    // 3. If currently listening, stop
+    if (isListening) {
+      stopListening();
+      return;
+    }
+
+    // 4. Start voice turn
+    startListening();
+  };
+
+  // Map VoiceError codes to friendly localized messages in terminal
+  useEffect(() => {
+    if (speechError) {
+      const voiceErrors = (t?.assistant as any)?.voiceErrors;
+      let friendlyMsg = t?.assistant?.errors?.genericError || 'Voice service notice.';
+      if (voiceErrors) {
+        if (speechError === 'UNSUPPORTED') friendlyMsg = voiceErrors.unsupported;
+        else if (speechError === 'INSECURE') friendlyMsg = voiceErrors.insecure;
+        else if (speechError === 'DENIED') friendlyMsg = voiceErrors.denied;
+        else if (speechError === 'NO_DEVICE') friendlyMsg = voiceErrors.noDevice;
+        else if (speechError === 'MIC_FAILED') friendlyMsg = voiceErrors.micFailed;
+        else if (speechError === 'RATE_LIMIT') friendlyMsg = voiceErrors.rateLimit;
+        else if (speechError === 'PROVIDER_QUOTA') friendlyMsg = voiceErrors.providerQuota;
+        else if (speechError === 'NO_KEY') friendlyMsg = voiceErrors.noKey;
+        else if (speechError === 'MODEL_FAILED') friendlyMsg = voiceErrors.modelFailed;
+        else if (speechError === 'NETWORK') friendlyMsg = voiceErrors.network;
+        else if (speechError === 'SERVER_ERROR') friendlyMsg = voiceErrors.serverError;
+      }
+      setBootLogs((prev) => [...prev, `SYS_VOICE_NOTICE: ${friendlyMsg}`]);
+    }
+  }, [speechError, t]);
+
   // Sync Visual State with Voice
   useEffect(() => {
     if (isProcessing) {
@@ -102,12 +161,13 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     }
   }, [isProcessing, isSpeaking, isListening]);
 
-  // Boot Sequence Simulation on Open
+  // Boot Sequence Simulation on Open & Clean up on close
   useEffect(() => {
     if (!isOpen) {
       setBootCompleted(false);
       setBootLogs([]);
       cancelSpeech();
+      stopListening();
       return;
     }
 
@@ -133,7 +193,36 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     }, 280);
 
     return () => clearInterval(interval);
-  }, [isOpen, cancelSpeech]);
+  }, [isOpen, cancelSpeech, stopListening]);
+
+  // Synchronize Orb geometry with HUD Backdrop rings
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const measureOrb = () => {
+      if (overlayRef.current && orbContainerRef.current) {
+        const overlayRect = overlayRef.current.getBoundingClientRect();
+        const orbRect = orbContainerRef.current.getBoundingClientRect();
+        if (overlayRect.height > 0) {
+          const cy = (orbRect.top + orbRect.height / 2 - overlayRect.top) / overlayRect.height;
+          const radius = Math.min(orbRect.width, orbRect.height) / 2;
+          setOrbGeometry({
+            centerY: Math.max(0.2, Math.min(0.8, cy)),
+            orbRadius: Math.max(50, radius),
+          });
+        }
+      }
+    };
+
+    measureOrb();
+    const frameId = requestAnimationFrame(measureOrb);
+    window.addEventListener('resize', measureOrb);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', measureOrb);
+    };
+  }, [isOpen]);
 
   // Keyboard shortcut Esc to close
   useEffect(() => {
@@ -191,7 +280,11 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         }
 
         if (!audioMuted) {
-          speak(data.reply);
+          speak(data.reply, () => {
+            if (conversationMode && isOpen) {
+              startListening();
+            }
+          });
         }
       } else {
         const errorMsg = data.error || 'Transmission failed. Signal lost.';
@@ -322,26 +415,32 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#05070a]/95 backdrop-blur-xl text-slate-100 font-mono overflow-hidden select-none">
-      {/* 1. Subtle Hologram Scanline & Vignette Effect */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(5,7,10,0.85)_100%)]" />
-      <div className="absolute inset-0 pointer-events-none opacity-[0.035] bg-[linear-gradient(rgba(56,232,255,0.2)_1px,transparent_1px)] bg-[size:100%_4px]" />
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-50 flex flex-col bg-[#05070a] text-slate-100 font-mono overflow-hidden select-none"
+    >
+      {/* 1. Dynamic Holographic Concentric HUD Backdrop */}
+      <JarvisBackdrop
+        state={visualState}
+        loudness={audioLevel}
+        centerY={orbGeometry.centerY}
+        orbRadius={orbGeometry.orbRadius}
+      />
 
-      {/* 2. Scanning Perspective Grid Floor */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none overflow-hidden opacity-30">
-        <div className="w-[200%] -left-[50%] h-full relative [transform:perspective(500px)_rotateX(60deg)] bg-[linear-gradient(to_right,rgba(56,232,255,0.15)_1px,transparent_1px),linear-gradient(to_bottom,rgba(56,232,255,0.15)_1px,transparent_1px)] bg-[size:40px_40px] animate-[pulse_4s_ease-in-out_infinite]" />
-      </div>
+      {/* 2. Subtle Hologram Scanline & Vignette Effect */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(5,7,10,0.85)_100%)] z-[1]" />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.035] bg-[linear-gradient(rgba(56,232,255,0.2)_1px,transparent_1px)] bg-[size:100%_4px] z-[1]" />
 
       {/* 3. Sci-Fi HUD Corner Brackets */}
-      <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-[#38e8ff]/60 pointer-events-none" />
-      <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-[#38e8ff]/60 pointer-events-none" />
-      <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-[#38e8ff]/60 pointer-events-none" />
-      <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-[#38e8ff]/60 pointer-events-none" />
+      <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
+      <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
+      <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
+      <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
 
-      {/* 4. Top Telemetry Bar */}
-      <div className="absolute top-0 left-0 right-0 h-14 border-b border-[#38e8ff]/20 bg-[#05070a]/70 flex items-center justify-between px-6 z-20">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#38e8ff] animate-ping" />
+      {/* 4. Slim Header Telemetry Bar */}
+      <div className="h-12 border-b border-[#38e8ff]/20 bg-[#05070a]/80 flex items-center justify-between px-4 sm:px-6 relative z-30 shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-2 h-2 rounded-full bg-[#38e8ff] animate-ping" />
           <span className="text-xs uppercase tracking-widest text-[#38e8ff] font-bold">
             HAYAATI // NEURAL CORE v3.8
           </span>
@@ -350,14 +449,14 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* Audio Mute Toggle */}
           <button
             onClick={() => {
               if (!audioMuted) cancelSpeech();
               setAudioMuted(!audioMuted);
             }}
-            className="p-2 rounded border border-[#38e8ff]/30 text-[#38e8ff] hover:bg-[#38e8ff]/10 transition-colors"
+            className="p-1.5 sm:p-2 rounded border border-[#38e8ff]/30 text-[#38e8ff] hover:bg-[#38e8ff]/10 transition-colors cursor-pointer"
             title={audioMuted ? 'Unmute Audio' : 'Mute Audio'}
           >
             {audioMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -370,18 +469,18 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
                 fetchAdminData();
                 setShowAdminPanel(true);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#ffaa00]/60 bg-[#ffaa00]/10 text-[#ffaa00] text-xs hover:bg-[#ffaa00]/20 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-[#ffaa00]/60 bg-[#ffaa00]/10 text-[#ffaa00] text-xs hover:bg-[#ffaa00]/20 transition-colors cursor-pointer"
             >
               <Sliders className="w-3.5 h-3.5" />
-              <span>ADMIN PANEL</span>
+              <span className="hidden sm:inline">ADMIN PANEL</span>
             </button>
           )}
 
-          {/* Lock / Unlock Status */}
+          {/* Lock / Authenticate Status */}
           {isOwner ? (
             <button
               onClick={handleLockOwnerMode}
-              className="flex items-center gap-1 px-3 py-1.5 rounded border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 text-xs hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/50 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 text-xs hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/50 transition-colors cursor-pointer"
               title="Lock Owner Mode"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -390,7 +489,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           ) : (
             <button
               onClick={() => setShowVerifyModal(true)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded border border-[#38e8ff]/30 text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff] text-xs transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded border border-[#38e8ff]/30 text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff] text-xs transition-colors cursor-pointer"
               title="Owner Authentication"
             >
               <Lock className="w-3.5 h-3.5" />
@@ -401,7 +500,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           {/* Close Overlay Button */}
           <button
             onClick={onClose}
-            className="p-2 rounded border border-slate-700 hover:border-rose-500/80 hover:text-rose-400 text-slate-400 transition-colors"
+            className="p-1.5 sm:p-2 rounded border border-slate-700 hover:border-rose-500/80 hover:text-rose-400 text-slate-400 transition-colors cursor-pointer"
             title="Close Interface (Esc)"
           >
             <X className="w-4 h-4" />
@@ -409,130 +508,191 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         </div>
       </div>
 
-      {/* 5. Main Holographic Stage Grid */}
-      <div className="w-full h-full pt-16 pb-20 px-4 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 max-w-7xl mx-auto">
-        {/* Left Side: System Terminal & Conversation Stream */}
-        <div className="lg:col-span-4 flex flex-col h-full bg-[#0a0f18]/60 border border-[#38e8ff]/20 rounded-lg p-4 backdrop-blur-md overflow-hidden">
-          <div className="flex items-center justify-between border-b border-[#38e8ff]/20 pb-2 mb-3">
+      {/* Mobile LOG Chip Button (Visible only < 900px, opens bottom sheet) */}
+      <button
+        onClick={() => setMobileLogOpen(true)}
+        className="min-[900px]:hidden absolute left-4 top-14 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded border border-[#38e8ff]/40 bg-[#0a0f18]/90 text-[#38e8ff] text-xs hover:bg-[#38e8ff]/20 transition-colors cursor-pointer shadow-[0_0_12px_rgba(56,232,255,0.2)]"
+      >
+        <Terminal className="w-3.5 h-3.5" />
+        <span className="font-bold tracking-wider">LOG</span>
+        {messages.length > 0 && <span className="w-1.5 h-1.5 rounded-full bg-[#38e8ff]" />}
+      </button>
+
+      {/* Desktop Floating Terminal Panel (>= 900px, narrow 280px, floating at left, not part of layout flow) */}
+      <div className="hidden min-[900px]:flex absolute left-6 top-16 bottom-24 w-[280px] z-20 flex-col bg-[#0a0f18]/80 border border-[#38e8ff]/20 rounded-lg p-3.5 overflow-hidden select-text">
+        <div className="flex items-center justify-between border-b border-[#38e8ff]/20 pb-2 mb-2.5 shrink-0">
+          <div className="flex items-center gap-2 text-xs text-[#38e8ff]">
+            <Terminal className="w-3.5 h-3.5" />
+            <span className="font-bold tracking-wider">TERMINAL TELEMETRY</span>
+          </div>
+          <span className="text-[10px] text-slate-500">LIVE BUS</span>
+        </div>
+
+        {/* Scrollable messages */}
+        <div className="flex-1 overflow-y-auto space-y-2.5 pr-1.5 scrollbar-thin text-xs">
+          {bootLogs.map((log, idx) => (
+            <div key={`boot-${idx}`} className="text-slate-400 text-[11px] font-mono leading-relaxed">
+              <span className="text-[#38e8ff]/70 mr-1.5">&gt;</span>
+              {log}
+            </div>
+          ))}
+
+          {messages.map((m, idx) => (
+            <div
+              key={`msg-${idx}`}
+              className={`p-2 rounded border ${
+                m.role === 'user'
+                  ? 'border-[#38e8ff]/40 bg-[#38e8ff]/10 text-slate-100 ml-2'
+                  : 'border-slate-800 bg-[#070b12]/90 text-[#38e8ff] mr-2'
+              }`}
+            >
+              <div className="text-[9px] uppercase font-bold tracking-wider mb-0.5 opacity-70">
+                {m.role === 'user' ? 'TRANSMISSION // SENDER' : 'CORE // RESPONSE'}
+              </div>
+              <div className="text-xs leading-relaxed font-sans">{m.text}</div>
+            </div>
+          ))}
+
+          {isProcessing && (
+            <div className="p-2 rounded border border-[#ffaa00]/40 bg-[#ffaa00]/5 text-[#ffaa00] mr-2 animate-pulse flex items-center gap-1.5">
+              <Activity className="w-3 h-3 animate-spin" />
+              <span className="text-[11px]">Processing neural synthesis...</span>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Mobile Terminal Bottom Sheet (< 900px) */}
+      {mobileLogOpen && (
+        <div className="min-[900px]:hidden fixed inset-x-0 bottom-0 max-h-[65vh] bg-[#0a0f18]/95 border-t border-[#38e8ff]/40 rounded-t-xl z-40 p-4 flex flex-col shadow-2xl select-text">
+          <div className="flex items-center justify-between border-b border-[#38e8ff]/20 pb-2 mb-3 shrink-0">
             <div className="flex items-center gap-2 text-xs text-[#38e8ff]">
               <Terminal className="w-4 h-4" />
-              <span>TERMINAL TELEMETRY</span>
+              <span className="font-bold tracking-wider">TERMINAL TELEMETRY</span>
             </div>
-            <span className="text-[10px] text-slate-500">REAL-TIME BUS</span>
+            <button
+              onClick={() => setMobileLogOpen(false)}
+              className="p-1 rounded text-slate-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-
-          {/* Terminal Log Messages */}
-          <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin text-xs">
+          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1.5 scrollbar-thin text-xs">
             {bootLogs.map((log, idx) => (
-              <div key={`boot-${idx}`} className="text-slate-400 text-[11px] font-mono leading-relaxed">
+              <div key={`mboot-${idx}`} className="text-slate-400 text-[11px] font-mono leading-relaxed">
                 <span className="text-[#38e8ff]/70 mr-1.5">&gt;</span>
                 {log}
               </div>
             ))}
-
             {messages.map((m, idx) => (
               <div
-                key={`msg-${idx}`}
-                className={`p-2.5 rounded border ${
+                key={`mmsg-${idx}`}
+                className={`p-2 rounded border ${
                   m.role === 'user'
-                    ? 'border-[#38e8ff]/40 bg-[#38e8ff]/10 text-slate-100 ml-4'
-                    : 'border-slate-800 bg-[#070b12]/80 text-[#38e8ff] mr-4'
+                    ? 'border-[#38e8ff]/40 bg-[#38e8ff]/10 text-slate-100 ml-2'
+                    : 'border-slate-800 bg-[#070b12]/90 text-[#38e8ff] mr-2'
                 }`}
               >
-                <div className="text-[10px] uppercase font-bold tracking-wider mb-1 opacity-70">
+                <div className="text-[9px] uppercase font-bold tracking-wider mb-0.5 opacity-70">
                   {m.role === 'user' ? 'TRANSMISSION // SENDER' : 'CORE // RESPONSE'}
                 </div>
                 <div className="text-xs leading-relaxed font-sans">{m.text}</div>
               </div>
             ))}
-
             {isProcessing && (
-              <div className="p-2.5 rounded border border-[#ffaa00]/40 bg-[#ffaa00]/5 text-[#ffaa00] mr-4 animate-pulse flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5 animate-spin" />
-                <span className="text-xs">Processing neural synthesis...</span>
+              <div className="p-2 rounded border border-[#ffaa00]/40 bg-[#ffaa00]/5 text-[#ffaa00] mr-2 animate-pulse flex items-center gap-1.5">
+                <Activity className="w-3 h-3 animate-spin" />
+                <span className="text-[11px]">Processing neural synthesis...</span>
               </div>
             )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Waveform Equalizer Display */}
-          <div className="mt-3 pt-3 border-t border-[#38e8ff]/20 flex items-center justify-between">
-            <span className="text-[10px] text-slate-500 uppercase">SPECTRUM:</span>
-            <div className="flex items-end gap-1 h-5">
-              {[0.4, 0.8, 0.6, 1.0, 0.5, 0.9, 0.3, 0.7, 0.5, 0.8].map((mult, i) => {
-                const barHeight = Math.max(3, (audioLevel || 0.1) * mult * 20);
-                return (
-                  <div
-                    key={i}
-                    style={{ height: `${barHeight}px` }}
-                    className="w-1 bg-[#38e8ff] rounded-t transition-all duration-75"
-                  />
-                );
-              })}
-            </div>
           </div>
         </div>
+      )}
 
-        {/* Center: 3D Holographic Arc-Reactor Neural Core */}
-        <div className="lg:col-span-8 flex flex-col items-center justify-center relative min-h-[350px]">
-          {/* Radar Sweep HUD Element */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[340px] h-[340px] md:w-[480px] md:h-[480px] rounded-full border border-[#38e8ff]/15 relative">
-              <div className="absolute inset-4 rounded-full border border-dashed border-[#38e8ff]/20 animate-[spin_60s_linear_infinite]" />
-              <div className="absolute inset-16 rounded-full border border-[#38e8ff]/10" />
-              {/* Radar sweep beam */}
-              <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_0_300deg,rgba(56,232,255,0.12)_360deg)] animate-[spin_6s_linear_infinite]" />
-            </div>
-          </div>
+      {/* 5. Centered Holographic Stage Container (Horizontal & Vertical Center ~46%) */}
+      <div
+        className="absolute inset-x-0 flex flex-col items-center justify-center pointer-events-none z-10"
+        style={{ top: '46%', transform: 'translateY(-50%)' }}
+      >
+        {/* Hologram Orb Container */}
+        <div
+          ref={orbContainerRef}
+          onClick={handleVoiceTap}
+          style={{
+            width: 'min(78vw, 46vh, 520px)',
+            height: 'min(78vw, 46vh, 520px)',
+          }}
+          className="relative cursor-pointer pointer-events-auto flex items-center justify-center"
+          title={isSpeaking ? 'Speaking (tap to interrupt)' : isListening ? 'Listening (tap to stop)' : 'Tap to speak'}
+        >
+          <HologramCanvas
+            visualState={visualState}
+            audioLevel={audioLevel}
+            analyserNode={analyserNode}
+          />
+        </div>
 
-          {/* Real 3D WebGL Hologram Canvas */}
-          <div className="w-full h-[400px] md:h-[500px] relative z-10">
-            <HologramCanvas
-              visualState={visualState}
-              audioLevel={audioLevel}
-              analyserNode={analyserNode}
-            />
-          </div>
+        {/* State Indicator: centered right below the orb */}
+        <div className="mt-3 text-center pointer-events-auto">
+          <span
+            className={`text-xs uppercase tracking-widest font-bold px-3.5 py-1 rounded-full border ${
+              visualState === 'listening'
+                ? 'border-[#ffaa00] text-[#ffaa00] bg-[#ffaa00]/10'
+                : visualState === 'thinking'
+                ? 'border-[#38e8ff] text-[#38e8ff] bg-[#38e8ff]/10 animate-pulse'
+                : visualState === 'speaking'
+                ? 'border-emerald-400 text-emerald-400 bg-emerald-400/10'
+                : 'border-slate-700 text-slate-400 bg-slate-900/60'
+            }`}
+          >
+            STATE // {visualState.toUpperCase()}
+          </span>
+        </div>
 
-          {/* State Indicator */}
-          <div className="mt-1 text-center z-10">
-            <span
-              className={`text-xs uppercase tracking-widest font-bold px-3 py-1 rounded-full border ${
-                visualState === 'listening'
-                  ? 'border-[#ffaa00] text-[#ffaa00] bg-[#ffaa00]/10'
-                  : visualState === 'thinking'
-                  ? 'border-[#38e8ff] text-[#38e8ff] bg-[#38e8ff]/10 animate-pulse'
-                  : visualState === 'speaking'
-                  ? 'border-emerald-400 text-emerald-400 bg-emerald-400/10'
-                  : 'border-slate-700 text-slate-400 bg-slate-900/60'
-              }`}
-            >
-              STATE // {visualState.toUpperCase()}
-            </span>
-          </div>
+        {/* Spectrum Bar: right under state indicator */}
+        <div className="mt-2.5 flex items-end gap-1 h-4 pointer-events-auto">
+          {[0.4, 0.8, 0.6, 1.0, 0.5, 0.9, 0.3, 0.7, 0.5, 0.8].map((mult, i) => {
+            const barHeight = Math.max(3, (audioLevel || 0.1) * mult * 16);
+            return (
+              <div
+                key={i}
+                style={{ height: `${barHeight}px` }}
+                className="w-1 bg-[#38e8ff] rounded-t transition-all duration-75"
+              />
+            );
+          })}
         </div>
       </div>
 
-      {/* 6. Bottom Input & Voice Control Matrix */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-[#38e8ff]/20 bg-[#05070a]/90 backdrop-blur-md p-4 z-20">
-        <div className="max-w-3xl mx-auto flex items-center gap-3">
+      {/* 6. Fixed Bottom Command Bar */}
+      <div className="absolute bottom-0 left-0 right-0 border-t border-[#38e8ff]/20 bg-[#05070a]/95 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30">
+        <div className="max-w-3xl mx-auto flex items-center gap-2 sm:gap-3">
           {/* Voice Microphone Button */}
           {voiceSupported && (
             <button
-              onClick={isListening ? stopListening : startListening}
-              className={`p-3 rounded-full border transition-all ${
+              onClick={handleVoiceTap}
+              className={`p-3 rounded-full border transition-all cursor-pointer shrink-0 ${
                 isListening
                   ? 'border-rose-500 bg-rose-500/20 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.4)] animate-pulse'
+                  : isSpeaking
+                  ? 'border-emerald-400 bg-emerald-400/20 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.4)]'
                   : 'border-[#38e8ff]/40 bg-[#38e8ff]/10 text-[#38e8ff] hover:bg-[#38e8ff]/20'
               }`}
-              title={isListening ? 'Stop Listening' : 'Speak to Core'}
+              title={
+                isSpeaking
+                  ? 'Speaking (tap to interrupt)'
+                  : isListening
+                  ? 'Listening (tap to stop)'
+                  : 'Tap to speak'
+              }
             >
               {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             </button>
           )}
 
-          {/* Text Command Input Box */}
+          {/* Text Command Input Box (font size at least 16px to prevent mobile zoom) */}
           <div className="flex-1 relative">
             <input
               type="text"
@@ -546,18 +706,19 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
                   ? 'Listening for voice transmission...'
                   : 'Type transmission or speak into neural core...'
               }
-              className="w-full bg-[#0a0f18] border border-[#38e8ff]/30 focus:border-[#38e8ff] text-slate-100 placeholder-slate-500 text-xs px-4 py-3 rounded-md outline-none transition-colors"
+              style={{ fontSize: '16px' }}
+              className="w-full bg-[#0a0f18] border border-[#38e8ff]/30 focus:border-[#38e8ff] text-slate-100 placeholder-slate-500 px-4 py-2.5 sm:py-3 rounded-md outline-none transition-colors"
             />
           </div>
 
-          {/* Send Button */}
+          {/* TRANSMIT Button */}
           <button
             onClick={() => handleSendMessage()}
             disabled={!inputQuery.trim() || isProcessing}
-            className="px-5 py-3 rounded-md bg-[#38e8ff] text-[#05070a] font-bold text-xs uppercase tracking-wider hover:bg-[#38e8ff]/90 disabled:opacity-40 disabled:pointer-events-none transition-colors flex items-center gap-1.5"
+            className="px-4 sm:px-5 py-2.5 sm:py-3 rounded bg-[#38e8ff] text-[#05070a] font-bold text-xs uppercase tracking-wider hover:bg-[#38e8ff]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
           >
-            <span>TRANSMIT</span>
             <Send className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">TRANSMIT</span>
           </button>
         </div>
       </div>

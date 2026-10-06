@@ -202,6 +202,19 @@
       "micBlocked": "Mikrofonzugriff verweigert. Bitte Mikrofon im Browser erlauben.",
       "sessionEnded": "Sprachsitzung beendet (maximale Dauer erreicht). Sie können eine neue Sitzung starten.",
       "genericError": "Ein Fehler ist aufgetreten. Bitte klicken Sie auf Wiederholen."
+    },
+    "voiceErrors": {
+      "unsupported": "Das Mikrofon wird in diesem Browser nicht unterstützt.",
+      "insecure": "Die Spracheingabe erfordert eine sichere HTTPS-Verbindung.",
+      "denied": "Mikrofonberechtigung wurde verweigert. Bitte Zugriff erlauben.",
+      "noDevice": "Kein Mikrofongerät auf diesem System gefunden.",
+      "micFailed": "Audiogerät konnte nicht initialisiert werden.",
+      "rateLimit": "Sprachlimit erreicht. Bitte einen Moment warten.",
+      "providerQuota": "Sprachkontingent überschritten. Texteingabe bleibt aktiv.",
+      "noKey": "Der Schlüssel für den Sprachdienst ist nicht konfiguriert.",
+      "modelFailed": "Sprachsynthese fehlgeschlagen. Textantwort unten angezeigt.",
+      "network": "Netzwerkverbindung während der Übertragung unterbrochen.",
+      "serverError": "Serverfehler bei der Sprachverarbeitung aufgetreten."
     }
   },
   "footer": {

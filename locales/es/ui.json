@@ -202,6 +202,19 @@
       "micBlocked": "Permiso de micrófono denegado. Habilita el micrófono en los ajustes de tu navegador.",
       "sessionEnded": "Sesión de voz finalizada (duración máxima alcanzada). Puedes iniciar una nueva sesión.",
       "genericError": "Ocurrió un error al procesar tu solicitud. Haz clic en Reintentar."
+    },
+    "voiceErrors": {
+      "unsupported": "El micrófono no es compatible con este navegador.",
+      "insecure": "La entrada de voz requiere una conexión segura HTTPS.",
+      "denied": "Permiso de micrófono denegado. Por favor, autorice el acceso.",
+      "noDevice": "No se detectó ningún dispositivo de micrófono en el sistema.",
+      "micFailed": "No se pudo iniciar el dispositivo de grabación de audio.",
+      "rateLimit": "Límite de voz alcanzado. Por favor, espere un momento.",
+      "providerQuota": "Cuota de voz agotada. La entrada por texto sigue activa.",
+      "noKey": "Clave del servicio de voz neuronal no configurada.",
+      "modelFailed": "Síntesis de voz fallida. Respuesta mostrada en texto abajo.",
+      "network": "Conexión de red interrumpida durante la transmisión de voz.",
+      "serverError": "Error del servidor de voz. Por favor, reintente."
     }
   },
   "footer": {

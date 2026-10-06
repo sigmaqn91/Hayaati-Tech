@@ -202,6 +202,19 @@
       "micBlocked": "Microphone permission was denied. Please allow microphone access in your browser settings to enable voice.",
       "sessionEnded": "Voice session completed (maximum duration reached). You may start a new link anytime.",
       "genericError": "Something went wrong while processing your request. Please click Retry."
+    },
+    "voiceErrors": {
+      "unsupported": "Microphone is not supported in this browser environment.",
+      "insecure": "Voice input requires a secure HTTPS connection.",
+      "denied": "Microphone permission was denied. Please allow microphone access.",
+      "noDevice": "No microphone input device was found on this system.",
+      "micFailed": "Unable to initialize audio recording device.",
+      "rateLimit": "Voice rate limit reached. Please hold for a moment.",
+      "providerQuota": "Voice service quota exceeded. Text command input remains active.",
+      "noKey": "Neural voice service key is unconfigured.",
+      "modelFailed": "Neural audio synthesis failed. Text response shown below.",
+      "network": "Network connection dropped during voice transmission.",
+      "serverError": "Voice server error encountered. Please retry."
     }
   },
   "footer": {

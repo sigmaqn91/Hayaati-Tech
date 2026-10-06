@@ -202,6 +202,19 @@
       "micBlocked": "Akses mikrofon ditolak. Berikan izin mikrofon pada peramban.",
       "sessionEnded": "Sesi suara selesai (mencapai batas durasi). Anda dapat memulai sesi baru kapan saja.",
       "genericError": "Terjadi gangguan saat memproses. Silakan klik Coba Lagi."
+    },
+    "voiceErrors": {
+      "unsupported": "Mikrofon tidak didukung di lingkungan peramban ini.",
+      "insecure": "Masukan suara memerlukan koneksi HTTPS yang aman.",
+      "denied": "Izin mikrofon ditolak. Harap izinkan akses mikrofon.",
+      "noDevice": "Perangkat mikrofon tidak ditemukan pada sistem ini.",
+      "micFailed": "Gagal menginisialisasi perangkat perekam audio.",
+      "rateLimit": "Batas transmisi suara tercapai. Harap tunggu sebentar.",
+      "providerQuota": "Kuota layanan suara habis. Perintah teks tetap aktif.",
+      "noKey": "Kunci layanan suara neural belum dikonfigurasi.",
+      "modelFailed": "Sintesis suara gagal. Tanggapan teks ditampilkan di bawah.",
+      "network": "Koneksi jaringan terputus saat transmisi suara.",
+      "serverError": "Terjadi kesalahan pada peladen suara. Silakan coba lagi."
     }
   },
   "footer": {
