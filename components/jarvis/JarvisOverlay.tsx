@@ -23,9 +23,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { HologramCanvas, AssistantVisualState } from './HologramCanvas';
-import { useJarvisVoice } from './useJarvisVoice';
+import { useJarvisVoice, unlockAudio } from './useJarvisVoice';
 import { JarvisBackdrop } from './JarvisBackdrop';
-import { unlockAudio } from '@/lib/jarvisAudio';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface JarvisOverlayProps {
@@ -246,7 +245,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, bootLogs]);
 
-  // Send Query to /api/jarvis/chat
+  // Send Query to original working Gemini connection /api/chat
   const handleSendMessage = async (textToSend?: string) => {
     const query = textToSend || inputQuery;
     if (!query || !query.trim() || isProcessing) return;
@@ -256,12 +255,17 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     setIsProcessing(true);
 
     try {
-      const res = await fetch('/api/jarvis/chat', {
+      const historyPayload = messages.slice(-6).map((m) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        text: m.text,
+      }));
+
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: query,
-          sessionId: sessionIdRef.current,
+          history: historyPayload,
           language,
         }),
       });
@@ -287,14 +291,14 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           });
         }
       } else {
-        const errorMsg = data.error || 'Transmission failed. Signal lost.';
+        const errorMsg = data.error || (t?.assistant?.errors?.genericError || 'Transmission failed. Signal lost.');
         setMessages((prev) => [...prev, { role: 'assistant', text: errorMsg }]);
         if (!audioMuted) {
           speak(errorMsg);
         }
       }
     } catch {
-      const errorMsg = 'Neural connection interrupted. Reconnecting...';
+      const errorMsg = t?.assistant?.errors?.networkError || 'Neural connection interrupted. Reconnecting...';
       setMessages((prev) => [...prev, { role: 'assistant', text: errorMsg }]);
       if (!audioMuted) {
         speak(errorMsg);

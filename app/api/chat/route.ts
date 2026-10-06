@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { checkChatRateLimit, RATE_CONFIG } from '@/lib/rateLimit';
+import { verifyOwnerSession } from '@/lib/jarvisAuth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const BASE_SYSTEM_INSTRUCTION = `
-You are the HAYAATI Cognitive Assistant, the built-in holographic navigation intelligence for Hayaati Web Technology (www.hayaatiweb.site).
+You are the HAYAATI Cognitive Assistant (also designated JARVIS on the interface), the built-in holographic navigation intelligence for Hayaati Web Technology (www.hayaatiweb.site).
 Owner & Lead Architect: Aliya Khan. Contact Email: Hayaati.Technology@gmail.com.
 
 Mission & Persona:
@@ -25,27 +26,33 @@ Mission & Persona:
 
 export async function POST(req: NextRequest) {
   try {
+    const isOwner = verifyOwnerSession(req);
+
     // 1. Quota & Rate Limit Check via lib/rateLimit.ts (dual-key: cookie + salted IP hash)
-    const rateCheck = await checkChatRateLimit(req);
-    if (!rateCheck.allowed) {
-      console.warn(`[Assistant Rate Limited] Reason: ${rateCheck.reason}, RetryAfter: ${rateCheck.retryAfterSeconds}s`);
-      const headers = new Headers({ 'Content-Type': 'application/json' });
-      if (rateCheck.cookieToSet) headers.set('Set-Cookie', rateCheck.cookieToSet);
+    // Rate limits strictly apply to public visitors; bypassed for verified owner
+    let rateCheck: any = { allowed: true };
+    if (!isOwner) {
+      rateCheck = await checkChatRateLimit(req);
+      if (!rateCheck.allowed) {
+        console.warn(`[Assistant Rate Limited] Reason: ${rateCheck.reason}, RetryAfter: ${rateCheck.retryAfterSeconds}s`);
+        const headers = new Headers({ 'Content-Type': 'application/json' });
+        if (rateCheck.cookieToSet) headers.set('Set-Cookie', rateCheck.cookieToSet);
 
-      const code = rateCheck.reason === 'global_cap' ? 'quota_reached' : 'rate_limited';
-      const userMessage =
-        rateCheck.reason === 'global_cap'
-          ? 'Daily conversation quota reached. Please return tomorrow.'
-          : 'Rate limit reached. Please pause a moment before sending another message.';
+        const code = rateCheck.reason === 'global_cap' ? 'quota_reached' : 'rate_limited';
+        const userMessage =
+          rateCheck.reason === 'global_cap'
+            ? 'Daily conversation quota reached. Please return tomorrow.'
+            : 'Rate limit reached. Please pause a moment before sending another message.';
 
-      return NextResponse.json(
-        {
-          error: userMessage,
-          code,
-          retryAfterSeconds: rateCheck.retryAfterSeconds,
-        },
-        { status: 429, headers }
-      );
+        return NextResponse.json(
+          {
+            error: userMessage,
+            code,
+            retryAfterSeconds: rateCheck.retryAfterSeconds,
+          },
+          { status: 429, headers }
+        );
+      }
     }
 
     let body: any = {};
@@ -77,6 +84,18 @@ export async function POST(req: NextRequest) {
     }
 
     const userLang = typeof language === 'string' && language.trim() ? language.trim() : 'en';
+
+    // Intercept identity claims in public mode for instant defense
+    const claimRegex = /\b(i am|my name is|im)\s+(aliya|aliya khan|the owner|the founder|admin|boss)\b/i;
+    if (!isOwner && claimRegex.test(message.trim())) {
+      const promptReply = 'Identity claim noted. Please provide your verification code.';
+      return NextResponse.json({
+        reply: promptReply,
+        requiresVerification: true,
+        isOwner: false,
+      });
+    }
+
     const apiKey = process.env.GEMINI_API_KEY;
 
     // In dev mode, return fallback response if API key is not configured so the UI remains testable
@@ -220,7 +239,7 @@ Language Instructions:
     if (rateCheck.cookieToSet) headers.set('Set-Cookie', rateCheck.cookieToSet);
 
     return NextResponse.json(
-      { reply: replyText.trim() },
+      { reply: replyText.trim(), isOwner },
       { status: 200, headers }
     );
   } catch (fatalErr: any) {

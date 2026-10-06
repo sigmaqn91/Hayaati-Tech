@@ -1,15 +1,66 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  unlockAudio,
-  recordUtterance,
-  transcribe,
-  fetchSpeech,
-  playSpeech,
-  VoiceError,
-  VoiceErrorCode,
-} from '@/lib/jarvisAudio';
+
+// Maps language codes from Hayaati's 25 locales to SpeechRecognition/SpeechSynthesis BCP-47 tags
+const LOCALE_TO_VOICE_LANG: Record<string, string> = {
+  en: 'en-US',
+  hi: 'hi-IN',
+  es: 'es-ES',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  ja: 'ja-JP',
+  ko: 'ko-KR',
+  zh: 'zh-CN',
+  ar: 'ar-SA',
+  pt: 'pt-BR',
+  it: 'it-IT',
+  ru: 'ru-RU',
+  tr: 'tr-TR',
+  id: 'id-ID',
+  bn: 'bn-IN',
+  gu: 'gu-IN',
+  kn: 'kn-IN',
+  ml: 'ml-IN',
+  mr: 'mr-IN',
+  ne: 'ne-NP',
+  pa: 'pa-IN',
+  ta: 'ta-IN',
+  te: 'te-IN',
+  ur: 'ur-PK',
+  vi: 'vi-VN',
+};
+
+// Global audio unlocker to comply with browser autoplay policies
+export async function unlockAudio(): Promise<void> {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioCtx) {
+      const tempCtx = new AudioCtx();
+      if (tempCtx.state === 'suspended') {
+        await tempCtx.resume();
+      }
+      tempCtx.close().catch(() => {});
+    }
+    if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+  } catch {
+    // Graceful unlock fallback
+  }
+}
+
+// Clean markdown, symbols, and formatting for spoken speech synthesis
+function cleanTextForSpeech(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/[*_#`~>]/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 interface UseJarvisVoiceOptions {
   onTranscriptReady?: (transcript: string) => void;
@@ -27,189 +78,345 @@ export function useJarvisVoice({
   const [transcript, setTranscript] = useState<string>('');
   const [speechError, setSpeechError] = useState<string | null>(null);
 
-  // Active controllers and locks
-  const activeControllerRef = useRef<AbortController | null>(null);
+  // References
+  const onTranscriptReadyRef = useRef(onTranscriptReady);
+  const languageRef = useRef(language);
+  const recognitionRef = useRef<any>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const micAnimFrameRef = useRef<number | null>(null);
+  const speechAnimFrameRef = useRef<number | null>(null);
   const isTurnRunningRef = useRef<boolean>(false);
   const isSpeakingRef = useRef<boolean>(false);
-  const languageRef = useRef<string>(language);
-  const onTranscriptReadyRef = useRef(onTranscriptReady);
-
-  useEffect(() => {
-    languageRef.current = language;
-  }, [language]);
 
   useEffect(() => {
     onTranscriptReadyRef.current = onTranscriptReady;
   }, [onTranscriptReady]);
 
-  // Check browser audio support
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
+
+  // Check Web Speech and Audio capabilities on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-    const hasAudioCtx = !!(window.AudioContext || (window as any).webkitAudioContext);
-    setIsSupported(hasMedia && hasAudioCtx);
+    const hasSpeechRec = Boolean(
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    );
+    const hasMedia = Boolean(navigator?.mediaDevices?.getUserMedia);
+    const hasAudioCtx = Boolean(window.AudioContext || (window as any).webkitAudioContext);
+    const hasSynthesis = 'speechSynthesis' in window;
+
+    setIsSupported((hasSpeechRec || hasMedia) && (hasAudioCtx || hasSynthesis));
   }, []);
 
-  // Stop active speech playback
+  // Stop active microphone stream & audio level monitoring
+  const stopMicMonitoring = useCallback(() => {
+    if (micAnimFrameRef.current) {
+      cancelAnimationFrame(micAnimFrameRef.current);
+      micAnimFrameRef.current = null;
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => {
+        try {
+          track.stop();
+        } catch {}
+      });
+      mediaStreamRef.current = null;
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      try {
+        audioContextRef.current.close().catch(() => {});
+      } catch {}
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+  }, []);
+
+  // Cancel any active speech output and animation
   const cancelSpeech = useCallback(() => {
-    if (activeControllerRef.current && isSpeakingRef.current) {
-      activeControllerRef.current.abort();
-      activeControllerRef.current = null;
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {}
+    }
+    if (speechAnimFrameRef.current) {
+      cancelAnimationFrame(speechAnimFrameRef.current);
+      speechAnimFrameRef.current = null;
     }
     isSpeakingRef.current = false;
     setIsSpeaking(false);
     setAudioLevel(0);
   }, []);
 
-  // Stop active recording
+  // Stop active voice recognition
   const stopListening = useCallback(() => {
-    if (activeControllerRef.current && !isSpeakingRef.current) {
-      activeControllerRef.current.abort();
-      activeControllerRef.current = null;
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {}
+      recognitionRef.current = null;
     }
+    stopMicMonitoring();
     setIsListening(false);
     setAudioLevel(0);
     isTurnRunningRef.current = false;
-  }, []);
+  }, [stopMicMonitoring]);
 
-  // Speech Output with Gemini Neural TTS
-  const speak = useCallback((text: string, onEnd?: () => void) => {
-    if (!text || !text.trim()) {
-      if (onEnd) onEnd();
+  // Start Voice Listening (Speech Recognition + Microphone Amplitude Metering)
+  const startListening = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+
+    // Interrupt active speech if user speaks or taps mic
+    if (isSpeakingRef.current) {
+      cancelSpeech();
+    }
+
+    // Guard against concurrent turn starts
+    if (isTurnRunningRef.current) return;
+    isTurnRunningRef.current = true;
+
+    setTranscript('');
+    setSpeechError(null);
+
+    // 1. Start live microphone monitoring for real-time 3D hologram reactivity
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
+        });
+        mediaStreamRef.current = stream;
+
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          if (ctx.state === 'suspended') {
+            await ctx.resume().catch(() => {});
+          }
+          audioContextRef.current = ctx;
+
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.5;
+          analyserRef.current = analyser;
+
+          const source = ctx.createMediaStreamSource(stream);
+          source.connect(analyser);
+
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+          const monitorAudio = () => {
+            if (!analyserRef.current) return;
+            analyserRef.current.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+              sum += dataArray[i];
+            }
+            const average = sum / dataArray.length;
+            const normalized = Math.min(1.0, (average / 110));
+            setAudioLevel(normalized);
+            micAnimFrameRef.current = requestAnimationFrame(monitorAudio);
+          };
+          micAnimFrameRef.current = requestAnimationFrame(monitorAudio);
+        }
+      }
+    } catch (micErr: any) {
+      const errName = micErr?.name || '';
+      if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
+        setSpeechError('DENIED');
+      } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
+        setSpeechError('NO_DEVICE');
+      } else {
+        setSpeechError('MIC_FAILED');
+      }
+    }
+
+    // 2. Start Speech Recognition
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setSpeechError('UNSUPPORTED');
+      setIsListening(false);
+      isTurnRunningRef.current = false;
+      stopMicMonitoring();
       return;
     }
 
-    // Cancel any ongoing speech or recording
-    if (activeControllerRef.current) {
-      activeControllerRef.current.abort();
-    }
+    try {
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
 
-    const controller = new AbortController();
-    activeControllerRef.current = controller;
-    isSpeakingRef.current = true;
-    setIsSpeaking(true);
-    setSpeechError(null);
+      const targetLang =
+        LOCALE_TO_VOICE_LANG[languageRef.current] ||
+        languageRef.current ||
+        'en-US';
 
-    (async () => {
-      try {
-        // 1. Fetch neural audio from /api/jarvis/tts
-        const blob = await fetchSpeech(text, controller.signal);
+      recognition.lang = targetLang;
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
 
-        // 2. Play speech and drive audio levels into orb animation
-        await playSpeech(blob, {
-          onLevel: (lvl) => {
-            if (!controller.signal.aborted) {
-              setAudioLevel(lvl);
-            }
-          },
-          signal: controller.signal,
-        });
-      } catch (err: any) {
-        if (err?.name !== 'AbortError') {
-          console.warn('[Jarvis TTS Playback Notice]:', err?.message || err);
-          if (err instanceof VoiceError) {
-            setSpeechError(err.code);
-          } else {
-            setSpeechError('MODEL_FAILED');
+      recognition.onstart = () => {
+        setIsListening(true);
+        setSpeechError(null);
+      };
+
+      recognition.onresult = (event: any) => {
+        let currentTranscript = '';
+        let isFinal = false;
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const item = event.results[i];
+          if (item[0]) {
+            currentTranscript += item[0].transcript;
+          }
+          if (item.isFinal) {
+            isFinal = true;
           }
         }
-      } finally {
-        if (activeControllerRef.current === controller) {
-          activeControllerRef.current = null;
+
+        setTranscript(currentTranscript);
+
+        if (isFinal && currentTranscript.trim()) {
+          const finalText = currentTranscript.trim();
+          stopListening();
+          if (onTranscriptReadyRef.current) {
+            onTranscriptReadyRef.current(finalText);
+          }
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        const error = event?.error;
+        if (error === 'not-allowed') {
+          setSpeechError('DENIED');
+        } else if (error === 'no-speech') {
+          // Graceful silence timeout: reset to idle
+        } else if (error === 'audio-capture') {
+          setSpeechError('MIC_FAILED');
+        } else if (error === 'network') {
+          setSpeechError('NETWORK');
+        } else {
+          setSpeechError('MIC_FAILED');
+        }
+        stopListening();
+      };
+
+      recognition.onend = () => {
+        stopListening();
+      };
+
+      recognition.start();
+    } catch {
+      setSpeechError('MIC_FAILED');
+      stopListening();
+    }
+  }, [cancelSpeech, stopListening, stopMicMonitoring]);
+
+  // Voice Output (Original Speech Synthesis with Audio Envelope Reactivity)
+  const speak = useCallback(
+    (text: string, onEnd?: () => void) => {
+      if (typeof window === 'undefined' || !text || !text.trim()) {
+        if (onEnd) onEnd();
+        return;
+      }
+
+      // Interrupt any current speech or listening
+      cancelSpeech();
+      stopListening();
+
+      const cleanedText = cleanTextForSpeech(text);
+      if (!cleanedText) {
+        if (onEnd) onEnd();
+        return;
+      }
+
+      if (!('speechSynthesis' in window)) {
+        console.warn('[Jarvis Voice]: window.speechSynthesis unavailable in this environment.');
+        if (onEnd) onEnd();
+        return;
+      }
+
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(cleanedText);
+      const targetLang =
+        LOCALE_TO_VOICE_LANG[languageRef.current] ||
+        languageRef.current ||
+        'en-US';
+
+      utterance.lang = targetLang;
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+
+      // Select best matching natural system voice
+      const voices = synth.getVoices();
+      if (voices.length > 0) {
+        const langPrefix = targetLang.split('-')[0].toLowerCase();
+        const matchedVoice =
+          voices.find((v) => v.lang === targetLang) ||
+          voices.find((v) => v.lang.toLowerCase().startsWith(langPrefix)) ||
+          voices.find((v) => v.default);
+        if (matchedVoice) {
+          utterance.voice = matchedVoice;
+        }
+      }
+
+      // Live Vocal Envelope Modulation to drive 3D Hologram & Backdrop during speech
+      utterance.onstart = () => {
+        isSpeakingRef.current = true;
+        setIsSpeaking(true);
+        setSpeechError(null);
+
+        const startTime = Date.now();
+        const modulate = () => {
+          if (!isSpeakingRef.current) return;
+          const elapsed = (Date.now() - startTime) / 1000;
+          // Natural speech cadence envelope
+          const wave = Math.abs(Math.sin(elapsed * 6.5) * Math.cos(elapsed * 2.8));
+          const microJitter = (Math.random() - 0.5) * 0.12;
+          const level = Math.max(0.18, Math.min(0.9, 0.42 + wave * 0.44 + microJitter));
+          setAudioLevel(level);
+          speechAnimFrameRef.current = requestAnimationFrame(modulate);
+        };
+        speechAnimFrameRef.current = requestAnimationFrame(modulate);
+      };
+
+      const finishSpeech = () => {
+        if (speechAnimFrameRef.current) {
+          cancelAnimationFrame(speechAnimFrameRef.current);
+          speechAnimFrameRef.current = null;
         }
         isSpeakingRef.current = false;
         setIsSpeaking(false);
         setAudioLevel(0);
         if (onEnd) onEnd();
-      }
-    })();
-  }, []);
+      };
 
-  // Start Voice Listening / Turn Loop
-  const startListening = useCallback(async () => {
-    // If speaking, interrupt speech immediately and transition to listening
-    if (isSpeakingRef.current) {
-      cancelSpeech();
-    }
-
-    // Guard: ignore if recording turn is already running
-    if (isTurnRunningRef.current) {
-      return;
-    }
-
-    isTurnRunningRef.current = true;
-
-    // Must unlock AudioContext inside the user gesture
-    try {
-      await unlockAudio();
-    } catch {
-      // AudioContext unlocking notice
-    }
-
-    const controller = new AbortController();
-    activeControllerRef.current = controller;
-
-    setTranscript('');
-    setSpeechError(null);
-    setIsListening(true);
-
-    try {
-      // 1. Record voice utterance with live audio levels fed to orb
-      const recordingBlob = await recordUtterance({
-        onLevel: (lvl) => {
-          if (!controller.signal.aborted) {
-            setAudioLevel(lvl);
-          }
-        },
-        signal: controller.signal,
-      });
-
-      setIsListening(false);
-      setAudioLevel(0);
-
-      // 2. Transcribe recorded audio with /api/jarvis/stt
-      const spokenText = await transcribe(
-        recordingBlob,
-        languageRef.current,
-        controller.signal
-      );
-
-      if (spokenText) {
-        setTranscript(spokenText);
-        if (onTranscriptReadyRef.current) {
-          onTranscriptReadyRef.current(spokenText);
+      utterance.onend = finishSpeech;
+      utterance.onerror = (err) => {
+        if (err.error !== 'canceled' && err.error !== 'interrupted') {
+          console.warn('[Jarvis Voice]: Speech synthesis notice:', err.error);
         }
-      }
-    } catch (err: any) {
-      if (err?.name !== 'AbortError') {
-        console.warn('[Jarvis Voice Input Error]:', err?.message || err);
-        if (err instanceof VoiceError) {
-          setSpeechError(err.code);
-        } else {
-          setSpeechError('MIC_FAILED');
-        }
-      }
-    } finally {
-      if (activeControllerRef.current === controller) {
-        activeControllerRef.current = null;
-      }
-      setIsListening(false);
-      setAudioLevel(0);
-      isTurnRunningRef.current = false;
-    }
-  }, [cancelSpeech]);
+        finishSpeech();
+      };
 
-  // Clean up on unmount
+      synth.speak(utterance);
+    },
+    [cancelSpeech, stopListening]
+  );
+
+  // Clean up on component unmount
   useEffect(() => {
     return () => {
-      if (activeControllerRef.current) {
-        activeControllerRef.current.abort();
-        activeControllerRef.current = null;
-      }
-      isTurnRunningRef.current = false;
-      isSpeakingRef.current = false;
+      cancelSpeech();
+      stopListening();
     };
-  }, []);
+  }, [cancelSpeech, stopListening]);
 
   return {
     isSupported,
@@ -218,7 +425,7 @@ export function useJarvisVoice({
     audioLevel,
     transcript,
     speechError,
-    analyserNode: null, // Audio level is directly streamed via onLevel
+    analyserNode: analyserRef.current,
     startListening,
     stopListening,
     speak,
