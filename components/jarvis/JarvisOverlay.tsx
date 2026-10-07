@@ -89,13 +89,14 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     audioLevel,
     transcript,
     speechError,
+    failingLayer,
     analyserNode,
     startListening,
     stopListening,
     speak,
     cancelSpeech,
   } = useJarvisVoice({
-    language: language === 'hi' ? 'hi-IN' : 'en-IN',
+    language: language || 'en',
     onTranscriptReady: (spokenText) => {
       if (spokenText) {
         handleSendMessage(spokenText);
@@ -143,9 +144,10 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         else if (speechError === 'NETWORK') friendlyMsg = voiceErrors.network;
         else if (speechError === 'SERVER_ERROR') friendlyMsg = voiceErrors.serverError;
       }
-      setBootLogs((prev) => [...prev, `SYS_VOICE_NOTICE: ${friendlyMsg}`]);
+      const layerTag = failingLayer && failingLayer !== 'NONE' ? ` [${failingLayer}]` : '';
+      setBootLogs((prev) => [...prev, `SYS_VOICE_NOTICE${layerTag}: ${friendlyMsg}`]);
     }
-  }, [speechError, t]);
+  }, [speechError, failingLayer, t]);
 
   // Sync Visual State with Voice
   useEffect(() => {
@@ -421,7 +423,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex flex-col bg-[#05070a] text-slate-100 font-mono overflow-hidden select-none"
+      className="fixed inset-0 z-50 flex flex-col bg-[#05070a] text-slate-100 font-mono overflow-hidden select-none h-[100dvh] overscroll-contain touch-manipulation"
     >
       {/* 1. Dynamic Holographic Concentric HUD Backdrop */}
       <JarvisBackdrop
@@ -446,10 +448,13 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         <div className="flex items-center gap-2.5">
           <div className="w-2 h-2 rounded-full bg-[#38e8ff] animate-ping" />
           <span className="text-xs uppercase tracking-widest text-[#38e8ff] font-bold">
-            HAYAATI // NEURAL CORE v3.8
+            J.A.R.V.I.S. // NEURAL CORE v3.8
+          </span>
+          <span className="hidden md:inline-block text-[10px] px-2 py-0.5 rounded border border-[#38e8ff]/30 text-slate-400">
+            LOC: 28.6139° N, 77.2090° E // NOMINAL
           </span>
           <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded border border-[#38e8ff]/30 text-slate-400">
-            {isOwner ? 'MODE: VERIFIED ARCHITECT' : 'MODE: PUBLIC HORIZON'}
+            {isOwner ? 'MODE: VERIFIED ARCHITECT (ALIYA KHAN)' : 'MODE: PUBLIC HORIZON'}
           </span>
         </div>
 
@@ -512,109 +517,6 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         </div>
       </div>
 
-      {/* Mobile LOG Chip Button (Visible only < 900px, opens bottom sheet) */}
-      <button
-        onClick={() => setMobileLogOpen(true)}
-        className="min-[900px]:hidden absolute left-4 top-14 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded border border-[#38e8ff]/40 bg-[#0a0f18]/90 text-[#38e8ff] text-xs hover:bg-[#38e8ff]/20 transition-colors cursor-pointer shadow-[0_0_12px_rgba(56,232,255,0.2)]"
-      >
-        <Terminal className="w-3.5 h-3.5" />
-        <span className="font-bold tracking-wider">LOG</span>
-        {messages.length > 0 && <span className="w-1.5 h-1.5 rounded-full bg-[#38e8ff]" />}
-      </button>
-
-      {/* Desktop Floating Terminal Panel (>= 900px, narrow 280px, floating at left, not part of layout flow) */}
-      <div className="hidden min-[900px]:flex absolute left-6 top-16 bottom-24 w-[280px] z-20 flex-col bg-[#0a0f18]/80 border border-[#38e8ff]/20 rounded-lg p-3.5 overflow-hidden select-text">
-        <div className="flex items-center justify-between border-b border-[#38e8ff]/20 pb-2 mb-2.5 shrink-0">
-          <div className="flex items-center gap-2 text-xs text-[#38e8ff]">
-            <Terminal className="w-3.5 h-3.5" />
-            <span className="font-bold tracking-wider">TERMINAL TELEMETRY</span>
-          </div>
-          <span className="text-[10px] text-slate-500">LIVE BUS</span>
-        </div>
-
-        {/* Scrollable messages */}
-        <div className="flex-1 overflow-y-auto space-y-2.5 pr-1.5 scrollbar-thin text-xs">
-          {bootLogs.map((log, idx) => (
-            <div key={`boot-${idx}`} className="text-slate-400 text-[11px] font-mono leading-relaxed">
-              <span className="text-[#38e8ff]/70 mr-1.5">&gt;</span>
-              {log}
-            </div>
-          ))}
-
-          {messages.map((m, idx) => (
-            <div
-              key={`msg-${idx}`}
-              className={`p-2 rounded border ${
-                m.role === 'user'
-                  ? 'border-[#38e8ff]/40 bg-[#38e8ff]/10 text-slate-100 ml-2'
-                  : 'border-slate-800 bg-[#070b12]/90 text-[#38e8ff] mr-2'
-              }`}
-            >
-              <div className="text-[9px] uppercase font-bold tracking-wider mb-0.5 opacity-70">
-                {m.role === 'user' ? 'TRANSMISSION // SENDER' : 'CORE // RESPONSE'}
-              </div>
-              <div className="text-xs leading-relaxed font-sans">{m.text}</div>
-            </div>
-          ))}
-
-          {isProcessing && (
-            <div className="p-2 rounded border border-[#ffaa00]/40 bg-[#ffaa00]/5 text-[#ffaa00] mr-2 animate-pulse flex items-center gap-1.5">
-              <Activity className="w-3 h-3 animate-spin" />
-              <span className="text-[11px]">Processing neural synthesis...</span>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* Mobile Terminal Bottom Sheet (< 900px) */}
-      {mobileLogOpen && (
-        <div className="min-[900px]:hidden fixed inset-x-0 bottom-0 max-h-[65vh] bg-[#0a0f18]/95 border-t border-[#38e8ff]/40 rounded-t-xl z-40 p-4 flex flex-col shadow-2xl select-text">
-          <div className="flex items-center justify-between border-b border-[#38e8ff]/20 pb-2 mb-3 shrink-0">
-            <div className="flex items-center gap-2 text-xs text-[#38e8ff]">
-              <Terminal className="w-4 h-4" />
-              <span className="font-bold tracking-wider">TERMINAL TELEMETRY</span>
-            </div>
-            <button
-              onClick={() => setMobileLogOpen(false)}
-              className="p-1 rounded text-slate-400 hover:text-white"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1.5 scrollbar-thin text-xs">
-            {bootLogs.map((log, idx) => (
-              <div key={`mboot-${idx}`} className="text-slate-400 text-[11px] font-mono leading-relaxed">
-                <span className="text-[#38e8ff]/70 mr-1.5">&gt;</span>
-                {log}
-              </div>
-            ))}
-            {messages.map((m, idx) => (
-              <div
-                key={`mmsg-${idx}`}
-                className={`p-2 rounded border ${
-                  m.role === 'user'
-                    ? 'border-[#38e8ff]/40 bg-[#38e8ff]/10 text-slate-100 ml-2'
-                    : 'border-slate-800 bg-[#070b12]/90 text-[#38e8ff] mr-2'
-                }`}
-              >
-                <div className="text-[9px] uppercase font-bold tracking-wider mb-0.5 opacity-70">
-                  {m.role === 'user' ? 'TRANSMISSION // SENDER' : 'CORE // RESPONSE'}
-                </div>
-                <div className="text-xs leading-relaxed font-sans">{m.text}</div>
-              </div>
-            ))}
-            {isProcessing && (
-              <div className="p-2 rounded border border-[#ffaa00]/40 bg-[#ffaa00]/5 text-[#ffaa00] mr-2 animate-pulse flex items-center gap-1.5">
-                <Activity className="w-3 h-3 animate-spin" />
-                <span className="text-[11px]">Processing neural synthesis...</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* 5. Centered Holographic Stage Container (Horizontal & Vertical Center ~46%) */}
       <div
         className="absolute inset-x-0 flex flex-col items-center justify-center pointer-events-none z-10"
@@ -668,6 +570,23 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             );
           })}
         </div>
+
+        {/* Active Response Caption Subtitle (Clean, transient holographic strip) */}
+        {messages.length > 0 && (
+          <div className="mt-4 max-w-xl mx-4 px-4 py-2 bg-[#0a0f18]/90 border border-[#38e8ff]/30 rounded-full text-center text-xs text-[#38e8ff] shadow-[0_0_20px_rgba(56,232,255,0.2)] backdrop-blur-sm pointer-events-auto line-clamp-2">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mr-2">
+              {messages[messages.length - 1].role === 'user' ? 'TRANSMISSION:' : 'JARVIS:'}
+            </span>
+            <span className="font-sans text-slate-100">{messages[messages.length - 1].text}</span>
+          </div>
+        )}
+
+        {isProcessing && (
+          <div className="mt-3 px-4 py-1 rounded-full border border-[#ffaa00]/40 bg-[#ffaa00]/10 text-[#ffaa00] text-xs flex items-center gap-2 pointer-events-auto animate-pulse">
+            <Activity className="w-3.5 h-3.5 animate-spin" />
+            <span className="font-mono text-[11px] tracking-wider uppercase">Processing neural synthesis...</span>
+          </div>
+        )}
       </div>
 
       {/* 6. Fixed Bottom Command Bar */}
@@ -982,3 +901,5 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     </div>
   );
 };
+
+export default JarvisOverlay;

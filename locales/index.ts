@@ -33,6 +33,11 @@ export const languageList: Array<{
   { code: 'ru', name: 'Russian', native: 'Русский', rtl: false },
   { code: 'tr', name: 'Turkish', native: 'Türkçe', rtl: false },
   { code: 'id', name: 'Indonesian', native: 'Bahasa Indonesia', rtl: false },
+  { code: 'nl', name: 'Dutch', native: 'Nederlands', rtl: false },
+  { code: 'pl', name: 'Polish', native: 'Polski', rtl: false },
+  { code: 'fa', name: 'Persian', native: 'فارسی', rtl: true },
+  { code: 'th', name: 'Thai', native: 'ไทย', rtl: false },
+  { code: 'sw', name: 'Swahili', native: 'Kiswahili', rtl: false },
 ];
 
 export const defaultBundle: LanguageBundle = {

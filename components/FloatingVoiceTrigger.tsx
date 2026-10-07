@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
 
 interface FloatingVoiceTriggerProps {
   onOpen: () => void;
 }
 
 export function FloatingVoiceTrigger({ onOpen }: FloatingVoiceTriggerProps) {
-  const { t } = useLanguage();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -27,13 +25,11 @@ export function FloatingVoiceTrigger({ onOpen }: FloatingVoiceTriggerProps) {
 
   if (!visible) return null;
 
-  const label = t.assistant.talkTo;
-
   return (
-    <aside aria-label={label} className="fixed bottom-6 right-6 z-40">
+    <aside aria-label="JARVIS" className="fixed bottom-6 right-6 z-40">
       <button
         onClick={onOpen}
-        aria-label={label}
+        aria-label="JARVIS"
         className="group relative flex items-center gap-3 px-4 py-2.5 bg-[#070a0f] border border-[#38e8ff]/50 hover:border-[#38e8ff] shadow-[0_0_25px_rgba(56,232,255,0.3)] transition-all duration-300 cursor-pointer rounded-full min-h-[48px]"
       >
         {/* Glowing Arc Reactor mini launcher icon */}
@@ -49,8 +45,8 @@ export function FloatingVoiceTrigger({ onOpen }: FloatingVoiceTriggerProps) {
           />
         </div>
         {/* Label */}
-        <span className="font-mono text-xs font-semibold tracking-wider text-slate-100 group-hover:text-[#38e8ff] transition-colors pr-1">
-          {label}
+        <span className="font-mono text-xs font-bold tracking-widest text-[#38e8ff] group-hover:text-white transition-colors pr-1">
+          JARVIS
         </span>
       </button>
     </aside>

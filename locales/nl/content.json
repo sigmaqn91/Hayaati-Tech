@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "Het Cognitieve Fundament",
+      "yearLabel": "TIJDPERK // 2030",
+      "story": "De ochtenden beginnen met omgevings-AI die energienetten balanceert terwijl u slaapt. De stad functioneert vloeiend met stille elektrische shuttles en ondergrondse leveringscapsules.",
+      "breakthroughs": [
+        "Omgevings-AI-assistenten op apparaten die het dagelijkse levensritme optimaliseren zonder cloudlatentie",
+        "Vastestof lithium-metaal accupakketten die stedelijk transport 1.000 km ononderbroken ondersteunen",
+        "Officiële commerciële certificering van autonome luchttaxi's in grote stedelijke luchtcorridors"
+      ],
+      "bannerAlt": "Filmische weergave van een duurzame metropool in 2030 met schone transportcorridors",
+      "bannerPrompt": "Filmisch panorama van een duurzame kustmetropool bij zonsopgang, torens van zonneglas, elektrische shuttles, verticale tuinen, 8k-resolutie."
+    },
+    "era-2035": {
+      "title": "Biomechanische Synthese",
+      "yearLabel": "TIJDPERK // 2035",
+      "story": "Neurale interfaces maken moeiteloze besturing van digitale systemen met gedachten mogelijk. Preventieve geneeskunde werkt 24/7 op cellulair niveau via biocompatibele nanosensoren.",
+      "breakthroughs": [
+        "Subcutane opto-elektronische sensoren voor continue metabole monitoring",
+        "Niet-invasieve motorische cortexdecoders die fysieke mobiliteit herstellen",
+        "Industriële mycelium-bioreactoren die recyclebare, ultra-sterke bouwmaterialen produceren"
+      ],
+      "bannerAlt": "Filmische weergave van een verticale stad met biokoepels en magneetzweeflijnen",
+      "bannerPrompt": "Panorama van een verticale stad in de schemering met magneetzweefbuizen en aeroponische kassen, 8k-resolutie."
+    },
+    "era-2050": {
+      "title": "Planetaire & Orbitale Horizon",
+      "yearLabel": "TIJDPERK // 2050",
+      "story": "Zware industriële productie is verplaatst van de biosfeer van de Aarde naar raffinaderijen in microzwaartekracht. Commerciële fusie-energie en kringloopeconomieën herstellen de balans van oceaan en atmosfeer.",
+      "breakthroughs": [
+        "Commerciële magnetische opsluiting kernfusiecentrales die continue schone basislaststroom leveren",
+        "Permanente bases op de zuidpool van de maan voor waterijswinning en brandstofproductie",
+        "Planetaire synthetische biologiefaciliteiten ontworpen om miljarden tonnen atmosferische koolstof vast te leggen"
+      ],
+      "bannerAlt": "Uitzicht op de Aarde vanuit orbitale stations en leefmodules",
+      "bannerPrompt": "Filmisch uitzicht op de Aarde vanuit een ruimtetransferstation in een lage baan om de aarde, blauwe aardbolkromming, diepe ruimte, 8k."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Project // TL-2030-1",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2030-1",
+      "prompt": "Filmische architectuurfotografie, tl-2030-1, 8k-resolutie."
+    },
+    "tl-2030-2": {
+      "title": "Project // TL-2030-2",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2030-2",
+      "prompt": "Filmische architectuurfotografie, tl-2030-2, 8k-resolutie."
+    },
+    "tl-2030-3": {
+      "title": "Project // TL-2030-3",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2030-3",
+      "prompt": "Filmische architectuurfotografie, tl-2030-3, 8k-resolutie."
+    },
+    "tl-2030-4": {
+      "title": "Project // TL-2030-4",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2030-4",
+      "prompt": "Filmische architectuurfotografie, tl-2030-4, 8k-resolutie."
+    },
+    "tl-2035-1": {
+      "title": "Project // TL-2035-1",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2035-1",
+      "prompt": "Filmische architectuurfotografie, tl-2035-1, 8k-resolutie."
+    },
+    "tl-2035-2": {
+      "title": "Project // TL-2035-2",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2035-2",
+      "prompt": "Filmische architectuurfotografie, tl-2035-2, 8k-resolutie."
+    },
+    "tl-2035-3": {
+      "title": "Project // TL-2035-3",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2035-3",
+      "prompt": "Filmische architectuurfotografie, tl-2035-3, 8k-resolutie."
+    },
+    "tl-2035-4": {
+      "title": "Project // TL-2035-4",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2035-4",
+      "prompt": "Filmische architectuurfotografie, tl-2035-4, 8k-resolutie."
+    },
+    "tl-2050-1": {
+      "title": "Project // TL-2050-1",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2050-1",
+      "prompt": "Filmische architectuurfotografie, tl-2050-1, 8k-resolutie."
+    },
+    "tl-2050-2": {
+      "title": "Project // TL-2050-2",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2050-2",
+      "prompt": "Filmische architectuurfotografie, tl-2050-2, 8k-resolutie."
+    },
+    "tl-2050-3": {
+      "title": "Project // TL-2050-3",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2050-3",
+      "prompt": "Filmische architectuurfotografie, tl-2050-3, 8k-resolutie."
+    },
+    "tl-2050-4": {
+      "title": "Project // TL-2050-4",
+      "description": "Geavanceerde emissievrije technische specificaties voor de periode 2030-2050.",
+      "breakthrough": "Geavanceerde fysische principes en maximale hulpbronefficiëntie.",
+      "alt": "Technische visualisatie van tl-2050-4",
+      "prompt": "Filmische architectuurfotografie, tl-2050-4, 8k-resolutie."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Technologie // TECH-AI-1",
+      "description": "Toonaangevend subsysteem TECH-AI-1 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-ai-1",
+      "prompt": "Industriële ontwerpfotografie, tech-ai-1, 8k-resolutie."
+    },
+    "tech-ai-2": {
+      "title": "Technologie // TECH-AI-2",
+      "description": "Toonaangevend subsysteem TECH-AI-2 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-ai-2",
+      "prompt": "Industriële ontwerpfotografie, tech-ai-2, 8k-resolutie."
+    },
+    "tech-ai-3": {
+      "title": "Technologie // TECH-AI-3",
+      "description": "Toonaangevend subsysteem TECH-AI-3 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-ai-3",
+      "prompt": "Industriële ontwerpfotografie, tech-ai-3, 8k-resolutie."
+    },
+    "tech-ai-4": {
+      "title": "Technologie // TECH-AI-4",
+      "description": "Toonaangevend subsysteem TECH-AI-4 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-ai-4",
+      "prompt": "Industriële ontwerpfotografie, tech-ai-4, 8k-resolutie."
+    },
+    "tech-ai-5": {
+      "title": "Technologie // TECH-AI-5",
+      "description": "Toonaangevend subsysteem TECH-AI-5 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-ai-5",
+      "prompt": "Industriële ontwerpfotografie, tech-ai-5, 8k-resolutie."
+    },
+    "tech-ai-6": {
+      "title": "Technologie // TECH-AI-6",
+      "description": "Toonaangevend subsysteem TECH-AI-6 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-ai-6",
+      "prompt": "Industriële ontwerpfotografie, tech-ai-6, 8k-resolutie."
+    },
+    "tech-veh-1": {
+      "title": "Technologie // TECH-VEH-1",
+      "description": "Toonaangevend subsysteem TECH-VEH-1 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-veh-1",
+      "prompt": "Industriële ontwerpfotografie, tech-veh-1, 8k-resolutie."
+    },
+    "tech-veh-2": {
+      "title": "Technologie // TECH-VEH-2",
+      "description": "Toonaangevend subsysteem TECH-VEH-2 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-veh-2",
+      "prompt": "Industriële ontwerpfotografie, tech-veh-2, 8k-resolutie."
+    },
+    "tech-veh-3": {
+      "title": "Technologie // TECH-VEH-3",
+      "description": "Toonaangevend subsysteem TECH-VEH-3 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-veh-3",
+      "prompt": "Industriële ontwerpfotografie, tech-veh-3, 8k-resolutie."
+    },
+    "tech-veh-4": {
+      "title": "Technologie // TECH-VEH-4",
+      "description": "Toonaangevend subsysteem TECH-VEH-4 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-veh-4",
+      "prompt": "Industriële ontwerpfotografie, tech-veh-4, 8k-resolutie."
+    },
+    "tech-veh-5": {
+      "title": "Technologie // TECH-VEH-5",
+      "description": "Toonaangevend subsysteem TECH-VEH-5 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-veh-5",
+      "prompt": "Industriële ontwerpfotografie, tech-veh-5, 8k-resolutie."
+    },
+    "tech-veh-6": {
+      "title": "Technologie // TECH-VEH-6",
+      "description": "Toonaangevend subsysteem TECH-VEH-6 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-veh-6",
+      "prompt": "Industriële ontwerpfotografie, tech-veh-6, 8k-resolutie."
+    },
+    "tech-dev-1": {
+      "title": "Technologie // TECH-DEV-1",
+      "description": "Toonaangevend subsysteem TECH-DEV-1 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-dev-1",
+      "prompt": "Industriële ontwerpfotografie, tech-dev-1, 8k-resolutie."
+    },
+    "tech-dev-2": {
+      "title": "Technologie // TECH-DEV-2",
+      "description": "Toonaangevend subsysteem TECH-DEV-2 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-dev-2",
+      "prompt": "Industriële ontwerpfotografie, tech-dev-2, 8k-resolutie."
+    },
+    "tech-dev-3": {
+      "title": "Technologie // TECH-DEV-3",
+      "description": "Toonaangevend subsysteem TECH-DEV-3 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-dev-3",
+      "prompt": "Industriële ontwerpfotografie, tech-dev-3, 8k-resolutie."
+    },
+    "tech-dev-4": {
+      "title": "Technologie // TECH-DEV-4",
+      "description": "Toonaangevend subsysteem TECH-DEV-4 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-dev-4",
+      "prompt": "Industriële ontwerpfotografie, tech-dev-4, 8k-resolutie."
+    },
+    "tech-dev-5": {
+      "title": "Technologie // TECH-DEV-5",
+      "description": "Toonaangevend subsysteem TECH-DEV-5 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-dev-5",
+      "prompt": "Industriële ontwerpfotografie, tech-dev-5, 8k-resolutie."
+    },
+    "tech-dev-6": {
+      "title": "Technologie // TECH-DEV-6",
+      "description": "Toonaangevend subsysteem TECH-DEV-6 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-dev-6",
+      "prompt": "Industriële ontwerpfotografie, tech-dev-6, 8k-resolutie."
+    },
+    "tech-home-1": {
+      "title": "Technologie // TECH-HOME-1",
+      "description": "Toonaangevend subsysteem TECH-HOME-1 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-home-1",
+      "prompt": "Industriële ontwerpfotografie, tech-home-1, 8k-resolutie."
+    },
+    "tech-home-2": {
+      "title": "Technologie // TECH-HOME-2",
+      "description": "Toonaangevend subsysteem TECH-HOME-2 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-home-2",
+      "prompt": "Industriële ontwerpfotografie, tech-home-2, 8k-resolutie."
+    },
+    "tech-home-3": {
+      "title": "Technologie // TECH-HOME-3",
+      "description": "Toonaangevend subsysteem TECH-HOME-3 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-home-3",
+      "prompt": "Industriële ontwerpfotografie, tech-home-3, 8k-resolutie."
+    },
+    "tech-home-4": {
+      "title": "Technologie // TECH-HOME-4",
+      "description": "Toonaangevend subsysteem TECH-HOME-4 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-home-4",
+      "prompt": "Industriële ontwerpfotografie, tech-home-4, 8k-resolutie."
+    },
+    "tech-home-5": {
+      "title": "Technologie // TECH-HOME-5",
+      "description": "Toonaangevend subsysteem TECH-HOME-5 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-home-5",
+      "prompt": "Industriële ontwerpfotografie, tech-home-5, 8k-resolutie."
+    },
+    "tech-home-6": {
+      "title": "Technologie // TECH-HOME-6",
+      "description": "Toonaangevend subsysteem TECH-HOME-6 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-home-6",
+      "prompt": "Industriële ontwerpfotografie, tech-home-6, 8k-resolutie."
+    },
+    "tech-hlth-1": {
+      "title": "Technologie // TECH-HLTH-1",
+      "description": "Toonaangevend subsysteem TECH-HLTH-1 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-hlth-1",
+      "prompt": "Industriële ontwerpfotografie, tech-hlth-1, 8k-resolutie."
+    },
+    "tech-hlth-2": {
+      "title": "Technologie // TECH-HLTH-2",
+      "description": "Toonaangevend subsysteem TECH-HLTH-2 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-hlth-2",
+      "prompt": "Industriële ontwerpfotografie, tech-hlth-2, 8k-resolutie."
+    },
+    "tech-hlth-3": {
+      "title": "Technologie // TECH-HLTH-3",
+      "description": "Toonaangevend subsysteem TECH-HLTH-3 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-hlth-3",
+      "prompt": "Industriële ontwerpfotografie, tech-hlth-3, 8k-resolutie."
+    },
+    "tech-hlth-4": {
+      "title": "Technologie // TECH-HLTH-4",
+      "description": "Toonaangevend subsysteem TECH-HLTH-4 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-hlth-4",
+      "prompt": "Industriële ontwerpfotografie, tech-hlth-4, 8k-resolutie."
+    },
+    "tech-hlth-5": {
+      "title": "Technologie // TECH-HLTH-5",
+      "description": "Toonaangevend subsysteem TECH-HLTH-5 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-hlth-5",
+      "prompt": "Industriële ontwerpfotografie, tech-hlth-5, 8k-resolutie."
+    },
+    "tech-hlth-6": {
+      "title": "Technologie // TECH-HLTH-6",
+      "description": "Toonaangevend subsysteem TECH-HLTH-6 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-hlth-6",
+      "prompt": "Industriële ontwerpfotografie, tech-hlth-6, 8k-resolutie."
+    },
+    "tech-nrg-1": {
+      "title": "Technologie // TECH-NRG-1",
+      "description": "Toonaangevend subsysteem TECH-NRG-1 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-nrg-1",
+      "prompt": "Industriële ontwerpfotografie, tech-nrg-1, 8k-resolutie."
+    },
+    "tech-nrg-2": {
+      "title": "Technologie // TECH-NRG-2",
+      "description": "Toonaangevend subsysteem TECH-NRG-2 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-nrg-2",
+      "prompt": "Industriële ontwerpfotografie, tech-nrg-2, 8k-resolutie."
+    },
+    "tech-nrg-3": {
+      "title": "Technologie // TECH-NRG-3",
+      "description": "Toonaangevend subsysteem TECH-NRG-3 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-nrg-3",
+      "prompt": "Industriële ontwerpfotografie, tech-nrg-3, 8k-resolutie."
+    },
+    "tech-nrg-4": {
+      "title": "Technologie // TECH-NRG-4",
+      "description": "Toonaangevend subsysteem TECH-NRG-4 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-nrg-4",
+      "prompt": "Industriële ontwerpfotografie, tech-nrg-4, 8k-resolutie."
+    },
+    "tech-nrg-5": {
+      "title": "Technologie // TECH-NRG-5",
+      "description": "Toonaangevend subsysteem TECH-NRG-5 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-nrg-5",
+      "prompt": "Industriële ontwerpfotografie, tech-nrg-5, 8k-resolutie."
+    },
+    "tech-nrg-6": {
+      "title": "Technologie // TECH-NRG-6",
+      "description": "Toonaangevend subsysteem TECH-NRG-6 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-nrg-6",
+      "prompt": "Industriële ontwerpfotografie, tech-nrg-6, 8k-resolutie."
+    },
+    "tech-spc-1": {
+      "title": "Technologie // TECH-SPC-1",
+      "description": "Toonaangevend subsysteem TECH-SPC-1 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-spc-1",
+      "prompt": "Industriële ontwerpfotografie, tech-spc-1, 8k-resolutie."
+    },
+    "tech-spc-2": {
+      "title": "Technologie // TECH-SPC-2",
+      "description": "Toonaangevend subsysteem TECH-SPC-2 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-spc-2",
+      "prompt": "Industriële ontwerpfotografie, tech-spc-2, 8k-resolutie."
+    },
+    "tech-spc-3": {
+      "title": "Technologie // TECH-SPC-3",
+      "description": "Toonaangevend subsysteem TECH-SPC-3 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-spc-3",
+      "prompt": "Industriële ontwerpfotografie, tech-spc-3, 8k-resolutie."
+    },
+    "tech-spc-4": {
+      "title": "Technologie // TECH-SPC-4",
+      "description": "Toonaangevend subsysteem TECH-SPC-4 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-spc-4",
+      "prompt": "Industriële ontwerpfotografie, tech-spc-4, 8k-resolutie."
+    },
+    "tech-spc-5": {
+      "title": "Technologie // TECH-SPC-5",
+      "description": "Toonaangevend subsysteem TECH-SPC-5 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-spc-5",
+      "prompt": "Industriële ontwerpfotografie, tech-spc-5, 8k-resolutie."
+    },
+    "tech-spc-6": {
+      "title": "Technologie // TECH-SPC-6",
+      "description": "Toonaangevend subsysteem TECH-SPC-6 ontworpen voor duurzame en autonome langetermijnoperaties.",
+      "howItWorks": "Gebouwd op innovatieve fysische principes met een netto-nul ecologische voetafdruk.",
+      "alt": "Conceptueel ontwerp van tech-spc-6",
+      "prompt": "Industriële ontwerpfotografie, tech-spc-6, 8k-resolutie."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Habitat // PLACE-1",
+      "location": "Internationale Habitat PLACE-1",
+      "story": "Bewoners leven in harmonie met de natuur dankzij kringloopsystemen zonder afval.",
+      "infrastructureTags": [
+        "Slim Netwerk",
+        "Schoon Vervoer",
+        "Fusie-energie",
+        "Biosystemen"
+      ],
+      "alt": "Fotorealistisch beeld van place-1",
+      "prompt": "Filmisch stadslandschap, place-1, 8k-resolutie."
+    },
+    "place-2": {
+      "title": "Habitat // PLACE-2",
+      "location": "Internationale Habitat PLACE-2",
+      "story": "Bewoners leven in harmonie met de natuur dankzij kringloopsystemen zonder afval.",
+      "infrastructureTags": [
+        "Slim Netwerk",
+        "Schoon Vervoer",
+        "Fusie-energie",
+        "Biosystemen"
+      ],
+      "alt": "Fotorealistisch beeld van place-2",
+      "prompt": "Filmisch stadslandschap, place-2, 8k-resolutie."
+    },
+    "place-3": {
+      "title": "Habitat // PLACE-3",
+      "location": "Internationale Habitat PLACE-3",
+      "story": "Bewoners leven in harmonie met de natuur dankzij kringloopsystemen zonder afval.",
+      "infrastructureTags": [
+        "Slim Netwerk",
+        "Schoon Vervoer",
+        "Fusie-energie",
+        "Biosystemen"
+      ],
+      "alt": "Fotorealistisch beeld van place-3",
+      "prompt": "Filmisch stadslandschap, place-3, 8k-resolutie."
+    },
+    "place-4": {
+      "title": "Habitat // PLACE-4",
+      "location": "Internationale Habitat PLACE-4",
+      "story": "Bewoners leven in harmonie met de natuur dankzij kringloopsystemen zonder afval.",
+      "infrastructureTags": [
+        "Slim Netwerk",
+        "Schoon Vervoer",
+        "Fusie-energie",
+        "Biosystemen"
+      ],
+      "alt": "Fotorealistisch beeld van place-4",
+      "prompt": "Filmisch stadslandschap, place-4, 8k-resolutie."
+    },
+    "place-5": {
+      "title": "Habitat // PLACE-5",
+      "location": "Internationale Habitat PLACE-5",
+      "story": "Bewoners leven in harmonie met de natuur dankzij kringloopsystemen zonder afval.",
+      "infrastructureTags": [
+        "Slim Netwerk",
+        "Schoon Vervoer",
+        "Fusie-energie",
+        "Biosystemen"
+      ],
+      "alt": "Fotorealistisch beeld van place-5",
+      "prompt": "Filmisch stadslandschap, place-5, 8k-resolutie."
+    },
+    "place-6": {
+      "title": "Habitat // PLACE-6",
+      "location": "Internationale Habitat PLACE-6",
+      "story": "Bewoners leven in harmonie met de natuur dankzij kringloopsystemen zonder afval.",
+      "infrastructureTags": [
+        "Slim Netwerk",
+        "Schoon Vervoer",
+        "Fusie-energie",
+        "Biosystemen"
+      ],
+      "alt": "Fotorealistisch beeld van place-6",
+      "prompt": "Filmisch stadslandschap, place-6, 8k-resolutie."
+    },
+    "place-7": {
+      "title": "Habitat // PLACE-7",
+      "location": "Internationale Habitat PLACE-7",
+      "story": "Bewoners leven in harmonie met de natuur dankzij kringloopsystemen zonder afval.",
+      "infrastructureTags": [
+        "Slim Netwerk",
+        "Schoon Vervoer",
+        "Fusie-energie",
+        "Biosystemen"
+      ],
+      "alt": "Fotorealistisch beeld van place-7",
+      "prompt": "Filmisch stadslandschap, place-7, 8k-resolutie."
+    },
+    "place-8": {
+      "title": "Habitat // PLACE-8",
+      "location": "Internationale Habitat PLACE-8",
+      "story": "Bewoners leven in harmonie met de natuur dankzij kringloopsystemen zonder afval.",
+      "infrastructureTags": [
+        "Slim Netwerk",
+        "Schoon Vervoer",
+        "Fusie-energie",
+        "Biosystemen"
+      ],
+      "alt": "Fotorealistisch beeld van place-8",
+      "prompt": "Filmisch stadslandschap, place-8, 8k-resolutie."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Projecten worden direct geëvalueerd en gesynchroniseerd door Aliya Khan.",
+    "emptyLive": "Momenteel geen live systemen. Nieuwe implementaties worden binnenkort getoond.",
+    "emptyInProgress": "Technische ontwerpen verschijnen hier naarmate de fasen worden voltooid.",
+    "emptyIdeas": "Theoretische onderzoeksvoorstellen worden hier gecatalogiseerd."
+  }
+}

@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "code": "pl",
+    "languageName": "Polish",
+    "nativeName": "Polski",
+    "rtl": false
+  },
+  "nav": {
+    "home": "Strona Główna",
+    "timeline": "Oś Czasu Przyszłości",
+    "tech": "Technologia Przyszłości",
+    "places": "Miasta i Siedliska",
+    "projects": "Moje Projekty",
+    "advertise": "Ogłoś / Zgłoś",
+    "about": "O Mnie",
+    "contact": "Kontakt",
+    "assistant": "Asystent AI",
+    "language": "Język",
+    "menu": "Otwórz menu nawigacji",
+    "close": "Zamknij menu nawigacji",
+    "brandSubtitle": "TECHNOLOGIA // 2030-2050",
+    "menuSysHeader": "MENU SYSTEMOWE",
+    "locationDomain": "WĘZEŁ: WWW.HAYAATIWEB.SITE"
+  },
+  "hero": {
+    "systemStatus": "SYSTEM//WĘZEŁ.2030-2050",
+    "online": "WSZYSTKIE SYSTEMY ONLINE",
+    "headline": "Przyszłość nie nadchodzi sama. Budujemy ją wspólnie.",
+    "subtitle": "Kinowy plan ludzkiej innowacji, maszyn kognitywnych, kolonii orbitalnych i zrównoważonych siedlisk w latach 2030–2050. Stworzony przez Aliya Khan.",
+    "exploreCta": "Odkryj 2030 2050",
+    "projectsCta": "Zobacz Projekty",
+    "coordinates": "LOKALIZACJA: 28.6139° N, 77.2090° E // SILNIK AKTYWNY",
+    "timelineSpan": "HORYZONT 2030 — 2050",
+    "liveTelemetry": "TELEMETRIA: NOMINALNA",
+    "scrollDown": "Przewiń w dół, aby odkryć oś czasu",
+    "imageAlt": "Kinowy widok futurystycznej metropolii 2030 2050"
+  },
+  "timeline": {
+    "sectionTag": "MAPA_CZASU // 2030 -> 2050",
+    "title": "Kronika Ludzkich Innowacji",
+    "subtitle": "Od wszechobecnej inteligencji brzegowej w 2030 r. do przemysłu orbitalnego w 2050 r.",
+    "chronoMap": "CHRONOLOGICZNY PLAN",
+    "eraHeading": "HORYZONT ERY",
+    "storyTitle": "Dzień w Tej Erze",
+    "breakthroughsTitle": "Kluczowe Przełomy Technologiczne",
+    "viewEraDetails": "Otwórz Akta Ery",
+    "jumpToEra": "Przejdź do Tej Ery",
+    "statusPrefix": "STATUS SYSTEMU",
+    "eraBreakthroughsHeading": "Przełomy",
+    "specificationsCount": "Specyfikacje"
+  },
+  "tech": {
+    "sectionTag": "INDEKS_SYSTEMÓW // 42 PIONY",
+    "title": "Katalog Technologii Przyszłości",
+    "subtitle": "Kompleksowe plany systemowe i mechanizmy naukowe w 7 fundamentalnych granicach technologicznych.",
+    "systemsIndex": "INDEKS KATALOGU",
+    "howItWorksLabel": "JAK TO DZIAŁA",
+    "architectureMechanics": "ARCHITEKTURA TECHNICZNA I MECHANIKA",
+    "underlyingMechanism": "PODSTAWOWA ZASADA FIZYCZNA",
+    "searchPlaceholder": "Szukaj technologii, systemów lub przełomów...",
+    "searchNoResults": "Brak pasujących technologii.",
+    "filterAll": "Wszystkie Kategorie",
+    "modalClose": "Zamknij Akta",
+    "viewDossier": "Zobacz Akta Techniczne",
+    "yearLabel": "ROK",
+    "statusLabel": "STAN SYSTEMU",
+    "activeStatus": "SYSTEM AKTYWNY",
+    "promptLabel": "POLECENIE GRAFICZNE",
+    "categories": {
+      "all": "Wszystkie Kategorie",
+      "ai": "Przyszła AI",
+      "vehicles": "Pojazdy i Mobilność",
+      "devices": "Urządzenia i Bionika",
+      "homeWork": "Dom i Praca",
+      "health": "Zdrowie i Bio",
+      "energy": "Energia i Klimat",
+      "space": "Głęboki Kosmos"
+    }
+  },
+  "places": {
+    "sectionTag": "INDEKS_SIEDLISK // 2030-2050",
+    "title": "Miasta i Siedliska Przyszłości",
+    "subtitle": "Fotorealistyczne wizualizacje i raporty infrastrukturalne nowych osiedli ludzkich na Ziemi i orbicie.",
+    "horizonLabel": "HORYZONT",
+    "aDayInPlace": "Dzień w Tym Siedlisku",
+    "infrastructureLabel": "Kluczowa Infrastruktura",
+    "viewLocation": "Zbadaj Plan Siedliska",
+    "promptLabel": "POLECENIE GRAFICZNE"
+  },
+  "projects": {
+    "sectionTag": "PROJEKTY_AUTORSKIE // ALIYA KHAN",
+    "title": "Moje Projekty",
+    "subtitle": "Aktywne systemy oprogramowania, archiwa badawcze i projekty architektoniczne stworzone przez Aliya Khan.",
+    "tabs": {
+      "live": "Systemy Aktywne",
+      "inProgress": "W Trakcie Rozwoju",
+      "futureIdeas": "Koncepcje Przyszłości"
+    },
+    "visit": "Otwórz System",
+    "emptyLive": "Brak aktywnych systemów. Nowe wdrożenia pojawią się wkrótce.",
+    "emptyInProgress": "Projekty inżynieryjne pojawią się tutaj po ukończeniu kolejnych etapów.",
+    "emptyIdeas": "Teoretyczne propozycje badawcze zostaną tutaj skatalogowane.",
+    "pendingNotice": "Projekty są bezpośrednio weryfikowane i synchronizowane przez Aliya Khan."
+  },
+  "advertise": {
+    "sectionTag": "ZGŁOSZENIE_PROJEKTU // WPIS",
+    "title": "Ogłoś / Zgłoś Swój Projekt",
+    "subtitle": "Zgłoś swoją pionierską technologię lub zrównoważoną inicjatywę do oceny przez Aliya Khan.",
+    "reviewNotice": "Wszystkie zgłoszenia są osobiście oceniane przez Aliya Khan. Spam komercyjny jest odrzucany.",
+    "pricingNote": "Szczegóły dotyczące umieszczenia i warunki współpracy będą przekazane bezpośrednio drogą mailową.",
+    "form": {
+      "name": "Imię i Nazwisko",
+      "email": "Firmowy Adres E-mail",
+      "projectName": "Nazwa Projektu / Firmy",
+      "projectLink": "Link do Systemu lub Dokumentacji",
+      "category": "Dziedzina Technologiczna",
+      "selectCategory": "Wybierz dziedzinę...",
+      "budget": "Szacowany Budżet",
+      "budgetPlaceholder": "np. 20 000 zł - 100 000 zł",
+      "description": "Opis Techniczny i Znaczenie dla Przyszłości",
+      "submitBtn": "Prześlij Zgłoszenie do Oceny",
+      "sending": "Wysyłanie Zgłoszenia...",
+      "sentSuccess": "Zgłoszenie pomyślnie wysłane do Aliya Khan. Otrzymasz odpowiedź wkrótce.",
+      "sendError": "Wysyłanie nie powiodło się. Sprawdź połączenie lub spróbuj ponownie."
+    }
+  },
+  "about": {
+    "sectionTag": "AKTA_ARCHITEKTA // PROFIL",
+    "title": "O Mnie — Aliya Khan",
+    "subtitle": "Założycielka, główna projektantka i architekt systemów Hayaati Web Technology.",
+    "ownerName": "Aliya Khan",
+    "architectTitle": "Założycielka i Główna Architekt",
+    "leadArchitect": "GŁÓWNY ARCHITEKT // HAYAATI WEB TECHNOLOGY",
+    "bioPlaceholder": "Aliya Khan projektuje i tworzy oprogramowanie oraz wizje infrastrukturalne na lata 2030–2050.",
+    "contactDirect": "Bezpośredni Kanał: Hayaati.Technology@gmail.com",
+    "photoAlt": "Aliya Khan — Założycielka i Główna Architekt Hayaati Web Technology"
+  },
+  "contact": {
+    "sectionTag": "KANAŁ_BEZPOŚREDNI // KONTAKT",
+    "title": "Kontakt i Współpraca",
+    "subtitle": "Skontaktuj się bezpośrednio z Aliya Khan w sprawie badań, konsultacji lub współpracy strategicznej.",
+    "emailLabel": "OFICJALNY KANAŁ E-MAIL",
+    "directEmail": "Hayaati.Technology@gmail.com",
+    "form": {
+      "name": "Twoje Imię",
+      "email": "Twój Adres E-mail",
+      "message": "Wiadomość lub Propozycja",
+      "submitBtn": "Wyślij Wiadomość",
+      "sending": "Wysyłanie...",
+      "sentSuccess": "Wiadomość pomyślnie wysłana do Aliya Khan.",
+      "sendError": "Błąd wysyłania. Spróbuj ponownie.",
+      "placeholderName": "np. dr Jan Kowalski",
+      "placeholderEmail": "jan@nauka.pl",
+      "placeholderMessage": "Opisz swoje badania, pomysł na współpracę lub zapytanie..."
+    }
+  },
+  "assistant": {
+    "buttonLabel": "Porozmawiaj z Hayaati",
+    "panelTitle": "RDZEŃ KOGNITYWNY HAYAATI",
+    "subtitle": "Kwantowy Holograficzny Interfejs Neuronowy // Głos i Tekst",
+    "welcomeMessage": "Połączenie systemowe nawiązane. Jestem Hayaati, Twój przewodnik po latach 2030–2050.",
+    "chips": [
+      "Jak będzie wyglądać 2030 rok?",
+      "Pokaż technologie medyczne przyszłości",
+      "Opowiedz o Hayaati i Aliya Khan"
+    ],
+    "inputPlaceholder": "Zadaj pytanie o technologie 2030–2050...",
+    "sendBtn": "Wyślij",
+    "retryBtn": "Ponów",
+    "voiceBtn": "Aktywuj Głos",
+    "voiceStopBtn": "Zatrzymaj Głos",
+    "voiceListening": "Słucham...",
+    "voiceSpeaking": "Mówię...",
+    "voiceConnecting": "Łączenie...",
+    "voiceUnsupported": "Wprowadzanie głosowe nie jest obsługiwane w tej przeglądarce.",
+    "voiceNotAvailableLang": "Głos niedostępny dla tego języka.",
+    "rateLimitBanner": "Osiągnięto limit zapytań. Proszę chwilę poczekać.",
+    "talkTo": "Mów do Hayaati",
+    "typeInstead": "Lub pisz poniżej",
+    "returnToOrb": "Powrót do Rdzenia",
+    "muteMic": "Wycisz Mikrofon",
+    "unmuteMic": "Włącz Mikrofon",
+    "micLabel": "Mikrofon",
+    "mutedLabel": "Wyciszony",
+    "endSession": "Zakończ Sesję",
+    "endLabel": "Koniec",
+    "userTag": "UŻYTKOWNIK",
+    "assistantTag": "HAYAATI",
+    "cognitiveLink": "ŁĄCZE KOGNITYWNE AKTYWNE",
+    "orb": {
+      "ready": "GOTOWY",
+      "listening": "SŁUCHANIE",
+      "thinking": "PRZETWARZANIE",
+      "speaking": "MÓWIENIE",
+      "tapToStart": "Dotknij, aby Mówić",
+      "start": "Rozpocznij"
+    },
+    "errors": {
+      "quotaReached": "Dzienny limit rozmów wyczerpany. Zapraszamy jutro.",
+      "serverBusy": "Rdzeń kognitywny jest przeciążony. Proszę czekać.",
+      "networkError": "Błąd sieci. Sprawdź połączenie.",
+      "micBlocked": "Dostęp do mikrofonu został zablokowany.",
+      "sessionEnded": "Sesja zakończona.",
+      "genericError": "Wystąpił nieoczekiwany błąd."
+    },
+    "voiceErrors": {
+      "unsupported": "Rozpoznawanie mowy nie jest wspierane.",
+      "insecure": "Do obsługi głosu wymagane jest połączenie HTTPS.",
+      "denied": "Odmówiono dostępu do mikrofonu.",
+      "noDevice": "Nie wykryto mikrofonu.",
+      "micFailed": "Inicjalizacja mikrofonu nie powiodła się.",
+      "rateLimit": "Przekroczono limit zapytań głosowych.",
+      "providerQuota": "Wyczerpano limit dostawcy głosu.",
+      "noKey": "Usługa głosowa nie jest skonfigurowana.",
+      "modelFailed": "Błąd modelu głosu.",
+      "network": "Błąd sieci podczas syntezy mowy.",
+      "serverError": "Błąd serwera mowy."
+    }
+  },
+  "footer": {
+    "copyright": "© 2026-2050 Hayaati Web Technology. Wszelkie prawa zastrzeżone.",
+    "disclaimer": "Plan badawczo-architektoniczny dla technologii spekulatywnych i rozwijających się.",
+    "liveDomainLabel": "DOMENA",
+    "quickLinks": "SKRÓTY",
+    "systemDesignation": "OZNACZENIE SYSTEMU: HAYAATI-CORE-V5",
+    "allRightsReserved": "Wszelkie prawa zastrzeżone."
+  },
+  "common": {
+    "year": "Rok",
+    "status": "Stan",
+    "operational": "Operacyjny",
+    "close": "Zamknij",
+    "back": "Wstecz",
+    "retry": "Ponów",
+    "error": "Błąd",
+    "success": "Sukces",
+    "loading": "Ładowanie..."
+  },
+  "languageSelector": {
+    "selectLanguage": "Wybierz Język Międzynarodowy",
+    "dialogTitle": "Wybór Języka",
+    "searchPlaceholder": "Filtruj języki (np. Polski, English)...",
+    "languagesCountSuffix": "Języków"
+  },
+  "imageSlot": {
+    "opticalChannel": "KANAŁ OPTYCZNY",
+    "framePending": "ŁADOWANIE KLATKI",
+    "sysDim": "SYS//800x500"
+  },
+  "notFound": {
+    "errorTag": "BŁĄD 404 // SEKTOR NIE ZNALEZIONY",
+    "title": "Sygnał Utracony w Głębokim Kosmosie",
+    "description": "Żądane współrzędne nie odpowiadają żadnemu znanemu systemowi przyszłości.",
+    "returnBtn": "Powrót do Bazy Orbitalnej"
+  }
+}

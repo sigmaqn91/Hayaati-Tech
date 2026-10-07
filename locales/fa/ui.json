@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "code": "fa",
+    "languageName": "Persian",
+    "nativeName": "فارسی",
+    "rtl": true
+  },
+  "nav": {
+    "home": "صفحه اصلی",
+    "timeline": "خط زمانی آینده",
+    "tech": "فناوری آینده",
+    "places": "شهرها و سکونتگاه‌ها",
+    "projects": "پروژه‌های من",
+    "advertise": "تبلیغ / ثبت پروژه",
+    "about": "درباره من",
+    "contact": "تماس",
+    "assistant": "دستیار هوش مصنوعی",
+    "language": "زبان",
+    "menu": "باز کردن منو",
+    "close": "بستن منو",
+    "brandSubtitle": "فناوری // ۲۰۳۰-۲۰۵۰",
+    "menuSysHeader": "منوی سیستم",
+    "locationDomain": "گره: WWW.HAYAATIWEB.SITE"
+  },
+  "hero": {
+    "systemStatus": "سیستم//گره.۲۰۳۰-۲۰۵۰",
+    "online": "تمام سیستم‌ها فعال",
+    "headline": "آینده خودبه‌خود رخ نمی‌دهد. ما آن را با هم می‌سازیم.",
+    "subtitle": "طرحی سینمایی از نوآوری انسان، ماشین‌های شناختی، مستعمرات مداری و زیستگاه‌های پایدار از ۲۰۳۰ تا ۲۰۵۰. توسعه‌یافته توسط Aliya Khan.",
+    "exploreCta": "کاوش ۲۰۳۰ ۲۰۵۰",
+    "projectsCta": "مشاهده پروژه‌ها",
+    "coordinates": "موقعیت: ۲۸.۶۱۳۹° شمالی، ۷۷.۲۰۹۰° شرقی // موتور فعال",
+    "timelineSpan": "افق ۲۰۳۰ — ۲۰۵۰",
+    "liveTelemetry": "تله‌متری: عادی",
+    "scrollDown": "برای کاوش خط زمانی به پایین پیمایش کنید",
+    "imageAlt": "نمای سینمایی از کلان‌شهر آینده‌نگرانه ۲۰۳۰ ۲۰۵۰"
+  },
+  "timeline": {
+    "sectionTag": "نقشه_زمانی // ۲۰۳۰ -> ۲۰۵۰",
+    "title": "گاه‌شمار نوآوری بشر",
+    "subtitle": "از هوش لبه‌ای فراگیر در ۲۰۳۰ تا صنایع سنگین مداری در ۲۰۵۰.",
+    "chronoMap": "طرح گاه‌شناختی",
+    "eraHeading": "افق عصر",
+    "storyTitle": "یک روز در این عصر",
+    "breakthroughsTitle": "نقاط عطف کلیدی فناوری",
+    "viewEraDetails": "مشاهده پرونده عصر",
+    "jumpToEra": "رفتن به این عصر",
+    "statusPrefix": "وضعیت سیستم",
+    "eraBreakthroughsHeading": "دستاوردهای نوین",
+    "specificationsCount": "مشخصات فنی"
+  },
+  "tech": {
+    "sectionTag": "فهرست_سیستم‌ها // ۴۲ حوزه پیشگام",
+    "title": "کاتالوگ فناوری‌های آینده",
+    "subtitle": "طرح‌های جامع سیستمی و سازوکارهای علمی در ۷ مرز بنیادین فناوری.",
+    "systemsIndex": "فهرست کاتالوگ",
+    "howItWorksLabel": "نحوه کارکرد",
+    "architectureMechanics": "معماری فنی و مکانیک",
+    "underlyingMechanism": "اصل بنیادین فیزیک",
+    "searchPlaceholder": "جستجوی فناوری‌ها، سیستم‌ها یا پیشرفت‌ها...",
+    "searchNoResults": "فناوری متناسبی یافت نشد.",
+    "filterAll": "تمام دسته‌ها",
+    "modalClose": "بستن پرونده",
+    "viewDossier": "مشاهده پرونده فنی",
+    "yearLabel": "سال",
+    "statusLabel": "وضعیت",
+    "activeStatus": "سیستم فعال",
+    "promptLabel": "پرامپت",
+    "categories": {
+      "all": "تمام دسته‌ها",
+      "ai": "هوش مصنوعی آینده",
+      "vehicles": "وسایل نقلیه و جابجایی",
+      "devices": "دستگاه‌ها و بیونیک",
+      "homeWork": "خانه و محیط کار",
+      "health": "سلامت و زیست‌شناسی",
+      "energy": "انرژی و اقلیم",
+      "space": "اعماق فضا"
+    }
+  },
+  "places": {
+    "sectionTag": "فهرست_زیستگاه‌ها // ۲۰۳۰-۲۰۵۰",
+    "title": "کارت‌پستال‌های شهرها و سکونتگاه‌ها",
+    "subtitle": "تصاویر واقع‌گرایانه و پرونده‌های زیرساختی از سکونتگاه‌های نوظهور بشر روی زمین و مدار.",
+    "horizonLabel": "افق",
+    "aDayInPlace": "یک روز در این سکونتگاه",
+    "infrastructureLabel": "زیرساخت‌های حیاتی",
+    "viewLocation": "بررسی طرح سکونتگاه",
+    "promptLabel": "پرامپت"
+  },
+  "projects": {
+    "sectionTag": "پروژه‌های_بنیان‌گذار // ALIYA KHAN",
+    "title": "پروژه‌های من",
+    "subtitle": "سیستم‌های نرم‌افزاری فعال، آرشیوهای تحقیقاتی و طرح‌های معماری ساخته شده توسط Aliya Khan.",
+    "tabs": {
+      "live": "سیستم‌های زنده",
+      "inProgress": "در حال توسعه",
+      "futureIdeas": "ایده‌های آینده"
+    },
+    "visit": "مشاهده سیستم",
+    "emptyLive": "در حال حاضر سیستم زنده‌ای در دسترس نیست. پروژه‌های جدید به زودی افزوده می‌شوند.",
+    "emptyInProgress": "طرح‌های مهندسی به محض تکمیل مراحل در اینجا قرار خواهند گرفت.",
+    "emptyIdeas": "پیشنهادهای تحقیقاتی نظری در این بخش فهرست می‌شوند.",
+    "pendingNotice": "پروژه‌ها مستقیماً توسط Aliya Khan بررسی و همگام‌سازی می‌شوند."
+  },
+  "advertise": {
+    "sectionTag": "ثبت_پروژه // فهرست‌بندی",
+    "title": "تبلیغ / ثبت پروژه شما",
+    "subtitle": "فناوری پیشگام یا ابتکار پایدار خود را جهت بررسی توسط Aliya Khan ارسال کنید.",
+    "reviewNotice": "تمام درخواست‌ها شخصاً توسط Aliya Khan ارزیابی می‌شوند. پیام‌های تبلیغاتی اسپم رد خواهند شد.",
+    "pricingNote": "جزئیات جایگذاری و شرایط همکاری مستقیماً از طریق ایمیل ارسال می‌شود.",
+    "form": {
+      "name": "نام کامل",
+      "email": "ایمیل کاری",
+      "projectName": "نام پروژه یا شرکت",
+      "projectLink": "پیوند سیستم یا مقاله سفید",
+      "category": "حوزه فناوری",
+      "selectCategory": "انتخاب حوزه...",
+      "budget": "برآورد بودجه",
+      "budgetPlaceholder": "مثلاً ۵,۰۰۰ تا ۲۵,۰۰۰ دلار",
+      "description": "مرور کلی فنی و اهمیت برای آینده",
+      "submitBtn": "ارسال پرونده جهت بررسی",
+      "sending": "در حال ارسال...",
+      "sentSuccess": "پرونده با موفقیت برای Aliya Khan ارسال شد. به زودی با شما تماس گرفته می‌شود.",
+      "sendError": "خطا در ارسال. لطفاً اتصال اینترنت را بررسی کرده و دوباره تلاش کنید."
+    }
+  },
+  "about": {
+    "sectionTag": "پرونده_معمار // مشخصات سیستم",
+    "title": "درباره Aliya Khan",
+    "subtitle": "بنیان‌گذار، طراح ارشد و معمار سیستم‌های Hayaati Web Technology.",
+    "ownerName": "Aliya Khan",
+    "architectTitle": "بنیان‌گذار و طراح ارشد",
+    "leadArchitect": "معمار ارشد // HAYAATI WEB TECHNOLOGY",
+    "bioPlaceholder": "Aliya Khan طراح و توسعه‌دهنده نرم‌افزار و چشم‌اندازهای زیرساختی برای گذار از ۲۰۳۰ به ۲۰۵۰ است.",
+    "contactDirect": "کانال ارتباط مستقیم: Hayaati.Technology@gmail.com",
+    "photoAlt": "Aliya Khan — بنیان‌گذار و طراح ارشد Hayaati Web Technology"
+  },
+  "contact": {
+    "sectionTag": "کانال_مستقیم // ارتباط",
+    "title": "تماس و همکاری",
+    "subtitle": "جهت پژوهش، مشاوره معماری یا همکاری‌های استراتژیک مستقیماً با Aliya Khan در ارتباط باشید.",
+    "emailLabel": "ایمیل رسمی",
+    "directEmail": "Hayaati.Technology@gmail.com",
+    "form": {
+      "name": "نام شما",
+      "email": "ایمیل شما",
+      "message": "پیام یا پیشنهاد شما",
+      "submitBtn": "ارسال پیام",
+      "sending": "در حال ارسال...",
+      "sentSuccess": "پیام با موفقیت برای Aliya Khan ارسال شد.",
+      "sendError": "خطا در ارسال پیام. دوباره تلاش کنید.",
+      "placeholderName": "مثلاً دکتر مریم میرزاخانی",
+      "placeholderEmail": "maryam@frontiertech.org",
+      "placeholderMessage": "پژوهش، ایده همکاری یا پرسش خود را شرح دهید..."
+    }
+  },
+  "assistant": {
+    "buttonLabel": "گفتگو با Hayaati",
+    "panelTitle": "هسته شناختی HAYAATI",
+    "subtitle": "رابط عصبی هولوگرافیک کوانتومی // صوت و متن",
+    "welcomeMessage": "اتصال سیستم برقرار شد. من Hayaati هستم، راهنمای شناختی شما در خط زمانی ۲۰۳۰-۲۰۵۰.",
+    "chips": [
+      "سال ۲۰۳۰ چگونه خواهد بود؟",
+      "فناوری سلامت آینده را نشان بده",
+      "درباره Hayaati و Aliya Khan بگو"
+    ],
+    "inputPlaceholder": "درباره فناوری‌های ۲۰۳۰–۲۰۵۰ بپرسید...",
+    "sendBtn": "ارسال",
+    "retryBtn": "تلاش مجدد",
+    "voiceBtn": "فعال‌سازی صدا",
+    "voiceStopBtn": "توقف صدا",
+    "voiceListening": "در حال شنیدن...",
+    "voiceSpeaking": "در حال صحبت...",
+    "voiceConnecting": "در حال اتصال...",
+    "voiceUnsupported": "ورودی صوتی در این مرورگر پشتیبانی نمی‌شود.",
+    "voiceNotAvailableLang": "صوت برای این زبان در دسترس نیست.",
+    "rateLimitBanner": "محدودیت درخواست رخ داد. لطفاً کمی صبر کنید.",
+    "talkTo": "با Hayaati صحبت کنید",
+    "typeInstead": "یا در زیر بنویسید",
+    "returnToOrb": "بازگشت به هسته",
+    "muteMic": "قطع میکروفون",
+    "unmuteMic": "وصل میکروفون",
+    "micLabel": "میکروفون",
+    "mutedLabel": "بی‌صدا",
+    "endSession": "پایان نشست",
+    "endLabel": "پایان",
+    "userTag": "کاربر",
+    "assistantTag": "HAYAATI",
+    "cognitiveLink": "پیوند شناختی فعال",
+    "orb": {
+      "ready": "آماده",
+      "listening": "شنیدن",
+      "thinking": "پردازش",
+      "speaking": "صحبت",
+      "tapToStart": "لمس برای گفتگو",
+      "start": "شروع"
+    },
+    "errors": {
+      "quotaReached": "سهمیه گفتگوی روزانه به پایان رسید. لطفاً فردا مراجعه فرمایید.",
+      "serverBusy": "هسته شناختی مشغول است. لطفاً شکیبا باشید.",
+      "networkError": "خطای شبکه. لطفاً اتصال خود را بررسی کنید.",
+      "micBlocked": "دسترسی به میکروفون توسط مرورگر مسدود شده است.",
+      "sessionEnded": "نشست به پایان رسید.",
+      "genericError": "خطای غیرمنتظره‌ای رخ داد."
+    },
+    "voiceErrors": {
+      "unsupported": "تشخیص گفتار پشتیبانی نمی‌شود.",
+      "insecure": "برای استفاده از صوت پروتکل HTTPS الزامی است.",
+      "denied": "دسترسی به میکروفون رد شد.",
+      "noDevice": "میکروفونی یافت نشد.",
+      "micFailed": "راه‌اندازی میکروفون ناموفق بود.",
+      "rateLimit": "محدودیت نرخ صوتی رخ داد.",
+      "providerQuota": "سهمیه سرویس صوتی تمام شد.",
+      "noKey": "سرویس صوتی پیکربندی نشده است.",
+      "modelFailed": "مدل صوتی با خطا مواجه شد.",
+      "network": "خطای شبکه هنگام تولید صدا.",
+      "serverError": "خطای سرور صوتی."
+    }
+  },
+  "footer": {
+    "copyright": "© ۲۰۲۶-۲۰۵۰ Hayaati Web Technology. تمامی حقوق محفوظ است.",
+    "disclaimer": "طرح پژوهشی و معماری برای فناوری‌های گمانه‌زنانه و نوظهور.",
+    "liveDomainLabel": "دامنه فعال",
+    "quickLinks": "پیوندهای سریع",
+    "systemDesignation": "شناسه سیستم: HAYAATI-CORE-V5",
+    "allRightsReserved": "تمامی حقوق محفوظ است."
+  },
+  "common": {
+    "year": "سال",
+    "status": "وضعیت",
+    "operational": "عملیاتی",
+    "close": "بستن",
+    "back": "بازگشت",
+    "retry": "تلاش مجدد",
+    "error": "خطا",
+    "success": "موفقیت",
+    "loading": "در حال بارگذاری..."
+  },
+  "languageSelector": {
+    "selectLanguage": "انتخاب زبان بین‌المللی",
+    "dialogTitle": "انتخاب زبان",
+    "searchPlaceholder": "فیلتر زبان‌ها (مثلاً فارسی، English)...",
+    "languagesCountSuffix": "زبان"
+  },
+  "imageSlot": {
+    "opticalChannel": "کانال نوری",
+    "framePending": "در انتظار فریم",
+    "sysDim": "SYS//800x500"
+  },
+  "notFound": {
+    "errorTag": "خطای ۴۰۴ // بخش یافت نشد",
+    "title": "سیگنال در اعماق فضا گم شد",
+    "description": "مختصات درخواستی با هیچ سیستم آینده شناخته‌شده‌ای مطابقت ندارد.",
+    "returnBtn": "بازگشت به فرماندهی مدار"
+  }
+}

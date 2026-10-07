@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "Msingi wa Utambuzi",
+      "yearLabel": "ENZI // 2030",
+      "story": "Asubuhi huanza na AI ya mazingira inayoweka usawa kwenye gridi za nishati unapolala. Jiji linafanya kazi kwa utulivu na magari ya umeme na mifumo ya chini ya ardhi ya kupeleka mizigo.",
+      "breakthroughs": [
+        "Wasaidizi wa AI ya mazingira kwenye vifaa wanaoboresha mdundo wa maisha bila kuchelewa kwa wingu",
+        "Betri imara za lithiamu-chuma zinazowezesha usafiri wa mijini kwa kilomita 1,000 bila kusimama",
+        "Uthibitisho rasmi wa kibiashara wa teksi za angani zinazojiendesha kwenye njia kuu za anga za mijini"
+      ],
+      "bannerAlt": "Mwonekano wa jiji kuu endelevu la 2030 lenye mifumo safi ya usafirishaji",
+      "bannerPrompt": "Mwonekano mpana wa jiji endelevu la pwani wakati wa mapambazuko, minara ya vioo vya jua, usafiri wa umeme, bustani wima, ubora wa 8k."
+    },
+    "era-2035": {
+      "title": "Muungano wa Kibayolojia na Mitambo",
+      "yearLabel": "ENZI // 2035",
+      "story": "Mifumo ya mishipa ya fahamu inawezesha kuongoza mifumo ya kidijitali bila shida kwa kutumia fikra tu. Tiba ya kuzuia inafanya kazi masaa 24/7 katika kiwango cha chembechembe kupitia vihisi vya nano.",
+      "breakthroughs": [
+        "Vihisi vya ngozi vya macho na umeme kwa ufuatiliaji endelevu wa kimetaboliki",
+        "Mifumo ya kutafsiri mawimbi ya ubongo isiyoingilia mwili inayorejesha uwezo wa kutembea",
+        "Mifumo ya kibaolojia ya viwandani inayozalisha vifaa vya ujenzi vinavyoweza kutumika tena na imara sana"
+      ],
+      "bannerAlt": "Mwonekano wa jiji wima lenye makazi ya kibaolojia na njia za treni za sumaku",
+      "bannerPrompt": "Mandhari ya jiji wima wakati wa machweo yenye mirija ya treni ya sumaku na bustani za angani, ubora wa 8k."
+    },
+    "era-2050": {
+      "title": "Upeo wa Sayari na Anga za Juu",
+      "yearLabel": "ENZI // 2050",
+      "story": "Uzalishaji wa viwanda vizito umehamishwa kutoka kwenye mazingira ya Dunia hadi kwenye viwanda vya angani bila mvuto. Nishati safi ya muungano wa atomi na uchumi mzunguko umerejesha uwiano wa bahari na anga.",
+      "breakthroughs": [
+        "Viwanda vya kibiashara vya nishati ya muungano wa atomi vinavyotoa umeme safi usiokatika",
+        "Vituo vya kudumu kwenye ncha ya kusini ya Mwezi kwa uchimbaji wa barafu ya maji na nishati ya angani",
+        "Vituo vya biolojia ya usanisi vilivyoundwa kufyonza mabilioni ya tani za kaboni angani"
+      ],
+      "bannerAlt": "Mwonekano wa Dunia kutoka vituo vya anga za juu na makazi ya angani",
+      "bannerPrompt": "Mwonekano wa sinema wa Dunia kutoka kituo cha anga za juu katika obiti ya chini, mviringo wa bluu wa sayari, anga ya giza, ubora wa 8k."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Mradi // TL-2030-1",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2030-1",
+      "prompt": "Picha ya sinema ya usanifu, tl-2030-1, ubora wa 8k."
+    },
+    "tl-2030-2": {
+      "title": "Mradi // TL-2030-2",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2030-2",
+      "prompt": "Picha ya sinema ya usanifu, tl-2030-2, ubora wa 8k."
+    },
+    "tl-2030-3": {
+      "title": "Mradi // TL-2030-3",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2030-3",
+      "prompt": "Picha ya sinema ya usanifu, tl-2030-3, ubora wa 8k."
+    },
+    "tl-2030-4": {
+      "title": "Mradi // TL-2030-4",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2030-4",
+      "prompt": "Picha ya sinema ya usanifu, tl-2030-4, ubora wa 8k."
+    },
+    "tl-2035-1": {
+      "title": "Mradi // TL-2035-1",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2035-1",
+      "prompt": "Picha ya sinema ya usanifu, tl-2035-1, ubora wa 8k."
+    },
+    "tl-2035-2": {
+      "title": "Mradi // TL-2035-2",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2035-2",
+      "prompt": "Picha ya sinema ya usanifu, tl-2035-2, ubora wa 8k."
+    },
+    "tl-2035-3": {
+      "title": "Mradi // TL-2035-3",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2035-3",
+      "prompt": "Picha ya sinema ya usanifu, tl-2035-3, ubora wa 8k."
+    },
+    "tl-2035-4": {
+      "title": "Mradi // TL-2035-4",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2035-4",
+      "prompt": "Picha ya sinema ya usanifu, tl-2035-4, ubora wa 8k."
+    },
+    "tl-2050-1": {
+      "title": "Mradi // TL-2050-1",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2050-1",
+      "prompt": "Picha ya sinema ya usanifu, tl-2050-1, ubora wa 8k."
+    },
+    "tl-2050-2": {
+      "title": "Mradi // TL-2050-2",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2050-2",
+      "prompt": "Picha ya sinema ya usanifu, tl-2050-2, ubora wa 8k."
+    },
+    "tl-2050-3": {
+      "title": "Mradi // TL-2050-3",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2050-3",
+      "prompt": "Picha ya sinema ya usanifu, tl-2050-3, ubora wa 8k."
+    },
+    "tl-2050-4": {
+      "title": "Mradi // TL-2050-4",
+      "description": "Vipimo vya juu vya uhandisi visivyo na uchafuzi kwa kipindi cha 2030-2050.",
+      "breakthrough": "Kanuni za juu za fizikia na ufanisi mkubwa wa rasilimali.",
+      "alt": "Mwonekano wa kiufundi wa tl-2050-4",
+      "prompt": "Picha ya sinema ya usanifu, tl-2050-4, ubora wa 8k."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Teknolojia // TECH-AI-1",
+      "description": "Mfumo mdogo wa hali ya juu TECH-AI-1 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-ai-1",
+      "prompt": "Picha ya muundo wa viwandani, tech-ai-1, ubora wa 8k."
+    },
+    "tech-ai-2": {
+      "title": "Teknolojia // TECH-AI-2",
+      "description": "Mfumo mdogo wa hali ya juu TECH-AI-2 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-ai-2",
+      "prompt": "Picha ya muundo wa viwandani, tech-ai-2, ubora wa 8k."
+    },
+    "tech-ai-3": {
+      "title": "Teknolojia // TECH-AI-3",
+      "description": "Mfumo mdogo wa hali ya juu TECH-AI-3 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-ai-3",
+      "prompt": "Picha ya muundo wa viwandani, tech-ai-3, ubora wa 8k."
+    },
+    "tech-ai-4": {
+      "title": "Teknolojia // TECH-AI-4",
+      "description": "Mfumo mdogo wa hali ya juu TECH-AI-4 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-ai-4",
+      "prompt": "Picha ya muundo wa viwandani, tech-ai-4, ubora wa 8k."
+    },
+    "tech-ai-5": {
+      "title": "Teknolojia // TECH-AI-5",
+      "description": "Mfumo mdogo wa hali ya juu TECH-AI-5 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-ai-5",
+      "prompt": "Picha ya muundo wa viwandani, tech-ai-5, ubora wa 8k."
+    },
+    "tech-ai-6": {
+      "title": "Teknolojia // TECH-AI-6",
+      "description": "Mfumo mdogo wa hali ya juu TECH-AI-6 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-ai-6",
+      "prompt": "Picha ya muundo wa viwandani, tech-ai-6, ubora wa 8k."
+    },
+    "tech-veh-1": {
+      "title": "Teknolojia // TECH-VEH-1",
+      "description": "Mfumo mdogo wa hali ya juu TECH-VEH-1 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-veh-1",
+      "prompt": "Picha ya muundo wa viwandani, tech-veh-1, ubora wa 8k."
+    },
+    "tech-veh-2": {
+      "title": "Teknolojia // TECH-VEH-2",
+      "description": "Mfumo mdogo wa hali ya juu TECH-VEH-2 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-veh-2",
+      "prompt": "Picha ya muundo wa viwandani, tech-veh-2, ubora wa 8k."
+    },
+    "tech-veh-3": {
+      "title": "Teknolojia // TECH-VEH-3",
+      "description": "Mfumo mdogo wa hali ya juu TECH-VEH-3 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-veh-3",
+      "prompt": "Picha ya muundo wa viwandani, tech-veh-3, ubora wa 8k."
+    },
+    "tech-veh-4": {
+      "title": "Teknolojia // TECH-VEH-4",
+      "description": "Mfumo mdogo wa hali ya juu TECH-VEH-4 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-veh-4",
+      "prompt": "Picha ya muundo wa viwandani, tech-veh-4, ubora wa 8k."
+    },
+    "tech-veh-5": {
+      "title": "Teknolojia // TECH-VEH-5",
+      "description": "Mfumo mdogo wa hali ya juu TECH-VEH-5 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-veh-5",
+      "prompt": "Picha ya muundo wa viwandani, tech-veh-5, ubora wa 8k."
+    },
+    "tech-veh-6": {
+      "title": "Teknolojia // TECH-VEH-6",
+      "description": "Mfumo mdogo wa hali ya juu TECH-VEH-6 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-veh-6",
+      "prompt": "Picha ya muundo wa viwandani, tech-veh-6, ubora wa 8k."
+    },
+    "tech-dev-1": {
+      "title": "Teknolojia // TECH-DEV-1",
+      "description": "Mfumo mdogo wa hali ya juu TECH-DEV-1 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-dev-1",
+      "prompt": "Picha ya muundo wa viwandani, tech-dev-1, ubora wa 8k."
+    },
+    "tech-dev-2": {
+      "title": "Teknolojia // TECH-DEV-2",
+      "description": "Mfumo mdogo wa hali ya juu TECH-DEV-2 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-dev-2",
+      "prompt": "Picha ya muundo wa viwandani, tech-dev-2, ubora wa 8k."
+    },
+    "tech-dev-3": {
+      "title": "Teknolojia // TECH-DEV-3",
+      "description": "Mfumo mdogo wa hali ya juu TECH-DEV-3 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-dev-3",
+      "prompt": "Picha ya muundo wa viwandani, tech-dev-3, ubora wa 8k."
+    },
+    "tech-dev-4": {
+      "title": "Teknolojia // TECH-DEV-4",
+      "description": "Mfumo mdogo wa hali ya juu TECH-DEV-4 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-dev-4",
+      "prompt": "Picha ya muundo wa viwandani, tech-dev-4, ubora wa 8k."
+    },
+    "tech-dev-5": {
+      "title": "Teknolojia // TECH-DEV-5",
+      "description": "Mfumo mdogo wa hali ya juu TECH-DEV-5 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-dev-5",
+      "prompt": "Picha ya muundo wa viwandani, tech-dev-5, ubora wa 8k."
+    },
+    "tech-dev-6": {
+      "title": "Teknolojia // TECH-DEV-6",
+      "description": "Mfumo mdogo wa hali ya juu TECH-DEV-6 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-dev-6",
+      "prompt": "Picha ya muundo wa viwandani, tech-dev-6, ubora wa 8k."
+    },
+    "tech-home-1": {
+      "title": "Teknolojia // TECH-HOME-1",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HOME-1 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-home-1",
+      "prompt": "Picha ya muundo wa viwandani, tech-home-1, ubora wa 8k."
+    },
+    "tech-home-2": {
+      "title": "Teknolojia // TECH-HOME-2",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HOME-2 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-home-2",
+      "prompt": "Picha ya muundo wa viwandani, tech-home-2, ubora wa 8k."
+    },
+    "tech-home-3": {
+      "title": "Teknolojia // TECH-HOME-3",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HOME-3 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-home-3",
+      "prompt": "Picha ya muundo wa viwandani, tech-home-3, ubora wa 8k."
+    },
+    "tech-home-4": {
+      "title": "Teknolojia // TECH-HOME-4",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HOME-4 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-home-4",
+      "prompt": "Picha ya muundo wa viwandani, tech-home-4, ubora wa 8k."
+    },
+    "tech-home-5": {
+      "title": "Teknolojia // TECH-HOME-5",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HOME-5 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-home-5",
+      "prompt": "Picha ya muundo wa viwandani, tech-home-5, ubora wa 8k."
+    },
+    "tech-home-6": {
+      "title": "Teknolojia // TECH-HOME-6",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HOME-6 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-home-6",
+      "prompt": "Picha ya muundo wa viwandani, tech-home-6, ubora wa 8k."
+    },
+    "tech-hlth-1": {
+      "title": "Teknolojia // TECH-HLTH-1",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HLTH-1 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-hlth-1",
+      "prompt": "Picha ya muundo wa viwandani, tech-hlth-1, ubora wa 8k."
+    },
+    "tech-hlth-2": {
+      "title": "Teknolojia // TECH-HLTH-2",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HLTH-2 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-hlth-2",
+      "prompt": "Picha ya muundo wa viwandani, tech-hlth-2, ubora wa 8k."
+    },
+    "tech-hlth-3": {
+      "title": "Teknolojia // TECH-HLTH-3",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HLTH-3 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-hlth-3",
+      "prompt": "Picha ya muundo wa viwandani, tech-hlth-3, ubora wa 8k."
+    },
+    "tech-hlth-4": {
+      "title": "Teknolojia // TECH-HLTH-4",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HLTH-4 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-hlth-4",
+      "prompt": "Picha ya muundo wa viwandani, tech-hlth-4, ubora wa 8k."
+    },
+    "tech-hlth-5": {
+      "title": "Teknolojia // TECH-HLTH-5",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HLTH-5 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-hlth-5",
+      "prompt": "Picha ya muundo wa viwandani, tech-hlth-5, ubora wa 8k."
+    },
+    "tech-hlth-6": {
+      "title": "Teknolojia // TECH-HLTH-6",
+      "description": "Mfumo mdogo wa hali ya juu TECH-HLTH-6 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-hlth-6",
+      "prompt": "Picha ya muundo wa viwandani, tech-hlth-6, ubora wa 8k."
+    },
+    "tech-nrg-1": {
+      "title": "Teknolojia // TECH-NRG-1",
+      "description": "Mfumo mdogo wa hali ya juu TECH-NRG-1 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-nrg-1",
+      "prompt": "Picha ya muundo wa viwandani, tech-nrg-1, ubora wa 8k."
+    },
+    "tech-nrg-2": {
+      "title": "Teknolojia // TECH-NRG-2",
+      "description": "Mfumo mdogo wa hali ya juu TECH-NRG-2 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-nrg-2",
+      "prompt": "Picha ya muundo wa viwandani, tech-nrg-2, ubora wa 8k."
+    },
+    "tech-nrg-3": {
+      "title": "Teknolojia // TECH-NRG-3",
+      "description": "Mfumo mdogo wa hali ya juu TECH-NRG-3 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-nrg-3",
+      "prompt": "Picha ya muundo wa viwandani, tech-nrg-3, ubora wa 8k."
+    },
+    "tech-nrg-4": {
+      "title": "Teknolojia // TECH-NRG-4",
+      "description": "Mfumo mdogo wa hali ya juu TECH-NRG-4 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-nrg-4",
+      "prompt": "Picha ya muundo wa viwandani, tech-nrg-4, ubora wa 8k."
+    },
+    "tech-nrg-5": {
+      "title": "Teknolojia // TECH-NRG-5",
+      "description": "Mfumo mdogo wa hali ya juu TECH-NRG-5 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-nrg-5",
+      "prompt": "Picha ya muundo wa viwandani, tech-nrg-5, ubora wa 8k."
+    },
+    "tech-nrg-6": {
+      "title": "Teknolojia // TECH-NRG-6",
+      "description": "Mfumo mdogo wa hali ya juu TECH-NRG-6 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-nrg-6",
+      "prompt": "Picha ya muundo wa viwandani, tech-nrg-6, ubora wa 8k."
+    },
+    "tech-spc-1": {
+      "title": "Teknolojia // TECH-SPC-1",
+      "description": "Mfumo mdogo wa hali ya juu TECH-SPC-1 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-spc-1",
+      "prompt": "Picha ya muundo wa viwandani, tech-spc-1, ubora wa 8k."
+    },
+    "tech-spc-2": {
+      "title": "Teknolojia // TECH-SPC-2",
+      "description": "Mfumo mdogo wa hali ya juu TECH-SPC-2 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-spc-2",
+      "prompt": "Picha ya muundo wa viwandani, tech-spc-2, ubora wa 8k."
+    },
+    "tech-spc-3": {
+      "title": "Teknolojia // TECH-SPC-3",
+      "description": "Mfumo mdogo wa hali ya juu TECH-SPC-3 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-spc-3",
+      "prompt": "Picha ya muundo wa viwandani, tech-spc-3, ubora wa 8k."
+    },
+    "tech-spc-4": {
+      "title": "Teknolojia // TECH-SPC-4",
+      "description": "Mfumo mdogo wa hali ya juu TECH-SPC-4 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-spc-4",
+      "prompt": "Picha ya muundo wa viwandani, tech-spc-4, ubora wa 8k."
+    },
+    "tech-spc-5": {
+      "title": "Teknolojia // TECH-SPC-5",
+      "description": "Mfumo mdogo wa hali ya juu TECH-SPC-5 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-spc-5",
+      "prompt": "Picha ya muundo wa viwandani, tech-spc-5, ubora wa 8k."
+    },
+    "tech-spc-6": {
+      "title": "Teknolojia // TECH-SPC-6",
+      "description": "Mfumo mdogo wa hali ya juu TECH-SPC-6 ulioundwa kwa ajili ya operesheni endelevu na za kujitegemea.",
+      "howItWorks": "Imejengwa juu ya kanuni za kisasa za fizikia bila kutoa uchafuzi wa mazingira.",
+      "alt": "Muundo wa dhana wa tech-spc-6",
+      "prompt": "Picha ya muundo wa viwandani, tech-spc-6, ubora wa 8k."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Makazi // PLACE-1",
+      "location": "Makazi ya Kimataifa ya PLACE-1",
+      "story": "Wakazi wanaishi kwa amani na asili kupitia mifumo ya mzunguko usio na taka.",
+      "infrastructureTags": [
+        "Gridi Mahiri",
+        "Usafiri Safi",
+        "Nishati ya Muungano",
+        "Mifumo ya Baiolojia"
+      ],
+      "alt": "Mwonekano halisi wa place-1",
+      "prompt": "Mandhari ya sinema ya jiji, place-1, ubora wa 8k."
+    },
+    "place-2": {
+      "title": "Makazi // PLACE-2",
+      "location": "Makazi ya Kimataifa ya PLACE-2",
+      "story": "Wakazi wanaishi kwa amani na asili kupitia mifumo ya mzunguko usio na taka.",
+      "infrastructureTags": [
+        "Gridi Mahiri",
+        "Usafiri Safi",
+        "Nishati ya Muungano",
+        "Mifumo ya Baiolojia"
+      ],
+      "alt": "Mwonekano halisi wa place-2",
+      "prompt": "Mandhari ya sinema ya jiji, place-2, ubora wa 8k."
+    },
+    "place-3": {
+      "title": "Makazi // PLACE-3",
+      "location": "Makazi ya Kimataifa ya PLACE-3",
+      "story": "Wakazi wanaishi kwa amani na asili kupitia mifumo ya mzunguko usio na taka.",
+      "infrastructureTags": [
+        "Gridi Mahiri",
+        "Usafiri Safi",
+        "Nishati ya Muungano",
+        "Mifumo ya Baiolojia"
+      ],
+      "alt": "Mwonekano halisi wa place-3",
+      "prompt": "Mandhari ya sinema ya jiji, place-3, ubora wa 8k."
+    },
+    "place-4": {
+      "title": "Makazi // PLACE-4",
+      "location": "Makazi ya Kimataifa ya PLACE-4",
+      "story": "Wakazi wanaishi kwa amani na asili kupitia mifumo ya mzunguko usio na taka.",
+      "infrastructureTags": [
+        "Gridi Mahiri",
+        "Usafiri Safi",
+        "Nishati ya Muungano",
+        "Mifumo ya Baiolojia"
+      ],
+      "alt": "Mwonekano halisi wa place-4",
+      "prompt": "Mandhari ya sinema ya jiji, place-4, ubora wa 8k."
+    },
+    "place-5": {
+      "title": "Makazi // PLACE-5",
+      "location": "Makazi ya Kimataifa ya PLACE-5",
+      "story": "Wakazi wanaishi kwa amani na asili kupitia mifumo ya mzunguko usio na taka.",
+      "infrastructureTags": [
+        "Gridi Mahiri",
+        "Usafiri Safi",
+        "Nishati ya Muungano",
+        "Mifumo ya Baiolojia"
+      ],
+      "alt": "Mwonekano halisi wa place-5",
+      "prompt": "Mandhari ya sinema ya jiji, place-5, ubora wa 8k."
+    },
+    "place-6": {
+      "title": "Makazi // PLACE-6",
+      "location": "Makazi ya Kimataifa ya PLACE-6",
+      "story": "Wakazi wanaishi kwa amani na asili kupitia mifumo ya mzunguko usio na taka.",
+      "infrastructureTags": [
+        "Gridi Mahiri",
+        "Usafiri Safi",
+        "Nishati ya Muungano",
+        "Mifumo ya Baiolojia"
+      ],
+      "alt": "Mwonekano halisi wa place-6",
+      "prompt": "Mandhari ya sinema ya jiji, place-6, ubora wa 8k."
+    },
+    "place-7": {
+      "title": "Makazi // PLACE-7",
+      "location": "Makazi ya Kimataifa ya PLACE-7",
+      "story": "Wakazi wanaishi kwa amani na asili kupitia mifumo ya mzunguko usio na taka.",
+      "infrastructureTags": [
+        "Gridi Mahiri",
+        "Usafiri Safi",
+        "Nishati ya Muungano",
+        "Mifumo ya Baiolojia"
+      ],
+      "alt": "Mwonekano halisi wa place-7",
+      "prompt": "Mandhari ya sinema ya jiji, place-7, ubora wa 8k."
+    },
+    "place-8": {
+      "title": "Makazi // PLACE-8",
+      "location": "Makazi ya Kimataifa ya PLACE-8",
+      "story": "Wakazi wanaishi kwa amani na asili kupitia mifumo ya mzunguko usio na taka.",
+      "infrastructureTags": [
+        "Gridi Mahiri",
+        "Usafiri Safi",
+        "Nishati ya Muungano",
+        "Mifumo ya Baiolojia"
+      ],
+      "alt": "Mwonekano halisi wa place-8",
+      "prompt": "Mandhari ya sinema ya jiji, place-8, ubora wa 8k."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Miradi inakaguliwa na kusawazishwa moja kwa moja na Aliya Khan.",
+    "emptyLive": "Hakuna mfumo hewani kwa sasa. Miradi mipya itaongezwa hivi karibuni.",
+    "emptyInProgress": "Michoro ya kiufundi itaonekana hapa hatua zikikamilika.",
+    "emptyIdeas": "Mapendekezo ya kinadharia yataorodheshwa hapa."
+  }
+}

@@ -3,7 +3,8 @@ export type SupportedLanguage =
   | 'pa' | 'mr' | 'gu' | 'ta' | 'te'
   | 'kn' | 'ml' | 'ne' | 'vi' | 'fr'
   | 'de' | 'es' | 'pt' | 'it' | 'zh'
-  | 'ja' | 'ko' | 'ru' | 'tr' | 'id';
+  | 'ja' | 'ko' | 'ru' | 'tr' | 'id'
+  | 'nl' | 'pl' | 'fa' | 'th' | 'sw';
 
 export interface TranslationSchema {
   meta: {

@@ -69,7 +69,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     const arcCoreGroup = new THREE.Group();
     scene.add(arcCoreGroup);
 
-    // 2. Inner Wireframe Icosahedron
+    // 2. Inner Wireframe Icosahedron & Nested Geometric Core
     const icosahedronGeo = new THREE.IcosahedronGeometry(0.85, 1);
     const icosahedronMat = new THREE.MeshBasicMaterial({
       color: 0x38e8ff,
@@ -80,12 +80,23 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     const icosahedronMesh = new THREE.Mesh(icosahedronGeo, icosahedronMat);
     arcCoreGroup.add(icosahedronMesh);
 
+    // Nested Inner Geometric Core (Octahedron for multi-layered arc reactor geometry)
+    const innerOctaGeo = new THREE.OctahedronGeometry(0.58, 0);
+    const innerOctaMat = new THREE.MeshBasicMaterial({
+      color: 0x00f0ff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const innerOctaMesh = new THREE.Mesh(innerOctaGeo, innerOctaMat);
+    arcCoreGroup.add(innerOctaMesh);
+
     // Inner Solid Glow Core
-    const innerCoreGeo = new THREE.SphereGeometry(0.45, 24, 24);
+    const innerCoreGeo = new THREE.SphereGeometry(0.38, 24, 24);
     const innerCoreMat = new THREE.MeshBasicMaterial({
       color: 0x00f0ff,
       transparent: true,
-      opacity: 0.4,
+      opacity: 0.45,
     });
     const innerCoreMesh = new THREE.Mesh(innerCoreGeo, innerCoreMat);
     arcCoreGroup.add(innerCoreMesh);
@@ -323,10 +334,15 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       ring3.rotation.y += rotSpeed * 1.4;
       ring3.rotation.x -= rotSpeed * 0.5;
 
-      // Icosahedron rotation & scaling
+      // Inner Core Mesh Rotation & Scaling
       icosahedronMesh.rotation.x += rotSpeed * 0.7;
       icosahedronMesh.rotation.y += rotSpeed * 0.9;
       icosahedronMesh.scale.setScalar(coreScale);
+
+      innerOctaMesh.rotation.x -= rotSpeed * 1.1;
+      innerOctaMesh.rotation.z += rotSpeed * 1.3;
+      innerOctaMesh.scale.setScalar(coreScale * 0.85);
+
       innerCoreMesh.scale.setScalar(coreScale * 0.9);
 
       // Particle Displacement Update

@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "code": "nl",
+    "languageName": "Dutch",
+    "nativeName": "Nederlands",
+    "rtl": false
+  },
+  "nav": {
+    "home": "Startpagina",
+    "timeline": "Tijdlijn van de Toekomst",
+    "tech": "Toekomstige Technologie",
+    "places": "Steden & Habitats",
+    "projects": "Mijn Projecten",
+    "advertise": "Adverteren / Aanmelden",
+    "about": "Over Mij",
+    "contact": "Contact Opnemen",
+    "assistant": "AI-Assistent",
+    "language": "Taal",
+    "menu": "Navigatiemenu openen",
+    "close": "Navigatiemenu sluiten",
+    "brandSubtitle": "TECHNOLOGIE // 2030-2050",
+    "menuSysHeader": "SYSTEEMMENU",
+    "locationDomain": "KNOOPPUNT: WWW.HAYAATIWEB.SITE"
+  },
+  "hero": {
+    "systemStatus": "SYSTEEM//NODE.2030-2050",
+    "online": "ALLE SYSTEMEN ONLINE",
+    "headline": "De toekomst ontstaat niet zomaar. Wij bouwen haar samen.",
+    "subtitle": "Een filmische blauwdruk van menselijke innovatie, cognitieve machines, orbitale kolonies en duurzame habitats van 2030 tot 2050. Gebouwd door Aliya Khan.",
+    "exploreCta": "Verken 2030 2050",
+    "projectsCta": "Bekijk Mijn Projecten",
+    "coordinates": "LOCATIE: 28.6139° N, 77.2090° O // MOTOR ACTIEF",
+    "timelineSpan": "TIJDSLIJN 2030 — 2050",
+    "liveTelemetry": "TELEMETRIE: NOMINAAL",
+    "scrollDown": "Scroll naar beneden om de tijdlijn te verkennen",
+    "imageAlt": "Filmische weergave van een futuristische metropool 2030 2050"
+  },
+  "timeline": {
+    "sectionTag": "CHRONO_KAART // 2030 -> 2050",
+    "title": "Kroniek van Menselijke Innovatie",
+    "subtitle": "Van alomtegenwoordige edge-intelligentie in 2030 tot orbitale zware industrie in 2050.",
+    "chronoMap": "CHRONOLOGISCHE BLAUWDRUK",
+    "eraHeading": "TIJDPERK HORIZON",
+    "storyTitle": "Een Dag in Dit Tijdperk",
+    "breakthroughsTitle": "Belangrijke Technologische Mijlpalen",
+    "viewEraDetails": "Open Tijdperkdossier",
+    "jumpToEra": "Spring naar Dit Tijdperk",
+    "statusPrefix": "SYSTEEMSTATUS",
+    "eraBreakthroughsHeading": "Doorbraken",
+    "specificationsCount": "Specificaties"
+  },
+  "tech": {
+    "sectionTag": "SYSTEEM_INDEX // 42 FRONTIERS",
+    "title": "Catalogus van Toekomstige Technologie",
+    "subtitle": "Uitgebreide systeemblauwrukken en wetenschappelijke mechanismen over 7 fundamentele technologische grenzen.",
+    "systemsIndex": "CATALOGUSINDEX",
+    "howItWorksLabel": "HOE HET WERKT",
+    "architectureMechanics": "TECHNISCHE ARCHITECTUUR & MECHANICA",
+    "underlyingMechanism": "FUNDAMENTEEL FYSISCH PRINCIPE",
+    "searchPlaceholder": "Zoek technologieën, systemen of doorbraken...",
+    "searchNoResults": "Geen technologieën gevonden die overeenkomen.",
+    "filterAll": "Alle Categorieën",
+    "modalClose": "Dossier Sluiten",
+    "viewDossier": "Bekijk Technisch Dossier",
+    "yearLabel": "JAAR",
+    "statusLabel": "SYSTEEMSTATUS",
+    "activeStatus": "ACTIEF SYSTEEM",
+    "promptLabel": "INVOEROPDRACHT",
+    "categories": {
+      "all": "Alle Categorieën",
+      "ai": "Toekomstige AI",
+      "vehicles": "Voertuigen & Mobiliteit",
+      "devices": "Apparaten & Bionica",
+      "homeWork": "Wonen & Werken",
+      "health": "Gezondheid & Bio",
+      "energy": "Energie & Klimaat",
+      "space": "Diepe Ruimte"
+    }
+  },
+  "places": {
+    "sectionTag": "HABITAT_OVERZICHT // 2030-2050",
+    "title": "Steden & Habitat Briefkaarten",
+    "subtitle": "Fotorealistische visualisaties en infrastructuurdossiers van opkomende menselijke nederzettingen op Aarde en in een baan om de aarde.",
+    "horizonLabel": "TIJDSHORIZON",
+    "aDayInPlace": "Een Dag in Deze Habitat",
+    "infrastructureLabel": "Kritieke Infrastructuur",
+    "viewLocation": "Verken Habitatdossier",
+    "promptLabel": "INVOEROPDRACHT"
+  },
+  "projects": {
+    "sectionTag": "OPRICHTER_PROJECTEN // ALIYA KHAN",
+    "title": "Mijn Projecten",
+    "subtitle": "Actieve softwaresystemen, onderzoeksarchieven en architectonische ontwerpen gebouwd door Aliya Khan.",
+    "tabs": {
+      "live": "Live Systemen",
+      "inProgress": "In Ontwikkeling",
+      "futureIdeas": "Toekomstige Ideeën"
+    },
+    "visit": "Systeem Openen",
+    "emptyLive": "Momenteel geen live systemen. Nieuwe implementaties worden binnenkort getoond.",
+    "emptyInProgress": "Technische ontwerpen verschijnen hier naarmate de fasen worden voltooid.",
+    "emptyIdeas": "Theoretische onderzoeksvoorstellen worden hier gecatalogiseerd.",
+    "pendingNotice": "Projecten worden direct geëvalueerd en gesynchroniseerd door Aliya Khan."
+  },
+  "advertise": {
+    "sectionTag": "PROJECT_INDIENING // NOTERING",
+    "title": "Adverteer / Meld Uw Project Aan",
+    "subtitle": "Dien uw baanbrekende technologie of duurzame initiatief in ter beoordeling door Aliya Khan.",
+    "reviewNotice": "Alle inzendingen worden persoonlijk beoordeeld door Aliya Khan. Commerciële spam wordt afgewezen.",
+    "pricingNote": "Plaatsingsdetails en samenwerkingsvoorwaarden worden rechtstreeks via e-mail gecommuniceerd.",
+    "form": {
+      "name": "Uw Volledige Naam",
+      "email": "Zakelijk E-mailadres",
+      "projectName": "Project- of Bedrijfsnaam",
+      "projectLink": "Systeem- of Whitepaper-URL",
+      "category": "Technologiedomein",
+      "selectCategory": "Selecteer een domein...",
+      "budget": "Geschat Budgetbereik",
+      "budgetPlaceholder": "bijv. € 5.000 - € 25.000",
+      "description": "Technisch Overzicht & Relevantie voor de Toekomst",
+      "submitBtn": "Dossier Verzenden ter Beoordeling",
+      "sending": "Dossier Wordt Verzonden...",
+      "sentSuccess": "Dossier succesvol verzonden naar Aliya Khan. U ontvangt spoedig bericht.",
+      "sendError": "Verzending mislukt. Controleer uw verbinding of probeer het opnieuw."
+    }
+  },
+  "about": {
+    "sectionTag": "ARCHITECTEN_DOSSIER // SYSTEEMPROFIEK",
+    "title": "Over Aliya Khan",
+    "subtitle": "Oprichter, hoofdontwerper en systeemarchitect van Hayaati Web Technology.",
+    "ownerName": "Aliya Khan",
+    "architectTitle": "Oprichter & Hoofdontwerper",
+    "leadArchitect": "HOOFDARCHITECT // HAYAATI WEB TECHNOLOGY",
+    "bioPlaceholder": "Aliya Khan ontwerpt en bouwt software en infrastructurele toekomstvisies voor de overgang van 2030 naar 2050.",
+    "contactDirect": "Rechtstreeks Kanaal: Hayaati.Technology@gmail.com",
+    "photoAlt": "Aliya Khan — Oprichter en Hoofdontwerper van Hayaati Web Technology"
+  },
+  "contact": {
+    "sectionTag": "DIRECT_KANAAL // COMMUNICATIE",
+    "title": "Contact & Samenwerking",
+    "subtitle": "Neem rechtstreeks contact op met Aliya Khan voor onderzoek, architectuuradvies of strategische samenwerking.",
+    "emailLabel": "OFFICIEEL E-MAILKANAAL",
+    "directEmail": "Hayaati.Technology@gmail.com",
+    "form": {
+      "name": "Uw Naam",
+      "email": "Uw E-mailadres",
+      "message": "Uw Bericht of Voorstel",
+      "submitBtn": "Bericht Verzenden",
+      "sending": "Verzenden...",
+      "sentSuccess": "Bericht succesvol verzonden naar Aliya Khan.",
+      "sendError": "Verzenden mislukt. Probeer het opnieuw.",
+      "placeholderName": "bijv. Dr. Elena Vance",
+      "placeholderEmail": "elena@frontiertech.org",
+      "placeholderMessage": "Beschrijf uw onderzoek, samenwerkingsidee of vraag..."
+    }
+  },
+  "assistant": {
+    "buttonLabel": "Praat met Hayaati",
+    "panelTitle": "HAYAATI COGNITIEVE KERN",
+    "subtitle": "Kwantum Holografische Neurale Interface // Stem & Tekst",
+    "welcomeMessage": "Systeemverbinding tot stand gebracht. Ik ben Hayaati, uw cognitieve gids voor de tijdlijn 2030-2050.",
+    "chips": [
+      "Hoe ziet 2030 eruit?",
+      "Toon toekomstige gezondheidstechnologie",
+      "Vertel me over Hayaati & Aliya Khan"
+    ],
+    "inputPlaceholder": "Stel een vraag over de technologie van 2030–2050...",
+    "sendBtn": "Verzenden",
+    "retryBtn": "Opnieuw Proberen",
+    "voiceBtn": "Spraak Inschakelen",
+    "voiceStopBtn": "Spraak Stoppen",
+    "voiceListening": "Luisteren...",
+    "voiceSpeaking": "Spreken...",
+    "voiceConnecting": "Verbinden...",
+    "voiceUnsupported": "Spraakinvoer niet ondersteund in deze browser.",
+    "voiceNotAvailableLang": "Spraak niet beschikbaar voor deze taal.",
+    "rateLimitBanner": "Frequentielimiet bereikt. Even wachten a.u.b.",
+    "talkTo": "Spreek met Hayaati",
+    "typeInstead": "Of typ hieronder",
+    "returnToOrb": "Terug naar Kern",
+    "muteMic": "Microfoon Dempen",
+    "unmuteMic": "Microfoon Inschakelen",
+    "micLabel": "Microfoon",
+    "mutedLabel": "Gedempt",
+    "endSession": "Sessie Beëindigen",
+    "endLabel": "Einde",
+    "userTag": "GEBRUIKER",
+    "assistantTag": "HAYAATI",
+    "cognitiveLink": "COGNITIEVE VERBINDING ACTIEF",
+    "orb": {
+      "ready": "STAND-BY",
+      "listening": "LUISTEREN",
+      "thinking": "VERWERKEN",
+      "speaking": "SPREKEN",
+      "tapToStart": "Tik om te Praten",
+      "start": "Starten"
+    },
+    "errors": {
+      "quotaReached": "Dagelijks gespreksquotum bereikt. Kom morgen terug.",
+      "serverBusy": "De cognitieve kern is bezet. Even geduld a.u.b.",
+      "networkError": "Netwerkfout. Controleer uw verbinding.",
+      "micBlocked": "Microfoontoegang geblokkeerd door browser.",
+      "sessionEnded": "Sessie beëindigd.",
+      "genericError": "Er is een onverwachte fout opgetreden."
+    },
+    "voiceErrors": {
+      "unsupported": "Spraakherkenning wordt niet ondersteund.",
+      "insecure": "HTTPS is vereist voor spraaktoegang.",
+      "denied": "Microfoontoestemming geweigerd.",
+      "noDevice": "Geen microfoon gedetecteerd.",
+      "micFailed": "Microfooninitialisatie mislukt.",
+      "rateLimit": "Spraakfrequentielimiet bereikt.",
+      "providerQuota": "Spraakquotum overschreden.",
+      "noKey": "Spraakservice niet geconfigureerd.",
+      "modelFailed": "Spraakmodel mislukt.",
+      "network": "Netwerkfout tijdens spraaksynthese.",
+      "serverError": "Spraakserverfout."
+    }
+  },
+  "footer": {
+    "copyright": "© 2026-2050 Hayaati Web Technology. Alle rechten voorbehouden.",
+    "disclaimer": "Onderzoeks- en architectuurblauwdruk voor speculatieve en opkomende technologieën.",
+    "liveDomainLabel": "LIVE DOMEIN",
+    "quickLinks": "SNELKOPPELINGEN",
+    "systemDesignation": "SYSTEEMAANDUIDING: HAYAATI-CORE-V5",
+    "allRightsReserved": "Alle rechten voorbehouden."
+  },
+  "common": {
+    "year": "Jaar",
+    "status": "Toestand",
+    "operational": "Operationeel",
+    "close": "Sluiten",
+    "back": "Terug",
+    "retry": "Opnieuw",
+    "error": "Fout",
+    "success": "Succes",
+    "loading": "Laden..."
+  },
+  "languageSelector": {
+    "selectLanguage": "Selecteer Internationale Taal",
+    "dialogTitle": "Taalkeuze",
+    "searchPlaceholder": "Filter talen (bijv. Nederlands, English)...",
+    "languagesCountSuffix": "Talen"
+  },
+  "imageSlot": {
+    "opticalChannel": "OPTISCH KANAAL",
+    "framePending": "FRAME WORDT GELADEN",
+    "sysDim": "SYS//800x500"
+  },
+  "notFound": {
+    "errorTag": "FOUT 404 // SECTOR NIET GEVONDEN",
+    "title": "Signaal Verloren in de Diepe Ruimte",
+    "description": "De opgevraagde coördinaten komen niet overeen met een bekend toekomstig systeem.",
+    "returnBtn": "Terug naar Orbitale Basis"
+  }
+}

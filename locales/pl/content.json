@@ -1,0 +1,534 @@
+{
+  "eras": {
+    "era-2030": {
+      "title": "Fundament Kognitywny",
+      "yearLabel": "EPOKA // 2030",
+      "story": "Poranki zaczynają się od otoczeniowej AI, która optymalizuje sieci energetyczne podczas Twojego snu. Miasto funkcjonuje płynnie dzięki cichym elektrycznym wahadłowcom i podziemnym kapsułom dostawczym.",
+      "breakthroughs": [
+        "Otoczeniowi asystenci AI na urządzeniach, optymalizujący codzienny rytm bez opóźnień chmurowych",
+        "Pakiety akumulatorów litowo-metalowych ze stałym elektrolitem, zapewniające 1000 km zasięgu w transporcie miejskim",
+        "Oficjalna certyfikacja komercyjna autonomicznych taksówek powietrznych w głównych korytarzach miejskich"
+      ],
+      "bannerAlt": "Kinowy widok zrównoważonej metropolii 2030 r. z czystymi korytarzami transportowymi",
+      "bannerPrompt": "Kinowa panorama zrównoważonej metropolii nadmorskiej o świcie, wieże z fotowoltaicznego szkła, elektryczne promy, pionowe ogrody, rozdzielczość 8k."
+    },
+    "era-2035": {
+      "title": "Synteza Biomechaniczna",
+      "yearLabel": "EPOKA // 2035",
+      "story": "Interfejsy neuronowe umożliwiają bezwysiłkowe sterowanie systemami cyfrowymi za pomocą myśli. Medycyna prewencyjna działa 24/7 na poziomie komórkowym dzięki biokompatybilnym nanocząsteczkom.",
+      "breakthroughs": [
+        "Podskórne czujniki optoelektroniczne do ciągłego monitorowania parametrów metabolicznych",
+        "Nieinwazyjne dekodery kory ruchowej przywracające sprawność fizyczną",
+        "Przemysłowe bioreaktory grzybniowe wytwarzające ekologiczne, ultra-wytrzymałe materiały budowlane"
+      ],
+      "bannerAlt": "Kinowy widok wertykalnego miasta z biokopułami i liniami kolei magnetycznej",
+      "bannerPrompt": "Panorama pionowego miasta o zmierzchu z tubami maglev i szklarniami aeroponicznymi, rozdzielczość 8k."
+    },
+    "era-2050": {
+      "title": "Horyzont Planetarny i Orbitalny",
+      "yearLabel": "EPOKA // 2050",
+      "story": "Ciężki przemysł produkcyjny został przeniesiony z biosfery Ziemi do rafinerii w mikrograwitacji. Komercyjna fuzja jądrowa i gospodarki o obiegu zamkniętym przywracają równowagę oceanów i atmosfery.",
+      "breakthroughs": [
+        "Komercyjne elektrownie termojądrowe z pułapką magnetyczną zapewniające czystą moc podstawową",
+        "Stałe bazy na południowym biegunie Księżyca do wydobycia lodu wodnego i produkcji paliwa kosmicznego",
+        "Planetarne instalacje biologii syntetycznej zaprojektowane do sekwestracji miliardów ton węgla atmosferycznego"
+      ],
+      "bannerAlt": "Widok na Ziemię ze stacji orbitalnych i modułów mieszkalnych",
+      "bannerPrompt": "Kinowy widok Ziemi ze stacji orbitalnej na niskiej orbicie okołoziemskiej, błękitna krzywizna planety, głęboki kosmos, 8k."
+    }
+  },
+  "timelineCards": {
+    "tl-2030-1": {
+      "title": "Projekt // TL-2030-1",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2030-1",
+      "prompt": "Kinowa fotografia architektury, tl-2030-1, rozdzielczość 8k."
+    },
+    "tl-2030-2": {
+      "title": "Projekt // TL-2030-2",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2030-2",
+      "prompt": "Kinowa fotografia architektury, tl-2030-2, rozdzielczość 8k."
+    },
+    "tl-2030-3": {
+      "title": "Projekt // TL-2030-3",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2030-3",
+      "prompt": "Kinowa fotografia architektury, tl-2030-3, rozdzielczość 8k."
+    },
+    "tl-2030-4": {
+      "title": "Projekt // TL-2030-4",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2030-4",
+      "prompt": "Kinowa fotografia architektury, tl-2030-4, rozdzielczość 8k."
+    },
+    "tl-2035-1": {
+      "title": "Projekt // TL-2035-1",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2035-1",
+      "prompt": "Kinowa fotografia architektury, tl-2035-1, rozdzielczość 8k."
+    },
+    "tl-2035-2": {
+      "title": "Projekt // TL-2035-2",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2035-2",
+      "prompt": "Kinowa fotografia architektury, tl-2035-2, rozdzielczość 8k."
+    },
+    "tl-2035-3": {
+      "title": "Projekt // TL-2035-3",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2035-3",
+      "prompt": "Kinowa fotografia architektury, tl-2035-3, rozdzielczość 8k."
+    },
+    "tl-2035-4": {
+      "title": "Projekt // TL-2035-4",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2035-4",
+      "prompt": "Kinowa fotografia architektury, tl-2035-4, rozdzielczość 8k."
+    },
+    "tl-2050-1": {
+      "title": "Projekt // TL-2050-1",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2050-1",
+      "prompt": "Kinowa fotografia architektury, tl-2050-1, rozdzielczość 8k."
+    },
+    "tl-2050-2": {
+      "title": "Projekt // TL-2050-2",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2050-2",
+      "prompt": "Kinowa fotografia architektury, tl-2050-2, rozdzielczość 8k."
+    },
+    "tl-2050-3": {
+      "title": "Projekt // TL-2050-3",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2050-3",
+      "prompt": "Kinowa fotografia architektury, tl-2050-3, rozdzielczość 8k."
+    },
+    "tl-2050-4": {
+      "title": "Projekt // TL-2050-4",
+      "description": "Zaawansowane bezemisyjne specyfikacje inżynieryjne na lata 2030-2050.",
+      "breakthrough": "Zastosowanie zaawansowanych zasad fizyki i najwyższej efektywności zasobów.",
+      "alt": "Wizualizacja techniczna tl-2050-4",
+      "prompt": "Kinowa fotografia architektury, tl-2050-4, rozdzielczość 8k."
+    }
+  },
+  "techCards": {
+    "tech-ai-1": {
+      "title": "Technologia // TECH-AI-1",
+      "description": "Wiodący podsystem TECH-AI-1 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-ai-1",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-ai-1, rozdzielczość 8k."
+    },
+    "tech-ai-2": {
+      "title": "Technologia // TECH-AI-2",
+      "description": "Wiodący podsystem TECH-AI-2 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-ai-2",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-ai-2, rozdzielczość 8k."
+    },
+    "tech-ai-3": {
+      "title": "Technologia // TECH-AI-3",
+      "description": "Wiodący podsystem TECH-AI-3 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-ai-3",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-ai-3, rozdzielczość 8k."
+    },
+    "tech-ai-4": {
+      "title": "Technologia // TECH-AI-4",
+      "description": "Wiodący podsystem TECH-AI-4 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-ai-4",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-ai-4, rozdzielczość 8k."
+    },
+    "tech-ai-5": {
+      "title": "Technologia // TECH-AI-5",
+      "description": "Wiodący podsystem TECH-AI-5 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-ai-5",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-ai-5, rozdzielczość 8k."
+    },
+    "tech-ai-6": {
+      "title": "Technologia // TECH-AI-6",
+      "description": "Wiodący podsystem TECH-AI-6 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-ai-6",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-ai-6, rozdzielczość 8k."
+    },
+    "tech-veh-1": {
+      "title": "Technologia // TECH-VEH-1",
+      "description": "Wiodący podsystem TECH-VEH-1 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-veh-1",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-veh-1, rozdzielczość 8k."
+    },
+    "tech-veh-2": {
+      "title": "Technologia // TECH-VEH-2",
+      "description": "Wiodący podsystem TECH-VEH-2 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-veh-2",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-veh-2, rozdzielczość 8k."
+    },
+    "tech-veh-3": {
+      "title": "Technologia // TECH-VEH-3",
+      "description": "Wiodący podsystem TECH-VEH-3 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-veh-3",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-veh-3, rozdzielczość 8k."
+    },
+    "tech-veh-4": {
+      "title": "Technologia // TECH-VEH-4",
+      "description": "Wiodący podsystem TECH-VEH-4 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-veh-4",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-veh-4, rozdzielczość 8k."
+    },
+    "tech-veh-5": {
+      "title": "Technologia // TECH-VEH-5",
+      "description": "Wiodący podsystem TECH-VEH-5 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-veh-5",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-veh-5, rozdzielczość 8k."
+    },
+    "tech-veh-6": {
+      "title": "Technologia // TECH-VEH-6",
+      "description": "Wiodący podsystem TECH-VEH-6 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-veh-6",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-veh-6, rozdzielczość 8k."
+    },
+    "tech-dev-1": {
+      "title": "Technologia // TECH-DEV-1",
+      "description": "Wiodący podsystem TECH-DEV-1 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-dev-1",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-dev-1, rozdzielczość 8k."
+    },
+    "tech-dev-2": {
+      "title": "Technologia // TECH-DEV-2",
+      "description": "Wiodący podsystem TECH-DEV-2 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-dev-2",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-dev-2, rozdzielczość 8k."
+    },
+    "tech-dev-3": {
+      "title": "Technologia // TECH-DEV-3",
+      "description": "Wiodący podsystem TECH-DEV-3 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-dev-3",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-dev-3, rozdzielczość 8k."
+    },
+    "tech-dev-4": {
+      "title": "Technologia // TECH-DEV-4",
+      "description": "Wiodący podsystem TECH-DEV-4 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-dev-4",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-dev-4, rozdzielczość 8k."
+    },
+    "tech-dev-5": {
+      "title": "Technologia // TECH-DEV-5",
+      "description": "Wiodący podsystem TECH-DEV-5 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-dev-5",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-dev-5, rozdzielczość 8k."
+    },
+    "tech-dev-6": {
+      "title": "Technologia // TECH-DEV-6",
+      "description": "Wiodący podsystem TECH-DEV-6 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-dev-6",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-dev-6, rozdzielczość 8k."
+    },
+    "tech-home-1": {
+      "title": "Technologia // TECH-HOME-1",
+      "description": "Wiodący podsystem TECH-HOME-1 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-home-1",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-home-1, rozdzielczość 8k."
+    },
+    "tech-home-2": {
+      "title": "Technologia // TECH-HOME-2",
+      "description": "Wiodący podsystem TECH-HOME-2 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-home-2",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-home-2, rozdzielczość 8k."
+    },
+    "tech-home-3": {
+      "title": "Technologia // TECH-HOME-3",
+      "description": "Wiodący podsystem TECH-HOME-3 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-home-3",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-home-3, rozdzielczość 8k."
+    },
+    "tech-home-4": {
+      "title": "Technologia // TECH-HOME-4",
+      "description": "Wiodący podsystem TECH-HOME-4 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-home-4",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-home-4, rozdzielczość 8k."
+    },
+    "tech-home-5": {
+      "title": "Technologia // TECH-HOME-5",
+      "description": "Wiodący podsystem TECH-HOME-5 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-home-5",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-home-5, rozdzielczość 8k."
+    },
+    "tech-home-6": {
+      "title": "Technologia // TECH-HOME-6",
+      "description": "Wiodący podsystem TECH-HOME-6 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-home-6",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-home-6, rozdzielczość 8k."
+    },
+    "tech-hlth-1": {
+      "title": "Technologia // TECH-HLTH-1",
+      "description": "Wiodący podsystem TECH-HLTH-1 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-hlth-1",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-hlth-1, rozdzielczość 8k."
+    },
+    "tech-hlth-2": {
+      "title": "Technologia // TECH-HLTH-2",
+      "description": "Wiodący podsystem TECH-HLTH-2 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-hlth-2",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-hlth-2, rozdzielczość 8k."
+    },
+    "tech-hlth-3": {
+      "title": "Technologia // TECH-HLTH-3",
+      "description": "Wiodący podsystem TECH-HLTH-3 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-hlth-3",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-hlth-3, rozdzielczość 8k."
+    },
+    "tech-hlth-4": {
+      "title": "Technologia // TECH-HLTH-4",
+      "description": "Wiodący podsystem TECH-HLTH-4 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-hlth-4",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-hlth-4, rozdzielczość 8k."
+    },
+    "tech-hlth-5": {
+      "title": "Technologia // TECH-HLTH-5",
+      "description": "Wiodący podsystem TECH-HLTH-5 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-hlth-5",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-hlth-5, rozdzielczość 8k."
+    },
+    "tech-hlth-6": {
+      "title": "Technologia // TECH-HLTH-6",
+      "description": "Wiodący podsystem TECH-HLTH-6 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-hlth-6",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-hlth-6, rozdzielczość 8k."
+    },
+    "tech-nrg-1": {
+      "title": "Technologia // TECH-NRG-1",
+      "description": "Wiodący podsystem TECH-NRG-1 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-nrg-1",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-nrg-1, rozdzielczość 8k."
+    },
+    "tech-nrg-2": {
+      "title": "Technologia // TECH-NRG-2",
+      "description": "Wiodący podsystem TECH-NRG-2 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-nrg-2",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-nrg-2, rozdzielczość 8k."
+    },
+    "tech-nrg-3": {
+      "title": "Technologia // TECH-NRG-3",
+      "description": "Wiodący podsystem TECH-NRG-3 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-nrg-3",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-nrg-3, rozdzielczość 8k."
+    },
+    "tech-nrg-4": {
+      "title": "Technologia // TECH-NRG-4",
+      "description": "Wiodący podsystem TECH-NRG-4 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-nrg-4",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-nrg-4, rozdzielczość 8k."
+    },
+    "tech-nrg-5": {
+      "title": "Technologia // TECH-NRG-5",
+      "description": "Wiodący podsystem TECH-NRG-5 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-nrg-5",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-nrg-5, rozdzielczość 8k."
+    },
+    "tech-nrg-6": {
+      "title": "Technologia // TECH-NRG-6",
+      "description": "Wiodący podsystem TECH-NRG-6 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-nrg-6",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-nrg-6, rozdzielczość 8k."
+    },
+    "tech-spc-1": {
+      "title": "Technologia // TECH-SPC-1",
+      "description": "Wiodący podsystem TECH-SPC-1 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-spc-1",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-spc-1, rozdzielczość 8k."
+    },
+    "tech-spc-2": {
+      "title": "Technologia // TECH-SPC-2",
+      "description": "Wiodący podsystem TECH-SPC-2 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-spc-2",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-spc-2, rozdzielczość 8k."
+    },
+    "tech-spc-3": {
+      "title": "Technologia // TECH-SPC-3",
+      "description": "Wiodący podsystem TECH-SPC-3 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-spc-3",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-spc-3, rozdzielczość 8k."
+    },
+    "tech-spc-4": {
+      "title": "Technologia // TECH-SPC-4",
+      "description": "Wiodący podsystem TECH-SPC-4 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-spc-4",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-spc-4, rozdzielczość 8k."
+    },
+    "tech-spc-5": {
+      "title": "Technologia // TECH-SPC-5",
+      "description": "Wiodący podsystem TECH-SPC-5 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-spc-5",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-spc-5, rozdzielczość 8k."
+    },
+    "tech-spc-6": {
+      "title": "Technologia // TECH-SPC-6",
+      "description": "Wiodący podsystem TECH-SPC-6 zaprojektowany do zrównoważonych i autonomicznych operacji.",
+      "howItWorks": "Oparty na innowacyjnych prawach fizyki przy zerowej emisji środowiskowej.",
+      "alt": "Projekt koncepcyjny tech-spc-6",
+      "prompt": "Fotografia wzornictwa przemysłowego, tech-spc-6, rozdzielczość 8k."
+    }
+  },
+  "places": {
+    "place-1": {
+      "title": "Siedlisko // PLACE-1",
+      "location": "Międzynarodowe Siedlisko PLACE-1",
+      "story": "Mieszkańcy żyją w harmonii z naturą dzięki bezodpadowym obiegom zamkniętym.",
+      "infrastructureTags": [
+        "Inteligentna Sieć",
+        "Czysty Transport",
+        "Energia Termojądrowa",
+        "Biosystemy"
+      ],
+      "alt": "Fotorealistyczny widok place-1",
+      "prompt": "Kinowy krajobraz miejski, place-1, rozdzielczość 8k."
+    },
+    "place-2": {
+      "title": "Siedlisko // PLACE-2",
+      "location": "Międzynarodowe Siedlisko PLACE-2",
+      "story": "Mieszkańcy żyją w harmonii z naturą dzięki bezodpadowym obiegom zamkniętym.",
+      "infrastructureTags": [
+        "Inteligentna Sieć",
+        "Czysty Transport",
+        "Energia Termojądrowa",
+        "Biosystemy"
+      ],
+      "alt": "Fotorealistyczny widok place-2",
+      "prompt": "Kinowy krajobraz miejski, place-2, rozdzielczość 8k."
+    },
+    "place-3": {
+      "title": "Siedlisko // PLACE-3",
+      "location": "Międzynarodowe Siedlisko PLACE-3",
+      "story": "Mieszkańcy żyją w harmonii z naturą dzięki bezodpadowym obiegom zamkniętym.",
+      "infrastructureTags": [
+        "Inteligentna Sieć",
+        "Czysty Transport",
+        "Energia Termojądrowa",
+        "Biosystemy"
+      ],
+      "alt": "Fotorealistyczny widok place-3",
+      "prompt": "Kinowy krajobraz miejski, place-3, rozdzielczość 8k."
+    },
+    "place-4": {
+      "title": "Siedlisko // PLACE-4",
+      "location": "Międzynarodowe Siedlisko PLACE-4",
+      "story": "Mieszkańcy żyją w harmonii z naturą dzięki bezodpadowym obiegom zamkniętym.",
+      "infrastructureTags": [
+        "Inteligentna Sieć",
+        "Czysty Transport",
+        "Energia Termojądrowa",
+        "Biosystemy"
+      ],
+      "alt": "Fotorealistyczny widok place-4",
+      "prompt": "Kinowy krajobraz miejski, place-4, rozdzielczość 8k."
+    },
+    "place-5": {
+      "title": "Siedlisko // PLACE-5",
+      "location": "Międzynarodowe Siedlisko PLACE-5",
+      "story": "Mieszkańcy żyją w harmonii z naturą dzięki bezodpadowym obiegom zamkniętym.",
+      "infrastructureTags": [
+        "Inteligentna Sieć",
+        "Czysty Transport",
+        "Energia Termojądrowa",
+        "Biosystemy"
+      ],
+      "alt": "Fotorealistyczny widok place-5",
+      "prompt": "Kinowy krajobraz miejski, place-5, rozdzielczość 8k."
+    },
+    "place-6": {
+      "title": "Siedlisko // PLACE-6",
+      "location": "Międzynarodowe Siedlisko PLACE-6",
+      "story": "Mieszkańcy żyją w harmonii z naturą dzięki bezodpadowym obiegom zamkniętym.",
+      "infrastructureTags": [
+        "Inteligentna Sieć",
+        "Czysty Transport",
+        "Energia Termojądrowa",
+        "Biosystemy"
+      ],
+      "alt": "Fotorealistyczny widok place-6",
+      "prompt": "Kinowy krajobraz miejski, place-6, rozdzielczość 8k."
+    },
+    "place-7": {
+      "title": "Siedlisko // PLACE-7",
+      "location": "Międzynarodowe Siedlisko PLACE-7",
+      "story": "Mieszkańcy żyją w harmonii z naturą dzięki bezodpadowym obiegom zamkniętym.",
+      "infrastructureTags": [
+        "Inteligentna Sieć",
+        "Czysty Transport",
+        "Energia Termojądrowa",
+        "Biosystemy"
+      ],
+      "alt": "Fotorealistyczny widok place-7",
+      "prompt": "Kinowy krajobraz miejski, place-7, rozdzielczość 8k."
+    },
+    "place-8": {
+      "title": "Siedlisko // PLACE-8",
+      "location": "Międzynarodowe Siedlisko PLACE-8",
+      "story": "Mieszkańcy żyją w harmonii z naturą dzięki bezodpadowym obiegom zamkniętym.",
+      "infrastructureTags": [
+        "Inteligentna Sieć",
+        "Czysty Transport",
+        "Energia Termojądrowa",
+        "Biosystemy"
+      ],
+      "alt": "Fotorealistyczny widok place-8",
+      "prompt": "Kinowy krajobraz miejski, place-8, rozdzielczość 8k."
+    }
+  },
+  "projects": {
+    "pendingNotice": "Projekty są bezpośrednio weryfikowane i synchronizowane przez Aliya Khan.",
+    "emptyLive": "Brak aktywnych systemów. Nowe wdrożenia pojawią się wkrótce.",
+    "emptyInProgress": "Projekty inżynieryjne pojawią się tutaj po ukończeniu kolejnych etapów.",
+    "emptyIdeas": "Teoretyczne propozycje badawcze zostaną tutaj skatalogowane."
+  }
+}

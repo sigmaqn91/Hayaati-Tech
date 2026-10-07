@@ -16,8 +16,17 @@ import { Footer } from '@/components/Footer';
 import { useLanguage } from '@/context/LanguageContext';
 
 const JarvisOverlay = dynamic(
-  () => import('@/components/jarvis/JarvisOverlay').then((mod) => mod.JarvisOverlay),
-  { ssr: false }
+  () =>
+    import('@/components/jarvis/JarvisOverlay')
+      .then((mod) => mod.JarvisOverlay)
+      .catch(() => {
+        // Retry chunk import in case of transient dev reload or chunk hash mismatch
+        return import('@/components/jarvis/JarvisOverlay').then((mod) => mod.JarvisOverlay);
+      }),
+  {
+    ssr: false,
+    loading: () => null,
+  }
 );
 
 export default function HomePage() {
@@ -31,7 +40,7 @@ export default function HomePage() {
 
       {/* Main Content Sections */}
       <main className="flex-1">
-        {/* 1. Hero Section with Prominent "Talk to Hayaati" Center Orb Button */}
+        {/* 1. Hero Section with Prominent JARVIS Center Orb Button */}
         <Hero onOpenAssistant={() => setAssistantModalOpen(true)} />
 
         {/* 2. Future Timeline (2030 -> 2035 -> 2050) */}

@@ -185,7 +185,7 @@ Language Instructions:
           config: {
             systemInstruction,
             temperature: 0.7,
-            maxOutputTokens: 400,
+            maxOutputTokens: 800,
             ...(tools ? { tools } : {}),
           },
         });

@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "code": "sw",
+    "languageName": "Swahili",
+    "nativeName": "Kiswahili",
+    "rtl": false
+  },
+  "nav": {
+    "home": "Nyumbani",
+    "timeline": "Mstari wa Wakati wa Baadaye",
+    "tech": "Teknolojia ya Baadaye",
+    "places": "Miji na Makazi",
+    "projects": "Miradi Yangu",
+    "advertise": "Tangaza / Wasilisha",
+    "about": "Kuhusu Mimi",
+    "contact": "Wasiliana",
+    "assistant": "Msaidizi wa AI",
+    "language": "Lugha",
+    "menu": "Fungua menyu",
+    "close": "Funga menyu",
+    "brandSubtitle": "TEKNOLOJIA // 2030-2050",
+    "menuSysHeader": "MENYU YA MFUMO",
+    "locationDomain": "SEVA: WWW.HAYAATIWEB.SITE"
+  },
+  "hero": {
+    "systemStatus": "MFUMO//NODE.2030-2050",
+    "online": "MIFUMO YOTE IKO HEWANI",
+    "headline": "Wakati ujao haufiki tu. Tunaujenga kwa pamoja.",
+    "subtitle": "Mwongozo wa sinema wa uvumbuzi wa binadamu, mashine za utambuzi, makoloni ya anga za juu, na makazi endelevu kutoka 2030 hadi 2050. Imejengwa na Aliya Khan.",
+    "exploreCta": "Gundua 2030 2050",
+    "projectsCta": "Tazama Miradi Yangu",
+    "coordinates": "MAHALI: 28.6139° N, 77.2090° E // INJINI INAFANYA KAZI",
+    "timelineSpan": "UPEO WA 2030 — 2050",
+    "liveTelemetry": "TEKNOLOJIA YA KIPIMO: SAWA",
+    "scrollDown": "Sogeza chini ili kuchunguza mstari wa wakati",
+    "imageAlt": "Mwonekano wa jiji kuu la siku zijazo la 2030 2050"
+  },
+  "timeline": {
+    "sectionTag": "RAMANI_YA_WAKATI // 2030 -> 2050",
+    "title": "Historia ya Uvumbuzi wa Binadamu",
+    "subtitle": "Kutoka akili bandia ya vifaa vya 2030 hadi viwanda vizito vya anga za juu mnamo 2050.",
+    "chronoMap": "RAMANI YA MPANGILIO WA WAKATI",
+    "eraHeading": "UPEO WA ENZI",
+    "storyTitle": "Siku Moja Katika Enzi Hii",
+    "breakthroughsTitle": "Mafanikio Muhimu ya Kiteknolojia",
+    "viewEraDetails": "Fungua Faili ya Enzi",
+    "jumpToEra": "Rukia Enzi Hii",
+    "statusPrefix": "HALI YA MFUMO",
+    "eraBreakthroughsHeading": "Mageuzi",
+    "specificationsCount": "Vipimo vya Kiufundi"
+  },
+  "tech": {
+    "sectionTag": "ORODHA_YA_MIFUMO // NYANJA 42",
+    "title": "Katalogi ya Teknolojia ya Baadaye",
+    "subtitle": "Mipango kamili ya mifumo na kanuni za kisayansi katika nyanja 7 za msingi za kiteknolojia.",
+    "systemsIndex": "ORODHA YA KATALOGI",
+    "howItWorksLabel": "JINSI INAVYOFANYA KAZI",
+    "architectureMechanics": "MIUNDOMBINU YA KIUFUNDI NA UTENDAJI",
+    "underlyingMechanism": "KANUNI YA MSINGI YA FIZIKIA",
+    "searchPlaceholder": "Tafuta teknolojia, mifumo, au uvumbuzi...",
+    "searchNoResults": "Hakuna teknolojia inayolingana.",
+    "filterAll": "Kategoria Zote",
+    "modalClose": "Funga Faili",
+    "viewDossier": "Tazama Faili ya Kiufundi",
+    "yearLabel": "MWAKA",
+    "statusLabel": "HALI",
+    "activeStatus": "MFUMO UNAOFANYA KAZI",
+    "promptLabel": "MAELEKEZO YA PICHA",
+    "categories": {
+      "all": "Kategoria Zote",
+      "ai": "AI ya Baadaye",
+      "vehicles": "Usafiri na Uhamaji",
+      "devices": "Vifaa na Bioniki",
+      "homeWork": "Makazi na Kazi",
+      "health": "Afya na Biolojia",
+      "energy": "Nishati na Hali ya Hewa",
+      "space": "Anga za Juu"
+    }
+  },
+  "places": {
+    "sectionTag": "ORODHA_YA_MAKAZI // 2030-2050",
+    "title": "Miji na Postikadi za Makazi",
+    "subtitle": "Picha halisi na ripoti za miundombinu ya makazi mapya ya binadamu Duniani na angani.",
+    "horizonLabel": "UPEO",
+    "aDayInPlace": "Siku Moja Katika Makazi Haya",
+    "infrastructureLabel": "Miundombinu Muhimu",
+    "viewLocation": "Chunguza Mpango wa Makazi",
+    "promptLabel": "MAELEKEZO YA PICHA"
+  },
+  "projects": {
+    "sectionTag": "MIRADI_YA_MWANZILISHI // ALIYA KHAN",
+    "title": "Miradi Yangu",
+    "subtitle": "Mifumo ya programu inayofanya kazi, nyaraka za utafiti, na miundo ya usanifu iliyojengwa na Aliya Khan.",
+    "tabs": {
+      "live": "Mifumo Iliyo Hewani",
+      "inProgress": "Inayoendelea",
+      "futureIdeas": "Mawazo ya Baadaye"
+    },
+    "visit": "Fungua Mfumo",
+    "emptyLive": "Hakuna mfumo hewani kwa sasa. Miradi mipya itaongezwa hivi karibuni.",
+    "emptyInProgress": "Michoro ya kiufundi itaonekana hapa hatua zikikamilika.",
+    "emptyIdeas": "Mapendekezo ya kinadharia yataorodheshwa hapa.",
+    "pendingNotice": "Miradi inakaguliwa na kusawazishwa moja kwa moja na Aliya Khan."
+  },
+  "advertise": {
+    "sectionTag": "UWASILISHAJI_WA_MRADI // ORODHA",
+    "title": "Tangaza / Wasilisha Mradi Wako",
+    "subtitle": "Wasilisha teknolojia yako ya kisasa au mpango endelevu ili ukaguliwe na Aliya Khan.",
+    "reviewNotice": "Maombi yote yanakaguliwa kibinafsi na Aliya Khan. Ujumbe wa kibiashara usiohitajika utakataliwa.",
+    "pricingNote": "Maelezo ya uwekaji na masharti ya ushirikiano yatatolewa moja kwa moja kupitia barua pepe.",
+    "form": {
+      "name": "Jina Kamili",
+      "email": "Barua Pepe ya Kikazi",
+      "projectName": "Jina la Mradi au Kampuni",
+      "projectLink": "Kiungo cha Mfumo au Ripoti Rasmi",
+      "category": "Nyanja ya Teknolojia",
+      "selectCategory": "Chagua nyanja...",
+      "budget": "Makadirio ya Bajeti",
+      "budgetPlaceholder": "mfano: $5,000 - $25,000",
+      "description": "Muhtasari wa Kiufundi na Umuhimu wake kwa Baadaye",
+      "submitBtn": "Wasilisha Faili kwa Ukaguzi",
+      "sending": "Inawasilisha...",
+      "sentSuccess": "Faili imewasilishwa kwa Aliya Khan. Utajibiwa hivi karibuni.",
+      "sendError": "Imeshindwa kutuma. Tafadhali angalia mtandao wako na ujaribu tena."
+    }
+  },
+  "about": {
+    "sectionTag": "FAILI_LA_MSANIFU // MAELEZO YA MFUMO",
+    "title": "Kuhusu Aliya Khan",
+    "subtitle": "Mwanzilishi, mbunifu mkuu na msanifu mifumo wa Hayaati Web Technology.",
+    "ownerName": "Aliya Khan",
+    "architectTitle": "Mwanzilishi na Mbunifu Mkuu",
+    "leadArchitect": "MSANIFU MKUU // HAYAATI WEB TECHNOLOGY",
+    "bioPlaceholder": "Aliya Khan anabuni na kujenga programu pamoja na miundombinu ya siku zijazo kwa mpito wa 2030 hadi 2050.",
+    "contactDirect": "Mawasiliano ya Moja kwa Moja: Hayaati.Technology@gmail.com",
+    "photoAlt": "Aliya Khan — Mwanzilishi na Mbunifu Mkuu wa Hayaati Web Technology"
+  },
+  "contact": {
+    "sectionTag": "MAWASILIANO_YA_MOJA_KWA_MOJA // IDHINI",
+    "title": "Mawasiliano na Ushirikiano",
+    "subtitle": "Wasiliana moja kwa moja na Aliya Khan kwa utafiti, ushauri wa usanifu, au ushirikiano wa kimkakati.",
+    "emailLabel": "BARUA PEPE RASMI",
+    "directEmail": "Hayaati.Technology@gmail.com",
+    "form": {
+      "name": "Jina Lako",
+      "email": "Barua Pepe Yako",
+      "message": "Ujumbe au Pendekezo Lako",
+      "submitBtn": "Tuma Ujumbe",
+      "sending": "Inatuma...",
+      "sentSuccess": "Ujumbe umetumwa kwa mafanikio kwa Aliya Khan.",
+      "sendError": "Imeshindwa kutuma ujumbe. Jaribu tena.",
+      "placeholderName": "mfano: Dkt. Juma Bakari",
+      "placeholderEmail": "juma@frontiertech.org",
+      "placeholderMessage": "Eleza utafiti wako, wazo la ushirikiano, au swali..."
+    }
+  },
+  "assistant": {
+    "buttonLabel": "Zungumza na Hayaati",
+    "panelTitle": "KITOVU CHA UTAMBUZI CHA HAYAATI",
+    "subtitle": "Muunganisho wa Mishipa ya K квантum // Sauti na Maandishi",
+    "welcomeMessage": "Muunganisho wa mfumo umekamilika. Mimi ni Hayaati, kiongozi wako katika mstari wa wakati wa 2030-2050.",
+    "chips": [
+      "Mwaka wa 2030 utakuwaje?",
+      "Nionyeshe teknolojia ya afya ya baadaye",
+      "Nieleze kuhusu Hayaati na Aliya Khan"
+    ],
+    "inputPlaceholder": "Uliza kuhusu teknolojia ya 2030–2050...",
+    "sendBtn": "Tuma",
+    "retryBtn": "Jaribu Tena",
+    "voiceBtn": "Washa Sauti",
+    "voiceStopBtn": "Zima Sauti",
+    "voiceListening": "Inasikiliza...",
+    "voiceSpeaking": "Inazungumza...",
+    "voiceConnecting": "Inaunganisha...",
+    "voiceUnsupported": "Uingizaji wa sauti hautumiki kwenye kivinjari hiki.",
+    "voiceNotAvailableLang": "Sauti haipatikani kwa lugha hii.",
+    "rateLimitBanner": "Kikomo cha maombi kimefikiwa. Tafadhali subiri kidogo.",
+    "talkTo": "Ongea na Hayaati",
+    "typeInstead": "Au andika hapa chini",
+    "returnToOrb": "Rudi Kwenye Kitovu",
+    "muteMic": "Zima Kipaza Sauti",
+    "unmuteMic": "Washa Kipaza Sauti",
+    "micLabel": "Kipaza Sauti",
+    "mutedLabel": "Imezimwa",
+    "endSession": "Maliza Kipindi",
+    "endLabel": "Mwisho",
+    "userTag": "MTUMIAJI",
+    "assistantTag": "HAYAATI",
+    "cognitiveLink": "MUUNGANISHO WA UTAMBUZI UNAFANYA KAZI",
+    "orb": {
+      "ready": "TAYARI",
+      "listening": "INASIKILIZA",
+      "thinking": "INAFIKIRIA",
+      "speaking": "INAZUNGUMZA",
+      "tapToStart": "Gusa Ili Kuongea",
+      "start": "Anza"
+    },
+    "errors": {
+      "quotaReached": "Kiwango cha mazungumzo ya siku kimefikiwa. Karibu tena kesho.",
+      "serverBusy": "Kitovu cha utambuzi kiko bize. Tafadhali subiri.",
+      "networkError": "Hitilafu ya mtandao. Tafadhali angalia muunganisho wako.",
+      "micBlocked": "Ruhusa ya kipaza sauti imezuiwa na kivinjari.",
+      "sessionEnded": "Kipindi kimemalizika.",
+      "genericError": "Hitilafu isiyotarajiwa imetokea."
+    },
+    "voiceErrors": {
+      "unsupported": "Utambuzi wa sauti hautumiki.",
+      "insecure": "HTTPS inahitajika kwa matumizi ya sauti.",
+      "denied": "Ruhusa ya kipaza sauti imekataliwa.",
+      "noDevice": "Hakuna kipaza sauti kilichopatikana.",
+      "micFailed": "Kuanzisha kipaza sauti kumeshindikana.",
+      "rateLimit": "Kikomo cha maombi ya sauti kimefikiwa.",
+      "providerQuota": "Kiwango cha mtoa huduma kimezidiwa.",
+      "noKey": "Huduma ya sauti haijawekwa mipangilio.",
+      "modelFailed": "Mfumo wa sauti umeshindwa kufanya kazi.",
+      "network": "Hitilafu ya mtandao wakati wa kutoa sauti.",
+      "serverError": "Hitilafu ya seva ya sauti."
+    }
+  },
+  "footer": {
+    "copyright": "© 2026-2050 Hayaati Web Technology. Haki zote zimehifadhiwa.",
+    "disclaimer": "Mwongozo wa utafiti na usanifu wa teknolojia za siku zijazo.",
+    "liveDomainLabel": "DOMEINI HAI",
+    "quickLinks": "VIUNGO VYA HARAKA",
+    "systemDesignation": "JINA LA MFUMO: HAYAATI-CORE-V5",
+    "allRightsReserved": "Haki zote zimehifadhiwa."
+  },
+  "common": {
+    "year": "Mwaka",
+    "status": "Hali",
+    "operational": "Inafanya Kazi",
+    "close": "Funga",
+    "back": "Rudi",
+    "retry": "Jaribu Tena",
+    "error": "Hitilafu",
+    "success": "Imefanikiwa",
+    "loading": "Inapakia..."
+  },
+  "languageSelector": {
+    "selectLanguage": "Chagua Lugha ya Kimataifa",
+    "dialogTitle": "Chaguo la Lugha",
+    "searchPlaceholder": "Chuja lugha (mfano Kiswahili, English)...",
+    "languagesCountSuffix": "Lugha"
+  },
+  "imageSlot": {
+    "opticalChannel": "NJIA YA PICHA",
+    "framePending": "PICHA INASUBIRIWA",
+    "sysDim": "SYS//800x500"
+  },
+  "notFound": {
+    "errorTag": "HITILAFU 404 // ENEO HALIKUPATIKANA",
+    "title": "Mawimbi Yamepotea Angani",
+    "description": "Viwianishi vilivyoombwa havilingani na mfumo wowote unaojulikana.",
+    "returnBtn": "Rudi Kituo Kikuu cha Anga"
+  }
+}
