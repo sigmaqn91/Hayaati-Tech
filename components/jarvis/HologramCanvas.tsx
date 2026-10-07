@@ -46,13 +46,17 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x05070a, 0.08);
 
+    const cameraAspect = container.clientWidth / container.clientHeight;
     const camera = new THREE.PerspectiveCamera(
       45,
-      container.clientWidth / container.clientHeight,
+      cameraAspect,
       0.1,
       100
     );
-    camera.position.set(0, 0, 4.8);
+    // Keep the full outer ring inside the camera frustum on narrow mobile viewports.
+    // This only changes camera distance; the orb geometry and animation remain untouched.
+    const mobileFitZ = 2.15 / (Math.tan(THREE.MathUtils.degToRad(45 / 2)) * Math.max(cameraAspect, 0.01));
+    camera.position.set(0, 0, isMobile ? Math.max(4.8, mobileFitZ) : 4.8);
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -198,12 +202,12 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     arcCoreGroup.add(ring1);
 
     // Middle Ring
-    const ring2 = createSegmentedRing(1.85, 0.014, 48, 0x00f0ff);
+    const ring2 = createSegmentedRing(1.75, 0.014, 48, 0x00f0ff);
     ring2.rotation.x = Math.PI / 4;
     arcCoreGroup.add(ring2);
 
     // Outer Ring
-    const ring3 = createSegmentedRing(2.15, 0.012, 64, 0x0088ff);
+    const ring3 = createSegmentedRing(2.0, 0.012, 64, 0x0088ff);
     ring3.rotation.y = Math.PI / 3;
     arcCoreGroup.add(ring3);
 
@@ -383,6 +387,10 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       const width = container.clientWidth;
       const height = container.clientHeight;
       camera.aspect = width / height;
+      if (isMobile) {
+        const fitZ = 2.15 / (Math.tan(THREE.MathUtils.degToRad(45 / 2)) * Math.max(camera.aspect, 0.01));
+        camera.position.z = Math.max(4.8, fitZ);
+      }
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
     };
@@ -411,7 +419,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
   return (
     <div
       ref={containerRef}
-      className="w-full h-full relative pointer-events-none select-none overflow-hidden"
+      className="w-full h-full relative pointer-events-none select-none overflow-visible"
     />
   );
 };

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { verifyOwnerSession } from '@/lib/jarvisAuth';
 import {
   checkVoiceSessionLimit,
   recordVoiceSessionStart,
@@ -61,6 +62,7 @@ export async function POST(req: NextRequest) {
     // 3. New Session Request (action === 'session')
     if (action === 'session') {
       const { language } = body;
+      const isOwner = verifyOwnerSession(req);
       const userLang = typeof language === 'string' ? language.toLowerCase().trim() : 'en';
 
       // Validate language against the 14 supported voice languages
@@ -143,6 +145,7 @@ export async function POST(req: NextRequest) {
             voiceName,
             language: userLang,
             sessionMaxSeconds: RATE_CONFIG.voiceSessionMaxSeconds,
+            isOwner,
           },
           { status: 200, headers }
         );

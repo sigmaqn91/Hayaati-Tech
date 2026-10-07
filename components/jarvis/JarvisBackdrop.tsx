@@ -82,7 +82,7 @@ export const JarvisBackdrop: React.FC<JarvisBackdropProps> = ({
       const curState = stateRef.current;
 
       // Color scheme: cyan (#38e8ff) with amber warning for listening
-      const primaryRgb = curState === 'listening' ? '255, 170, 0' : '56, 232, 255';
+      const primaryRgb = '56, 232, 255';
       const secondaryRgb = '0, 180, 255';
 
       // 1. Perspective Background Subtle Grid

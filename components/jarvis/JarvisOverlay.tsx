@@ -3,8 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Mic,
-  MicOff,
   Send,
   X,
   Shield,
@@ -83,7 +81,6 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
   // Voice Hook
   const {
-    isSupported: voiceSupported,
     isListening,
     isSpeaking,
     audioLevel,
@@ -256,6 +253,9 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     setMessages((prev) => [...prev, { role: 'user', text: query }]);
     setIsProcessing(true);
 
+    const requestController = new AbortController();
+    const requestTimeout = window.setTimeout(() => requestController.abort(), 20000);
+
     try {
       const historyPayload = messages.slice(-6).map((m) => ({
         role: m.role === 'assistant' ? 'model' : 'user',
@@ -270,9 +270,16 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           history: historyPayload,
           language,
         }),
+        signal: requestController.signal,
       });
 
-      const data = await res.json();
+      const responseText = await res.text();
+      let data: any = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        data = {};
+      }
 
       if (res.ok && data.reply) {
         setMessages((prev) => [...prev, { role: 'assistant', text: data.reply }]);
@@ -293,19 +300,31 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           });
         }
       } else {
-        const errorMsg = data.error || (t?.assistant?.errors?.genericError || 'Transmission failed. Signal lost.');
+        const errorMsg =
+          data.error ||
+          (data.code === 'quota_reached'
+            ? 'Conversation quota reached. Please try again later.'
+            : data.code === 'rate_limited'
+              ? 'Please wait a moment before sending another message.'
+              : data.code === 'server_busy'
+                ? 'The cognitive service is temporarily busy. Please try again.'
+                : t?.assistant?.errors?.genericError || 'Transmission failed. Please try again.');
         setMessages((prev) => [...prev, { role: 'assistant', text: errorMsg }]);
         if (!audioMuted) {
           speak(errorMsg);
         }
       }
-    } catch {
-      const errorMsg = t?.assistant?.errors?.networkError || 'Neural connection interrupted. Reconnecting...';
+    } catch (error: any) {
+      const errorMsg =
+        error?.name === 'AbortError'
+          ? 'Cognitive service timed out. Please try again.'
+          : t?.assistant?.errors?.networkError || 'Neural connection interrupted. Reconnecting...';
       setMessages((prev) => [...prev, { role: 'assistant', text: errorMsg }]);
       if (!audioMuted) {
         speak(errorMsg);
       }
     } finally {
+      window.clearTimeout(requestTimeout);
       setIsProcessing(false);
     }
   };
@@ -333,7 +352,13 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         setVerifyCode('');
         const welcome = 'Owner credentials verified. Welcome back, Aliya Khan.';
         setMessages((prev) => [...prev, { role: 'assistant', text: welcome }]);
-        if (!audioMuted) speak(welcome);
+        if (!audioMuted) {
+          speak(welcome, () => {
+            if (conversationMode && isOpen) {
+              startListening();
+            }
+          });
+        }
         fetchAdminData();
       } else {
         setVerifyError(data.error || 'Verification failed. Access denied.');
@@ -448,7 +473,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         <div className="flex items-center gap-2.5">
           <div className="w-2 h-2 rounded-full bg-[#38e8ff] animate-ping" />
           <span className="text-xs uppercase tracking-widest text-[#38e8ff] font-bold">
-            J.A.R.V.I.S. // NEURAL CORE v3.8
+            JARVIS // NEURAL CORE v3.8
           </span>
           <span className="hidden md:inline-block text-[10px] px-2 py-0.5 rounded border border-[#38e8ff]/30 text-slate-400">
             LOC: 28.6139° N, 77.2090° E // NOMINAL
@@ -592,29 +617,6 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       {/* 6. Fixed Bottom Command Bar */}
       <div className="absolute bottom-0 left-0 right-0 border-t border-[#38e8ff]/20 bg-[#05070a]/95 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30">
         <div className="max-w-3xl mx-auto flex items-center gap-2 sm:gap-3">
-          {/* Voice Microphone Button */}
-          {voiceSupported && (
-            <button
-              onClick={handleVoiceTap}
-              className={`p-3 rounded-full border transition-all cursor-pointer shrink-0 ${
-                isListening
-                  ? 'border-rose-500 bg-rose-500/20 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.4)] animate-pulse'
-                  : isSpeaking
-                  ? 'border-emerald-400 bg-emerald-400/20 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.4)]'
-                  : 'border-[#38e8ff]/40 bg-[#38e8ff]/10 text-[#38e8ff] hover:bg-[#38e8ff]/20'
-              }`}
-              title={
-                isSpeaking
-                  ? 'Speaking (tap to interrupt)'
-                  : isListening
-                  ? 'Listening (tap to stop)'
-                  : 'Tap to speak'
-              }
-            >
-              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-            </button>
-          )}
-
           {/* Text Command Input Box (font size at least 16px to prevent mobile zoom) */}
           <div className="flex-1 relative">
             <input
