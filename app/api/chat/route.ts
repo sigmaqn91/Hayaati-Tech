@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const BASE_SYSTEM_INSTRUCTION = `
-You are the HAYAATI Cognitive Assistant (also designated JARVIS on the interface), the built-in holographic navigation intelligence for Hayaati Web Technology (www.hayaatiweb.site).
+You are Jarvis, the HAYAATI Cognitive Assistant, the built-in holographic navigation intelligence for Hayaati Web Technology (www.hayaatiweb.site).
 Owner & Lead Architect: Aliya Khan. Contact Email: Hayaati.Technology@gmail.com.
 
 Mission & Persona:
@@ -179,7 +179,7 @@ Language Instructions:
     // Model execution with prioritized fallback sequence
     for (const modelName of candidateModels) {
       try {
-        response = await ai.models.generateContent({
+        const generationPromise = ai.models.generateContent({
           model: modelName,
           contents,
           config: {
@@ -189,6 +189,10 @@ Language Instructions:
             ...(tools ? { tools } : {}),
           },
         });
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(Object.assign(new Error('Gemini Chat request timed out'), { code: 'timeout', status: 504 })), 20000);
+        });
+        response = await Promise.race([generationPromise, timeoutPromise]);
         const replyText = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (replyText && replyText.trim().length > 0) {
           break; // Successful generation
@@ -211,17 +215,40 @@ Language Instructions:
 
       let code = 'generic_error';
       let status = 500;
+      let error = 'Cognitive service temporarily unavailable.';
 
       if (errStatus === 429 || /quota|resource_exhausted/i.test(rawMsg)) {
         code = 'quota_reached';
         status = 429;
+        error = 'Conversation quota reached. Please try again later.';
+      } else if (errStatus === 401) {
+        code = 'unauthorized';
+        status = 401;
+        error = 'AI authentication failed. Please try again later.';
+      } else if (errStatus === 403) {
+        code = 'forbidden';
+        status = 403;
+        error = 'AI access was denied. Please try again later.';
+      } else if (errStatus === 404) {
+        code = 'model_not_found';
+        status = 404;
+        error = 'AI model endpoint was not found. Please try again later.';
+      } else if (errStatus === 504 || /timed out|timeout/i.test(rawMsg)) {
+        code = 'timeout';
+        status = 504;
+        error = 'AI response timed out. Please try again.';
       } else if (errStatus === 503 || /overloaded|unavailable|busy/i.test(rawMsg)) {
         code = 'server_busy';
         status = 503;
+        error = 'Cognitive service is temporarily busy. Please try again.';
+      } else if (errStatus >= 500) {
+        code = 'server_error';
+        status = 500;
+        error = 'Cognitive service encountered a server error. Please try again.';
       }
 
       return NextResponse.json(
-        { error: 'Cognitive service temporarily unavailable.', code },
+        { error, code },
         { status, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -246,9 +273,18 @@ Language Instructions:
     const errStatus = fatalErr?.status || fatalErr?.statusCode || 500;
     const rawMsg = fatalErr?.message || String(fatalErr);
     console.error(`[Gemini Chat Fatal] Status: ${errStatus}, Message: ${rawMsg.replace(/key=[^&\s]+/gi, 'key=REDACTED')}`);
+    const status = errStatus === 429 || errStatus === 401 || errStatus === 403 || errStatus === 404 || errStatus === 504
+      ? errStatus
+      : 500;
+    const code = errStatus === 504 ? 'timeout' : errStatus === 429 ? 'quota_reached' : 'server_error';
+    const error = errStatus === 504
+      ? 'AI response timed out. Please try again.'
+      : errStatus === 429
+        ? 'Conversation quota reached. Please try again later.'
+        : 'Fatal processing error. Please try again.';
     return NextResponse.json(
-      { error: 'Fatal processing error.', code: 'generic_error' },
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { error, code },
+      { status, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

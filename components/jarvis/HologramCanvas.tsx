@@ -152,10 +152,31 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
 
+    // Soft round particle texture so each GPU point renders as a circular glow instead of a square sprite.
+    const particleTextureCanvas = document.createElement('canvas');
+    particleTextureCanvas.width = 32;
+    particleTextureCanvas.height = 32;
+    const particleTextureContext = particleTextureCanvas.getContext('2d');
+    if (!particleTextureContext) {
+      throw new Error('Unable to create particle texture context');
+    }
+    const particleGradient = particleTextureContext.createRadialGradient(16, 16, 0, 16, 16, 16);
+    particleGradient.addColorStop(0, 'rgba(255,255,255,1)');
+    particleGradient.addColorStop(0.45, 'rgba(255,255,255,0.9)');
+    particleGradient.addColorStop(0.75, 'rgba(255,255,255,0.35)');
+    particleGradient.addColorStop(1, 'rgba(255,255,255,0)');
+    particleTextureContext.fillStyle = particleGradient;
+    particleTextureContext.fillRect(0, 0, 32, 32);
+    const particleTexture = new THREE.CanvasTexture(particleTextureCanvas);
+    particleTexture.needsUpdate = true;
+
     const particleMaterial = new THREE.PointsMaterial({
       size: isMobile ? 0.024 : 0.018,
       vertexColors: true,
+      map: particleTexture,
+      alphaMap: particleTexture,
       transparent: true,
+      alphaTest: 0.01,
       opacity: 0.85,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
@@ -405,6 +426,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       renderer.dispose();
       particleGeometry.dispose();
       particleMaterial.dispose();
+      particleTexture.dispose();
       icosahedronGeo.dispose();
       icosahedronMat.dispose();
       innerCoreGeo.dispose();

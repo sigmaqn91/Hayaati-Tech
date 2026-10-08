@@ -40,7 +40,7 @@ export default function HomePage() {
 
       {/* Main Content Sections */}
       <main className="flex-1">
-        {/* 1. Hero Section with Prominent JARVIS Center Orb Button */}
+        {/* 1. Hero Section with Activate Jarvis control */}
         <Hero onOpenAssistant={() => setAssistantModalOpen(true)} />
 
         {/* 2. Future Timeline (2030 -> 2035 -> 2050) */}

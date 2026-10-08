@@ -91,6 +91,7 @@ export function useJarvisVoice({
 }: UseJarvisVoiceOptions = {}) {
   const [isSupported, setIsSupported] = useState<boolean>(true);
   const [isListening, setIsListening] = useState<boolean>(false);
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [audioLevel, setAudioLevel] = useState<number>(0);
   const [transcript, setTranscript] = useState<string>('');
@@ -208,6 +209,7 @@ export function useJarvisVoice({
 
     analyserRef.current = null;
     setIsListening(false);
+    setIsConnecting(false);
     setAudioLevel(0);
     isTurnRunningRef.current = false;
   }, []);
@@ -332,111 +334,110 @@ export function useJarvisVoice({
     setFailingLayer('NONE');
     setTranscript('');
     setSpeechError(null);
+    setIsConnecting(true);
 
-    // Warm up / Resume AudioContext synchronously during user gesture (critical for Android Chrome autoplay policy)
-    try {
-      if (!playbackContextRef.current || playbackContextRef.current.state === 'closed') {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        playbackContextRef.current = new AudioCtx({ sampleRate: 24000 });
-      }
-      if (playbackContextRef.current.state === 'suspended') {
-        playbackContextRef.current.resume().catch(() => {});
-      }
-    } catch (warmupErr) {
-      console.warn('[AudioContext Warmup]:', warmupErr);
-    }
-
-    // 1. Layer: TOKEN — Request secure ephemeral Gemini Live token from /api/assistant/voice
-    let sessionData: any = null;
-    let tokenTimeout: ReturnType<typeof setTimeout> | null = null;
-    try {
+    // Start token, microphone permission and input AudioContext work together.
+    // This keeps the initial user gesture active while removing avoidable serial waits.
+    const tokenPromise = (async () => {
       const controller = new AbortController();
-      tokenTimeout = setTimeout(() => controller.abort(), 15000);
-      const res = await fetch('/api/assistant/voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'session', language: languageRef.current }),
-        signal: controller.signal,
-      });
-
-      if (tokenTimeout) clearTimeout(tokenTimeout);
-
-      sessionData = await res.json();
-      if (!res.ok || !sessionData?.token) {
-        setFailingLayer('TOKEN');
-        const errCode = sessionData?.code || 'MIC_FAILED';
-        if (errCode === 'quota_reached') setSpeechError('PROVIDER_QUOTA');
-        else if (errCode === 'rate_limited') setSpeechError('RATE_LIMIT');
-        else if (errCode === 'server_busy') setSpeechError('SERVER_ERROR');
-        else setSpeechError('MIC_FAILED');
-        isTurnRunningRef.current = false;
-        return;
+      const timeout = window.setTimeout(() => controller.abort(), 15000);
+      try {
+        const res = await fetch('/api/assistant/voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'session', language: languageRef.current }),
+          signal: controller.signal,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data?.token) {
+          const error: any = new Error(data?.error || `Voice session request failed (${res.status})`);
+          error.layer = 'TOKEN';
+          error.code = data?.code || (res.status === 429 ? 'quota_reached' : 'SERVER_ERROR');
+          error.status = res.status;
+          throw error;
+        }
+        return data;
+      } catch (error: any) {
+        if (error?.name === 'AbortError') {
+          error.layer = 'TOKEN';
+          error.code = 'NETWORK';
+        }
+        throw error;
+      } finally {
+        window.clearTimeout(timeout);
       }
-    } catch (tokenErr: any) {
-      if (tokenTimeout) clearTimeout(tokenTimeout);
-      setFailingLayer('TOKEN');
-      setSpeechError('NETWORK');
-      isTurnRunningRef.current = false;
-      return;
-    }
+    })();
 
-    sessionStartTimeRef.current = Date.now();
-
-    // 2. Start heartbeat to maintain session concurrency slot
-    heartbeatTimerRef.current = setInterval(() => {
-      fetch('/api/assistant/voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'heartbeat' }),
-      }).catch(() => {});
-    }, 25000);
-
-    // 3. Layer: MIC PERMISSION & MEDIA STREAM — Request microphone MediaStream via getUserMedia
-    let stream: MediaStream | null = null;
-    try {
+    const mediaPromise = (async () => {
       if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
-        setFailingLayer('MIC_PERMISSION');
-        setSpeechError('INSECURE');
-        stopListening();
-        return;
+        const error: any = new Error('Microphone access requires a secure browser context.');
+        error.layer = 'MIC_PERMISSION';
+        error.code = 'INSECURE';
+        throw error;
       }
-
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          sampleRate: 16000,
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-      mediaStreamRef.current = stream;
-    } catch (micErr: any) {
-      const errName = micErr?.name || '';
-      if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
-        setFailingLayer('MIC_PERMISSION');
-        setSpeechError('DENIED');
-      } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
-        setFailingLayer('MEDIA_STREAM');
-        setSpeechError('NO_DEVICE');
-      } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
-        setFailingLayer('MEDIA_STREAM');
-        setSpeechError('MIC_FAILED');
-      } else {
-        setFailingLayer('MEDIA_STREAM');
-        setSpeechError('MIC_FAILED');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            sampleRate: 16000,
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
+        });
+        mediaStreamRef.current = stream;
+        return stream;
+      } catch (error: any) {
+        const err: any = error instanceof Error ? error : new Error(String(error));
+        err.layer =
+          err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
+            ? 'MIC_PERMISSION'
+            : err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError'
+              ? 'MEDIA_STREAM'
+              : 'MEDIA_STREAM';
+        err.code =
+          err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
+            ? 'DENIED'
+            : err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError'
+              ? 'NO_DEVICE'
+              : err.name === 'NotReadableError' || err.name === 'TrackStartError'
+                ? 'MIC_FAILED'
+                : 'MIC_FAILED';
+        throw err;
       }
-      stopListening();
-      return;
-    }
+    })();
 
-    // 4. Layer: AUDIO CONTEXT — Initialize 16kHz AudioContext & AnalyserNode for Holographic ORB reactivity
+    const audioContextPromise = (async () => {
+      try {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioCtx) throw new Error('Web Audio is not supported.');
+        const ctx = new AudioCtx({ sampleRate: 16000 });
+        audioContextRef.current = ctx;
+        if (!playbackContextRef.current || playbackContextRef.current.state === 'closed') {
+          playbackContextRef.current = new AudioCtx({ sampleRate: 24000 });
+        }
+        if (ctx.state === 'suspended') {
+          await ctx.resume().catch(() => {});
+        }
+        if (playbackContextRef.current.state === 'suspended') {
+          await playbackContextRef.current.resume().catch(() => {});
+        }
+        return ctx;
+      } catch (error: any) {
+        const err: any = error instanceof Error ? error : new Error(String(error));
+        err.layer = 'AUDIO_CONTEXT';
+        err.code = 'MIC_FAILED';
+        throw err;
+      }
+    })();
+
+    let sessionData: any = null;
+    let stream: MediaStream | null = null;
+    let ctx: AudioContext | null = null;
+
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      const ctx = new AudioCtx({ sampleRate: 16000 });
-      if (ctx.state === 'suspended') {
-        await ctx.resume().catch(() => {});
-      }
+      [sessionData, stream, ctx] = await Promise.all([tokenPromise, mediaPromise, audioContextPromise]);
+      mediaStreamRef.current = stream;
       audioContextRef.current = ctx;
 
       const analyser = ctx.createAnalyser();
@@ -447,79 +448,127 @@ export function useJarvisVoice({
       const sourceNode = ctx.createMediaStreamSource(stream);
       sourceNode.connect(analyser);
 
-      // 5. Layer: WEBSOCKET & GEMINI LIVE — Connect to Gemini Live via @google/genai/web using ephemeral token
+      sessionStartTimeRef.current = Date.now();
+
+      // Maintain the server-side session concurrency slot.
+      heartbeatTimerRef.current = setInterval(() => {
+        fetch('/api/assistant/voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'heartbeat' }),
+        }).catch(() => {});
+      }, 25000);
+
       const ai = new GoogleGenAI({ apiKey: sessionData.token });
-      let liveConnectTimedOut = false;
-      const liveConnectPromise = ai.live.connect({
-        model: sessionData.model,
-        config: {
-          responseModalities: [Modality.AUDIO],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: sessionData.voice || 'Kore' },
+
+      const connectLive = async () => {
+        const liveConnectPromise = ai.live.connect({
+          model: sessionData.model,
+          config: {
+            responseModalities: [Modality.AUDIO],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: sessionData.voice || 'Kore' },
+              },
+            },
+            systemInstruction:
+              `You are Jarvis, the cognitive neural intelligence of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly. ${sessionData?.isOwner ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.' : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.'} Language and speaking style rules: Always respond in the visitor's selected language (${languageRef.current}). Use natural, everyday, localized speech for that language, not formal, literary, or machine-translated phrasing. For Hindi, use natural contemporary Hindi-English (Hinglish) as people commonly speak today; do not force pure or overly formal Hindi. Keep the same language throughout the response unless the visitor clearly switches languages. Answer concisely and with cinematic precision.`,
+          },
+          callbacks: {
+            onmessage: (msg: any) => {
+              if (msg.serverContent?.interrupted) {
+                handleInterruption();
+              }
+
+              const audioData = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+              if (audioData) {
+                playLiveAudioChunk(audioData);
+              }
+
+              const textPart = msg.serverContent?.modelTurn?.parts?.[0]?.text;
+              if (textPart) {
+                setTranscript((prev) => prev + textPart);
+                if (onTranscriptReadyRef.current) {
+                  onTranscriptReadyRef.current(textPart);
+                }
+              }
+            },
+            onclose: () => {
+              stopListening();
+            },
+            onerror: (err: any) => {
+              console.warn('[Gemini Live Session Error]:', err);
+              setFailingLayer('GEMINI_LIVE');
+              const status = err?.status || err?.statusCode;
+              if (status === 429) setSpeechError('PROVIDER_QUOTA');
+              else if (status === 401 || status === 403) setSpeechError('NO_KEY');
+              else if (status === 404) setSpeechError('MODEL_FAILED');
+              else setSpeechError('NETWORK');
+              stopListening();
             },
           },
-          systemInstruction:
-            `You are JARVIS, the cognitive neural intelligence of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly. ${sessionData?.isOwner ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.' : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.'} Language and speaking style rules: Always respond in the visitor's selected language (${languageRef.current}). Use natural, everyday, localized speech for that language, not formal, literary, or machine-translated phrasing. For Hindi, use natural contemporary Hindi-English (Hinglish) as people commonly speak today; do not force pure or overly formal Hindi. Keep the same language throughout the response unless the visitor clearly switches languages. Answer concisely and with cinematic precision.`,
-        },
-        callbacks: {
-          onmessage: (msg: any) => {
-            // Handle audio interruption signal from Gemini Live
-            if (msg.serverContent?.interrupted) {
-              handleInterruption();
-            }
+        });
 
-            // Stream audio chunk into AudioContext playback (Layer: AUDIO PLAYBACK)
-            const audioData = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
-            if (audioData) {
-              playLiveAudioChunk(audioData);
-            }
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          window.setTimeout(() => reject(Object.assign(new Error('Gemini Live connection timed out'), { code: 'LIVE_TIMEOUT' })), 15000);
+        });
 
-            // Real-time transcript updates if provided by model
-            const textPart = msg.serverContent?.modelTurn?.parts?.[0]?.text;
-            if (textPart) {
-              setTranscript((prev) => prev + textPart);
-              if (onTranscriptReadyRef.current) {
-                onTranscriptReadyRef.current(textPart);
-              }
-            }
-          },
-          onclose: () => {
-            stopListening();
-          },
-          onerror: (err: any) => {
-            console.warn('[Gemini Live Session Error]:', err);
-            setFailingLayer('GEMINI_LIVE');
-            setSpeechError('MIC_FAILED');
-            stopListening();
-          },
-        },
-      });
-      liveConnectPromise.then((lateSession: any) => {
-        if (liveConnectTimedOut) {
-          try {
-            lateSession?.close();
-          } catch {}
+        return Promise.race([liveConnectPromise, timeoutPromise]);
+      };
+
+      let liveSession: any = null;
+      let lastLiveError: any = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          liveSession = await connectLive();
+          break;
+        } catch (liveErr: any) {
+          lastLiveError = liveErr;
+          if (attempt === 0) {
+            await new Promise((resolve) => window.setTimeout(resolve, 250));
+          }
         }
-      }).catch(() => {});
-      const liveTimeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          liveConnectTimedOut = true;
-          reject(new Error('Gemini Live connection timed out'));
-        }, 15000);
-      });
-      const liveSession = await Promise.race([liveConnectPromise, liveTimeoutPromise]);
+      }
+
+      if (!liveSession) {
+        const status = lastLiveError?.status || lastLiveError?.statusCode;
+        setFailingLayer('GEMINI_LIVE');
+        if (lastLiveError?.code === 'LIVE_TIMEOUT') setSpeechError('NETWORK');
+        else if (status === 429) setSpeechError('PROVIDER_QUOTA');
+        else if (status === 401 || status === 403) setSpeechError('NO_KEY');
+        else if (status === 404) setSpeechError('MODEL_FAILED');
+        else setSpeechError('NETWORK');
+        stopListening();
+        return;
+      }
 
       liveSessionRef.current = liveSession;
 
-      // 6. Set up ScriptProcessor for real-time PCM conversion and streaming
+      // Make Jarvis greet first instead of waiting silently for the visitor.
+      try {
+        liveSession.sendClientContent({
+          turns: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: `Greet the visitor briefly as Jarvis in their selected language (${languageRef.current}). Do not wait for the visitor to speak first.`,
+                },
+              ],
+            },
+          ],
+          turnComplete: true,
+        });
+      } catch (greetingError) {
+        console.warn('[Gemini Live Greeting Error]:', greetingError);
+      }
+
       const processor = ctx.createScriptProcessor(4096, 1, 1);
       scriptProcessorRef.current = processor;
 
       processor.onaudioprocess = (e) => {
         const inputData = e.inputBuffer.getChannelData(0);
 
-        // Compute RMS level for ORB amplitude reactivity when listening
         let sum = 0;
         for (let i = 0; i < inputData.length; i++) {
           sum += inputData[i] * inputData[i];
@@ -529,12 +578,10 @@ export function useJarvisVoice({
           setAudioLevel(Math.min(1.0, rms * 5.0));
         }
 
-        // Interruption detection: if visitor speaks loudly while assistant is speaking
         if (isSpeakingRef.current && rms > 0.08) {
           handleInterruption();
         }
 
-        // Convert Float32 samples to 16-bit linear PCM and stream to Gemini Live
         const base64Audio = floatTo16BitBase64(inputData);
         if (liveSessionRef.current) {
           try {
@@ -551,18 +598,26 @@ export function useJarvisVoice({
       sourceNode.connect(processor);
       processor.connect(ctx.destination);
 
+      setIsConnecting(false);
       setIsListening(true);
       setSpeechError(null);
     } catch (err: any) {
       console.warn('[Live Setup Error]:', err);
-      if (!audioContextRef.current) {
-        setFailingLayer('AUDIO_CONTEXT');
-      } else if (!liveSessionRef.current) {
-        setFailingLayer('WEBSOCKET');
-      } else {
-        setFailingLayer('GEMINI_LIVE');
-      }
-      setSpeechError('MIC_FAILED');
+      const layer = err?.layer as VoiceFailureLayer | undefined;
+      if (layer) setFailingLayer(layer);
+      else if (!audioContextRef.current) setFailingLayer('AUDIO_CONTEXT');
+      else if (!liveSessionRef.current) setFailingLayer('WEBSOCKET');
+      else setFailingLayer('GEMINI_LIVE');
+
+      const code = err?.code;
+      if (code === 'quota_reached' || err?.status === 429) setSpeechError('PROVIDER_QUOTA');
+      else if (code === 'rate_limited') setSpeechError('RATE_LIMIT');
+      else if (code === 'server_busy' || err?.status === 503) setSpeechError('SERVER_ERROR');
+      else if (code === 'NO_DEVICE' || code === 'DENIED' || code === 'INSECURE' || code === 'MIC_FAILED') setSpeechError(code);
+      else if (err?.status === 401 || err?.status === 403) setSpeechError('NO_KEY');
+      else if (err?.status === 404) setSpeechError('MODEL_FAILED');
+      else if (code === 'NETWORK' || code === 'LIVE_TIMEOUT') setSpeechError('NETWORK');
+      else setSpeechError('MIC_FAILED');
       stopListening();
     }
   }, [cancelSpeech, handleInterruption, playLiveAudioChunk, stopListening]);
@@ -639,6 +694,7 @@ export function useJarvisVoice({
   return {
     isSupported,
     isListening,
+    isConnecting,
     isSpeaking,
     audioLevel,
     transcript,

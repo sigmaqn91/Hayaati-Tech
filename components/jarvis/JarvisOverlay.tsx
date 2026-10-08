@@ -21,7 +21,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { HologramCanvas, AssistantVisualState } from './HologramCanvas';
-import { useJarvisVoice, unlockAudio } from './useJarvisVoice';
+import { useJarvisVoice } from './useJarvisVoice';
 import { JarvisBackdrop } from './JarvisBackdrop';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -82,6 +82,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   // Voice Hook
   const {
     isListening,
+    isConnecting,
     isSpeaking,
     audioLevel,
     transcript,
@@ -101,25 +102,21 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     },
   });
 
-  // Tap handler: unlocks audio, interrupts if speaking, or toggles listening
-  const handleVoiceTap = async () => {
-    // 1. Must run inside user tap gesture
-    await unlockAudio().catch(() => {});
+  // Tap handler: start immediately, ignore taps while connecting, and stop an active session.
+  const handleVoiceTap = () => {
+    if (isConnecting) return;
 
-    // 2. Interrupt: tapping while speaking aborts playback and starts listening
     if (isSpeaking) {
       cancelSpeech();
-      startListening();
+      stopListening();
       return;
     }
 
-    // 3. If currently listening, stop
     if (isListening) {
       stopListening();
       return;
     }
 
-    // 4. Start voice turn
     startListening();
   };
 
@@ -148,7 +145,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
   // Sync Visual State with Voice
   useEffect(() => {
-    if (isProcessing) {
+    if (isProcessing || isConnecting) {
       setVisualState('thinking');
     } else if (isSpeaking) {
       setVisualState('speaking');
@@ -157,7 +154,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     } else {
       setVisualState('idle');
     }
-  }, [isProcessing, isSpeaking, isListening]);
+  }, [isProcessing, isConnecting, isSpeaking, isListening]);
 
   // Boot Sequence Simulation on Open & Clean up on close
   useEffect(() => {
@@ -301,14 +298,20 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         }
       } else {
         const errorMsg =
-          data.error ||
-          (data.code === 'quota_reached'
-            ? 'Conversation quota reached. Please try again later.'
-            : data.code === 'rate_limited'
-              ? 'Please wait a moment before sending another message.'
-              : data.code === 'server_busy'
-                ? 'The cognitive service is temporarily busy. Please try again.'
-                : t?.assistant?.errors?.genericError || 'Transmission failed. Please try again.');
+          res.status === 401 || res.status === 403
+            ? 'Jarvis authentication is unavailable. Please try again.'
+            : res.status === 404
+              ? 'Jarvis model endpoint was not found. Please try again later.'
+              : res.status === 429 || data.code === 'quota_reached' || data.code === 'rate_limited'
+                ? 'Jarvis is temporarily rate-limited or out of quota. Please try again later.'
+                : res.status === 500
+                  ? 'Jarvis encountered a server error. Please try again.'
+                  : res.status === 504 || data.code === 'timeout'
+                    ? 'Jarvis took too long to respond. Please try again.'
+                    : data.error ||
+                      (data.code === 'server_busy'
+                        ? 'The cognitive service is temporarily busy. Please try again.'
+                        : t?.assistant?.errors?.genericError || 'Transmission failed. Please try again.');
         setMessages((prev) => [...prev, { role: 'assistant', text: errorMsg }]);
         if (!audioMuted) {
           speak(errorMsg);
@@ -473,7 +476,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         <div className="flex items-center gap-2.5">
           <div className="w-2 h-2 rounded-full bg-[#38e8ff] animate-ping" />
           <span className="text-xs uppercase tracking-widest text-[#38e8ff] font-bold">
-            JARVIS // NEURAL CORE v3.8
+            Jarvis // NEURAL CORE v3.8
           </span>
           <span className="hidden md:inline-block text-[10px] px-2 py-0.5 rounded border border-[#38e8ff]/30 text-slate-400">
             LOC: 28.6139° N, 77.2090° E // NOMINAL
@@ -556,7 +559,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             height: 'min(78vw, 46vh, 520px)',
           }}
           className="relative cursor-pointer pointer-events-auto flex items-center justify-center"
-          title={isSpeaking ? 'Speaking (tap to interrupt)' : isListening ? 'Listening (tap to stop)' : 'Tap to speak'}
+          title={isConnecting ? 'Connecting...' : isSpeaking ? 'Speaking (tap to stop)' : isListening ? 'Listening (tap to stop)' : 'Tap to speak'}
         >
           <HologramCanvas
             visualState={visualState}
@@ -567,6 +570,11 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
         {/* State Indicator: centered right below the orb */}
         <div className="mt-3 text-center pointer-events-auto">
+          {isConnecting && (
+            <div className="mb-2 text-xs uppercase tracking-widest font-bold text-[#38e8ff] animate-pulse">
+              Connecting...
+            </div>
+          )}
           <span
             className={`text-xs uppercase tracking-widest font-bold px-3.5 py-1 rounded-full border ${
               visualState === 'listening'
@@ -600,7 +608,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         {messages.length > 0 && (
           <div className="mt-4 max-w-xl mx-4 px-4 py-2 bg-[#0a0f18]/90 border border-[#38e8ff]/30 rounded-full text-center text-xs text-[#38e8ff] shadow-[0_0_20px_rgba(56,232,255,0.2)] backdrop-blur-sm pointer-events-auto line-clamp-2">
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mr-2">
-              {messages[messages.length - 1].role === 'user' ? 'TRANSMISSION:' : 'JARVIS:'}
+              {messages[messages.length - 1].role === 'user' ? 'TRANSMISSION:' : 'Jarvis:'}
             </span>
             <span className="font-sans text-slate-100">{messages[messages.length - 1].text}</span>
           </div>
