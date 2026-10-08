@@ -132,7 +132,6 @@ export function useJarvisVoice({
   const nextSessionIdRef = useRef<number>(0);
   const rollingTranscriptRef = useRef<string[]>([]);
   const ownerVerifiedRef = useRef<boolean>(false);
-  const greetingCompleteResolverRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     onTranscriptReadyRef.current = onTranscriptReady;
@@ -532,18 +531,12 @@ export function useJarvisVoice({
               // Assistant processed all returned PCM chunks; reading only parts[0]
               // can silently drop later chunks and make Jarvis audio sound cut off.
               const parts = msg.serverContent?.modelTurn?.parts;
-              if (Array.isArray(parts) && parts.some((part: any) => part?.inlineData?.data)) {
-                setIsListening(false);
+              if (Array.isArray(parts)) {
                 for (const part of parts) {
                   if (part?.inlineData?.data) {
                     playLiveAudioChunk(part.inlineData.data);
                   }
                 }
-              }
-
-              if (msg.serverContent?.turnComplete) {
-                greetingCompleteResolverRef.current?.();
-                greetingCompleteResolverRef.current = null;
               }
 
               const inputText = msg.serverContent?.inputTranscription?.text || msg.serverContent?.inputAudioTranscription?.text;
@@ -638,43 +631,16 @@ export function useJarvisVoice({
         }
       }
 
-      // The greeting is the only explicit client-content turn. Keep the proven
-      // Assistant microphone/audio pipeline unchanged after the greeting.
-      // Do not stream microphone PCM while Jarvis is speaking its introduction;
-      // otherwise mobile speaker leakage can be detected as user activity and
-      // interrupt the greeting before the microphone is actually needed.
-      const greetingComplete = new Promise<void>((resolve) => {
-        greetingCompleteResolverRef.current = resolve;
-      });
+      // Greet immediately after the session opens, before microphone processor creation.
       try {
-        liveSession.sendClientContent({
-          turns: [{
-            role: 'user',
-            parts: [{
-              text: `Begin immediately. Your first sentence must be a short self-introduction as Jarvis of Hayaati Web Technology in ${languageName}. Speak the complete greeting only in ${languageName}, using natural everyday local phrasing. Do not use English, Hinglish, Hindi, or any other language unless ${languageName} itself is that language.`,
-            }],
-          }],
-          turnComplete: true,
+        liveSession.sendRealtimeInput({
+          text: `Your very first sentence must be a short self-introduction as Jarvis of Hayaati Web Technology in ${languageName}, spoken immediately without waiting. Greet the visitor briefly in ${languageName}. Use natural, everyday local conversational phrasing for ${languageName}. Do not use Hinglish or English unless the selected language is English.`,
         });
       } catch (greetingError) {
-        greetingCompleteResolverRef.current = null;
         console.warn('[Gemini Live Greeting Error]:', greetingError);
       }
 
-      // Wait only for the greeting turn to finish (with a short safety timeout).
-      // This prevents the user's microphone from feeding the model its own speaker
-      // output during the introduction. The normal Live microphone starts immediately
-      // after the greeting and remains available for real user barge-in.
-      await Promise.race([
-        greetingComplete,
-        new Promise<void>((resolve) => window.setTimeout(resolve, 8000)),
-      ]);
-
-      const playbackDeadline = Date.now() + 5000;
-      while (isSpeakingRef.current && Date.now() < playbackDeadline) {
-        await new Promise((resolve) => window.setTimeout(resolve, 50));
-      }
-
+      // Mic and AudioContext work was started in parallel with the Live connection.
       [stream, ctx] = await Promise.all([mediaPromise, audioContextPromise]);
       mediaStreamRef.current = stream;
       audioContextRef.current = ctx;
@@ -700,6 +666,10 @@ export function useJarvisVoice({
         const rms = Math.sqrt(sum / inputData.length);
         if (!isSpeakingRef.current) {
           setAudioLevel(Math.min(1.0, rms * 5.0));
+        }
+
+        if (isSpeakingRef.current && rms > 0.08) {
+          handleInterruption();
         }
 
         const base64Audio = floatTo16BitBase64(inputData);
