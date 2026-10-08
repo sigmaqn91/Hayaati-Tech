@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
           {
             error: 'Voice session limit reached.',
             code: sessionCheck.reason === 'concurrency_limit' ? 'server_busy' : 'quota_reached',
+            reason: sessionCheck.reason,
             retryAfterSeconds: sessionCheck.retryAfterSeconds,
           },
           { status: 429, headers }

@@ -487,7 +487,9 @@ export function useJarvisVoice({
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data?.token) {
-          const error: any = new Error(data?.error || `Voice session request failed (${res.status})`);
+          const error: any = new Error(
+            `${data?.error || `Voice session request failed (${res.status})`}${data?.reason ? ` reason=${data.reason}` : ''}${data?.retryAfterSeconds ? ` retryAfter=${data.retryAfterSeconds}s` : ''}`
+          );
           error.layer = 'TOKEN';
           error.code = data?.code || (res.status === 429 ? 'quota_reached' : 'SERVER_ERROR');
           error.status = res.status;
