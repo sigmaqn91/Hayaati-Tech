@@ -527,9 +527,16 @@ export function useJarvisVoice({
                 handleInterruption();
               }
 
-              const audioData = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
-              if (audioData) {
-                playLiveAudioChunk(audioData);
+              // Process every audio part in the model turn. The previous working
+              // Assistant processed all returned PCM chunks; reading only parts[0]
+              // can silently drop later chunks and make Jarvis audio sound cut off.
+              const parts = msg.serverContent?.modelTurn?.parts;
+              if (Array.isArray(parts)) {
+                for (const part of parts) {
+                  if (part?.inlineData?.data) {
+                    playLiveAudioChunk(part.inlineData.data);
+                  }
+                }
               }
 
               const inputText = msg.serverContent?.inputTranscription?.text || msg.serverContent?.inputAudioTranscription?.text;

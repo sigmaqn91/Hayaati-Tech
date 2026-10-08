@@ -118,6 +118,14 @@ export async function POST(req: NextRequest) {
             uses: 1,
             expireTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
             newSessionExpireTime: new Date(Date.now() + 60 * 1000).toISOString(),
+            // Lock the ephemeral token to the exact Live model/audio modality used
+            // by Jarvis while leaving the client's identity/language instruction free.
+            liveConnectConstraints: {
+              model: liveModel,
+              config: {
+                responseModalities: ['AUDIO'],
+              },
+            },
           },
         });
 
