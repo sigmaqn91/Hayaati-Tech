@@ -117,7 +117,7 @@ export function useJarvisVoice({
   const isSpeakingRef = useRef<boolean>(false);
   const keepSessionAliveRef = useRef<boolean>(false);
   const startListeningRef = useRef<(() => Promise<void>) | null>(null);
-  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     onTranscriptReadyRef.current = onTranscriptReady;
