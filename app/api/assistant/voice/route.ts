@@ -34,6 +34,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, released: true });
     }
 
+    // 1b. Refund Action: the token was issued but the Live connection / microphone failed,
+    // so give back the concurrency slot AND the visitor's hourly attempt.
+    if (action === 'refund') {
+      await refundVoiceSession(req);
+      return NextResponse.json({ success: true, refunded: true });
+    }
+
     // 2. Heartbeat Action: keepalive indicator
     if (action === 'heartbeat') {
       return NextResponse.json({ success: true, active: true });
@@ -118,15 +125,18 @@ export async function POST(req: NextRequest) {
             uses: 1,
             expireTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
             newSessionExpireTime: new Date(Date.now() + 60 * 1000).toISOString(),
-            // Lock the ephemeral token to the exact Live model/audio modality used
-            // by Jarvis while leaving the client's identity/language instruction free.
+            // Lock the ephemeral token to the exact Live model + audio modality only.
+            // lockAdditionalFields: [] is REQUIRED: without it Gemini locks the whole
+            // config, and the client's own systemInstruction / speechConfig /
+            // transcription settings make the Live connection get rejected.
             liveConnectConstraints: {
               model: liveModel,
               config: {
                 responseModalities: [Modality.AUDIO],
               },
             },
-          },
+            lockAdditionalFields: [],
+          } as any,
         });
 
         const headers = new Headers({ 'Content-Type': 'application/json' });

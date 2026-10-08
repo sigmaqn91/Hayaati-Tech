@@ -140,6 +140,17 @@ export function useJarvisVoice({
   // before returning the UI to the user-turn/listening state.
   const turnCompleteRef = useRef<boolean>(false);
   const turnHasAudioRef = useRef<boolean>(false);
+  // Echo guard: the microphone is NOT streamed to Gemini while Jarvis is talking
+  // (phone speakers leak back into the mic and Gemini then "hears" itself, which
+  // caused self-interruption and random language switching).
+  const speechEndedAtRef = useRef<number>(0);
+  const greetingDoneRef = useRef<boolean>(false);
+  const greetingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Server slot bookkeeping so the concurrency slot + hourly quota are never leaked.
+  const slotHeldRef = useRef<boolean>(false);
+  const liveOpenedRef = useRef<boolean>(false);
+  const sessionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const liveLanguageRef = useRef<string>(language);
 
   useEffect(() => {
     onTranscriptReadyRef.current = onTranscriptReady;
@@ -151,6 +162,18 @@ export function useJarvisVoice({
 
   useEffect(() => {
     languageRef.current = language;
+
+    // If the visitor switches the website language while Jarvis is live,
+    // tell the running session so it follows the new language immediately.
+    if (liveSessionRef.current && liveLanguageRef.current !== language) {
+      liveLanguageRef.current = language;
+      try {
+        const newName = getLanguageEnglishName(language);
+        liveSessionRef.current.sendRealtimeInput({
+          text: `[SYSTEM] The website language was changed to ${newName}. From now on speak only ${newName}. Do not answer this message; just use ${newName} for your next reply.`,
+        });
+      } catch {}
+    }
   }, [language]);
 
   useEffect(() => {
@@ -181,6 +204,7 @@ export function useJarvisVoice({
     activeAudioSourcesRef.current = [];
     nextPlayTimeRef.current = 0;
     isSpeakingRef.current = false;
+    speechEndedAtRef.current = Date.now();
     turnCompleteRef.current = false;
     turnHasAudioRef.current = false;
     setIsSpeaking(false);
@@ -194,19 +218,36 @@ export function useJarvisVoice({
       heartbeatTimerRef.current = null;
     }
 
-    // 1. Release session slot on server if session was running
-    if (sessionStartTimeRef.current > 0) {
-      const durationSeconds = Math.max(
-        1,
-        Math.round((Date.now() - sessionStartTimeRef.current) / 1000)
-      );
+    if (sessionTimeoutRef.current) {
+      clearTimeout(sessionTimeoutRef.current);
+      sessionTimeoutRef.current = null;
+    }
+    if (greetingTimerRef.current) {
+      clearTimeout(greetingTimerRef.current);
+      greetingTimerRef.current = null;
+    }
+
+    // 1. Give the server slot back. The slot is taken as soon as the token is issued,
+    // so it must be returned even when the Live connection or the microphone failed
+    // (otherwise 5 failed taps lock everyone out and 3 per hour lock this visitor out).
+    if (slotHeldRef.current) {
+      slotHeldRef.current = false;
+      const durationSeconds =
+        sessionStartTimeRef.current > 0
+          ? Math.max(1, Math.round((Date.now() - sessionStartTimeRef.current) / 1000))
+          : 0;
       sessionStartTimeRef.current = 0;
       fetch('/api/assistant/voice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'release', durationSeconds }),
+        body: JSON.stringify(
+          liveOpenedRef.current ? { action: 'release', durationSeconds } : { action: 'refund' }
+        ),
+        keepalive: true,
       }).catch(() => {});
     }
+    sessionStartTimeRef.current = 0;
+    liveOpenedRef.current = false;
 
     // 2. Disconnect ScriptProcessor
     if (scriptProcessorRef.current) {
@@ -261,6 +302,8 @@ export function useJarvisVoice({
     if (activeAudioSourcesRef.current.length > 0) return;
 
     isSpeakingRef.current = false;
+    speechEndedAtRef.current = Date.now();
+    greetingDoneRef.current = true;
     setIsSpeaking(false);
     setAudioLevel(0);
     nextPlayTimeRef.current = 0;
@@ -530,6 +573,12 @@ export function useJarvisVoice({
       // Get the ephemeral token first. Do not wait for microphone setup before
       // starting the Live WebSocket connection.
       sessionData = await tokenPromise;
+      // The server took a concurrency slot + one hourly attempt when it issued the token.
+      slotHeldRef.current = true;
+      liveOpenedRef.current = false;
+      greetingDoneRef.current = false;
+      speechEndedAtRef.current = 0;
+      liveLanguageRef.current = languageRef.current;
       const sessionId = ++nextSessionIdRef.current;
       liveSessionIdRef.current = sessionId;
 
@@ -550,7 +599,7 @@ export function useJarvisVoice({
             },
           },
           systemInstruction:
-            `You are Jarvis, the cognitive neural intelligence of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly. ${sessionData?.isOwner ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.' : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.'} STRICT LANGUAGE RULES: The website-selected language is ${languageName}. You MUST speak and write only in ${languageName} for this entire session. Never automatically switch, mix, translate, transliterate, or code-switch into another language because of the visitor's accent, detected input language, pronunciation, context, or your own language detection. Do not use Hinglish or English unless ${languageName} is English. Only change language when the visitor explicitly asks you to translate, speak, or respond in another language. If the visitor asks for another language, follow that explicit request for that response; otherwise immediately return to ${languageName}. Your very first response must use the exact localized website welcome message supplied below. Do not paraphrase or translate it. Localized welcome message: ${JSON.stringify(welcomeMessageRef.current || `Hello! I am Jarvis, your Hayaati Web Technology assistant.`, null, 0)}. Use natural, everyday, locally conversational phrasing native to ${languageName}, not formal, literary, stiff, or machine-translated phrasing. Answer concisely and with cinematic precision.`,
+            `You are Jarvis, the voice assistant of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly. ${sessionData?.isOwner ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.' : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.'} STRICT LANGUAGE RULES: The website-selected language is ${languageName}. You MUST speak only in ${languageName} for this entire session, including your very first greeting. Never switch, mix, translate or code-switch into another language because of the visitor's accent, background noise, detected input language, pronunciation, or your own language detection. Do not use Hinglish or English unless ${languageName} is English. Only change language when the visitor clearly and explicitly asks you to speak another language; if the website language is changed you will be told with a [SYSTEM] message and must then follow the new language. If you hear unclear audio, noise, or silence, do NOT answer and do NOT guess: stay quiet and wait. Never respond to your own voice. GREETING: when you receive the [SYSTEM] activation message, greet the visitor in ${languageName} with one or two short sentences: say hello, say that you are Jarvis, the assistant of Hayaati Web Technology, and ask how you can help. Use natural, everyday phrasing native to ${languageName}, not formal, literary, or machine-translated phrasing. Answer concisely and with cinematic precision.`,
         };
 
         const liveConnectPromise = ai.live.connect({
@@ -663,7 +712,25 @@ export function useJarvisVoice({
       // The Live session is authoritative from this point onward. Store it before
       // waiting on mic setup so stale callbacks cannot affect another session.
       liveSessionRef.current = liveSession;
+      liveOpenedRef.current = true;
       sessionStartTimeRef.current = Date.now();
+
+      // Enforce the server's maximum session length on the client too.
+      const maxSeconds =
+        typeof sessionData?.sessionMaxSeconds === 'number' && sessionData.sessionMaxSeconds > 0
+          ? sessionData.sessionMaxSeconds
+          : 180;
+      sessionTimeoutRef.current = setTimeout(() => {
+        if (liveSessionIdRef.current !== sessionId) return;
+        cancelSpeech();
+        stopListening();
+        setSpeechError('SESSION_ENDED');
+      }, maxSeconds * 1000);
+
+      // Safety net: if the greeting never completes, open the microphone anyway.
+      greetingTimerRef.current = setTimeout(() => {
+        greetingDoneRef.current = true;
+      }, 12000);
       heartbeatTimerRef.current = setInterval(() => {
         fetch('/api/assistant/voice', {
           method: 'POST',
@@ -687,11 +754,8 @@ export function useJarvisVoice({
       // Greet immediately after the session opens, before microphone processor creation.
       // The localized UI welcome string is the single source of truth for the activation greeting.
       try {
-        const localizedWelcome = welcomeMessageRef.current.trim();
         liveSession.sendRealtimeInput({
-          text: localizedWelcome
-            ? `[SYSTEM] Activate Jarvis with the exact localized website welcome message below. Speak it as the first response without paraphrasing, translating, or changing language. Exact welcome message: ${localizedWelcome}`
-            : `[SYSTEM] Activate Jarvis with a short self-introduction in ${languageName}. Speak only in the selected website language.`,
+          text: `[SYSTEM] Jarvis has just been activated. Greet the visitor now, speaking only ${languageName}: say hello, say you are Jarvis, the assistant of Hayaati Web Technology, and ask how you can help. Keep it to one or two short sentences.`,
         });
       } catch (greetingError) {
         console.warn('[Gemini Live Greeting Error]:', greetingError);
@@ -723,6 +787,16 @@ export function useJarvisVoice({
         const rms = Math.sqrt(sum / inputData.length);
         if (!isSpeakingRef.current) {
           setAudioLevel(Math.min(1.0, rms * 5.0));
+        }
+
+        // Echo guard: never stream the mic while Jarvis speaks, while the greeting is
+        // still pending, or for a short moment after speech ends (speaker tail).
+        if (
+          isSpeakingRef.current ||
+          !greetingDoneRef.current ||
+          Date.now() - speechEndedAtRef.current < 700
+        ) {
+          return;
         }
 
         const base64Audio = floatTo16BitBase64(inputData);

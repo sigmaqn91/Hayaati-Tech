@@ -105,7 +105,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       if (!spokenText) return;
       setMessages((prev) => [...prev, { role: 'user', text: spokenText }]);
       const claim = spokenText.trim();
-      if (/\b(i am|i'm|im)\s+(the\s+)?(owner|founder)\b/i.test(claim) || /\b(i am|i'm|im)\s+aliya\s+khan\b/i.test(claim) || /\b(main|मैं)\s+(owner|founder|मालिक|संस्थापक)\b/i.test(claim) || /\b(owner|founder)\s+(hoon|hun)\b/i.test(claim) || /मैं\s+(मालिक|संस्थापक)\s+हूँ/.test(claim)) {
+      if (/\b(main|mai|mein)\s+aliya(\s+khan)?\s+(hoon|hun|hu)\b/i.test(claim) || /(मैं|मै)\s+(आलिया|अलिया)(\s+खान)?/.test(claim) || /\b(i am|i'm|im)\s+(the\s+)?(owner|founder)\b/i.test(claim) || /\b(i am|i'm|im)\s+aliya\s+khan\b/i.test(claim) || /\b(main|मैं)\s+(owner|founder|मालिक|संस्थापक)\b/i.test(claim) || /\b(owner|founder)\s+(hoon|hun)\b/i.test(claim) || /मैं\s+(मालिक|संस्थापक)\s+हूँ/.test(claim)) {
         setShowVerifyModal(true);
       }
     },
@@ -169,6 +169,9 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         else if (speechError === 'MODEL_FAILED') friendlyMsg = voiceErrors.modelFailed;
         else if (speechError === 'NETWORK') friendlyMsg = voiceErrors.network;
         else if (speechError === 'SERVER_ERROR') friendlyMsg = voiceErrors.serverError;
+      }
+      if (speechError === 'SESSION_ENDED') {
+        friendlyMsg = t?.assistant?.errors?.sessionEnded || friendlyMsg;
       }
       const layerTag = failingLayer && failingLayer !== 'NONE' ? ` [${failingLayer}]` : '';
       setBootLogs((prev) => [...prev, `SYS_VOICE_NOTICE${layerTag}: ${friendlyMsg}`]);
