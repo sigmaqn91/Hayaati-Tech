@@ -24,12 +24,12 @@ The platform features an advanced dual-mode AI interface providing both real-tim
                            ▼                              ▼
                  ┌───────────────────┐          ┌───────────────────┐
                  │ Gemini Live API   │          │ Gemini 2.5 Flash  │
-                 │ (gemini-3.8-live) │          │  (Server Route)   │
+                 │ (gemini-3.1-flash-live-preview) │          │  (Server Route)   │
                  └───────────────────┘          └───────────────────┘
 ```
 
 1. **Multimodal Live Voice (WebSocket Protocol)**:
-   - Real-time two-way audio streaming using Google's Gemini Multimodal Live API (`gemini-3.8-live` / `gemini-3.1-flash-live-preview`).
+   - Real-time two-way audio streaming using Google's Gemini Multimodal Live API (`gemini-3.1-flash-live-preview` / `gemini-3.1-flash-live-preview`).
    - The browser requests an ephemeral session token from `/api/assistant/voice` via an authenticated, rate-governed endpoint.
    - Direct low-latency WebSocket connection handling 16kHz PCM audio input and 24kHz audio synthesis.
    - Automatic slot reservation and keepalive heartbeats with clean release mechanics upon session termination.

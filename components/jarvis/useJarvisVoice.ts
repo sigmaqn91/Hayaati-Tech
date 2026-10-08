@@ -111,6 +111,8 @@ export function useJarvisVoice({
   const [transcript, setTranscript] = useState<string>('');
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [failingLayer, setFailingLayer] = useState<VoiceFailureLayer>('NONE');
+  // Raw technical detail of the last voice failure (shown on screen so the real cause is visible).
+  const [speechDetail, setSpeechDetail] = useState<string>('');
 
   // References for live streaming and playback
   const onTranscriptReadyRef = useRef(onTranscriptReady);
@@ -464,6 +466,7 @@ export function useJarvisVoice({
 
     setFailingLayer('NONE');
     setSpeechError(null);
+    setSpeechDetail('');
     try {
       const stored = JSON.parse(sessionStorage.getItem('hayaati_jarvis_transcript') || '[]');
       if (Array.isArray(stored)) rollingTranscriptRef.current = stored.slice(-20);
@@ -662,6 +665,7 @@ export function useJarvisVoice({
               const ageMs = Date.now() - sessionOpenedAt;
               console.warn(`[Gemini Live Session Closed] code=${closeCode ?? 'unknown'} reason=${closeReason || 'none'}`);
               if (ageMs < 5000) {
+                setSpeechDetail(`Live closed code=${closeCode ?? 'unknown'} reason=${closeReason || 'none'} after ${ageMs}ms`);
                 setSpeechError(closeCode === 401 || closeCode === 403 ? 'NO_KEY' : 'NETWORK');
                 setFailingLayer('GEMINI_LIVE');
               }
@@ -670,6 +674,7 @@ export function useJarvisVoice({
             onerror: (err: any) => {
               if (liveSessionIdRef.current !== sessionId) return;
               console.warn('[Gemini Live Session Error]:', err);
+              setSpeechDetail(`Live error status=${err?.status || err?.statusCode || 'n/a'} ${String(err?.message || err?.type || '').slice(0, 160)}`);
               setFailingLayer('GEMINI_LIVE');
               const status = err?.status || err?.statusCode;
               if (status === 429) setSpeechError('PROVIDER_QUOTA');
@@ -700,6 +705,7 @@ export function useJarvisVoice({
       if (!liveSession) {
         const status = lastLiveError?.status || lastLiveError?.statusCode;
         setFailingLayer('GEMINI_LIVE');
+        setSpeechDetail(`Live connect failed status=${status || 'n/a'} code=${lastLiveError?.code || 'n/a'} ${String(lastLiveError?.message || lastLiveError || '').slice(0, 160)}`);
         if (lastLiveError?.code === 'LIVE_TIMEOUT') setSpeechError('NETWORK');
         else if (status === 429) setSpeechError('PROVIDER_QUOTA');
         else if (status === 401 || status === 403) setSpeechError('NO_KEY');
@@ -762,7 +768,14 @@ export function useJarvisVoice({
       }
 
       // Mic and AudioContext work was started in parallel with the Live connection.
-      [stream, ctx] = await Promise.all([mediaPromise, audioContextPromise]);
+      // Never hang forever on mic permission / audio start: give up after 30 seconds.
+      const micTimeout = new Promise<never>((_, reject) => {
+        window.setTimeout(
+          () => reject(Object.assign(new Error('Microphone or audio start timed out'), { layer: 'MEDIA_STREAM', code: 'MIC_FAILED' })),
+          30000
+        );
+      });
+      [stream, ctx] = await Promise.race([Promise.all([mediaPromise, audioContextPromise]), micTimeout]);
       mediaStreamRef.current = stream;
       audioContextRef.current = ctx;
 
@@ -833,6 +846,7 @@ export function useJarvisVoice({
     } catch (err: any) {
       console.warn('[Live Setup Error]:', err);
       const layer = err?.layer as VoiceFailureLayer | undefined;
+      setSpeechDetail(`${err?.layer || 'SETUP'} ${err?.name || ''} code=${err?.code || 'n/a'} status=${err?.status || 'n/a'} ${String(err?.message || '').slice(0, 160)}`);
       if (layer) setFailingLayer(layer);
       else if (!audioContextRef.current) setFailingLayer('AUDIO_CONTEXT');
       else if (!liveSessionRef.current) setFailingLayer('WEBSOCKET');
@@ -927,6 +941,7 @@ export function useJarvisVoice({
     transcript,
     speechError,
     failingLayer,
+    speechDetail,
     analyserNode: activeAnalyser,
     startListening,
     stopListening,

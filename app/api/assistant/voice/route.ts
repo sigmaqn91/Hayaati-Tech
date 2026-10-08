@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     if (action === 'status') {
       const apiKey = process.env.GEMINI_API_KEY;
       const isConfigured = Boolean(apiKey && apiKey !== 'disabled');
-      const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
+      const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.1-flash-live-preview';
 
       return NextResponse.json({
         ok: true,
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Gemini Live model and voice configurations
-      const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
+      const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.1-flash-live-preview';
       console.info(`[Gemini Voice Server] Live model: ${liveModel}`);
       if (!liveModel) {
         return NextResponse.json(

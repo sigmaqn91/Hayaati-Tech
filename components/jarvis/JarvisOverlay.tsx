@@ -91,6 +91,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     transcript,
     speechError,
     failingLayer,
+    speechDetail,
     analyserNode,
     startListening,
     stopListening,
@@ -118,7 +119,13 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
   // Tap handler: start immediately, ignore taps while connecting, and stop an active session.
   const handleVoiceTap = () => {
-    if (isConnecting) return;
+    // Tapping while connecting cancels it, so the button can never get stuck.
+    if (isConnecting) {
+      cancelSpeech();
+      stopListening();
+      if (embedded) setEmbeddedActive(false);
+      return;
+    }
 
     if (isSpeaking) {
       cancelSpeech();
@@ -175,8 +182,13 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       }
       const layerTag = failingLayer && failingLayer !== 'NONE' ? ` [${failingLayer}]` : '';
       setBootLogs((prev) => [...prev, `SYS_VOICE_NOTICE${layerTag}: ${friendlyMsg}`]);
+      // Also show the real technical cause on screen (the boot log is hidden in the hero).
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', text: `[VOICE ${speechError}${layerTag}] ${friendlyMsg}${speechDetail ? ' | ' + speechDetail : ''}` },
+      ]);
     }
-  }, [speechError, failingLayer, t]);
+  }, [speechError, failingLayer, speechDetail, t]);
 
   // Sync Visual State with Voice
   useEffect(() => {
