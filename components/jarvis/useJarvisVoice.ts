@@ -499,18 +499,16 @@ export function useJarvisVoice({
 
       const ai = new GoogleGenAI({
         apiKey: sessionData.token,
-        httpOptions: { apiVersion: 'v1alpha' },
+        httpOptions: { apiVersion: 'v1beta' },
       });
-      const languageCode = LOCALE_TO_VOICE_LANG[languageRef.current];
-      const languageName = getLanguageEnglishName(languageCode || languageRef.current);
+      const languageName = getLanguageEnglishName(languageRef.current);
 
-      const connectLive = async (includeLanguageCode = true) => {
+      const connectLive = async () => {
         const config: any = {
           responseModalities: [Modality.AUDIO],
           inputAudioTranscription: {},
           outputAudioTranscription: {},
           speechConfig: {
-            ...(includeLanguageCode && languageCode ? { languageCode } : {}),
             voiceConfig: {
               prebuiltVoiceConfig: { voiceName: sessionData.voice || 'Capella' },
             },
@@ -585,18 +583,9 @@ export function useJarvisVoice({
       let lastLiveError: any = null;
       const sessionOpenedAt = Date.now();
       try {
-        liveSession = await connectLive(true);
-      } catch (firstLiveErr: any) {
-        lastLiveError = firstLiveErr;
-        // If the selected locale's languageCode is rejected, retry once without
-        // languageCode. The ephemeral token allows the single retry.
-        if (languageCode) {
-          try {
-            liveSession = await connectLive(false);
-          } catch (secondLiveErr: any) {
-            lastLiveError = secondLiveErr;
-          }
-        }
+        liveSession = await connectLive();
+      } catch (liveErr: any) {
+        lastLiveError = liveErr;
       }
 
       if (!liveSession) {

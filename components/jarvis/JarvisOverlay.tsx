@@ -695,7 +695,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
       {embedded && (
         <button
-          onClick={() => setShowVerifyModal(true)}
+          onClick={() => (isOwner ? handleLockOwnerMode() : setShowVerifyModal(true))}
           className="absolute right-3 top-3 sm:right-5 sm:top-5 z-30 pointer-events-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-[#38e8ff]/30 bg-[#05070a]/70 text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff] text-xs transition-colors cursor-pointer backdrop-blur-sm"
           title="Owner Authentication"
           aria-label="Owner Authentication"
@@ -731,7 +731,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
           {/* Always-visible Owner Authentication Button */}
           <button
-            onClick={() => setShowVerifyModal(true)}
+            onClick={() => (isOwner ? handleLockOwnerMode() : setShowVerifyModal(true))}
             className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-2.5 sm:py-3 rounded border text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shrink-0 ${
               isOwner
                 ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'

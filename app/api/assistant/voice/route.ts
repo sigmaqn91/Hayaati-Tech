@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       const ai = new GoogleGenAI({
         apiKey,
         httpOptions: {
-          apiVersion: 'v1alpha',
+          apiVersion: 'v1beta',
           headers: {
             'User-Agent': 'aistudio-build',
           },
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
       try {
         const token = await ai.authTokens.create({
           config: {
-            uses: 2,
+            uses: 1,
             expireTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
             newSessionExpireTime: new Date(Date.now() + 60 * 1000).toISOString(),
           },
