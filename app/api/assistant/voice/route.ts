@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Modality } from '@google/genai';
 import { verifyOwnerSession } from '@/lib/jarvisAuth';
 import {
   checkVoiceSessionLimit,
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
             liveConnectConstraints: {
               model: liveModel,
               config: {
-                responseModalities: ['AUDIO'],
+                responseModalities: [Modality.AUDIO],
               },
             },
           },
