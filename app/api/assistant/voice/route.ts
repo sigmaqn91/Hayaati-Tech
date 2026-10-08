@@ -12,11 +12,6 @@ import {
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// The 14 official supported languages for Gemini native audio
-const VOICE_SUPPORTED_LANGUAGES = new Set([
-  'en', 'hi', 'es', 'fr', 'de', 'ja', 'ko', 'zh', 'ar', 'pt', 'it', 'ru', 'tr', 'id'
-]);
-
 export async function POST(req: NextRequest) {
   try {
     let body: any = {};
@@ -65,18 +60,7 @@ export async function POST(req: NextRequest) {
       const isOwner = verifyOwnerSession(req);
       const userLang = typeof language === 'string' ? language.toLowerCase().trim() : 'en';
 
-      // Validate language against the 14 supported voice languages
-      if (!VOICE_SUPPORTED_LANGUAGES.has(userLang)) {
-        return NextResponse.json(
-          {
-            error: 'Voice conversation is not available in this language yet.',
-            code: 'voice_not_supported',
-          },
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Check Rate, Concurrency, and Quota Limits
+            // Check Rate, Concurrency, and Quota Limits
       const sessionCheck = await checkVoiceSessionLimit(req);
       if (!sessionCheck.allowed) {
         console.warn(`[Voice Session Blocked] Reason: ${sessionCheck.reason}`);
@@ -103,6 +87,7 @@ export async function POST(req: NextRequest) {
 
       // Gemini Live model and voice configurations
       const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
+      console.info(`[Gemini Voice Server] Live model: ${liveModel}`);
       if (!liveModel) {
         return NextResponse.json(
           { error: 'Voice model is not configured.', code: 'MODEL_NOT_CONFIGURED' },
@@ -110,7 +95,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const voiceName = process.env.GEMINI_VOICE || 'Kore';
+      const voiceName = process.env.GEMINI_VOICE || 'Capella';
 
       // Acquire concurrency slot & visitor hourly usage in shared store
       await recordVoiceSessionStart(req);
@@ -118,19 +103,21 @@ export async function POST(req: NextRequest) {
       const ai = new GoogleGenAI({
         apiKey,
         httpOptions: {
+          apiVersion: 'v1alpha',
           headers: {
             'User-Agent': 'aistudio-build',
           },
         },
       });
 
-      // Create an ephemeral token on the server using ai.authTokens.create (uses: 1, expireTime: 30 minutes)
+      // Create an ephemeral token on the server using ai.authTokens.create. The token may be used for the initial connect retry.
       // The API key remains strictly server-side; client receives ONLY the short-lived single-use token.
       try {
         const token = await ai.authTokens.create({
           config: {
-            uses: 1,
+            uses: 2,
             expireTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+            newSessionExpireTime: new Date(Date.now() + 60 * 1000).toISOString(),
           },
         });
 

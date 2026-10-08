@@ -95,12 +95,22 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     startListening,
     stopListening,
     speak,
+    sendLiveText,
+    notifyOwnerVerified,
     cancelSpeech,
   } = useJarvisVoice({
     language: language || 'en',
     onTranscriptReady: (spokenText) => {
-      if (spokenText) {
-        handleSendMessage(spokenText);
+      if (!spokenText) return;
+      setMessages((prev) => [...prev, { role: 'user', text: spokenText }]);
+      const claim = spokenText.trim();
+      if (/\b(i am|i'm|im)\s+(the\s+)?(owner|founder)\b/i.test(claim) || /\b(i am|i'm|im)\s+aliya\s+khan\b/i.test(claim) || /\b(main|मैं)\s+(owner|founder|मालिक|संस्थापक)\b/i.test(claim) || /\b(owner|founder)\s+(hoon|hun)\b/i.test(claim) || /मैं\s+(मालिक|संस्थापक)\s+हूँ/.test(claim)) {
+        setShowVerifyModal(true);
+      }
+    },
+    onAssistantTextReady: (assistantText) => {
+      if (assistantText) {
+        setMessages((prev) => [...prev, { role: 'assistant', text: assistantText }]);
       }
     },
   });
@@ -180,6 +190,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   // Boot Sequence Simulation on Open & Clean up on close
   useEffect(() => {
     if (!isOpen) {
+      try { sessionStorage.removeItem('hayaati_jarvis_transcript'); } catch {}
       setBootCompleted(false);
       setBootLogs([]);
       if (embedded) setEmbeddedActive(false);
@@ -271,6 +282,16 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     setInputQuery('');
     setMessages((prev) => [...prev, { role: 'user', text: query }]);
     setIsProcessing(true);
+
+    // Keep an active Live session alive: typed input goes directly into the same session.
+    if (isListening) {
+      const sent = sendLiveText(query);
+      setIsProcessing(false);
+      if (!sent) {
+        setMessages((prev) => [...prev, { role: 'assistant', text: 'Live transmission failed. Please try again.' }]);
+      }
+      return;
+    }
 
     // Give typed chat an immediate spoken acknowledgement while the existing /api/chat reply is pending.
     if (!audioMuted) {
@@ -388,12 +409,9 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         setVerifyCode('');
         const welcome = 'Owner credentials verified. Welcome back, Aliya Khan.';
         setMessages((prev) => [...prev, { role: 'assistant', text: welcome }]);
-        if (!audioMuted) {
-          speak(welcome, () => {
-            if (conversationMode && (embedded ? embeddedActive : isOpen)) {
-              startListening();
-            }
-          });
+        const notified = notifyOwnerVerified();
+        if (!notified && !audioMuted) {
+          speak(welcome);
         }
         fetchAdminData();
       } else {
@@ -710,6 +728,21 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
               className="w-full bg-[#0a0f18] border border-[#38e8ff]/30 focus:border-[#38e8ff] text-slate-100 placeholder-slate-500 px-4 py-2.5 sm:py-3 rounded-md outline-none transition-colors"
             />
           </div>
+
+          {/* Always-visible Owner Authentication Button */}
+          <button
+            onClick={() => setShowVerifyModal(true)}
+            className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-2.5 sm:py-3 rounded border text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shrink-0 ${
+              isOwner
+                ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+                : 'border-[#38e8ff]/30 text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff]'
+            }`}
+            title={isOwner ? 'Owner Verified' : 'Owner Authentication'}
+            aria-label={isOwner ? 'Owner Verified' : 'Owner Authentication'}
+          >
+            {isOwner ? <ShieldCheck className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{isOwner ? 'VERIFIED' : 'AUTHENTICATE'}</span>
+          </button>
 
           {/* TRANSMIT Button */}
           <button
