@@ -132,7 +132,7 @@ export function useJarvisVoice({
   const nextSessionIdRef = useRef<number>(0);
   const rollingTranscriptRef = useRef<string[]>([]);
   const ownerVerifiedRef = useRef<boolean>(false);
-  const turnCompleteWaitingForPlaybackRef = useRef<boolean>(false);
+  const greetingCompleteResolverRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     onTranscriptReadyRef.current = onTranscriptReady;
@@ -239,9 +239,7 @@ export function useJarvisVoice({
     isTurnRunningRef.current = false;
   }, []);
 
-  // A server-side Live VAD interruption is authoritative. Do not use raw
-  // microphone RMS as an interruption trigger: microphone RMS also contains
-  // environmental noise and can contain speaker leakage/echo on mobile.
+  // Handle interruption: when visitor speaks or sends audio while model is playing
   const handleInterruption = useCallback(() => {
     cancelSpeech();
     setIsListening(true);
@@ -338,10 +336,6 @@ export function useJarvisVoice({
           setIsSpeaking(false);
           setAudioLevel(0);
           nextPlayTimeRef.current = 0;
-          if (turnCompleteWaitingForPlaybackRef.current) {
-            turnCompleteWaitingForPlaybackRef.current = false;
-            setIsListening(true);
-          }
         }
       };
     } catch (err) {
@@ -360,18 +354,12 @@ export function useJarvisVoice({
     } catch {}
   }, []);
 
-  const sendLiveText = useCallback((text: string, recordTranscript = true) => {
+  const sendLiveText = useCallback((text: string) => {
     const clean = text.trim();
     if (!clean || !liveSessionRef.current) return false;
     try {
-      // Gemini 3.8 Live supports client content throughout the session.
-      // Unlike realtimeInput text, client content with turnComplete=true
-      // explicitly ends the user turn and asks the model to answer now.
-      liveSessionRef.current.sendClientContent({
-        turns: [{ role: 'user', parts: [{ text: clean }] }],
-        turnComplete: true,
-      });
-      if (recordTranscript) appendTranscript(`USER: ${clean}`);
+      liveSessionRef.current.sendRealtimeInput({ text: clean });
+      appendTranscript(`USER: ${clean}`);
       return true;
     } catch (error) {
       console.warn('[Gemini Live Text Error]:', error);
@@ -381,10 +369,7 @@ export function useJarvisVoice({
 
   const notifyOwnerVerified = useCallback(() => {
     ownerVerifiedRef.current = true;
-    return sendLiveText(
-      '[SYSTEM] Owner Aliya Khan has just been verified server-side. Continue the same conversation, greet her briefly as the owner in the currently selected website language, and remember everything said before.',
-      false
-    );
+    return sendLiveText('[SYSTEM] Owner Aliya Khan has just been verified server-side. Continue the same conversation, greet her briefly as the owner in the currently selected website language, and remember everything said before.');
   }, [sendLiveText]);
 
   // Start Live Microphone Capture and Stream into Gemini Live WebSocket
@@ -524,23 +509,13 @@ export function useJarvisVoice({
           responseModalities: [Modality.AUDIO],
           inputAudioTranscription: {},
           outputAudioTranscription: {},
-          realtimeInputConfig: {
-            automaticActivityDetection: {
-              disabled: false,
-              startOfSpeechSensitivity: 'START_SENSITIVITY_LOW',
-              endOfSpeechSensitivity: 'END_SENSITIVITY_LOW',
-              prefixPaddingMs: 80,
-              silenceDurationMs: 500,
-            },
-            activityHandling: 'START_OF_ACTIVITY_INTERRUPTS',
-          },
           speechConfig: {
             voiceConfig: {
               prebuiltVoiceConfig: { voiceName: sessionData.voice || 'Capella' },
             },
           },
           systemInstruction:
-            `You are Jarvis, the cognitive neural intelligence of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly. ${sessionData?.isOwner ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.' : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.'} STRICT LANGUAGE LOCK: The website language selected for this session is ${languageName}. Every spoken response and every written response MUST be entirely in ${languageName}. Do not switch to English, Hinglish, Hindi, or any other language because of the visitor, detected audio language, accent, or code-switching. Only change language if the website itself starts a new session in a different selected language. Your first model response must begin immediately with a short self-introduction as Jarvis of Hayaati Web Technology in ${languageName}. Use natural, everyday, locally conversational phrasing native to ${languageName}, not formal, literary, stiff, or machine-translated phrasing. Answer concisely and with cinematic precision.`,
+            `You are Jarvis, the cognitive neural intelligence of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly. ${sessionData?.isOwner ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.' : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.'} Language and speaking style rules: The website is currently switched to ${languageName}. Always use ${languageName} for both spoken and written responses. Your very first sentence must be a short self-introduction as Jarvis of Hayaati Web Technology in ${languageName}, spoken immediately without waiting. Do not default to Hinglish or English when another website language is selected. Use natural, everyday, locally conversational phrasing native to that language and locale, not formal, literary, stiff, or machine-translated phrasing. Keep the same selected language throughout the conversation unless the visitor clearly switches languages. Answer concisely and with cinematic precision.`,
         };
 
         const liveConnectPromise = ai.live.connect({
@@ -553,35 +528,22 @@ export function useJarvisVoice({
                 handleInterruption();
               }
 
-              // While Jarvis is actually generating audio, the UI is in speaking
-              // state. The microphone remains open for real user barge-in, but
-              // raw mic level must never be treated as an interruption signal.
-              if (Array.isArray(msg.serverContent?.modelTurn?.parts)) {
-                setIsListening(false);
-              }
-
-              // Gemini 3.8 sends turnComplete when the current response is done.
-              // Wait for any already-buffered PCM to finish before switching the
-              // UI back to listening.
-              if (msg.serverContent?.turnComplete) {
-                if (activeAudioSourcesRef.current.length === 0) {
-                  turnCompleteWaitingForPlaybackRef.current = false;
-                  setIsListening(true);
-                } else {
-                  turnCompleteWaitingForPlaybackRef.current = true;
-                }
-              }
-
               // Process every audio part in the model turn. The previous working
               // Assistant processed all returned PCM chunks; reading only parts[0]
               // can silently drop later chunks and make Jarvis audio sound cut off.
               const parts = msg.serverContent?.modelTurn?.parts;
-              if (Array.isArray(parts)) {
+              if (Array.isArray(parts) && parts.some((part: any) => part?.inlineData?.data)) {
+                setIsListening(false);
                 for (const part of parts) {
                   if (part?.inlineData?.data) {
                     playLiveAudioChunk(part.inlineData.data);
                   }
                 }
+              }
+
+              if (msg.serverContent?.turnComplete) {
+                greetingCompleteResolverRef.current?.();
+                greetingCompleteResolverRef.current = null;
               }
 
               const inputText = msg.serverContent?.inputTranscription?.text || msg.serverContent?.inputAudioTranscription?.text;
@@ -668,38 +630,51 @@ export function useJarvisVoice({
       // model may restrict sendClientContent to initial history only.
       if (rollingTranscriptRef.current.length > 0) {
         try {
-          liveSession.sendClientContent({
-            turns: [{
-              role: 'user',
-              parts: [{
-                text: `[SYSTEM] Restore conversation context silently. Do not answer this message. Prior transcript:\n${rollingTranscriptRef.current.join('\n')}`,
-              }],
-            }],
-            turnComplete: false,
+          liveSession.sendRealtimeInput({
+            text: `[SYSTEM] Continue this existing conversation. Prior transcript:\n${rollingTranscriptRef.current.join('\n')}`,
           });
         } catch (historyError) {
           console.warn('[Gemini Live History Restore Error]:', historyError);
         }
       }
 
-      // Explicitly complete the opening user turn so Gemini 3.8 generates
-      // the requested introduction immediately. A realtimeInput text stream
-      // does not itself mark an end-of-turn.
+      // The greeting is the only explicit client-content turn. Keep the proven
+      // Assistant microphone/audio pipeline unchanged after the greeting.
+      // Do not stream microphone PCM while Jarvis is speaking its introduction;
+      // otherwise mobile speaker leakage can be detected as user activity and
+      // interrupt the greeting before the microphone is actually needed.
+      const greetingComplete = new Promise<void>((resolve) => {
+        greetingCompleteResolverRef.current = resolve;
+      });
       try {
         liveSession.sendClientContent({
           turns: [{
             role: 'user',
             parts: [{
-              text: `Begin immediately. Your very first sentence must be a short self-introduction as Jarvis of Hayaati Web Technology in ${languageName}. Speak the entire response only in ${languageName}. Use natural, everyday local conversational phrasing for ${languageName}. Do not use English, Hinglish, Hindi, or any other language unless ${languageName} itself is that language.`,
+              text: `Begin immediately. Your first sentence must be a short self-introduction as Jarvis of Hayaati Web Technology in ${languageName}. Speak the complete greeting only in ${languageName}, using natural everyday local phrasing. Do not use English, Hinglish, Hindi, or any other language unless ${languageName} itself is that language.`,
             }],
           }],
           turnComplete: true,
         });
       } catch (greetingError) {
+        greetingCompleteResolverRef.current = null;
         console.warn('[Gemini Live Greeting Error]:', greetingError);
       }
 
-      // Mic and AudioContext work was started in parallel with the Live connection.
+      // Wait only for the greeting turn to finish (with a short safety timeout).
+      // This prevents the user's microphone from feeding the model its own speaker
+      // output during the introduction. The normal Live microphone starts immediately
+      // after the greeting and remains available for real user barge-in.
+      await Promise.race([
+        greetingComplete,
+        new Promise<void>((resolve) => window.setTimeout(resolve, 8000)),
+      ]);
+
+      const playbackDeadline = Date.now() + 5000;
+      while (isSpeakingRef.current && Date.now() < playbackDeadline) {
+        await new Promise((resolve) => window.setTimeout(resolve, 50));
+      }
+
       [stream, ctx] = await Promise.all([mediaPromise, audioContextPromise]);
       mediaStreamRef.current = stream;
       audioContextRef.current = ctx;
