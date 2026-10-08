@@ -29,12 +29,14 @@ interface JarvisOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   language?: string;
+  embedded?: boolean;
 }
 
 export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   isOpen,
   onClose,
   language = 'en',
+  embedded = false,
 }) => {
   // Assistant Mode & States
   const [visualState, setVisualState] = useState<AssistantVisualState>('idle');
@@ -78,6 +80,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
   const [conversationMode] = useState<boolean>(true);
+  const [embeddedActive, setEmbeddedActive] = useState<boolean>(false);
 
   // Voice Hook
   const {
@@ -109,16 +112,34 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     if (isSpeaking) {
       cancelSpeech();
       stopListening();
+      if (embedded) setEmbeddedActive(false);
       return;
     }
 
     if (isListening) {
       stopListening();
+      if (embedded) setEmbeddedActive(false);
       return;
     }
 
+    if (embedded) setEmbeddedActive(true);
     startListening();
   };
+
+  // Embedded hero controls dispatch the same toggle event so the existing voice hook stays single-instance.
+  useEffect(() => {
+    if (!embedded) return;
+
+    const handleEmbeddedToggle = () => handleVoiceTap();
+    window.addEventListener('jarvis:toggle', handleEmbeddedToggle);
+    return () => window.removeEventListener('jarvis:toggle', handleEmbeddedToggle);
+  }, [embedded, handleVoiceTap]);
+
+  useEffect(() => {
+    if (embedded && speechError && !isConnecting && !isListening) {
+      setEmbeddedActive(false);
+    }
+  }, [embedded, speechError, isConnecting, isListening]);
 
   // Map VoiceError codes to friendly localized messages in terminal
   useEffect(() => {
@@ -161,6 +182,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     if (!isOpen) {
       setBootCompleted(false);
       setBootLogs([]);
+      if (embedded) setEmbeddedActive(false);
       cancelSpeech();
       stopListening();
       return;
@@ -250,6 +272,17 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     setMessages((prev) => [...prev, { role: 'user', text: query }]);
     setIsProcessing(true);
 
+    // Give typed chat an immediate spoken acknowledgement while the existing /api/chat reply is pending.
+    if (!audioMuted) {
+      const englishInput = /^[\x00-\x7F]*$/.test(query.trim()) && /[a-zA-Z]/.test(query);
+      const quickReply = englishInput
+        ? 'Got it. One moment.'
+        : language === 'hi'
+          ? 'Samajh gaya. Ek second, main check karta hoon.'
+          : 'Got it. One moment.';
+      speak(quickReply);
+    }
+
     const requestController = new AbortController();
     const requestTimeout = window.setTimeout(() => requestController.abort(), 20000);
 
@@ -291,7 +324,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
         if (!audioMuted) {
           speak(data.reply, () => {
-            if (conversationMode && isOpen) {
+            if (conversationMode && (embedded ? embeddedActive : isOpen)) {
               startListening();
             }
           });
@@ -357,7 +390,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         setMessages((prev) => [...prev, { role: 'assistant', text: welcome }]);
         if (!audioMuted) {
           speak(welcome, () => {
-            if (conversationMode && isOpen) {
+            if (conversationMode && (embedded ? embeddedActive : isOpen)) {
               startListening();
             }
           });
@@ -446,33 +479,36 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !embedded) return null;
 
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex flex-col bg-[#05070a] text-slate-100 font-mono overflow-hidden select-none h-[100dvh] overscroll-contain touch-manipulation"
+      className={embedded
+        ? 'absolute inset-0 z-10 flex flex-col bg-transparent text-slate-100 font-mono overflow-hidden select-none pointer-events-none'
+        : 'fixed inset-0 z-50 flex flex-col bg-[#05070a] text-slate-100 font-mono overflow-hidden select-none h-[100dvh] overscroll-contain touch-manipulation'}
     >
-      {/* 1. Dynamic Holographic Concentric HUD Backdrop */}
-      <JarvisBackdrop
-        state={visualState}
-        loudness={audioLevel}
-        centerY={orbGeometry.centerY}
-        orbRadius={orbGeometry.orbRadius}
-      />
-
-      {/* 2. Subtle Hologram Scanline & Vignette Effect */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(5,7,10,0.85)_100%)] z-[1]" />
-      <div className="absolute inset-0 pointer-events-none opacity-[0.035] bg-[linear-gradient(rgba(56,232,255,0.2)_1px,transparent_1px)] bg-[size:100%_4px] z-[1]" />
-
-      {/* 3. Sci-Fi HUD Corner Brackets */}
-      <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
-      <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
-      <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
-      <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
+      {/* 1-3. The full-screen HUD chrome stays only in the legacy modal mode. */}
+      {!embedded && (
+        <>
+          <JarvisBackdrop
+            state={visualState}
+            loudness={audioLevel}
+            centerY={orbGeometry.centerY}
+            orbRadius={orbGeometry.orbRadius}
+          />
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(5,7,10,0.85)_100%)] z-[1]" />
+          <div className="absolute inset-0 pointer-events-none opacity-[0.035] bg-[linear-gradient(rgba(56,232,255,0.2)_1px,transparent_1px)] bg-[size:100%_4px] z-[1]" />
+          <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
+          <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
+          <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
+          <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-[#38e8ff]/60 pointer-events-none z-[1]" />
+        </>
+      )}
 
       {/* 4. Slim Header Telemetry Bar */}
-      <div className="h-12 border-b border-[#38e8ff]/20 bg-[#05070a]/80 flex items-center justify-between px-4 sm:px-6 relative z-30 shrink-0">
+      {!embedded && (
+        <div className="h-12 border-b border-[#38e8ff]/20 bg-[#05070a]/80 flex items-center justify-between px-4 sm:px-6 relative z-30 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-2 h-2 rounded-full bg-[#38e8ff] animate-ping" />
           <span className="text-xs uppercase tracking-widest text-[#38e8ff] font-bold">
@@ -543,12 +579,13 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             <X className="w-4 h-4" />
           </button>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* 5. Centered Holographic Stage Container (Horizontal & Vertical Center ~46%) */}
       <div
         className="absolute inset-x-0 flex flex-col items-center justify-center pointer-events-none z-10"
-        style={{ top: '46%', transform: 'translateY(-50%)' }}
+        style={{ top: embedded ? '44%' : '46%', transform: 'translateY(-50%)' }}
       >
         {/* Hologram Orb Container */}
         <div
@@ -588,6 +625,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           >
             STATE // {visualState.toUpperCase()}
           </span>
+          {embedded && <div className="mt-2 w-24 border-t border-dotted border-[#38e8ff]/50" aria-hidden="true" />}
         </div>
 
         {/* Spectrum Bar: right under state indicator */}
@@ -604,8 +642,8 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           })}
         </div>
 
-        {/* Active Response Caption Subtitle (Clean, transient holographic strip) */}
-        {messages.length > 0 && (
+        {/* Active Response Caption Subtitle (legacy modal only) */}
+        {!embedded && messages.length > 0 && (
           <div className="mt-4 max-w-xl mx-4 px-4 py-2 bg-[#0a0f18]/90 border border-[#38e8ff]/30 rounded-full text-center text-xs text-[#38e8ff] shadow-[0_0_20px_rgba(56,232,255,0.2)] backdrop-blur-sm pointer-events-auto line-clamp-2">
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mr-2">
               {messages[messages.length - 1].role === 'user' ? 'TRANSMISSION:' : 'Jarvis:'}
@@ -622,8 +660,37 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         )}
       </div>
 
+      {embedded && messages.length > 0 && (
+        <div className="absolute bottom-[4.75rem] left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[min(92vw,48rem)] max-h-28 overflow-y-auto rounded-md border border-[#38e8ff]/20 bg-[#05070a]/75 px-3 py-2 backdrop-blur-sm pointer-events-auto" aria-live="polite">
+          <div className="space-y-1.5 text-[11px] font-sans">
+            {messages.slice(-5).map((message, index) => (
+              <div key={`${message.role}-${index}`} className="leading-relaxed">
+                <span className={message.role === 'user' ? 'text-slate-500 mr-2' : 'text-[#38e8ff] mr-2'}>
+                  {message.role === 'user' ? 'YOU:' : 'JARVIS:'}
+                </span>
+                <span className="text-slate-200">{message.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {embedded && (
+        <button
+          onClick={() => setShowVerifyModal(true)}
+          className="absolute right-3 top-3 sm:right-5 sm:top-5 z-30 pointer-events-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-[#38e8ff]/30 bg-[#05070a]/70 text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff] text-xs transition-colors cursor-pointer backdrop-blur-sm"
+          title="Owner Authentication"
+          aria-label="Owner Authentication"
+        >
+          {isOwner ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Lock className="w-3.5 h-3.5" />}
+          <span>{isOwner ? 'VERIFIED' : 'AUTHENTICATE'}</span>
+        </button>
+      )}
+
       {/* 6. Fixed Bottom Command Bar */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-[#38e8ff]/20 bg-[#05070a]/95 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30">
+      <div className={embedded
+        ? 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30 pointer-events-auto'
+        : 'absolute bottom-0 left-0 right-0 border-t border-[#38e8ff]/20 bg-[#05070a]/95 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30'}>
         <div className="max-w-3xl mx-auto flex items-center gap-2 sm:gap-3">
           {/* Text Command Input Box (font size at least 16px to prevent mobile zoom) */}
           <div className="flex-1 relative">
@@ -663,7 +730,9 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-40 bg-[#05070a]/90 backdrop-blur-md flex items-center justify-center p-4"
+            className={embedded
+              ? 'absolute bottom-[5.5rem] left-3 right-3 sm:left-auto sm:right-4 sm:w-[min(92vw,28rem)] z-40 pointer-events-auto'
+              : 'absolute inset-0 z-40 bg-[#05070a]/90 backdrop-blur-md flex items-center justify-center p-4'}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}

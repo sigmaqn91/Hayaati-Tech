@@ -11,11 +11,12 @@ import DevBanner from './DevBanner';
 
 interface HeroProps {
   onOpenAssistant?: () => void;
+  assistantOverlay?: React.ReactNode;
 }
 
 const LATIN_LANGUAGES = new Set(['en', 'fr', 'de', 'es', 'pt', 'it', 'tr', 'id', 'vi']);
 
-export function Hero({ onOpenAssistant }: HeroProps) {
+export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
   const { t, language } = useLanguage();
   const [scrollY, setScrollY] = useState(0);
   const [heroImageError, setHeroImageError] = useState(false);
@@ -75,26 +76,6 @@ export function Hero({ onOpenAssistant }: HeroProps) {
     >
       <HeroCosmos />
       <DevBanner />
-      <button
-        onClick={onOpenAssistant}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 group px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-3 bg-[#070a0f]/90 border border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-xs font-bold uppercase tracking-wider shadow-[0_0_25px_rgba(56,232,255,0.35)] hover:shadow-[0_0_35px_rgba(56,232,255,0.5)] transition-all cursor-pointer rounded-full"
-        aria-label="Activate Jarvis"
-      >
-        <div className="relative w-5 h-5 rounded-full flex items-center justify-center shrink-0">
-          <span className="absolute inset-0 rounded-full bg-[#38e8ff] opacity-40 animate-ping [animation-duration:2.5s]" />
-          <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-[#38e8ff] via-[#818cf8] to-[#c084fc] opacity-60 blur-xs animate-pulse" />
-          <span
-            className="relative z-10 w-4 h-4 rounded-full shadow-[0_0_10px_#38e8ff]"
-            style={{
-              background:
-                'radial-gradient(circle at 35% 30%, #ffffff 0%, #38e8ff 45%, #1e40af 80%, #050b18 100%)',
-            }}
-          />
-        </div>
-        <span className="text-[#38e8ff] group-hover:text-white transition-colors tracking-widest font-bold">
-          Activate Jarvis
-        </span>
-      </button>
       {/* Background Image Container with subtle parallax */}
       <div
         className="absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden"
@@ -134,6 +115,9 @@ export function Hero({ onOpenAssistant }: HeroProps) {
 
       {/* Hero Canvas Starfield / Perspective Data Grid */}
       <HeroStarfield hasImage={imageLoaded && !heroImageError} />
+
+      {/* Embedded Jarvis stays inside the hero stage; its orb sits behind the content layers. */}
+      {assistantOverlay}
 
       {/* Hero Content Box */}
       <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
@@ -207,6 +191,28 @@ export function Hero({ onOpenAssistant }: HeroProps) {
             <span>{t.hero.exploreCta}</span>
             <ArrowDown className="w-3.5 h-3.5 text-[#05070a]" />
           </a>
+
+          {/* Embedded Jarvis CTA: same row as the existing hero actions. */}
+          <button
+            onClick={onOpenAssistant}
+            className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-3 bg-[#070a0f]/90 border border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-xs font-bold uppercase tracking-wider shadow-[0_0_25px_rgba(56,232,255,0.35)] hover:shadow-[0_0_35px_rgba(56,232,255,0.5)] transition-all cursor-pointer rounded-none"
+            aria-label="Activate Jarvis"
+          >
+            <div className="relative w-5 h-5 rounded-full flex items-center justify-center shrink-0">
+              <span className="absolute inset-0 rounded-full bg-[#38e8ff] opacity-40 animate-ping [animation-duration:2.5s]" />
+              <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-[#38e8ff] via-[#818cf8] to-[#c084fc] opacity-60 blur-xs animate-pulse" />
+              <span
+                className="relative z-10 w-4 h-4 rounded-full shadow-[0_0_10px_#38e8ff]"
+                style={{
+                  background:
+                    'radial-gradient(circle at 35% 30%, #ffffff 0%, #38e8ff 45%, #1e40af 80%, #050b18 100%)',
+                }}
+              />
+            </div>
+            <span className="text-[#38e8ff] group-hover:text-white transition-colors tracking-widest font-bold">
+              Activate Jarvis
+            </span>
+          </button>
 
           {/* Secondary CTA */}
           <a
