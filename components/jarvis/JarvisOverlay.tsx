@@ -100,6 +100,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     cancelSpeech,
   } = useJarvisVoice({
     language: language || 'en',
+    welcomeMessage: t.assistant.welcomeMessage,
     onTranscriptReady: (spokenText) => {
       if (!spokenText) return;
       setMessages((prev) => [...prev, { role: 'user', text: spokenText }]);
