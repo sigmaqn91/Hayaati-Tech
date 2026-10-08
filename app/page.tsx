@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { TimelineSection } from '@/components/TimelineSection';
@@ -30,13 +30,8 @@ const JarvisOverlay = dynamic(
 );
 
 export default function HomePage() {
+  const [assistantModalOpen, setAssistantModalOpen] = useState(false);
   const { language } = useLanguage();
-
-  const toggleJarvis = () => {
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('jarvis:toggle'));
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#05070a] text-slate-100 flex flex-col selection:bg-[#38e8ff]/20 selection:text-[#38e8ff]">
@@ -46,17 +41,7 @@ export default function HomePage() {
       {/* Main Content Sections */}
       <main className="flex-1">
         {/* 1. Hero Section with Activate Jarvis control */}
-        <Hero
-          onOpenAssistant={toggleJarvis}
-          assistantOverlay={
-            <JarvisOverlay
-              isOpen
-              embedded
-              onClose={() => undefined}
-              language={language}
-            />
-          }
-        />
+        <Hero onOpenAssistant={() => setAssistantModalOpen(true)} />
 
         {/* 2. Future Timeline (2030 -> 2035 -> 2050) */}
         <TimelineSection />
@@ -80,8 +65,17 @@ export default function HomePage() {
         <ContactSection />
       </main>
 
-      {/* Floating Glowing Orb Button: toggles the same embedded Jarvis instance. */}
-      <FloatingVoiceTrigger onOpen={toggleJarvis} />
+      {/* Floating Glowing Orb Button */}
+      <FloatingVoiceTrigger onOpen={() => setAssistantModalOpen(true)} />
+
+      {/* Quantum Holographic 3D Arc-Reactor Neural Core Overlay */}
+      {assistantModalOpen && (
+        <JarvisOverlay
+          isOpen={assistantModalOpen}
+          onClose={() => setAssistantModalOpen(false)}
+          language={language}
+        />
+      )}
 
       {/* Footer */}
       <Footer />
