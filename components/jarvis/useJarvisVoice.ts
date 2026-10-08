@@ -467,13 +467,12 @@ export function useJarvisVoice({
           config: {
             responseModalities: [Modality.AUDIO],
             speechConfig: {
-              languageCode: LOCALE_TO_VOICE_LANG[languageRef.current] || 'en-US',
               voiceConfig: {
                 prebuiltVoiceConfig: { voiceName: sessionData.voice || 'Kore' },
               },
             },
             systemInstruction:
-              `You are Jarvis, the cognitive neural intelligence of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly. ${sessionData?.isOwner ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.' : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.'} Language and speaking style rules: Always use the visitor's currently selected website language (${languageRef.current}) for both spoken and written responses. Do not default to Hinglish or English when another website language is selected. Use natural, everyday, locally conversational phrasing native to that language and locale, not formal, literary, stiff, or machine-translated phrasing. Keep the same selected language throughout the conversation unless the visitor clearly switches languages. Answer concisely and with cinematic precision.`,
+              `You are Jarvis, the cognitive neural intelligence of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly. ${sessionData?.isOwner ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.' : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.'} Language and speaking style rules: Default spoken and written language is natural Hinglish (Hindi-English mix). If the visitor speaks or types English, respond in English. If the visitor selects another site language, keep the existing language-switch behavior. Use natural, everyday, localized speech for that language, not formal, literary, or machine-translated phrasing. Keep the same language throughout the response unless the visitor clearly switches languages. Answer concisely and with cinematic precision.`,
           },
           callbacks: {
             onmessage: (msg: any) => {
@@ -489,10 +488,9 @@ export function useJarvisVoice({
               const textPart = msg.serverContent?.modelTurn?.parts?.[0]?.text;
               if (textPart) {
                 setTranscript((prev) => prev + textPart);
-                // Model output is not visitor speech. Do not feed the model's own
-                // response back into the chat handler, because that handler calls
-                // stopListening() and would close the live session immediately
-                // after Jarvis starts its introduction.
+                if (onTranscriptReadyRef.current) {
+                  onTranscriptReadyRef.current(textPart);
+                }
               }
             },
             onclose: () => {
@@ -554,7 +552,7 @@ export function useJarvisVoice({
               role: 'user',
               parts: [
                 {
-                  text: `Greet the visitor briefly as Jarvis in the currently selected website language (${languageRef.current}). Use natural, everyday local conversational phrasing for that language. Do not use Hinglish or English unless the selected language is English. Do not wait for the visitor to speak first.`,
+                  text: `Greet the visitor briefly as Jarvis in their selected language (${languageRef.current}). Do not wait for the visitor to speak first.`,
                 },
               ],
             },
