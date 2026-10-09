@@ -1,1 +1,125 @@
 @import "tailwindcss";
+
+/* =====================================================================
+   HERO REDESIGN (UI only) — added classes/variables, nothing above changed
+   ===================================================================== */
+
+/* Shared orb geometry. Read by Hero layout, JarvisOverlay stage and HeroCosmos. */
+#hero.hero-v2 {
+  --orb-size: min(78vw, 46vh, 520px);
+  --orb-top: 10.5rem;
+  --orb-cx: 50%;
+  --orb-cy: calc(var(--orb-top) + var(--orb-size) / 2);
+  --orb-reserve: 7rem; /* state chip + spectrum + processing chip under the orb */
+  --tr-top: calc(var(--orb-top) + var(--orb-size) + var(--orb-reserve));
+}
+@media (min-width: 1024px) {
+  #hero.hero-v2 {
+    --orb-size: min(36vw, 62vh, 600px);
+    --orb-cx: 70%;
+    --orb-cy: 50%;
+    --orb-top: calc(var(--orb-cy) - var(--orb-size) / 2);
+    --tr-top: calc(var(--orb-cy) + var(--orb-size) / 2 + 5.25rem);
+  }
+}
+
+/* Background readability layers */
+.hero-v2-glow {
+  background:
+    radial-gradient(ellipse 38% 46% at var(--orb-cx, 50%) var(--orb-cy, 40%), rgba(56, 232, 255, 0.16), transparent 70%),
+    radial-gradient(ellipse 30% 36% at calc(var(--orb-cx, 50%) + 8%) calc(var(--orb-cy, 40%) + 4%), rgba(129, 140, 248, 0.14), transparent 72%);
+}
+.hero-v2-shade {
+  background: linear-gradient(90deg, rgba(5, 7, 10, 0.78) 0%, rgba(5, 7, 10, 0.45) 40%, rgba(5, 7, 10, 0) 70%),
+    linear-gradient(0deg, rgba(5, 7, 10, 0.85) 0%, rgba(5, 7, 10, 0) 28%);
+}
+[dir='rtl'] .hero-v2-shade {
+  background: linear-gradient(270deg, rgba(5, 7, 10, 0.78) 0%, rgba(5, 7, 10, 0.45) 40%, rgba(5, 7, 10, 0) 70%),
+    linear-gradient(0deg, rgba(5, 7, 10, 0.85) 0%, rgba(5, 7, 10, 0) 28%);
+}
+
+/* Glass HUD panel with chamfered, glowing border */
+.hero-panel {
+  --c: 18px;
+  --b: 1.5px;
+  --ci: calc(var(--c) - 0.9px);
+  position: relative;
+  width: 100%;
+}
+.hero-panel__glow {
+  position: absolute;
+  inset: 6px;
+  pointer-events: none;
+  box-shadow: 0 0 36px rgba(56, 232, 255, 0.2), 0 0 90px rgba(56, 232, 255, 0.08);
+}
+.hero-panel__ring {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(56, 232, 255, 0.95), rgba(56, 232, 255, 0.4) 45%, rgba(129, 140, 248, 0.75));
+  clip-path: polygon(
+    evenodd,
+    var(--c) 0, calc(100% - var(--c)) 0, 100% var(--c), 100% calc(100% - var(--c)),
+    calc(100% - var(--c)) 100%, var(--c) 100%, 0 calc(100% - var(--c)), 0 var(--c), var(--c) 0,
+    calc(var(--b) + var(--ci)) var(--b),
+    calc(100% - var(--b) - var(--ci)) var(--b),
+    calc(100% - var(--b)) calc(var(--b) + var(--ci)),
+    calc(100% - var(--b)) calc(100% - var(--b) - var(--ci)),
+    calc(100% - var(--b) - var(--ci)) calc(100% - var(--b)),
+    calc(var(--b) + var(--ci)) calc(100% - var(--b)),
+    var(--b) calc(100% - var(--b) - var(--ci)),
+    var(--b) calc(var(--b) + var(--ci)),
+    calc(var(--b) + var(--ci)) var(--b)
+  );
+}
+.hero-panel__glass {
+  position: absolute;
+  inset: var(--b);
+  pointer-events: none;
+  background: rgba(5, 10, 20, 0.55);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  clip-path: polygon(
+    var(--ci) 0, calc(100% - var(--ci)) 0, 100% var(--ci), 100% calc(100% - var(--ci)),
+    calc(100% - var(--ci)) 100%, var(--ci) 100%, 0 calc(100% - var(--ci)), 0 var(--ci)
+  );
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .hero-panel__glass { background: rgba(5, 10, 20, 0.82); }
+}
+.hero-panel__tick {
+  position: absolute;
+  pointer-events: none;
+  background: #38e8ff;
+  box-shadow: 0 0 8px rgba(56, 232, 255, 0.9);
+}
+.hero-panel__body {
+  position: relative;
+  z-index: 1;
+  padding: 1.25rem;
+}
+@media (min-width: 1024px) {
+  .hero-panel__body { padding: 1.9rem 2rem; }
+}
+
+/* Headline sizes (mobile / desktop) */
+.hero-headline { font-size: clamp(1.7rem, 7vw, 2.4rem); }
+@media (min-width: 1024px) {
+  .hero-headline { font-size: clamp(2.4rem, 4.2vw, 4.2rem); }
+}
+
+/* When Jarvis shows a transcript on mobile, the panel makes room for it (pure CSS, no JS) */
+@media (max-width: 1023.98px) {
+  #hero.hero-v2:has([data-jarvis-transcript]) .hero-content {
+    padding-top: calc(var(--tr-top) + 7.75rem);
+  }
+}
+.hero-content { transition: padding-top 0.3s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-content { transition: none; }
+}
+.hero-content { padding-top: var(--tr-top); padding-bottom: 6.5rem; }
+@media (min-width: 1024px) {
+  .hero-content { padding-top: 9.5rem; padding-bottom: 6rem; }
+}

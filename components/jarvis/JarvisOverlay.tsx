@@ -618,16 +618,26 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
       {/* 5. Centered Holographic Stage Container (Horizontal & Vertical Center ~46%) */}
       <div
-        className="absolute inset-x-0 flex flex-col items-center justify-center pointer-events-none z-10"
-        style={{ top: embedded ? '44%' : '46%', transform: 'translateY(-50%)' }}
+        className={embedded
+          ? 'absolute flex flex-col items-center justify-start pointer-events-none z-10'
+          : 'absolute inset-x-0 flex flex-col items-center justify-center pointer-events-none z-10'}
+        style={embedded
+          ? {
+              left: 'var(--orb-cx, 50%)',
+              top: 'var(--orb-cy, 44%)',
+              width: 'max(var(--orb-size, min(78vw, 46vh, 520px)), 18rem)',
+              transform: 'translate(-50%, calc(var(--orb-size, min(78vw, 46vh, 520px)) / -2))',
+            }
+          : { top: '46%', transform: 'translateY(-50%)' }}
       >
         {/* Hologram Orb Container */}
         <div
           ref={orbContainerRef}
+          data-jarvis-orb
           onClick={handleVoiceTap}
           style={{
-            width: 'min(78vw, 46vh, 520px)',
-            height: 'min(78vw, 46vh, 520px)',
+            width: 'var(--orb-size, min(78vw, 46vh, 520px))',
+            height: 'var(--orb-size, min(78vw, 46vh, 520px))',
           }}
           className="relative cursor-pointer pointer-events-auto flex items-center justify-center"
           title={isConnecting ? 'Connecting...' : isSpeaking ? 'Speaking (tap to stop)' : isListening ? 'Listening (tap to stop)' : 'Tap to speak'}
@@ -694,20 +704,38 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         )}
       </div>
 
-      {embedded && messages.length > 0 && (
-        <div className="absolute bottom-[4.75rem] left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[min(92vw,48rem)] max-h-28 overflow-y-auto rounded-md border border-[#38e8ff]/20 bg-[#05070a]/75 px-3 py-2 backdrop-blur-sm pointer-events-auto" aria-live="polite">
-          <div className="space-y-1.5 text-[11px] font-sans">
-            {messages.slice(-5).map((message, index) => (
-              <div key={`${message.role}-${index}`} className="leading-relaxed">
-                <span className={message.role === 'user' ? 'text-slate-500 mr-2' : 'text-[#38e8ff] mr-2'}>
-                  {message.role === 'user' ? 'YOU:' : 'JARVIS:'}
-                </span>
-                <span className="text-slate-200">{message.text}</span>
-              </div>
-            ))}
+      {embedded && messages.length > 0 && (() => {
+        // UI only: merge consecutive same-role chunks into one line; stored messages stay untouched.
+        const merged: Array<{ role: 'user' | 'assistant'; text: string }> = [];
+        for (const m of messages) {
+          const prev = merged[merged.length - 1];
+          if (prev && prev.role === m.role) prev.text = `${prev.text} ${m.text}`.trim();
+          else merged.push({ role: m.role, text: m.text });
+        }
+        const shown = merged.slice(-2);
+        return (
+          <div
+            data-jarvis-transcript
+            className="absolute z-30 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[min(92vw,30rem)] lg:left-[var(--orb-cx)] lg:w-[min(28rem,30vw)] overflow-y-auto rounded-md border border-[#38e8ff]/20 bg-[#05070a]/80 px-3 py-2 backdrop-blur-sm pointer-events-auto"
+            style={{
+              top: 'var(--tr-top, auto)',
+              maxHeight: 'max(3.5rem, min(7rem, calc(100% - var(--tr-top, 0px) - 5rem)))',
+            }}
+            aria-live="polite"
+          >
+            <div className="space-y-1.5 text-[11px] font-sans">
+              {shown.map((message, index) => (
+                <div key={`${message.role}-${index}`} className="leading-relaxed break-words">
+                  <span className={message.role === 'user' ? 'text-slate-500 mr-2' : 'text-[#38e8ff] mr-2'}>
+                    {message.role === 'user' ? 'YOU:' : 'JARVIS:'}
+                  </span>
+                  <span className="text-slate-200">{message.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {embedded && (
         <button

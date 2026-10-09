@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { HeroStarfield } from './HeroStarfield';
 import { DecryptText } from './DecryptText';
-import { ArrowDown, Layers } from 'lucide-react';
+import { ArrowRight, Layers } from 'lucide-react';
 import DevBanner from './DevBanner';
 
 interface HeroProps {
@@ -17,7 +17,7 @@ interface HeroProps {
 const LATIN_LANGUAGES = new Set(['en', 'fr', 'de', 'es', 'pt', 'it', 'tr', 'id', 'vi']);
 
 export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
-  const { t, language } = useLanguage();
+  const { t, language, isRtl } = useLanguage();
   const [scrollY, setScrollY] = useState(0);
   const [heroImageError, setHeroImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -33,7 +33,6 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
   }, []);
 
   const isLatin = LATIN_LANGUAGES.has(language);
-  const talkToLabel = t.assistant.talkTo;
 
   // Split headline into two balanced lines across all script sentence delimiters
   const rawHeadline = t.hero.headline || '';
@@ -72,7 +71,7 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
     <section
       id="hero"
       aria-label={t.nav.home}
-      className="relative min-h-[92vh] flex items-center justify-center pt-64 pb-16 overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
+      className="hero-v2 relative min-h-[100svh] overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
     >
       <HeroCosmos />
       <DevBanner />
@@ -93,8 +92,8 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
             referrerPolicy="no-referrer"
             onError={() => setHeroImageError(true)}
             onLoad={() => setImageLoaded(true)}
-            className={`object-cover object-center opacity-35 transition-opacity duration-1000 ${
-              imageLoaded ? 'opacity-35' : 'opacity-0'
+            className={`object-cover object-center transition-opacity duration-1000 ${
+              imageLoaded ? 'opacity-60' : 'opacity-0'
             }`}
           />
         ) : null}
@@ -106,12 +105,16 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
           </div>
         )}
 
-        {/* Dark radial gradient vignette for crisp text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05070a] via-[#05070a]/70 to-[#05070a]/90" />
+        {/* Soft vignette: keeps the picture visible but the edges dark */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#05070a] via-[#05070a]/20 to-[#05070a]/40" />
       </div>
 
       {/* Static scanline texture overlay */}
       <div className="absolute inset-0 scanlines-overlay opacity-30 pointer-events-none" />
+
+      {/* Soft cyan/violet glow behind the orb + dark side shade so the glass panel stays readable */}
+      <div className="hero-v2-glow absolute inset-0 z-[2] pointer-events-none" aria-hidden="true" />
+      <div className="hero-v2-shade absolute inset-0 z-[2] pointer-events-none" aria-hidden="true" />
 
       {/* Hero Canvas Starfield / Perspective Data Grid */}
       <HeroStarfield hasImage={imageLoaded && !heroImageError} />
@@ -119,119 +122,136 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
       {/* Embedded Jarvis stays inside the hero stage; its orb sits behind the content layers. */}
       {assistantOverlay}
 
-      {/* Hero Content Box */}
-      <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-        {/* System Online HUD Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0b0f17] border border-[#38e8ff]/40 shadow-[0_0_12px_rgba(56,232,255,0.15)] mb-5">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#38e8ff] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#38e8ff]" />
-          </span>
-          <span className="font-mono text-[11px] tracking-widest text-[#38e8ff] uppercase font-bold">
-            {t.hero.online}
-          </span>
-          <span className="text-slate-600 font-mono text-[10px]">|</span>
-          <span className="font-mono text-[10px] text-slate-400">
-            {t.hero.systemStatus}
-          </span>
-        </div>
-
-        {/* Monospace Label Above Headline */}
-        <div className="text-[10px] sm:text-xs font-mono tracking-widest text-[#38e8ff]/80 uppercase mb-2">
-          {t.hero.timelineSpan}
-        </div>
-
-        {/* Main Headline Split into Two Balanced Lines */}
-        <h1
-          ref={headlineRef}
-          className={`font-bold tracking-tight text-white max-w-4xl text-center mx-auto mb-2 min-h-[4.5rem] sm:min-h-[6rem] md:min-h-[7.5rem] lg:min-h-[9rem] ${
-            isLatin ? 'leading-[1.18]' : 'leading-[1.45]'
-          }`}
-          style={{
-            fontSize: 'clamp(1.5rem, 4.2vw + 0.35rem, 3.85rem)',
-            textWrap: 'balance',
-            overflowWrap: 'break-word',
-            wordBreak: isLatin ? 'normal' : 'break-word',
-            minHeight: headlineHeight ? `${headlineHeight}px` : undefined,
-          }}
-        >
-          {/* Line 1 */}
-          <span className="block text-slate-100 min-h-[1.25em]">
-            <DecryptText key={`${language}-${line1}`} text={line1} speed={25} />
-          </span>
-          {/* Line 2 (Key Phrase with cyan-to-violet gradient & soft glow) */}
-          {line2 ? (
-            <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-[#38e8ff] via-[#818cf8] to-[#c084fc] bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(56,232,255,0.4)] font-extrabold min-h-[1.25em]">
-              <DecryptText key={`${language}-${line2}`} text={line2} speed={25} />
-            </span>
-          ) : null}
-        </h1>
-
-        {/* Thin Animated Line Under Heading */}
-        <div className="w-28 h-0.5 bg-gradient-to-r from-transparent via-[#38e8ff] to-transparent my-5 animate-pulse" />
-
-        {/* Subtitle */}
-        <p
-          className={`text-slate-300 max-w-2xl leading-relaxed mb-8 font-normal text-sm sm:text-base md:text-lg ${
-            isLatin ? '' : 'leading-[1.6]'
-          }`}
-          style={{ textWrap: 'balance' }}
-        >
-          {t.hero.subtitle}
-        </p>
-
-        {/* Exploration CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto">
-          {/* Primary Exploration CTA */}
-          <a
-            href="#timeline"
-            aria-label={t.hero.exploreCta}
-            className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-2 bg-[#38e8ff] text-[#05070a] font-mono text-xs font-bold uppercase tracking-wider hover:bg-[#38e8ff]/90 shadow-[0_0_20px_rgba(56,232,255,0.25)] transition-all cursor-pointer rounded-none"
+      {/* Hero content: glass HUD panel (left on desktop, below the orb on mobile) */}
+      <div
+        dir="ltr"
+        className="hero-content relative z-20 min-h-[100svh] flex flex-col justify-start lg:justify-center pointer-events-none"
+      >
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div
+            dir={isRtl ? 'rtl' : 'ltr'}
+            className="mx-auto lg:mx-0 w-full max-w-[36rem] lg:w-[min(44vw,36rem)]"
           >
-            <span>{t.hero.exploreCta}</span>
-            <ArrowDown className="w-3.5 h-3.5 text-[#05070a]" />
-          </a>
+            <div className="hero-panel pointer-events-auto">
+              <span className="hero-panel__glow" aria-hidden="true" />
+              <span className="hero-panel__ring" aria-hidden="true" />
+              <span className="hero-panel__glass" aria-hidden="true" />
+              {/* Corner / edge tick marks */}
+              <span className="hero-panel__tick" style={{ top: -1, left: '64%', width: 54, height: 3 }} aria-hidden="true" />
+              <span className="hero-panel__tick" style={{ bottom: -1, left: '14%', width: 40, height: 3 }} aria-hidden="true" />
+              <span className="hero-panel__tick" style={{ left: -1, top: '38%', width: 3, height: 26 }} aria-hidden="true" />
+              <span className="hero-panel__tick" style={{ right: -1, top: '27%', width: 3, height: 28 }} aria-hidden="true" />
 
-          {/* Embedded Jarvis CTA: same row as the existing hero actions. */}
-          <button
-            onClick={onOpenAssistant}
-            className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-3 bg-[#070a0f]/90 border border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-xs font-bold uppercase tracking-wider shadow-[0_0_25px_rgba(56,232,255,0.35)] hover:shadow-[0_0_35px_rgba(56,232,255,0.5)] transition-all cursor-pointer rounded-none"
-            aria-label="Activate Jarvis"
-          >
-            <div className="relative w-5 h-5 rounded-full flex items-center justify-center shrink-0">
-              <span className="absolute inset-0 rounded-full bg-[#38e8ff] opacity-40 animate-ping [animation-duration:2.5s]" />
-              <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-[#38e8ff] via-[#818cf8] to-[#c084fc] opacity-60 blur-xs animate-pulse" />
-              <span
-                className="relative z-10 w-4 h-4 rounded-full shadow-[0_0_10px_#38e8ff]"
-                style={{
-                  background:
-                    'radial-gradient(circle at 35% 30%, #ffffff 0%, #38e8ff 45%, #1e40af 80%, #050b18 100%)',
-                }}
-              />
+              <div className="hero-panel__body flex flex-col items-start text-start">
+                {/* System Online HUD Badge */}
+                <div className="inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-0.5 px-3.5 py-1.5 rounded-lg bg-[#05070a]/60 border border-[#38e8ff]/40 shadow-[0_0_12px_rgba(56,232,255,0.15)] mb-5">
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-[#38e8ff] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#38e8ff]" />
+                  </span>
+                  <span className="font-mono text-[10px] sm:text-[11px] tracking-widest text-[#38e8ff] uppercase font-bold">
+                    {t.hero.online}
+                  </span>
+                  <span className="text-slate-500 font-mono text-[10px]">|</span>
+                  <span className="font-mono text-[9px] sm:text-[10px] text-slate-300 break-all">
+                    {t.hero.systemStatus}
+                  </span>
+                </div>
+
+                {/* Headline with thin vertical cyan line */}
+                <div className="relative w-full ps-4 lg:ps-5 mb-1">
+                  <span
+                    className="absolute start-0 top-1 bottom-1 w-[2px] bg-gradient-to-b from-[#38e8ff] via-[#38e8ff]/50 to-[#38e8ff]/10"
+                    aria-hidden="true"
+                  />
+                  {/* Main Headline Split into Two Balanced Lines */}
+                  <h1
+                    ref={headlineRef}
+                    className={`hero-headline font-bold tracking-tight text-white text-start ${
+                      isLatin ? 'leading-[1.15]' : 'leading-[1.45]'
+                    }`}
+                    style={{
+                      textWrap: 'balance',
+                      overflowWrap: 'break-word',
+                      wordBreak: isLatin ? 'normal' : 'break-word',
+                      minHeight: headlineHeight ? `${headlineHeight}px` : undefined,
+                    }}
+                  >
+                    {/* Line 1 */}
+                    <span className="block text-slate-100 min-h-[1.25em]">
+                      <DecryptText key={`${language}-${line1}`} text={line1} speed={25} />
+                    </span>
+                    {/* Line 2 (Key Phrase with cyan-to-blue-to-violet gradient & soft glow) */}
+                    {line2 ? (
+                      <span className="block mt-0.5 bg-gradient-to-r from-[#38e8ff] via-[#4f8dff] to-[#c084fc] bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(56,232,255,0.35)] font-extrabold min-h-[1.25em]">
+                        <DecryptText key={`${language}-${line2}`} text={line2} speed={25} />
+                      </span>
+                    ) : null}
+                  </h1>
+                </div>
+
+                {/* Small gradient underline */}
+                <div className="w-24 h-0.5 bg-gradient-to-r from-[#38e8ff] to-transparent rtl:bg-gradient-to-l mt-3 mb-4" />
+
+                {/* Subtitle */}
+                <p
+                  className={`text-slate-300 max-w-[45ch] mb-6 font-normal text-sm sm:text-[0.95rem] lg:text-base ${
+                    isLatin ? 'leading-relaxed' : 'leading-[1.6]'
+                  }`}
+                >
+                  {t.hero.subtitle}
+                </p>
+
+                {/* Exploration CTAs: stacked on desktop, Explore + (Activate | Projects) row on mobile */}
+                <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 w-full">
+                  {/* Primary Exploration CTA */}
+                  <a
+                    href="#timeline"
+                    aria-label={t.hero.exploreCta}
+                    className="col-span-2 lg:col-span-1 w-full px-4 py-3.5 min-h-[52px] flex items-center justify-center gap-2.5 bg-[#38e8ff] text-[#05070a] font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-center leading-tight hover:bg-[#38e8ff]/90 shadow-[0_0_22px_rgba(56,232,255,0.35)] transition-all cursor-pointer rounded-md"
+                  >
+                    <span>{t.hero.exploreCta}</span>
+                    <ArrowRight className="w-4 h-4 shrink-0 text-[#05070a] rtl:-scale-x-100" />
+                  </a>
+
+                  {/* Embedded Jarvis CTA (onClick untouched) */}
+                  <button
+                    onClick={onOpenAssistant}
+                    className="w-full px-2.5 sm:px-4 py-3 min-h-[52px] flex items-center justify-center gap-2.5 bg-[#05101c]/70 border border-[#38e8ff]/45 hover:border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-center leading-tight shadow-[0_0_18px_rgba(56,232,255,0.2)] hover:shadow-[0_0_30px_rgba(56,232,255,0.4)] transition-all cursor-pointer rounded-md"
+                    aria-label="Activate Jarvis"
+                  >
+                    <div className="relative w-5 h-5 rounded-full flex items-center justify-center shrink-0">
+                      <span className="absolute inset-0 rounded-full bg-[#38e8ff] opacity-40 animate-ping motion-reduce:animate-none [animation-duration:2.5s]" />
+                      <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-[#38e8ff] via-[#818cf8] to-[#c084fc] opacity-60 blur-xs animate-pulse motion-reduce:animate-none" />
+                      <span
+                        className="relative z-10 w-4 h-4 rounded-full shadow-[0_0_10px_#38e8ff]"
+                        style={{
+                          background:
+                            'radial-gradient(circle at 35% 30%, #ffffff 0%, #38e8ff 45%, #1e40af 80%, #050b18 100%)',
+                        }}
+                      />
+                    </div>
+                    <span className="text-slate-100 tracking-widest font-bold">Activate Jarvis</span>
+                  </button>
+
+                  {/* Secondary CTA */}
+                  <a
+                    href="#projects"
+                    aria-label={t.hero.projectsCta}
+                    className="w-full px-2.5 sm:px-4 py-3 min-h-[52px] flex items-center justify-center gap-2.5 bg-[#05101c]/70 text-slate-100 border border-[#38e8ff]/30 hover:border-[#38e8ff] hover:bg-[#38e8ff]/10 hover:text-white font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-center leading-tight transition-all cursor-pointer rounded-md"
+                  >
+                    <Layers className="w-4 h-4 shrink-0 text-[#38e8ff]" />
+                    <span>{t.hero.projectsCta}</span>
+                  </a>
+                </div>
+              </div>
             </div>
-            <span className="text-[#38e8ff] group-hover:text-white transition-colors tracking-widest font-bold">
-              Activate Jarvis
-            </span>
-          </button>
 
-          {/* Secondary CTA */}
-          <a
-            href="#projects"
-            aria-label={t.hero.projectsCta}
-            className="w-full sm:w-auto px-6 py-3.5 min-h-[48px] flex items-center justify-center gap-2 bg-[#0b0f17] text-slate-200 border border-[#1e293b] hover:border-[#38e8ff]/50 hover:text-white font-mono text-xs font-medium uppercase tracking-wider transition-all cursor-pointer rounded-none"
-          >
-            <Layers className="w-3.5 h-3.5 text-[#38e8ff]" />
-            <span>{t.hero.projectsCta}</span>
-          </a>
-        </div>
-
-        {/* Monospace Telemetry Details Bar */}
-        <div className="mt-12 pt-6 border-t border-[#1e293b] w-full max-w-2xl flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-500 gap-3">
-          <div className="flex items-center gap-2">
-            <span>{t.hero.coordinates}</span>
-          </div>
-          <div className="text-[#38e8ff]/80 font-semibold tracking-wider">
-            {t.hero.timelineSpan}
+            {/* Monospace Telemetry Details Bar */}
+            <div className="mt-4 px-1 flex flex-wrap items-center justify-between text-[10px] sm:text-[11px] font-mono text-slate-500 gap-x-3 gap-y-1">
+              <span>{t.hero.coordinates}</span>
+              <span className="text-[#38e8ff]/80 font-semibold tracking-wider">{t.hero.timelineSpan}</span>
+            </div>
           </div>
         </div>
       </div>

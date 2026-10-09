@@ -149,6 +149,17 @@ export default function HeroCosmos() {
       buildDust();
     };
 
+    // Reads the Jarvis orb box (data-jarvis-orb) relative to this canvas. null -> legacy centre.
+    let orbEl: HTMLElement | null = null;
+    const readOrb = () => {
+      if (!orbEl || !orbEl.isConnected) orbEl = document.querySelector<HTMLElement>('[data-jarvis-orb]');
+      if (!orbEl) return null;
+      const o = orbEl.getBoundingClientRect();
+      if (o.width < 2) return null;
+      const k = canvas.getBoundingClientRect();
+      return { x: o.left - k.left + o.width / 2, y: o.top - k.top + o.height / 2, size: o.width };
+    };
+
     // ---------- drawing ----------
     const draw = (ts: number, dt: number) => {
       c.setLineDash([]);
@@ -159,9 +170,11 @@ export default function HeroCosmos() {
         c.fillStyle = '#000';
         c.fillRect(0, 0, W, H);
       }
-      const cx = W / 2;
-      const cy = H * 0.42;
-      const R = Math.min(W * 0.42, H * 0.3);
+      // Centre + radius follow the on-screen Jarvis orb so globe and orb stay concentric.
+      const orb = readOrb();
+      const cx = orb ? orb.x : W / 2;
+      const cy = orb ? orb.y : H * 0.42;
+      const R = orb ? orb.size * 0.54 : Math.min(W * 0.42, H * 0.3);
       const horizon = H * 0.64;
       const photoMul = SHOW_PHOTO ? 0.55 : 1;
 
@@ -507,6 +520,10 @@ export default function HeroCosmos() {
 
     resize();
     if (reduce) draw(2.5, 0);
+    // Reduced motion draws a still frame; redraw once the (lazy-loaded) orb has mounted.
+    const stillTimers: number[] = reduce
+      ? [500, 1500].map((ms) => window.setTimeout(() => draw(2.5, 0), ms))
+      : [];
 
     let io: IntersectionObserver | null = null;
     if (typeof IntersectionObserver !== 'undefined') {
@@ -534,6 +551,7 @@ export default function HeroCosmos() {
     }
 
     return () => {
+      stillTimers.forEach((id) => window.clearTimeout(id));
       stop();
       if (io) io.disconnect();
       if (ro) ro.disconnect();
