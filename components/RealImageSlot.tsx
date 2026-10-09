@@ -31,6 +31,7 @@ export function RealImageSlot({
 
   return (
     <div
+      data-image-slot={isLoaded && !hasError ? 'real' : 'pending'}
       className={`relative overflow-hidden bg-[#080b11] border border-[#1e293b] select-none ${className}`}
       style={{ aspectRatio: `${width} / ${height}` }}
     >

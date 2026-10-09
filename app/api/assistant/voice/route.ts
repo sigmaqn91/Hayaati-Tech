@@ -67,7 +67,49 @@ export async function POST(req: NextRequest) {
       const isOwner = verifyOwnerSession(req);
       const userLang = typeof language === 'string' ? language.toLowerCase().trim() : 'en';
 
-            // Check Rate, Concurrency, and Quota Limits
+      const apiKey = process.env.GEMINI_API_KEY;
+      const hasKey = Boolean(apiKey && apiKey !== 'disabled');
+      // Gemini Live model and voice configurations
+      const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.1-flash-live-preview';
+      const voiceName = process.env.GEMINI_VOICE || 'Capella';
+
+      // SPEED: the Google token is requested at the same time as the limit checks (they used to run one after
+      // another). If the visitor is over a limit, the unused token simply expires; nothing is consumed.
+      const tokenPromise: Promise<{ token?: any; error?: any }> | null = hasKey
+        ? new GoogleGenAI({
+            apiKey: apiKey as string,
+            httpOptions: {
+              apiVersion: 'v1beta',
+              headers: {
+                'User-Agent': 'aistudio-build',
+              },
+            },
+          }).authTokens
+            .create({
+              config: {
+                uses: 1,
+                expireTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+                newSessionExpireTime: new Date(Date.now() + 60 * 1000).toISOString(),
+                // Lock the ephemeral token to the exact Live model + audio modality only.
+                // lockAdditionalFields: [] is REQUIRED: without it Gemini locks the whole
+                // config, and the client's own systemInstruction / speechConfig /
+                // transcription settings make the Live connection get rejected.
+                liveConnectConstraints: {
+                  model: liveModel,
+                  config: {
+                    responseModalities: [Modality.AUDIO],
+                  },
+                },
+                lockAdditionalFields: [],
+              } as any,
+            })
+            .then(
+              (token) => ({ token }),
+              (error) => ({ error })
+            )
+        : null;
+
+      // Check Rate, Concurrency, and Quota Limits
       const sessionCheck = await checkVoiceSessionLimit(req);
       if (!sessionCheck.allowed) {
         console.warn(`[Voice Session Blocked] Reason: ${sessionCheck.reason}`);
@@ -84,8 +126,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey || apiKey === 'disabled') {
+      if (!hasKey || !tokenPromise) {
         console.warn('[Gemini Voice Server]: GEMINI_API_KEY is not configured or disabled on the server.');
         return NextResponse.json(
           { error: 'Voice transmission service is currently offline.', code: 'server_busy' },
@@ -93,52 +134,15 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Gemini Live model and voice configurations
-      const liveModel = process.env.GEMINI_LIVE_MODEL || 'gemini-3.1-flash-live-preview';
       console.info(`[Gemini Voice Server] Live model: ${liveModel}`);
-      if (!liveModel) {
-        return NextResponse.json(
-          { error: 'Voice model is not configured.', code: 'MODEL_NOT_CONFIGURED' },
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
 
-      const voiceName = process.env.GEMINI_VOICE || 'Capella';
+      // Acquire concurrency slot & visitor hourly usage in shared store (in parallel with the token finishing)
+      const [, tokenResult] = await Promise.all([recordVoiceSessionStart(req), tokenPromise]);
 
-      // Acquire concurrency slot & visitor hourly usage in shared store
-      await recordVoiceSessionStart(req);
-
-      const ai = new GoogleGenAI({
-        apiKey,
-        httpOptions: {
-          apiVersion: 'v1beta',
-          headers: {
-            'User-Agent': 'aistudio-build',
-          },
-        },
-      });
-
-      // Create an ephemeral token on the server using ai.authTokens.create. The token may be used for the initial connect retry.
       // The API key remains strictly server-side; client receives ONLY the short-lived single-use token.
       try {
-        const token = await ai.authTokens.create({
-          config: {
-            uses: 1,
-            expireTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-            newSessionExpireTime: new Date(Date.now() + 60 * 1000).toISOString(),
-            // Lock the ephemeral token to the exact Live model + audio modality only.
-            // lockAdditionalFields: [] is REQUIRED: without it Gemini locks the whole
-            // config, and the client's own systemInstruction / speechConfig /
-            // transcription settings make the Live connection get rejected.
-            liveConnectConstraints: {
-              model: liveModel,
-              config: {
-                responseModalities: [Modality.AUDIO],
-              },
-            },
-            lockAdditionalFields: [],
-          } as any,
-        });
+        if (tokenResult.error) throw tokenResult.error;
+        const token = tokenResult.token;
 
         const headers = new Headers({ 'Content-Type': 'application/json' });
         if (sessionCheck.cookieToSet) headers.set('Set-Cookie', sessionCheck.cookieToSet);

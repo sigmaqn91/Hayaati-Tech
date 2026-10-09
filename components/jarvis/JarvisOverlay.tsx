@@ -26,6 +26,7 @@ import { useJarvisVoice } from './useJarvisVoice';
 import { JarvisBackdrop } from './JarvisBackdrop';
 import { useLanguage } from '@/context/LanguageContext';
 import { QUICK_ACK } from '@/lib/jarvisLocale';
+import { collectLiveSiteSnapshot } from '@/lib/jarvisKnowledge';
 
 interface JarvisOverlayProps {
   isOpen: boolean;
@@ -191,6 +192,13 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   } = useJarvisVoice({
     language: language || 'en',
     welcomeMessage: t.assistant.welcomeMessage,
+    // Live facts from the open website (current-language hero text, sections, photos) for Jarvis.
+    getSiteSnapshot: () =>
+      collectLiveSiteSnapshot({
+        headline: (t as any)?.hero?.headline,
+        subtitle: (t as any)?.hero?.subtitle,
+        advert: (t as any)?.heroAdvert?.headline,
+      }),
     onTranscriptReady: (spokenText) => {
       if (!spokenText) return;
       setMessages((prev) => [...prev, { role: 'user', text: spokenText, lang: langRef.current }]);

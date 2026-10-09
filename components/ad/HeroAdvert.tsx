@@ -100,7 +100,8 @@ export function HeroAdvert() {
     link.id = 'ad-serif-font';
     link.rel = 'stylesheet';
     link.href =
-      'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap';
+      // Modern display set: Unbounded (titles), Sora (text), JetBrains Mono (HUD labels). Cormorant kept as fallback.
+      'https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500&family=Sora:wght@300;400;500&family=JetBrains+Mono:wght@500;700&family=Cormorant+Garamond:wght@400;500&display=swap';
     document.head.appendChild(link);
   }, []);
 

@@ -150,9 +150,10 @@ async function atomicIncrement(key: string, ttlSeconds: number): Promise<{ count
 async function getCounter(key: string): Promise<{ count: number; ttlRemaining: number }> {
   if (UPSTASH_URL && UPSTASH_TOKEN) {
     try {
-      const raw = await executeRedisCommand(['GET', key]);
+      // GET and TTL together (one network wait instead of two).
+      const [raw, ttlRaw] = await Promise.all([executeRedisCommand(['GET', key]), executeRedisCommand(['TTL', key])]);
       const count = raw !== null && raw !== undefined ? parseInt(String(raw), 10) : 0;
-      let ttl = (await executeRedisCommand(['TTL', key])) as number;
+      let ttl = ttlRaw as number;
       if (typeof ttl !== 'number' || ttl < 0) ttl = 0;
       return { count: isNaN(count) ? 0 : count, ttlRemaining: ttl };
     } catch {
@@ -401,8 +402,21 @@ export async function checkVoiceSessionLimit(reqOrIp: NextRequest | Request | st
   const today = new Date().toISOString().slice(0, 10);
   const globalVoiceKey = `global:voice:minutes:${today}`;
 
+  // All reads go out at the same time (they used to run one after another = slow "connecting").
+  // The decision order below is unchanged.
+  const concurrencyRead: Promise<number> =
+    UPSTASH_URL && UPSTASH_TOKEN
+      ? executeRedisCommand(['GET', CONCURRENCY_KEY])
+          .then((v) => (v ? parseInt(String(v), 10) || 0 : 0))
+          .catch(() => inMemoryActiveVoiceSessions)
+      : Promise.resolve(inMemoryActiveVoiceSessions);
+  const [globalMinutes, activeConcurrencyRead, visitorCounters] = await Promise.all([
+    getCounter(globalVoiceKey),
+    concurrencyRead,
+    Promise.all(identity.keys.map((key) => getCounter(`rate:voice:hour:${key}`))),
+  ]);
+
   // 1. Check Global Daily Voice Minutes Cap
-  const globalMinutes = await getCounter(globalVoiceKey);
   if (globalMinutes.count >= RATE_CONFIG.globalDailyVoiceMinutesCap) {
     const secondsUntilMidnight = Math.max(
       60,
@@ -417,17 +431,7 @@ export async function checkVoiceSessionLimit(reqOrIp: NextRequest | Request | st
   }
 
   // 2. Check Global Concurrency Limit
-  let activeConcurrency = 0;
-  if (UPSTASH_URL && UPSTASH_TOKEN) {
-    try {
-      const activeRaw = await executeRedisCommand(['GET', CONCURRENCY_KEY]);
-      activeConcurrency = activeRaw ? parseInt(String(activeRaw), 10) : 0;
-    } catch {
-      activeConcurrency = inMemoryActiveVoiceSessions;
-    }
-  } else {
-    activeConcurrency = inMemoryActiveVoiceSessions;
-  }
+  const activeConcurrency = activeConcurrencyRead;
 
   if (activeConcurrency >= RATE_CONFIG.maxConcurrentVoiceSessions) {
     return {
@@ -439,9 +443,7 @@ export async function checkVoiceSessionLimit(reqOrIp: NextRequest | Request | st
   }
 
   // 3. Check Visitor Hourly Limit across both keys (stricter wins)
-  for (const key of identity.keys) {
-    const voiceKey = `rate:voice:hour:${key}`;
-    const counter = await getCounter(voiceKey);
+  for (const counter of visitorCounters) {
     if (counter.count >= RATE_CONFIG.voiceSessionsPerHour) {
       return {
         allowed: false,
@@ -472,24 +474,24 @@ export async function recordVoiceSessionStart(
 
   const VOICE_HOUR_SECONDS = 60 * 60;
 
-  // Increment hourly counter for both keys
-  for (const key of identity.keys) {
-    const voiceKey = `rate:voice:hour:${key}`;
-    await atomicIncrement(voiceKey, VOICE_HOUR_SECONDS);
-  }
+  // Hourly counters (both keys) and the concurrency slot are updated in parallel (same result, less waiting).
+  const hourly = identity.keys.map((key) => atomicIncrement(`rate:voice:hour:${key}`, VOICE_HOUR_SECONDS));
 
-  // Increment active concurrency
-  if (UPSTASH_URL && UPSTASH_TOKEN) {
-    try {
-      await executeRedisCommand(['INCR', CONCURRENCY_KEY]);
-      // Concurrency key safety TTL in case server crashes
-      await executeRedisCommand(['EXPIRE', CONCURRENCY_KEY, 300]);
-    } catch {
+  const concurrency = (async () => {
+    if (UPSTASH_URL && UPSTASH_TOKEN) {
+      try {
+        await executeRedisCommand(['INCR', CONCURRENCY_KEY]);
+        // Concurrency key safety TTL in case server crashes
+        await executeRedisCommand(['EXPIRE', CONCURRENCY_KEY, 300]);
+      } catch {
+        inMemoryActiveVoiceSessions += 1;
+      }
+    } else {
       inMemoryActiveVoiceSessions += 1;
     }
-  } else {
-    inMemoryActiveVoiceSessions += 1;
-  }
+  })();
+
+  await Promise.all([...hourly, concurrency]);
 }
 
 /**

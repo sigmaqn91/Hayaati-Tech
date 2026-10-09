@@ -74,6 +74,9 @@ export default function RootLayout({
       <head>
         {/* Picks the visitor's language before the page paints (saved choice > country > browser). */}
         <script dangerouslySetInnerHTML={{ __html: GEO_BOOT_SCRIPT }} />
+        {/* Jarvis voice: open the connection to Google's Live server early, so activation connects faster. */}
+        <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
       </head>
       <body className="bg-[#05070a] text-slate-100 min-h-screen relative antialiased selection:bg-[#38e8ff]/20 selection:text-[#38e8ff]">
         <script

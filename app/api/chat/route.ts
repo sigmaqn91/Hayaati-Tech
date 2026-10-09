@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { checkChatRateLimit, RATE_CONFIG } from '@/lib/rateLimit';
 import { verifyOwnerSession } from '@/lib/jarvisAuth';
+import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -150,7 +151,8 @@ Language Instructions:
 - Do NOT use literal mechanical translations. No English words unless they are brand names (Hayaati, Gemini) or technical proper nouns.
 `;
 
-    const systemInstruction = `${BASE_SYSTEM_INSTRUCTION}\n${langInstruction}`;
+    // Same website status + owner facts the voice Jarvis uses, so typed answers know the site too.
+    const systemInstruction = `${BASE_SYSTEM_INSTRUCTION}\n${langInstruction}\n${buildJarvisKnowledge('')}`;
 
     // Pass conversation history safely
     const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];

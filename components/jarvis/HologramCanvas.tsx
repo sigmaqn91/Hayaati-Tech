@@ -112,7 +112,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       el.style.maskImage = mask;
     };
     applyFrame(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 1.75));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.3;
     container.appendChild(renderer.domElement);
@@ -507,7 +507,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     screenObserver?.observe(container);
 
     // Adaptive sharpness: if the phone cannot keep up, render slightly fewer pixels (looks the same, runs smooth).
-    let pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
+    let pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 1.75);
     let perfFrames = 0;
     let perfAcc = 0;
     let lastFrameAt = 0;

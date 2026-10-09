@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GoogleGenAI, Modality } from '@google/genai/web';
-import { getJarvisLang, NAME_GREETING_RULE } from '@/lib/jarvisLocale';
+import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE } from '@/lib/jarvisLocale';
+import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 
 // Maps language codes from Hayaati's 30 locales to BCP-47 / Live voice language tags
 const LOCALE_TO_VOICE_LANG: Record<string, string> = {
@@ -97,8 +98,42 @@ function floatTo16BitBase64(input: Float32Array): string {
   return btoa(binary);
 }
 
+// Microphone -> 16 kHz. The input AudioContext now runs at the device's own rate (48 kHz / 44.1 kHz) and we
+// resample here. Forcing a 16 kHz AudioContext is ignored or mis-handled by some browsers / sound cards, which
+// made Jarvis hear a distorted voice ("meri awaaz acche se nahi sun raha").
+function downsampleTo16k(input: Float32Array, inRate: number): Float32Array {
+  if (!inRate || Math.abs(inRate - 16000) < 1) return input;
+  const ratio = inRate / 16000;
+  const outLen = Math.floor(input.length / ratio);
+  const out = new Float32Array(outLen);
+  for (let i = 0; i < outLen; i++) {
+    const start = Math.floor(i * ratio);
+    const end = Math.min(input.length, Math.floor((i + 1) * ratio));
+    let sum = 0;
+    for (let j = start; j < end; j++) sum += input[j];
+    out[i] = end > start ? sum / (end - start) : input[start] || 0;
+  }
+  return out;
+}
+
+// Warm-up: wakes the voice server (cold serverless start) WITHOUT using any voice quota, so the real
+// activation answers faster. Called once after page load and whenever the visitor hovers the Activate button.
+let lastWarmAt = 0;
+export function warmVoiceServer(): void {
+  if (typeof window === 'undefined') return;
+  const now = Date.now();
+  if (now - lastWarmAt < 45000) return;
+  lastWarmAt = now;
+  fetch('/api/assistant/voice', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'status' }),
+    keepalive: true,
+  }).catch(() => {});
+}
+
 // Jarvis personality + localisation rules for the Live voice session.
-function buildSystemInstruction(languageCode: string, isOwner: boolean): string {
+function buildSystemInstruction(languageCode: string, isOwner: boolean, knowledge = ''): string {
   const lp = getJarvisLang(languageCode);
   const where = lp.country ? ` The visitor appears to be in country code ${lp.country}; adapt wording to that country where natural.` : '';
   return [
@@ -109,10 +144,14 @@ function buildSystemInstruction(languageCode: string, isOwner: boolean): string 
     `LANGUAGE: The website-selected language is ${lp.name}. Speak only ${lp.name} for this entire session, including your very first greeting. Never switch into another language because of the visitor's accent, background noise, detected input language or your own language detection. Only change language when the visitor clearly and explicitly asks, or when a [SYSTEM] message says the website language changed.`,
     `LOCAL, NATURAL SPEECH (very important): ${lp.style}${where}`,
     `GREETING: The normal greeting in ${lp.name} is ${lp.greeting}. Always open with that culturally correct greeting, never with a literal translation of the English word "hello".`,
+    GREETING_PRONUNCIATION_RULE,
     NAME_GREETING_RULE,
     'VOICE: Sound like a real, warm human, not a robot: relaxed natural pace, natural pauses and intonation, friendly energy, short sentences. Do not read lists or symbols aloud; talk like a person.',
-    'If you hear unclear audio, noise, or silence, do NOT answer and do NOT guess: stay quiet and wait. Never respond to your own voice. Keep answers short and clear.',
-  ].join('\n\n');
+    'LISTENING: Listen carefully to the visitor\'s full sentence and answer what they actually said. If you hear only noise or silence, stay quiet and wait. If speech was unclear, politely ask them to repeat it once. Never respond to your own voice. Keep answers short and clear.',
+    knowledge,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 }
 
 export type VoiceFailureLayer =
@@ -130,6 +169,8 @@ interface UseJarvisVoiceOptions {
   onAssistantTextReady?: (text: string) => void;
   language?: string;
   welcomeMessage?: string;
+  /** Live facts about the page (hero text, sections, photos) read at activation time. */
+  getSiteSnapshot?: () => string;
 }
 
 export function useJarvisVoice({
@@ -137,6 +178,7 @@ export function useJarvisVoice({
   onAssistantTextReady,
   language = 'en',
   welcomeMessage = '',
+  getSiteSnapshot,
 }: UseJarvisVoiceOptions = {}) {
   const [isSupported, setIsSupported] = useState<boolean>(true);
   const [isListening, setIsListening] = useState<boolean>(false);
@@ -191,6 +233,26 @@ export function useJarvisVoice({
   const liveOpenedRef = useRef<boolean>(false);
   const sessionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const liveLanguageRef = useRef<string>(language);
+  const getSiteSnapshotRef = useRef(getSiteSnapshot);
+  getSiteSnapshotRef.current = getSiteSnapshot;
+  // Adaptive playback cushion (seconds): grows a little after any network hiccup so the voice never breaks.
+  const jitterRef = useRef<number>(0.18);
+
+  // Warm the voice server once the page is idle, and again when the visitor hovers "Activate Jarvis".
+  useEffect(() => {
+    const w = window as any;
+    const hasIdle = typeof w.requestIdleCallback === 'function';
+    const id: number = hasIdle
+      ? w.requestIdleCallback(() => warmVoiceServer(), { timeout: 4000 })
+      : window.setTimeout(warmVoiceServer, 2500);
+    const onWarm = () => warmVoiceServer();
+    window.addEventListener('jarvis:warm', onWarm);
+    return () => {
+      window.removeEventListener('jarvis:warm', onWarm);
+      if (hasIdle && typeof w.cancelIdleCallback === 'function') w.cancelIdleCallback(id);
+      else window.clearTimeout(id);
+    };
+  }, []);
 
   useEffect(() => {
     onTranscriptReadyRef.current = onTranscriptReady;
@@ -202,18 +264,6 @@ export function useJarvisVoice({
 
   useEffect(() => {
     languageRef.current = language;
-
-    // If the visitor switches the website language while Jarvis is live,
-    // tell the running session so it follows the new language immediately.
-    if (liveSessionRef.current && liveLanguageRef.current !== language) {
-      liveLanguageRef.current = language;
-      try {
-        const lp = getJarvisLang(language);
-        liveSessionRef.current.sendRealtimeInput({
-          text: `[SYSTEM] The website language was changed to ${lp.name}. From now on speak only ${lp.name}. Greeting in this language: ${lp.greeting}. Speaking style: ${lp.style} Do not answer this message; just use ${lp.name} this way for your next reply.`,
-        });
-      } catch {}
-    }
   }, [language]);
 
   useEffect(() => {
@@ -251,6 +301,36 @@ export function useJarvisVoice({
     setAudioLevel(0);
     audioLevelRef.current = 0;
   }, []);
+
+  // Website language switched while Jarvis is live (v17 behaviour, restored): stop the old-language speech
+  // and let Jarvis introduce himself again right away in the new language. The overlay hides the old chat.
+  useEffect(() => {
+    const session = liveSessionRef.current;
+    if (!session || liveLanguageRef.current === language) {
+      liveLanguageRef.current = language;
+      return;
+    }
+    liveLanguageRef.current = language;
+    cancelSpeech();
+    // Drop half-shown old-language captions so they never appear under the new language.
+    captionQueueRef.current = [];
+    if (captionTimerRef.current) {
+      clearTimeout(captionTimerRef.current);
+      captionTimerRef.current = null;
+    }
+    // Mic stays quiet until the new greeting has finished (echo guard), with the usual safety timer.
+    greetingDoneRef.current = false;
+    if (greetingTimerRef.current) clearTimeout(greetingTimerRef.current);
+    greetingTimerRef.current = setTimeout(() => {
+      greetingDoneRef.current = true;
+    }, 10000);
+    try {
+      const lp = getJarvisLang(language);
+      session.sendRealtimeInput({
+        text: `[SYSTEM] The visitor just switched the website language to ${lp.name}. From now on speak ONLY ${lp.name}. Speaking style: ${lp.style} Right now, immediately introduce yourself again in ${lp.name}: start with ${lp.greeting}, say you are Jarvis from Hayaati Web Technology and ask how you can help. One or two short, warm sentences.`,
+      });
+    } catch {}
+  }, [language, cancelSpeech]);
 
   // Stop active microphone streaming, close live session, and release server concurrency slot
   const stopListening = useCallback(() => {
@@ -380,7 +460,9 @@ export function useJarvisVoice({
       // Initialize 24kHz playback AudioContext with AnalyserNode
       if (!playbackContextRef.current || playbackContextRef.current.state === 'closed') {
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        playbackContextRef.current = new AudioCtx({ sampleRate: 24000 });
+        // latencyHint 'playback' = bigger audio buffers inside the browser, so busy animations on the page can
+        // no longer starve the speaker (the main cause of the crackle / "ham radio" noise).
+        playbackContextRef.current = new AudioCtx({ sampleRate: 24000, latencyHint: 'playback' });
       }
 
       const pCtx = playbackContextRef.current;
@@ -402,6 +484,13 @@ export function useJarvisVoice({
       for (let i = 0; i < pcm16.length; i++) {
         channelData[i] = pcm16[i] / 32768.0;
       }
+      const queueDry = nextPlayTimeRef.current < pCtx.currentTime + 0.005;
+      const hadAudioThisTurn = turnHasAudioRef.current;
+      if (queueDry) {
+        // Starting after silence: 4 ms fade-in so the first sample never "clicks".
+        const fade = Math.min(96, channelData.length);
+        for (let i = 0; i < fade; i++) channelData[i] *= i / fade;
+      }
 
       // A new model audio chunk belongs to an active model turn. A later
       // turnComplete event, together with playback completion, will return the
@@ -412,13 +501,14 @@ export function useJarvisVoice({
       setIsSpeaking(true);
       setIsListening(false);
 
-      // Gapless scheduling with a small jitter buffer. Network chunks never arrive perfectly on time; starting
-      // each burst ~0.12 s ahead (and re-buffering after any underrun) removes the tiny gaps and
-      // clicks that made the voice sound broken / robotic ("atak-atak ke").
+      // Gapless scheduling with an adaptive jitter buffer. Network chunks never arrive perfectly on time. Each
+      // reply starts with a small cushion; if a chunk still arrives late in the middle of a reply (underrun),
+      // the cushion grows a bit (max 0.45 s) so the rest of the session plays smoothly instead of "atak-atak".
       const currentTime = pCtx.currentTime;
-      if (nextPlayTimeRef.current < currentTime) {
-        // Queue ran dry (start of a reply, or a late network chunk): build a small cushion before playing.
-        nextPlayTimeRef.current = currentTime + 0.12;
+      if (queueDry) {
+        const midReply = hadAudioThisTurn && nextPlayTimeRef.current > 0;
+        if (midReply) jitterRef.current = Math.min(0.45, jitterRef.current + 0.08);
+        nextPlayTimeRef.current = currentTime + jitterRef.current;
       }
 
       const sourceNode = pCtx.createBufferSource();
@@ -473,7 +563,8 @@ export function useJarvisVoice({
     const clean = entry.replace(/\s+/g, ' ').trim();
     if (!clean) return;
     rollingTranscriptRef.current = [...rollingTranscriptRef.current, clean].slice(-20);
-    setTranscript((prev) => (prev ? `${prev} ${clean}` : clean));
+    // Keep only the recent part on screen state (an ever-growing string slowed every update down).
+    setTranscript((prev) => (prev ? `${prev} ${clean}` : clean).slice(-4000));
     try {
       sessionStorage.setItem('hayaati_jarvis_transcript', JSON.stringify(rollingTranscriptRef.current));
     } catch {}
@@ -631,10 +722,11 @@ export function useJarvisVoice({
       try {
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
         if (!AudioCtx) throw new Error('Web Audio is not supported.');
-        const ctx = new AudioCtx({ sampleRate: 16000 });
+        // Device-native rate (resampled to 16 kHz in downsampleTo16k) + low latency for the microphone.
+        const ctx = new AudioCtx({ latencyHint: 'interactive' });
         audioContextRef.current = ctx;
         if (!playbackContextRef.current || playbackContextRef.current.state === 'closed') {
-          playbackContextRef.current = new AudioCtx({ sampleRate: 24000 });
+          playbackContextRef.current = new AudioCtx({ sampleRate: 24000, latencyHint: 'playback' });
         }
         if (ctx.state === 'suspended') {
           await ctx.resume().catch(() => {});
@@ -654,6 +746,21 @@ export function useJarvisVoice({
     let sessionData: any = null;
     let stream: MediaStream | null = null;
     let ctx: AudioContext | null = null;
+    // If setup fails, a microphone that is granted a moment later must not stay switched on.
+    const releaseLateMic = () => {
+      mediaPromise
+        .then((st) => {
+          if (liveSessionRef.current) return;
+          st.getTracks().forEach((tr) => {
+            try {
+              tr.stop();
+            } catch {}
+          });
+          if (mediaStreamRef.current === st) mediaStreamRef.current = null;
+        })
+        .catch(() => {});
+    };
+    jitterRef.current = 0.18;
 
     try {
       // Get the ephemeral token first. Do not wait for microphone setup before
@@ -673,6 +780,10 @@ export function useJarvisVoice({
         httpOptions: { apiVersion: 'v1beta' },
       });
       const langProfile = getJarvisLang(languageRef.current);
+      let knowledge = '';
+      try {
+        knowledge = buildJarvisKnowledge(getSiteSnapshotRef.current?.() || '');
+      } catch {}
 
       const connectLive = async () => {
         const config: any = {
@@ -684,7 +795,18 @@ export function useJarvisVoice({
               prebuiltVoiceConfig: { voiceName: sessionData.voice || 'Capella' },
             },
           },
-          systemInstruction: buildSystemInstruction(languageRef.current, Boolean(sessionData?.isOwner)),
+          systemInstruction: buildSystemInstruction(languageRef.current, Boolean(sessionData?.isOwner), knowledge),
+          // Hear the visitor quickly and reliably: sensitive start-of-speech detection, short pre-roll and a
+          // natural pause length before Jarvis answers.
+          realtimeInputConfig: {
+            automaticActivityDetection: {
+              disabled: false,
+              startOfSpeechSensitivity: 'START_SENSITIVITY_HIGH',
+              endOfSpeechSensitivity: 'END_SENSITIVITY_LOW',
+              prefixPaddingMs: 40,
+              silenceDurationMs: 650,
+            },
+          },
         };
 
         const liveConnectPromise = ai.live.connect({
@@ -792,6 +914,7 @@ export function useJarvisVoice({
         else if (status === 404) setSpeechError('MODEL_FAILED');
         else setSpeechError('NETWORK');
         stopListening();
+        releaseLateMic();
         return;
       }
 
@@ -825,23 +948,15 @@ export function useJarvisVoice({
         }).catch(() => {});
       }, 25000);
 
-      // Preserve conversation across reconnects. Seed via realtime text because this
-      // model may restrict sendClientContent to initial history only.
-      if (rollingTranscriptRef.current.length > 0) {
-        try {
-          liveSession.sendRealtimeInput({
-            text: `[SYSTEM] Continue this existing conversation. Prior transcript:\n${rollingTranscriptRef.current.join('\n')}`,
-          });
-        } catch (historyError) {
-          console.warn('[Gemini Live History Restore Error]:', historyError);
-        }
-      }
-
-      // Greet immediately after the session opens, before microphone processor creation.
-      // The localized UI welcome string is the single source of truth for the activation greeting.
+      // Greet immediately after the session opens, before microphone processor creation. Earlier history (if any)
+      // goes in the SAME message: two separate messages made the model answer twice and delayed the greeting.
       try {
+        const history =
+          rollingTranscriptRef.current.length > 0
+            ? `Earlier conversation with this visitor (remember it, do not repeat it):\n${rollingTranscriptRef.current.join('\n')}\n\n`
+            : '';
         liveSession.sendRealtimeInput({
-          text: `[SYSTEM] Jarvis has just been activated. Greet the visitor now in everyday ${langProfile.name}: start with ${langProfile.greeting} (NOT a translated "hello"), say you are Jarvis from Hayaati Web Technology, politely ask their name and how you can help. One or two short, warm, natural sentences, the way a friendly local person would say it.`,
+          text: `[SYSTEM] ${history}Jarvis has just been activated. Greet the visitor right now in everyday ${langProfile.name}: start with ${langProfile.greeting} (NOT a translated "hello"), say you are Jarvis from Hayaati Web Technology, politely ask their name and how you can help. One or two short, warm, natural sentences.`,
         });
       } catch (greetingError) {
         console.warn('[Gemini Live Greeting Error]:', greetingError);
@@ -867,8 +982,10 @@ export function useJarvisVoice({
       const sourceNode = ctx.createMediaStreamSource(stream);
       sourceNode.connect(analyser);
 
-      const processor = ctx.createScriptProcessor(4096, 1, 1);
+      // 2048-sample blocks (~43 ms at 48 kHz) instead of 4096: Jarvis receives the voice twice as fast.
+      const processor = ctx.createScriptProcessor(2048, 1, 1);
       scriptProcessorRef.current = processor;
+      const inRate = ctx.sampleRate;
 
       processor.onaudioprocess = (e) => {
         const inputData = e.inputBuffer.getChannelData(0);
@@ -887,12 +1004,12 @@ export function useJarvisVoice({
         if (
           isSpeakingRef.current ||
           !greetingDoneRef.current ||
-          Date.now() - speechEndedAtRef.current < 700
+          Date.now() - speechEndedAtRef.current < 250
         ) {
           return;
         }
 
-        const base64Audio = floatTo16BitBase64(inputData);
+        const base64Audio = floatTo16BitBase64(downsampleTo16k(inputData, inRate));
         if (liveSessionRef.current) {
           try {
             liveSessionRef.current.sendRealtimeInput({
@@ -942,6 +1059,7 @@ export function useJarvisVoice({
       else if (code === 'NETWORK' || code === 'LIVE_TIMEOUT') setSpeechError('NETWORK');
       else setSpeechError('MIC_FAILED');
       stopListening();
+      releaseLateMic();
     }
   }, [cancelSpeech, finishCompletedTurnIfReady, handleInterruption, playLiveAudioChunk, stopListening, queueCaption, flushCaptions]);
 

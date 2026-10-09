@@ -138,12 +138,15 @@ export default function HeroCosmos() {
 
     const resize = () => {
       const r = canvas.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, quality === 2 ? 1.5 : 1);
+      dpr = Math.min(window.devicePixelRatio || 1, quality === 2 ? 1.25 : 1);
       W = Math.max(1, Math.round(r.width));
       H = Math.max(1, Math.round(r.height));
       canvas.width = Math.max(1, Math.round(W * dpr));
       canvas.height = Math.max(1, Math.round(H * dpr));
       c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Soft aurora layer is drawn at 1/4 size and stretched (gradients look identical, ~16x less pixel work).
+      aur.width = Math.max(1, Math.ceil(W / AUR_SCALE));
+      aur.height = Math.max(1, Math.ceil(H / AUR_SCALE));
       buildStreams();
       buildTraces();
       buildDust();
@@ -181,6 +184,11 @@ export default function HeroCosmos() {
       return orbCache;
     };
 
+    // Low-resolution aurora layer (see resize).
+    const AUR_SCALE = 4;
+    const aur = document.createElement('canvas');
+    const aurCtx = aur.getContext('2d');
+
     // Static readability veil + vignette, pre-drawn once into an offscreen canvas (was 2 big gradients per frame).
     const shade = document.createElement('canvas');
     const shadeCtx = shade.getContext('2d');
@@ -198,14 +206,15 @@ export default function HeroCosmos() {
       g.clearRect(0, 0, W, H);
       const vr = Math.max(W * 0.55, H * 0.4);
       const veil = g.createRadialGradient(cx, H * 0.58, 0, cx, H * 0.58, vr);
-      veil.addColorStop(0, 'rgba(0,0,0,0.5)');
-      veil.addColorStop(0.65, 'rgba(0,0,0,0.2)');
+      // Lighter veil: the glass hero panel is 90% transparent, so the animation should stay visible behind it.
+      veil.addColorStop(0, 'rgba(0,0,0,0.22)');
+      veil.addColorStop(0.65, 'rgba(0,0,0,0.1)');
       veil.addColorStop(1, 'rgba(0,0,0,0)');
       g.fillStyle = veil;
       g.fillRect(0, 0, W, H);
       const vg = g.createRadialGradient(cx, H * 0.5, Math.min(W, H) * 0.35, cx, H * 0.5, Math.hypot(W, H) * 0.62);
       vg.addColorStop(0, 'rgba(0,0,0,0)');
-      vg.addColorStop(1, 'rgba(0,0,0,0.7)');
+      vg.addColorStop(1, 'rgba(0,0,0,0.6)');
       g.fillStyle = vg;
       g.fillRect(0, 0, W, H);
     };
@@ -228,19 +237,28 @@ export default function HeroCosmos() {
       const horizon = H * 0.64;
       const photoMul = SHOW_PHOTO ? 0.55 : 1;
 
-      // 1. aurora glows
+      // 1. aurora glows (richer neon palette: cyan, electric violet, magenta, amber) on the low-res layer
       c.globalCompositeOperation = 'lighter';
-      const blob = (x: number, y: number, r: number, col: string) => {
-        const g = c.createRadialGradient(x, y, 0, x, y, r);
+      const blobOn = (g2: CanvasRenderingContext2D, k: number, x: number, y: number, r: number, col: string) => {
+        const g = g2.createRadialGradient(x * k, y * k, 0, x * k, y * k, r * k);
         g.addColorStop(0, col);
         g.addColorStop(1, 'rgba(0,0,0,0)');
-        c.fillStyle = g;
-        c.fillRect(x - r, y - r, r * 2, r * 2);
+        g2.fillStyle = g;
+        g2.fillRect((x - r) * k, (y - r) * k, r * 2 * k, r * 2 * k);
       };
+      const blob = (x: number, y: number, r: number, col: string) => blobOn(c, 1, x, y, r, col);
       const bigR = Math.max(W, H) * 0.55;
-      blob(W * (0.18 + 0.08 * Math.sin(ts * 0.15)), H * (0.22 + 0.05 * Math.cos(ts * 0.2)), bigR, 'rgba(56,232,255,' + 0.15 * photoMul + ')');
-      blob(W * (0.84 + 0.06 * Math.cos(ts * 0.13)), H * (0.3 + 0.06 * Math.sin(ts * 0.17)), bigR, 'rgba(139,123,255,' + 0.17 * photoMul + ')');
-      blob(W * 0.5, H * 0.95, bigR * 0.8, 'rgba(255,176,32,' + 0.07 * photoMul + ')');
+      if (aurCtx) {
+        const k = 1 / AUR_SCALE;
+        aurCtx.globalCompositeOperation = 'source-over';
+        aurCtx.clearRect(0, 0, aur.width, aur.height);
+        aurCtx.globalCompositeOperation = 'lighter';
+        blobOn(aurCtx, k, W * (0.18 + 0.08 * Math.sin(ts * 0.15)), H * (0.22 + 0.05 * Math.cos(ts * 0.2)), bigR, 'rgba(56,232,255,' + 0.17 * photoMul + ')');
+        blobOn(aurCtx, k, W * (0.84 + 0.06 * Math.cos(ts * 0.13)), H * (0.3 + 0.06 * Math.sin(ts * 0.17)), bigR, 'rgba(124,92,255,' + 0.2 * photoMul + ')');
+        blobOn(aurCtx, k, W * (0.62 + 0.1 * Math.sin(ts * 0.09)), H * (0.5 + 0.08 * Math.cos(ts * 0.11)), bigR * 0.7, 'rgba(232,72,220,' + (0.07 + 0.03 * Math.sin(ts * 0.4)) * photoMul + ')');
+        blobOn(aurCtx, k, W * 0.5, H * 0.95, bigR * 0.8, 'rgba(255,176,32,' + 0.08 * photoMul + ')');
+        c.drawImage(aur, 0, 0, W, H);
+      }
 
       // 2. perspective grid floor
       const floorH = H - horizon;
@@ -251,7 +269,7 @@ export default function HeroCosmos() {
         const t = (k + off) / rows;
         const p = Math.pow(t, 2.2);
         const y = horizon + floorH * p;
-        c.strokeStyle = (k % 4 === 0 ? 'rgba(139,123,255,' : 'rgba(56,232,255,') + (0.09 + 0.55 * p) * photoMul + ')';
+        c.strokeStyle = (k % 4 === 0 ? 'rgba(168,110,255,' : k % 4 === 2 ? 'rgba(90,170,255,' : 'rgba(56,232,255,') + (0.09 + 0.55 * p) * photoMul + ')';
         c.beginPath();
         c.moveTo(0, y);
         c.lineTo(W, y);
@@ -274,8 +292,10 @@ export default function HeroCosmos() {
       c.fillRect(0, horizon - 70, W, 72);
       const hl = c.createLinearGradient(0, 0, W, 0);
       hl.addColorStop(0, 'rgba(56,232,255,0)');
-      hl.addColorStop(0.5, 'rgba(56,232,255,' + 0.85 * photoMul + ')');
-      hl.addColorStop(1, 'rgba(56,232,255,0)');
+      hl.addColorStop(0.3, 'rgba(56,232,255,' + 0.7 * photoMul + ')');
+      hl.addColorStop(0.5, 'rgba(200,250,255,' + 0.95 * photoMul + ')');
+      hl.addColorStop(0.7, 'rgba(192,120,255,' + 0.7 * photoMul + ')');
+      hl.addColorStop(1, 'rgba(232,72,220,0)');
       c.fillStyle = hl;
       c.fillRect(0, horizon - 1, W, 2);
 
@@ -313,8 +333,20 @@ export default function HeroCosmos() {
       c.strokeStyle = 'rgba(139,123,255,' + 0.18 * photoMul + ')';
       c.stroke();
       segs(all, true);
-      c.strokeStyle = 'rgba(70,235,255,' + 0.62 * photoMul + ')';
+      // Iridescent front lines: cyan -> electric blue -> violet across the globe, plus a soft neon bloom pass.
+      const iri = c.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+      iri.addColorStop(0, 'rgba(70,235,255,' + 0.7 * photoMul + ')');
+      iri.addColorStop(0.5, 'rgba(110,150,255,' + 0.66 * photoMul + ')');
+      iri.addColorStop(1, 'rgba(200,120,255,' + 0.62 * photoMul + ')');
+      c.strokeStyle = iri;
       c.stroke();
+      if (quality === 2) {
+        c.lineWidth = 3;
+        c.globalAlpha = 0.18;
+        c.stroke();
+        c.globalAlpha = 1;
+        c.lineWidth = 1;
+      }
       // inner glow
       blob(cx, cy, R * 1.15, 'rgba(56,232,255,' + 0.17 * photoMul + ')');
 

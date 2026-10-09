@@ -34,13 +34,13 @@ export const JARVIS_LANGS: Record<string, LangProfile> = {
   },
   ur: {
     name: 'Urdu',
-    greeting: '"السلام علیکم" (Assalam-o-Alaikum)',
+    greeting: '"السلام علیکم" (As-salaam-o-alaikum, said fully and clearly: as-sa-LAA-mu a-LAI-kum)',
     style:
       'Speak everyday spoken Urdu exactly as ordinary people in Pakistan and India talk: simple and warm. Keep common English tech words in English (website, technology, project, app, online). Avoid heavy Persianised / literary Urdu. Do not speak full English sentences.',
   },
   ar: {
     name: 'Arabic',
-    greeting: '"السلام عليكم" (As-salamu alaykum), and reply "وعليكم السلام" if they greet you first',
+    greeting: '"السلام عليكم" (As-salāmu ʿalaykum, said fully: as-sa-LAA-mu a-LAI-kum), and reply "وعليكم السلام" (Wa ʿalaykum as-salām) if they greet you first',
     style:
       'Speak simple, friendly, modern spoken Arabic that everyday people use (the easy "white" Arabic understood everywhere), not heavy classical Fusha. Common tech words like "website" or "app" may stay in English.',
     styleByCountry: {
@@ -61,13 +61,13 @@ export const JARVIS_LANGS: Record<string, LangProfile> = {
   bn: {
     name: 'Bengali',
     greeting: '"নমস্কার!" (Nomoshkar)',
-    greetingByCountry: { BD: '"আসসালামু আলাইকুম" (Assalamu Alaikum)' },
+    greetingByCountry: { BD: '"আসসালামু আলাইকুম" (As-salāmu ʿalaykum, said fully and clearly)' },
     style: `Speak everyday spoken Bangla (cholito bhasha) as people really talk, never sadhu bhasha or bookish words. Common English tech words stay English. ${EVERYDAY}`,
   },
   pa: {
     name: 'Punjabi',
     greeting: '"ਸਤ ਸ੍ਰੀ ਅਕਾਲ ਜੀ!" (Sat Sri Akal ji)',
-    greetingByCountry: { PK: '"السلام علیکم" (Assalam-o-Alaikum)' },
+    greetingByCountry: { PK: '"السلام علیکم" (As-salāmu ʿalaykum, said fully and clearly)' },
     style: `Speak everyday, warm spoken Punjabi the way people in Punjab really talk. Common English tech words stay English. ${EVERYDAY}`,
   },
   mr: {
@@ -107,7 +107,7 @@ export const JARVIS_LANGS: Record<string, LangProfile> = {
   },
   vi: {
     name: 'Vietnamese',
-    greeting: '"Xin chào!"',
+    greeting: '"Xin chào!" (with the natural polite "ạ" when fitting)',
     style: `${EVERYDAY} Friendly, polite everyday Vietnamese.`,
   },
   fr: {
@@ -167,12 +167,12 @@ export const JARVIS_LANGS: Record<string, LangProfile> = {
   },
   tr: {
     name: 'Turkish',
-    greeting: '"Merhaba!"',
+    greeting: '"Merhaba!" (or "Hoş geldiniz!" - welcome)',
     style: `${EVERYDAY} Natural, friendly spoken Turkish.`,
   },
   id: {
     name: 'Indonesian',
-    greeting: '"Halo!"',
+    greeting: '"Halo!" / "Selamat datang!"',
     style: `${EVERYDAY} Natural everyday Indonesian (bahasa sehari-hari), not stiff formal baku.`,
   },
   nl: {
@@ -188,7 +188,7 @@ export const JARVIS_LANGS: Record<string, LangProfile> = {
   },
   fa: {
     name: 'Persian',
-    greeting: '"سلام!" (Salam)',
+    greeting: '"سلام!" (Salaam) or the warmer "سلام، خوش آمدید!" (Salaam, khosh amadid)',
     style: `${EVERYDAY} Natural everyday spoken Persian (mohavere), not formal written ketabi style.`,
     styleByCountry: { AF: 'Use Dari wording that Afghans find natural.' },
   },
@@ -199,7 +199,7 @@ export const JARVIS_LANGS: Record<string, LangProfile> = {
   },
   sw: {
     name: 'Swahili',
-    greeting: '"Habari!" / "Jambo!"',
+    greeting: '"Hujambo!" / "Habari yako?" (or the casual "Jambo!")',
     style: `${EVERYDAY} Natural everyday Swahili as spoken in Kenya and Tanzania.`,
   },
 };
@@ -211,9 +211,13 @@ export function getJarvisLang(code: string, country: string | null = detectCount
   return { name: p.name, greeting, style: p.style + countryStyle, country };
 }
 
+/** Say every greeting completely and correctly (Salam was coming out as "Assala walekum"). */
+export const GREETING_PRONUNCIATION_RULE =
+  'GREETING PRONUNCIATION (very important): Say the greeting completely, clearly and correctly, every syllable, at a calm pace, exactly as native speakers say it with respect - never shortened, slurred or mispronounced. The Islamic greeting must be said fully as "As-salāmu ʿalaykum" (as-sa-LAA-mu a-LAI-kum) - never "Assala walekum", "Slaam walekum" or "Salamalekum"; its reply is "Wa ʿalaykum as-salām". "Sat Sri Akal" must be said fully (sat-sree-a-KAAL). "Namaste" / "Namaskar" / "Vanakkam" must be said clearly with the correct stress. Each of the 30 languages uses its own natural greeting given above.';
+
 /** Name-based greeting rule (respect for every faith/culture), shared by every language. */
 export const NAME_GREETING_RULE =
-  'NAMES & RESPECT: When the visitor tells you their name, warmly use it and greet them back the way people of that name\'s culture usually greet each other, if the name clearly shows it: typical Muslim names (e.g. Aamir, Asad, Ayesha, Imran, Fatima) -> "Assalam-o-Alaikum / As-salamu alaykum, <name>"; typical Hindu names (e.g. Rajkumar, Sonu Kumar, Priya, Rahul) -> "Namaste <name> ji"; typical Sikh/Punjabi names (e.g. Gurpreet, Harjeet Singh, Simran Kaur) -> "Sat Sri Akal <name> ji"; typical Christian names -> a warm "Hello <name>". Say this greeting in the CURRENT website language. If you are not sure, simply use the normal greeting of the current language. Never say or guess the visitor\'s religion or caste out loud, never comment on it, and treat every faith with equal respect. If a visitor greets you with "Assalam-o-Alaikum", answer "Wa-alaikum-assalam"; if with "Namaste", answer "Namaste"; if with "Sat Sri Akal", answer "Sat Sri Akal".';
+  'NAMES & RESPECT: When the visitor tells you their name, warmly use it and greet them back the way people of that name\'s culture usually greet each other, if the name clearly shows it: typical Muslim names (e.g. Aamir, Asad, Ayesha, Imran, Fatima) -> "As-salāmu ʿalaykum, <name>" (said fully and correctly); typical Hindu names (e.g. Rajkumar, Sonu Kumar, Priya, Rahul) -> "Namaste <name> ji"; typical Sikh/Punjabi names (e.g. Gurpreet, Harjeet Singh, Simran Kaur) -> "Sat Sri Akal <name> ji"; typical Christian names -> a warm "Hello <name>". Say this greeting in the CURRENT website language. If you are not sure, simply use the normal greeting of the current language. Never say or guess the visitor\'s religion or caste out loud, never comment on it, and treat every faith with equal respect. If a visitor greets you with "As-salāmu ʿalaykum" (in any form), answer "Wa ʿalaykum as-salām"; if with "Namaste", answer "Namaste"; if with "Sat Sri Akal", answer "Sat Sri Akal".';
 
 /** Short spoken acknowledgement while a typed question is being answered (fallback text path). */
 export const QUICK_ACK: Record<string, string> = {

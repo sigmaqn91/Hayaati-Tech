@@ -17,6 +17,11 @@ interface HeroProps {
 
 const LATIN_LANGUAGES = new Set(['en', 'fr', 'de', 'es', 'pt', 'it', 'tr', 'id', 'vi']);
 
+// Hovering / touching the Activate button warms up the voice server so the real click connects faster.
+const warmJarvis = () => {
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('jarvis:warm'));
+};
+
 export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
   const { t, language, isRtl } = useLanguage();
   const parallaxRef = useRef<HTMLDivElement>(null);
@@ -24,6 +29,41 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const [headlineHeight, setHeadlineHeight] = useState<number | undefined>(undefined);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Jarvis chat open/close (phones & tablets): the hero panel moves down to make room for the live chat and
+  // back up when it closes. The layout changes ONCE and the movement itself is a GPU transform animation
+  // (FLIP), so it glides smoothly instead of re-laying out the whole hero on every frame (old "atak" bug).
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    let on = false;
+    const movers = () =>
+      [section.querySelector<HTMLElement>('.hero-content'), section.querySelector<HTMLElement>('.hero-ad')].filter(
+        (el): el is HTMLElement => Boolean(el)
+      );
+    const sync = () => {
+      const next = Boolean(section.querySelector('[data-jarvis-transcript]'));
+      if (next === on) return;
+      on = next;
+      const els = movers();
+      const before = els.map((el) => el.getBoundingClientRect().top);
+      section.classList.toggle('jarvis-chat-on', on);
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      els.forEach((el, i) => {
+        const delta = before[i] - el.getBoundingClientRect().top;
+        if (reduce || Math.abs(delta) < 1 || typeof el.animate !== 'function') return;
+        el.animate([{ transform: `translate3d(0, ${delta}px, 0)` }, { transform: 'translate3d(0, 0, 0)' }], {
+          duration: 620,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        });
+      });
+    };
+    const mo = new MutationObserver(sync);
+    mo.observe(section, { childList: true, subtree: true });
+    sync();
+    return () => mo.disconnect();
+  }, []);
 
   useEffect(() => {
     // Parallax is written straight to the element (no React re-render per scroll event) and only while the hero is on screen.
@@ -81,6 +121,7 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
 
   return (
     <section
+      ref={sectionRef}
       id="hero"
       aria-label={t.nav.home}
       className="hero-v2 relative min-h-[100svh] flex flex-col overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
@@ -137,16 +178,23 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
         dir="ltr"
         className="hero-content relative z-20 lg:min-h-[100svh] flex-none flex flex-col justify-start lg:justify-center pointer-events-none"
       >
-        {/* Phones: no side gutter, so the glass panel runs edge to edge and touches both screen borders. */}
-        <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
+        {/* Panel is wide (horizontal), not tall: on phones / tablets it runs almost edge to edge, on desktop it
+            starts near the left screen edge and stretches up to the orb. */}
+        <div className="w-full mx-auto px-0 sm:px-3 lg:px-[3vw]">
           <div
             dir={isRtl ? 'rtl' : 'ltr'}
-            className="hero-panel-wrap mx-auto lg:mx-0 w-full max-w-[46rem] lg:w-[min(50vw,42rem)]"
+            className="hero-panel-wrap mx-auto lg:mx-0 w-full lg:w-[min(47vw,62rem)]"
           >
             <div className="hero-panel pointer-events-auto">
               <span className="hero-panel__glow" aria-hidden="true" />
               <span className="hero-panel__ring" aria-hidden="true" />
               <span className="hero-panel__glass" aria-hidden="true" />
+              {/* Live animation inside the 90% transparent glass (GPU only: transform / opacity) */}
+              <span className="hero-panel__holo" aria-hidden="true">
+                <span className="hero-panel__holo-grid" />
+                <span className="hero-panel__holo-aurora" />
+                <span className="hero-panel__holo-scan" />
+              </span>
               {/* Corner / edge tick marks */}
               <span className="hero-panel__tick hero-panel__tick--a" style={{ top: -1, left: '64%', width: 54, height: 3 }} aria-hidden="true" />
               <span className="hero-panel__tick hero-panel__tick--b" style={{ bottom: -1, left: '14%', width: 40, height: 3 }} aria-hidden="true" />
@@ -209,20 +257,20 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
 
                 {/* Subtitle */}
                 <p
-                  className={`hero-panel__subtitle text-slate-200 max-w-[62ch] mb-5 font-normal text-sm sm:text-[0.95rem] lg:text-base ${
+                  className={`hero-panel__subtitle text-slate-200 max-w-none mb-5 font-normal text-sm sm:text-[0.95rem] lg:text-base ${
                     isLatin ? 'leading-relaxed' : 'leading-[1.6]'
                   }`}
                 >
                   {t.hero.subtitle}
                 </p>
 
-                {/* Exploration CTAs: stacked on desktop, Explore + (Activate | Projects) row on mobile */}
-                <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 w-full">
+                {/* Exploration CTAs: Explore on its own row, then (Activate | Projects) side by side - keeps the wide panel short */}
+                <div className="grid grid-cols-2 gap-3 w-full">
                   {/* Primary Exploration CTA */}
                   <a
                     href="#timeline"
                     aria-label={t.hero.exploreCta}
-                    className="col-span-2 lg:col-span-1 w-full px-4 py-3 min-h-[48px] flex items-center justify-center gap-2.5 bg-[#38e8ff] text-[#05070a] font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-center leading-tight hover:bg-[#38e8ff]/90 shadow-[0_0_22px_rgba(56,232,255,0.35)] transition-all cursor-pointer rounded-md"
+                    className="col-span-2 w-full px-4 py-3 min-h-[48px] flex items-center justify-center gap-2.5 bg-[#38e8ff] text-[#05070a] font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-center leading-tight hover:bg-[#38e8ff]/90 shadow-[0_0_22px_rgba(56,232,255,0.35)] transition-all cursor-pointer rounded-md"
                   >
                     <span>{t.hero.exploreCta}</span>
                     <ArrowRight className="w-4 h-4 shrink-0 text-[#05070a] rtl:-scale-x-100" />
@@ -231,6 +279,9 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
                   {/* Embedded Jarvis CTA (onClick untouched) */}
                   <button
                     onClick={onOpenAssistant}
+                    onPointerEnter={warmJarvis}
+                    onFocus={warmJarvis}
+                    onTouchStart={warmJarvis}
                     className="w-full px-2.5 sm:px-4 py-2.5 min-h-[48px] flex items-center justify-center gap-2.5 bg-[#05101c]/70 border border-[#38e8ff]/45 hover:border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-center leading-tight shadow-[0_0_18px_rgba(56,232,255,0.2)] hover:shadow-[0_0_30px_rgba(56,232,255,0.4)] transition-all cursor-pointer rounded-md"
                     aria-label="Activate Jarvis"
                   >
