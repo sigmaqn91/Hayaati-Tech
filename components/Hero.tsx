@@ -8,7 +8,6 @@ import { HeroStarfield } from './HeroStarfield';
 import { DecryptText } from './DecryptText';
 import { ArrowRight, Layers } from 'lucide-react';
 import DevBanner from './DevBanner';
-import { HeroAdvert } from './HeroAdvert';
 
 interface HeroProps {
   onOpenAssistant?: () => void;
@@ -256,9 +255,6 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
               <span>{t.hero.coordinates}</span>
               <span className="text-[#38e8ff]/80 font-semibold tracking-wider">{t.hero.timelineSpan}</span>
             </div>
-
-            {/* Advertisement: fills the empty area under the hero panel */}
-            <HeroAdvert />
           </div>
         </div>
       </div>

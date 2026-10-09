@@ -63,23 +63,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       antialias: !isMobile,
       powerPreference: 'high-performance',
     });
-    // The drawing surface is bigger than the container on every side so the rings are never cut off.
-    // camera.setViewOffset keeps the orb at EXACTLY the same size and place on screen as before.
-    const CANVAS_PAD = 0.18; // extra drawing area per side, as a share of the larger container side
-    const applyFrame = (width: number, height: number) => {
-      const pad = Math.round(Math.max(width, height) * CANVAS_PAD);
-      camera.aspect = width / Math.max(height, 1);
-      camera.setViewOffset(width, height, -pad, -pad, width + pad * 2, height + pad * 2);
-      camera.updateProjectionMatrix();
-      renderer.setSize(width + pad * 2, height + pad * 2);
-      const el = renderer.domElement;
-      el.style.position = 'absolute';
-      el.style.left = `${-pad}px`;
-      el.style.top = `${-pad}px`;
-      el.style.maxWidth = 'none';
-      el.style.pointerEvents = 'none';
-    };
-    applyFrame(container.clientWidth, container.clientHeight);
+    renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.3;
@@ -580,12 +564,13 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       if (!container) return;
       const width = container.clientWidth;
       const height = container.clientHeight;
-      camera.aspect = width / Math.max(height, 1);
+      camera.aspect = width / height;
       if (isMobile) {
         const fitZ = 2.15 / (Math.tan(THREE.MathUtils.degToRad(45 / 2)) * Math.max(camera.aspect, 0.01));
         camera.position.z = Math.max(4.8, fitZ);
       }
-      applyFrame(width, height);
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
     };
 
     const resizeObserver = new ResizeObserver(handleResize);
