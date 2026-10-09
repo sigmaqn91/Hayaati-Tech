@@ -1,18 +1,9 @@
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { getSiteUrl } from '@/lib/siteUrl';
 
 const appUrl = getSiteUrl();
-
-// Normal responsive viewport: no forced zoom lock (pinch zoom stays available), inputs are 16px so no auto-zoom,
-// and the visual viewport shrinks for the on-screen keyboard (handled in JarvisOverlay).
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  viewportFit: 'cover',
-  interactiveWidget: 'resizes-visual',
-};
 
 export const metadata: Metadata = {
   title: 'Hayaati Web Technology — Future (2030–2050)',

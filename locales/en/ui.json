@@ -35,26 +35,6 @@
     "scrollDown": "Scroll to explore chronological timeline",
     "imageAlt": "Cinematic vision of futuristic metropolis 2030–2050"
   },
-  "heroAdvert": {
-    "badge": "FEATURED // HAYAATI WEB TECHNOLOGY",
-    "headline": "Your business, built for 2030–2050.",
-    "tagline": "Futuristic websites, AI assistants and premium UI, crafted by Aliya Khan.",
-    "service1Title": "Website Development",
-    "service1Desc": "Fast, responsive websites on modern technology.",
-    "service2Title": "AI Assistant (Jarvis)",
-    "service2Desc": "A voice and chat assistant added to your website.",
-    "service3Title": "Futuristic UI/UX",
-    "service3Desc": "Cinematic interfaces with smooth, modern motion.",
-    "service4Title": "Business Websites",
-    "service4Desc": "Professional sites that present your business clearly.",
-    "statLanguages": "Languages",
-    "statServices": "Core services",
-    "founderLabel": "Founder",
-    "builtFor": "Built for 2030–2050",
-    "ctaStart": "Start Your Project",
-    "ctaProjects": "View My Projects",
-    "ctaAdvertise": "Advertise With Us"
-  },
   "timeline": {
     "sectionTag": "CHRONO_MAP // 2030 -> 2050",
     "title": "Human Innovation Chronology",

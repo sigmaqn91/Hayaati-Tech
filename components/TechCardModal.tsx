@@ -5,7 +5,6 @@ import { TechCardData, TimelineCardData } from '@/data/future';
 import { RealImageSlot } from './RealImageSlot';
 import { useLanguage } from '@/context/LanguageContext';
 import { X, Cpu, Clock, Layers, Sparkles } from 'lucide-react';
-import { useOverlayHistory } from '@/hooks/use-overlay-history';
 
 interface TechCardModalProps {
   card: TechCardData | TimelineCardData | null;
@@ -24,9 +23,6 @@ export function TechCardModal({ card, onClose }: TechCardModalProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
-
-  // Back button closes this modal instead of leaving the site
-  useOverlayHistory(!!card, onClose);
 
   if (!card) return null;
 

@@ -5,7 +5,6 @@ import { placesData, PlaceCardData } from '@/data/places';
 import { RealImageSlot } from './RealImageSlot';
 import { useLanguage } from '@/context/LanguageContext';
 import { MapPin, Calendar, Layers, X, BookOpen, Compass } from 'lucide-react';
-import { useOverlayHistory } from '@/hooks/use-overlay-history';
 
 interface LocalizedPlace extends PlaceCardData {
   title: string;
@@ -19,9 +18,6 @@ interface LocalizedPlace extends PlaceCardData {
 export function PlacesSection() {
   const { t, content } = useLanguage();
   const [selectedPlace, setSelectedPlace] = useState<LocalizedPlace | null>(null);
-
-  // Back button closes the place dossier instead of leaving the site
-  useOverlayHistory(!!selectedPlace, () => setSelectedPlace(null));
 
   return (
     <section
