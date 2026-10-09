@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { aboutData } from '@/data/about';
 import { useLanguage } from '@/context/LanguageContext';
 import { User, Mail, Globe } from 'lucide-react';
+import { FounderPortrait } from '@/components/FounderPortrait';
 
 export function AboutSection() {
   const { t } = useLanguage();
@@ -33,13 +33,11 @@ export function AboutSection() {
         <div className="lg:col-span-4">
           <div className="relative overflow-hidden bg-[#0b0f17] border border-[#1e293b] aspect-square flex flex-col items-center justify-center p-6 text-center hud-frame">
             {aboutData.photoUrl ? (
-              <Image
+              <FounderPortrait
                 src={aboutData.photoUrl}
                 alt={t.about.photoAlt}
-                fill
-                sizes="(max-width: 1024px) 100vw, 380px"
-                referrerPolicy="no-referrer"
-                className="object-cover"
+                name={aboutData.ownerName}
+                title={t.about.architectTitle}
               />
             ) : (
               /* Honest Placeholder */

@@ -13,6 +13,6 @@ export const aboutData: AboutConfig = {
   ownerName: 'Aliya Khan',
   email: 'Hayaati.Technology@gmail.com',
   domain: 'www.hayaatiweb.site',
-  photoUrl: null,
+  photoUrl: '/images/about/aliya-khan.webp',
   socialLinks: [],
 };
