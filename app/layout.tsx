@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { getSiteUrl } from '@/lib/siteUrl';
+import { GEO_BOOT_SCRIPT } from '@/lib/geoLanguage';
 
 const appUrl = getSiteUrl();
 
@@ -70,6 +71,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Picks the visitor's language before the page paints (saved choice > country > browser). */}
+        <script dangerouslySetInnerHTML={{ __html: GEO_BOOT_SCRIPT }} />
+      </head>
       <body className="bg-[#05070a] text-slate-100 min-h-screen relative antialiased selection:bg-[#38e8ff]/20 selection:text-[#38e8ff]">
         <script
           type="application/ld+json"

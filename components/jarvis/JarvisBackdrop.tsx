@@ -7,6 +7,7 @@ export interface JarvisBackdropProps {
   loudness: number;
   centerY?: number; // Normalized vertical center: 0.0 - 1.0 (e.g. 0.46)
   orbRadius?: number; // Radius in pixels
+  levelRef?: React.MutableRefObject<number>; // live loudness (no re-render)
 }
 
 export const JarvisBackdrop: React.FC<JarvisBackdropProps> = ({
@@ -14,7 +15,10 @@ export const JarvisBackdrop: React.FC<JarvisBackdropProps> = ({
   loudness = 0,
   centerY = 0.46,
   orbRadius = 180,
+  levelRef,
 }) => {
+  const levelRefHolder = useRef(levelRef);
+  levelRefHolder.current = levelRef;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const stateRef = useRef(state);
@@ -78,7 +82,7 @@ export const JarvisBackdrop: React.FC<JarvisBackdropProps> = ({
       const cx = width / 2;
       const cy = height * centerYRef.current;
       const currentRadius = Math.max(60, orbRadiusRef.current);
-      const curLoudness = loudnessRef.current || 0;
+      const curLoudness = Math.max(loudnessRef.current || 0, levelRefHolder.current?.current || 0);
       const curState = stateRef.current;
 
       // Color scheme: cyan (#38e8ff) with amber warning for listening

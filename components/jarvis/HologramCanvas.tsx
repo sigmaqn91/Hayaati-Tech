@@ -9,17 +9,22 @@ interface HologramCanvasProps {
   visualState: AssistantVisualState;
   audioLevel?: number; // 0.0 to 1.0 real-time audio amplitude
   analyserNode?: AnalyserNode | null;
+  /** Live loudness written by the voice hook every frame (no React re-render needed). */
+  levelRef?: React.MutableRefObject<number>;
 }
 
 export const HologramCanvas: React.FC<HologramCanvasProps> = ({
   visualState,
   audioLevel = 0,
   analyserNode,
+  levelRef,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const visualStateRef = useRef<AssistantVisualState>(visualState);
   const audioLevelRef = useRef<number>(audioLevel);
   const analyserRef = useRef<AnalyserNode | null>(analyserNode || null);
+  const externalLevelRef = useRef<React.MutableRefObject<number> | undefined>(levelRef);
+  externalLevelRef.current = levelRef;
 
   useEffect(() => {
     visualStateRef.current = visualState;
@@ -36,6 +41,28 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    // Build the 3D orb a moment after the page has painted (browser idle time), so opening the website
+    // stays smooth instead of freezing while thousands of particles and shaders are prepared.
+    let cleanup: (() => void) | null = null;
+    let cancelled = false;
+    const w = window as unknown as {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const start = () => {
+      if (cancelled) return;
+      cleanup = initOrb(container);
+    };
+    const idleId = w.requestIdleCallback ? w.requestIdleCallback(start, { timeout: 700 }) : window.setTimeout(start, 200);
+    return () => {
+      cancelled = true;
+      if (w.cancelIdleCallback && w.requestIdleCallback) w.cancelIdleCallback(idleId);
+      else window.clearTimeout(idleId);
+      cleanup?.();
+    };
+  }, []);
+
+  function initOrb(container: HTMLDivElement): () => void {
 
     // Detect mobile or low performance
     const isMobile = window.innerWidth < 768;
@@ -130,7 +157,6 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
 
     // 3. Particle Shell (20k+ GPU points)
     const particlePositions = new Float32Array(particleCount * 3);
-    const particleOriginals = new Float32Array(particleCount * 3);
     const particleColors = new Float32Array(particleCount * 3);
 
     const baseRadius = 1.35;
@@ -156,9 +182,6 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       particlePositions[i * 3 + 1] = y;
       particlePositions[i * 3 + 2] = z;
 
-      particleOriginals[i * 3] = x;
-      particleOriginals[i * 3 + 1] = y;
-      particleOriginals[i * 3 + 2] = z;
 
       // Color mix: Mostly cyan/ice-blue with 4% amber warning accents
       const roll = Math.random();
@@ -211,10 +234,31 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
+    // Ripple/pulse runs on the GPU (vertex shader) instead of a JS loop over thousands of points
+    // every frame, which was the main reason the page stuttered while Jarvis was talking.
+    const rippleUniforms = {
+      uPulse: { value: 1.0 },
+      uWave: { value: 0.0 },
+      uRipple: { value: 0.0 },
+      uAudio: { value: 0.0 },
+    };
+    particleMaterial.onBeforeCompile = (shader) => {
+      Object.assign(shader.uniforms, rippleUniforms);
+      shader.vertexShader = shader.vertexShader
+        .replace(
+          '#include <common>',
+          '#include <common>\nuniform float uPulse;\nuniform float uWave;\nuniform float uRipple;\nuniform float uAudio;'
+        )
+        .replace(
+          '#include <begin_vertex>',
+          'vec3 transformed = position * (uPulse + uRipple * sin(position.y * 5.0 + uWave) * (0.05 + uAudio * 0.18));'
+        );
+    };
     const particlePoints = new THREE.Points(particleGeometry, particleMaterial);
     arcCoreGroup.add(particlePoints);
 
     // 4. Three Counter-Rotating Torus Rings with Segmented Tick Marks
+    const disposables: Array<{ dispose: () => void }> = [];
     function createSegmentedRing(radius: number, tube: number, segments: number, color: number) {
       const ringGroup = new THREE.Group();
 
@@ -229,21 +273,26 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       const torusMesh = new THREE.Mesh(torusGeo, torusMat);
       ringGroup.add(torusMesh);
 
-      // Segmented tick marks along perimeter
+      // Segmented tick marks along perimeter: ONE instanced mesh per ring (was one mesh + material per tick,
+      // ~150 separate draw calls every frame).
+      const tickGeo = new THREE.BoxGeometry(0.015, 0.06, 0.02);
+      const tickMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+      const ticks = new THREE.InstancedMesh(tickGeo, tickMat, segments);
+      const dummy = new THREE.Object3D();
+      const base = new THREE.Color(color);
+      const amber = new THREE.Color(0xffaa00);
       for (let s = 0; s < segments; s++) {
         const angle = (s / segments) * Math.PI * 2;
-        const tickGeo = new THREE.BoxGeometry(0.015, 0.06, 0.02);
-        const tickMat = new THREE.MeshBasicMaterial({
-          color: s % 4 === 0 ? 0xffaa00 : color,
-          transparent: true,
-          opacity: 0.85,
-        });
-        const tickMesh = new THREE.Mesh(tickGeo, tickMat);
-        tickMesh.position.x = radius * Math.cos(angle);
-        tickMesh.position.y = radius * Math.sin(angle);
-        tickMesh.rotation.z = angle;
-        ringGroup.add(tickMesh);
+        dummy.position.set(radius * Math.cos(angle), radius * Math.sin(angle), 0);
+        dummy.rotation.set(0, 0, angle);
+        dummy.updateMatrix();
+        ticks.setMatrixAt(s, dummy.matrix);
+        ticks.setColorAt(s, s % 4 === 0 ? amber : base);
       }
+      ticks.instanceMatrix.needsUpdate = true;
+      if (ticks.instanceColor) ticks.instanceColor.needsUpdate = true;
+      ringGroup.add(ticks);
+      disposables.push(torusGeo, torusMat, tickGeo, tickMat);
 
       return ringGroup;
     }
@@ -449,8 +498,6 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
 
     // Do not render the orb while it is scrolled out of view
     let onScreen = true;
-    let rippleTick = 0;
-    let rippleDirty = false;
     const screenObserver =
       typeof IntersectionObserver !== 'undefined'
         ? new IntersectionObserver((entries) => {
@@ -459,15 +506,44 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
         : null;
     screenObserver?.observe(container);
 
-    const animate = () => {
+    // Adaptive sharpness: if the phone cannot keep up, render slightly fewer pixels (looks the same, runs smooth).
+    let pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
+    let perfFrames = 0;
+    let perfAcc = 0;
+    let lastFrameAt = 0;
+
+    const animate = (now?: number) => {
       animationFrameId = requestAnimationFrame(animate);
-      if (!isTabVisible || !onScreen) return;
+      if (!isTabVisible || !onScreen) {
+        lastFrameAt = 0;
+        return;
+      }
+      if (document.documentElement.classList.contains('bg-paused')) {
+        lastFrameAt = 0;
+        return;
+      }
+      const t = typeof now === 'number' ? now : performance.now();
+      if (lastFrameAt) {
+        perfAcc += Math.min(t - lastFrameAt, 100);
+        perfFrames++;
+        if (perfFrames >= 90) {
+          const avg = perfAcc / perfFrames;
+          if (avg > 24 && pixelRatio > 1) {
+            pixelRatio = Math.max(1, pixelRatio - 0.25);
+            renderer.setPixelRatio(pixelRatio);
+            applyFrame(container.clientWidth, container.clientHeight);
+          }
+          perfFrames = 0;
+          perfAcc = 0;
+        }
+      }
+      lastFrameAt = t;
 
       const elapsed = clock.getElapsedTime();
       const state = visualStateRef.current;
 
       // Extract real audio amplitude if analyser exists
-      let computedAudio = audioLevelRef.current;
+      let computedAudio = Math.max(audioLevelRef.current, externalLevelRef.current?.current || 0);
       if (analyserRef.current) {
         try {
           analyserRef.current.getByteFrequencyData(freqData);
@@ -560,37 +636,12 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
 
       innerCoreMesh.scale.setScalar(coreScale * 0.9);
 
-      // Particle Displacement Update
-      // Speed: without ripples every particle is just scaled by the same factor, so the whole cloud is scaled on the GPU
-      // (identical picture, no 8k-22k point loop per frame). The per-point loop only runs while listening/speaking.
-      if (state === 'speaking' || state === 'listening') {
-        rippleTick++;
-        if (!isMobile || rippleTick % 2 === 0) {
-          const positions = particleGeometry.attributes.position.array as Float32Array;
-          const count = particlePositions.length / 3;
-          const waveFreq = elapsed * 3.0;
-          for (let i = 0; i < count; i++) {
-            const ox = particleOriginals[i * 3];
-            const oy = particleOriginals[i * 3 + 1];
-            const oz = particleOriginals[i * 3 + 2];
-            // Radial wave ripples along latitude
-            const disp = particlePulse + Math.sin(oy * 5.0 + waveFreq) * (0.05 + computedAudio * 0.18);
-            positions[i * 3] = ox * disp;
-            positions[i * 3 + 1] = oy * disp;
-            positions[i * 3 + 2] = oz * disp;
-          }
-          particleGeometry.attributes.position.needsUpdate = true;
-        }
-        particlePoints.scale.setScalar(1);
-        rippleDirty = true;
-      } else {
-        if (rippleDirty) {
-          (particleGeometry.attributes.position.array as Float32Array).set(particleOriginals);
-          particleGeometry.attributes.position.needsUpdate = true;
-          rippleDirty = false;
-        }
-        particlePoints.scale.setScalar(particlePulse);
-      }
+      // Particle Displacement (GPU): ripple only while listening/speaking, otherwise a uniform breathing scale.
+      const rippleOn = state === 'speaking' || state === 'listening';
+      rippleUniforms.uPulse.value = particlePulse;
+      rippleUniforms.uRipple.value = rippleOn ? 1 : 0;
+      rippleUniforms.uWave.value = elapsed * 3.0;
+      rippleUniforms.uAudio.value = computedAudio;
 
       // Global subtle tilt toward mouse/neutral
       arcCoreGroup.rotation.y = Math.sin(elapsed * 0.4) * 0.15;
@@ -599,7 +650,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       renderer.render(scene, camera);
     };
 
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
     // 8. Resize Observer
     const handleResize = () => {
@@ -638,11 +689,12 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       coreGlowMat.dispose();
       glowTexture.dispose();
       cometSprites.forEach((cm) => cm.mat.dispose());
+      disposables.forEach((d) => d.dispose());
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }
 
   return (
     <div

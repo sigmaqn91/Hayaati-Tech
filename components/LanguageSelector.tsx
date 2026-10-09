@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useReducedMotion, type Variants } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { loadLanguageBundle } from '@/locales';
 import { useLanguage } from '@/context/LanguageContext';
 import { SupportedLanguage } from '@/locales/types';
 import { Globe, X, Search, Check } from 'lucide-react';
@@ -16,6 +17,9 @@ export function LanguageSelector() {
   const triggerButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
+  // The picked language is applied right after the sheet has closed, so the closing animation never
+  // competes with the whole page re-rendering in the new language.
+  const pendingLangRef = useRef<SupportedLanguage | null>(null);
 
   const handleOpen = () => {
     setIsDesktop(window.matchMedia('(min-width: 640px)').matches);
@@ -36,6 +40,8 @@ export function LanguageSelector() {
     const originalOverflow = document.body.style.overflow;
     const originalPaddingRight = document.body.style.paddingRight;
     document.body.style.overflow = 'hidden';
+    // Freeze the animated hero canvases behind the popup (they are hidden by the dark layer anyway).
+    document.documentElement.classList.add('bg-paused');
     if (scrollBarWidth > 0) {
       document.body.style.paddingRight = `${scrollBarWidth}px`;
     }
@@ -47,6 +53,7 @@ export function LanguageSelector() {
     return () => {
       document.body.style.overflow = originalOverflow;
       document.body.style.paddingRight = originalPaddingRight;
+      document.documentElement.classList.remove('bg-paused');
     };
   }, [isOpen]);
 
@@ -96,28 +103,23 @@ export function LanguageSelector() {
 
   const currentLangObj = languages.find((l) => l.code === language) || languages[0];
 
-  const gridVariants: Variants = {
-    hidden: {},
-    show: { transition: { staggerChildren: reduceMotion ? 0 : 0.014, delayChildren: reduceMotion ? 0 : 0.16 } },
-  };
-  const cardVariants: Variants = {
-    hidden: { opacity: 0, y: reduceMotion ? 0 : 12, scale: reduceMotion ? 1 : 0.96 },
-    show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 460, damping: 30 } },
-  };
-
+  // GPU-only motion (transform + opacity). No blur filters: they made the popup heavy on phones.
   const panelInitial = reduceMotion
     ? { opacity: 0 }
     : isDesktop
-    ? { opacity: 0, scale: 0.9, y: 18, filter: 'blur(8px)' }
+    ? { opacity: 0, scale: 0.94, y: 14 }
     : { y: '100%', opacity: 1 };
   const panelAnimate = isDesktop || reduceMotion
-    ? { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }
+    ? { opacity: 1, scale: 1, y: 0 }
     : { y: 0, opacity: 1 };
   const panelExit = reduceMotion
     ? { opacity: 0 }
     : isDesktop
-    ? { opacity: 0, scale: 0.94, y: 10, filter: 'blur(6px)' }
+    ? { opacity: 0, scale: 0.97, y: 8 }
     : { y: '100%', opacity: 1 };
+  const panelTransition = isDesktop
+    ? { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const }
+    : { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const };
 
   return (
     <div className="relative">
@@ -135,18 +137,25 @@ export function LanguageSelector() {
         <span className="hidden sm:inline text-slate-400" suppressHydrationWarning>({currentLangObj.native})</span>
       </button>
 
-      <AnimatePresence onExitComplete={() => triggerButtonRef.current?.focus()}>
+      <AnimatePresence
+        onExitComplete={() => {
+          triggerButtonRef.current?.focus({ preventScroll: true });
+          const next = pendingLangRef.current;
+          pendingLangRef.current = null;
+          if (next && next !== language) setLanguage(next);
+        }}
+      >
         {isOpen && (
           <motion.div
             key="lang-dialog"
             role="dialog"
             aria-modal="true"
             aria-label={t.languageSelector.dialogTitle}
-            className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#02040a]/75 backdrop-blur-md"
+            className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-[#02040a]/[0.86]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.24 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
             onClick={(e) => {
               if (e.target === e.currentTarget) handleClose();
             }}
@@ -157,8 +166,8 @@ export function LanguageSelector() {
               initial={panelInitial}
               animate={panelAnimate}
               exit={panelExit}
-              transition={{ type: 'spring', stiffness: 340, damping: 34, mass: 0.9 }}
-              style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+              transition={panelTransition}
+              style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', willChange: 'transform, opacity' }}
             >
               <span className="hx-glow" aria-hidden="true" />
               <div className="hx-frame hx-frame--sheet flex flex-col min-h-0 flex-1">
@@ -210,27 +219,26 @@ export function LanguageSelector() {
                   </div>
 
                   {/* Language Grid */}
-                  <motion.div
+                  <div
                     className="px-4 sm:px-5 pb-3 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-2 flex-1 min-h-0 content-start"
                     style={{ overscrollBehavior: 'contain' }}
-                    variants={gridVariants}
-                    initial="hidden"
-                    animate="show"
                   >
-                    {filtered.map((item) => {
+                    {filtered.map((item, i) => {
                       const isSelected = item.code === language;
                       return (
-                        <motion.button
+                        <button
                           key={item.code}
-                          variants={cardVariants}
-                          whileTap={{ scale: 0.96 }}
-                          whileHover={reduceMotion ? undefined : { y: -2 }}
+                          style={{ animationDelay: `${Math.min(i, 14) * 10 + 40}ms` }}
+                          onPointerDown={() => {
+                            loadLanguageBundle(item.code as SupportedLanguage).catch(() => {});
+                          }}
                           onClick={() => {
-                            setLanguage(item.code as SupportedLanguage);
+                            loadLanguageBundle(item.code as SupportedLanguage).catch(() => {});
+                            pendingLangRef.current = item.code as SupportedLanguage;
                             handleClose();
                           }}
                           aria-pressed={isSelected}
-                          className={`relative flex items-center justify-between gap-2 px-3 py-2.5 text-start min-h-[52px] rounded-lg border transition-colors cursor-pointer overflow-hidden ${
+                          className={`lang-card relative flex items-center justify-between gap-2 px-3 py-2.5 text-start min-h-[52px] rounded-lg border transition-colors cursor-pointer overflow-hidden ${
                             isSelected
                               ? 'bg-gradient-to-br from-[#38e8ff]/20 via-[#818cf8]/10 to-transparent border-[#38e8ff] text-[#38e8ff] shadow-[0_0_18px_rgba(56,232,255,0.35),inset_0_0_14px_rgba(56,232,255,0.12)]'
                               : 'bg-[#080c14]/80 border-[#38e8ff]/10 text-slate-300 hover:border-[#38e8ff]/50 hover:bg-[#38e8ff]/[0.07] hover:text-white'
@@ -252,10 +260,10 @@ export function LanguageSelector() {
                               <Check className="w-3 h-3" strokeWidth={3} />
                             </motion.span>
                           )}
-                        </motion.button>
+                        </button>
                       );
                     })}
-                  </motion.div>
+                  </div>
 
                   {/* Footer */}
                   <div className="px-4 sm:px-5 py-3 border-t border-[#38e8ff]/15 flex justify-end shrink-0">

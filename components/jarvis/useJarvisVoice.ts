@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GoogleGenAI, Modality } from '@google/genai/web';
+import { getJarvisLang, NAME_GREETING_RULE } from '@/lib/jarvisLocale';
 
 // Maps language codes from Hayaati's 30 locales to BCP-47 / Live voice language tags
 const LOCALE_TO_VOICE_LANG: Record<string, string> = {
@@ -37,13 +38,29 @@ const LOCALE_TO_VOICE_LANG: Record<string, string> = {
   vi: 'vi-VN',
 };
 
-function getLanguageEnglishName(languageCode: string): string {
+// Browser speech (only used when no Live session is open): pick the most natural-sounding installed voice
+// for the language (Google / Microsoft "Natural" / "Neural" / enhanced voices) instead of the default robot voice.
+function pickNaturalVoice(langTag: string): SpeechSynthesisVoice | null {
   try {
-    const baseCode = languageCode.split('-')[0];
-    const displayNames = new Intl.DisplayNames(['en'], { type: 'language' });
-    return displayNames.of(baseCode) || languageCode;
+    const voices = window.speechSynthesis?.getVoices?.() || [];
+    if (!voices.length) return null;
+    const base = langTag.split('-')[0].toLowerCase();
+    const same = voices.filter((v) => v.lang && v.lang.toLowerCase().startsWith(base));
+    if (!same.length) return null;
+    const score = (v: SpeechSynthesisVoice) => {
+      const n = `${v.name} ${v.voiceURI}`.toLowerCase();
+      let sc = 0;
+      if (/natural|neural|premium|enhanced|wavenet|studio/.test(n)) sc += 6;
+      if (/google/.test(n)) sc += 4;
+      if (/microsoft.*online/.test(n)) sc += 4;
+      if (v.lang.toLowerCase() === langTag.toLowerCase()) sc += 2;
+      if (!v.localService) sc += 1;
+      if (/compact|espeak|robot/.test(n)) sc -= 5;
+      return sc;
+    };
+    return same.sort((x, y) => score(y) - score(x))[0] || null;
   } catch {
-    return languageCode;
+    return null;
   }
 }
 
@@ -80,6 +97,24 @@ function floatTo16BitBase64(input: Float32Array): string {
   return btoa(binary);
 }
 
+// Jarvis personality + localisation rules for the Live voice session.
+function buildSystemInstruction(languageCode: string, isOwner: boolean): string {
+  const lp = getJarvisLang(languageCode);
+  const where = lp.country ? ` The visitor appears to be in country code ${lp.country}; adapt wording to that country where natural.` : '';
+  return [
+    'You are Jarvis, the voice assistant of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly.',
+    isOwner
+      ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.'
+      : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.',
+    `LANGUAGE: The website-selected language is ${lp.name}. Speak only ${lp.name} for this entire session, including your very first greeting. Never switch into another language because of the visitor's accent, background noise, detected input language or your own language detection. Only change language when the visitor clearly and explicitly asks, or when a [SYSTEM] message says the website language changed.`,
+    `LOCAL, NATURAL SPEECH (very important): ${lp.style}${where}`,
+    `GREETING: The normal greeting in ${lp.name} is ${lp.greeting}. Always open with that culturally correct greeting, never with a literal translation of the English word "hello".`,
+    NAME_GREETING_RULE,
+    'VOICE: Sound like a real, warm human, not a robot: relaxed natural pace, natural pauses and intonation, friendly energy, short sentences. Do not read lists or symbols aloud; talk like a person.',
+    'If you hear unclear audio, noise, or silence, do NOT answer and do NOT guess: stay quiet and wait. Never respond to your own voice. Keep answers short and clear.',
+  ].join('\n\n');
+}
+
 export type VoiceFailureLayer =
   | 'NONE'
   | 'MIC_PERMISSION'
@@ -108,6 +143,9 @@ export function useJarvisVoice({
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [audioLevel, setAudioLevel] = useState<number>(0);
+  // Live loudness for the orb / spectrum. Written every audio frame WITHOUT React state, because a
+  // 60-per-second state update re-rendered the whole Jarvis panel and made the site stutter.
+  const audioLevelRef = useRef<number>(0);
   const [transcript, setTranscript] = useState<string>('');
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [failingLayer, setFailingLayer] = useState<VoiceFailureLayer>('NONE');
@@ -170,9 +208,9 @@ export function useJarvisVoice({
     if (liveSessionRef.current && liveLanguageRef.current !== language) {
       liveLanguageRef.current = language;
       try {
-        const newName = getLanguageEnglishName(language);
+        const lp = getJarvisLang(language);
         liveSessionRef.current.sendRealtimeInput({
-          text: `[SYSTEM] The website language was changed to ${newName}. From now on speak only ${newName}. Do not answer this message; just use ${newName} for your next reply.`,
+          text: `[SYSTEM] The website language was changed to ${lp.name}. From now on speak only ${lp.name}. Greeting in this language: ${lp.greeting}. Speaking style: ${lp.style} Do not answer this message; just use ${lp.name} this way for your next reply.`,
         });
       } catch {}
     }
@@ -211,6 +249,7 @@ export function useJarvisVoice({
     turnHasAudioRef.current = false;
     setIsSpeaking(false);
     setAudioLevel(0);
+    audioLevelRef.current = 0;
   }, []);
 
   // Stop active microphone streaming, close live session, and release server concurrency slot
@@ -292,6 +331,7 @@ export function useJarvisVoice({
     setIsListening(false);
     setIsConnecting(false);
     setAudioLevel(0);
+    audioLevelRef.current = 0;
     isTurnRunningRef.current = false;
     turnCompleteRef.current = false;
     turnHasAudioRef.current = false;
@@ -308,6 +348,7 @@ export function useJarvisVoice({
     greetingDoneRef.current = true;
     setIsSpeaking(false);
     setAudioLevel(0);
+    audioLevelRef.current = 0;
     nextPlayTimeRef.current = 0;
     turnHasAudioRef.current = false;
     setIsListening(true);
@@ -371,10 +412,13 @@ export function useJarvisVoice({
       setIsSpeaking(true);
       setIsListening(false);
 
-      // Gapless scheduling
+      // Gapless scheduling with a small jitter buffer. Network chunks never arrive perfectly on time; starting
+      // each burst ~0.12 s ahead (and re-buffering after any underrun) removes the tiny gaps and
+      // clicks that made the voice sound broken / robotic ("atak-atak ke").
       const currentTime = pCtx.currentTime;
       if (nextPlayTimeRef.current < currentTime) {
-        nextPlayTimeRef.current = currentTime;
+        // Queue ran dry (start of a reply, or a late network chunk): build a small cushion before playing.
+        nextPlayTimeRef.current = currentTime + 0.12;
       }
 
       const sourceNode = pCtx.createBufferSource();
@@ -390,7 +434,8 @@ export function useJarvisVoice({
         const dataArray = new Uint8Array(playbackAnalyserRef.current.frequencyBinCount);
         const monitorPlayback = () => {
           if (!isSpeakingRef.current || !playbackAnalyserRef.current) {
-            setAudioLevel(0);
+            audioLevelRef.current = 0;
+            playbackAnimFrameRef.current = null;
             return;
           }
           playbackAnalyserRef.current.getByteFrequencyData(dataArray);
@@ -399,7 +444,7 @@ export function useJarvisVoice({
             sum += dataArray[i];
           }
           const avg = sum / dataArray.length;
-          setAudioLevel(Math.min(1.0, avg / 85));
+          audioLevelRef.current = Math.min(1.0, avg / 85);
           playbackAnimFrameRef.current = requestAnimationFrame(monitorPlayback);
         };
         playbackAnimFrameRef.current = requestAnimationFrame(monitorPlayback);
@@ -433,6 +478,42 @@ export function useJarvisVoice({
       sessionStorage.setItem('hayaati_jarvis_transcript', JSON.stringify(rollingTranscriptRef.current));
     } catch {}
   }, []);
+
+  // Caption batching (see onmessage)
+  const captionQueueRef = useRef<Array<{ role: 'user' | 'assistant'; text: string }>>([]);
+  const captionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flushCaptions = useCallback(() => {
+    if (captionTimerRef.current) {
+      clearTimeout(captionTimerRef.current);
+      captionTimerRef.current = null;
+    }
+    const queue = captionQueueRef.current;
+    if (!queue.length) return;
+    captionQueueRef.current = [];
+    // Merge consecutive pieces from the same speaker.
+    const merged: Array<{ role: 'user' | 'assistant'; text: string }> = [];
+    for (const item of queue) {
+      const prev = merged[merged.length - 1];
+      if (prev && prev.role === item.role) prev.text = `${prev.text} ${item.text}`;
+      else merged.push({ ...item });
+    }
+    for (const item of merged) {
+      if (!item.text.trim()) continue;
+      if (item.role === 'user') {
+        appendTranscript(`USER: ${item.text}`);
+        onTranscriptReadyRef.current?.(item.text);
+      } else {
+        appendTranscript(`JARVIS: ${item.text}`);
+        onAssistantTextReadyRef.current?.(item.text);
+      }
+    }
+  }, [appendTranscript]);
+  const queueCaption = useCallback((role: 'user' | 'assistant', text: string) => {
+    captionQueueRef.current.push({ role, text });
+    if (!captionTimerRef.current) {
+      captionTimerRef.current = setTimeout(flushCaptions, 220);
+    }
+  }, [flushCaptions]);
 
   const sendLiveText = useCallback((text: string) => {
     const clean = text.trim();
@@ -591,7 +672,7 @@ export function useJarvisVoice({
         apiKey: sessionData.token,
         httpOptions: { apiVersion: 'v1beta' },
       });
-      const languageName = getLanguageEnglishName(languageRef.current);
+      const langProfile = getJarvisLang(languageRef.current);
 
       const connectLive = async () => {
         const config: any = {
@@ -603,8 +684,7 @@ export function useJarvisVoice({
               prebuiltVoiceConfig: { voiceName: sessionData.voice || 'Capella' },
             },
           },
-          systemInstruction:
-            `You are Jarvis, the voice assistant of Hayaati Web Technology. Guide visitors through the 2030, 2035, and 2050 timeline frontiers, deep tech catalogue, and future city habitats. The owner and founder of Hayaati Web Technology is Aliya Khan. Never invent names, identities, ownership, company facts, prices, statistics, or other facts; if you do not know something, say so clearly. ${sessionData?.isOwner ? 'This session has been verified server-side as the owner session. Address Aliya Khan as the owner when appropriate.' : 'If the visitor says they are Aliya Khan, the owner, or the founder, do not treat the claim as verification. Ask them to provide the secure verification code through the existing owner verification flow.'} STRICT LANGUAGE RULES: The website-selected language is ${languageName}. You MUST speak only in ${languageName} for this entire session, including your very first greeting. Never switch, mix, translate or code-switch into another language because of the visitor's accent, background noise, detected input language, pronunciation, or your own language detection. Do not use Hinglish or English unless ${languageName} is English. Only change language when the visitor clearly and explicitly asks you to speak another language; if the website language is changed you will be told with a [SYSTEM] message and must then follow the new language. If you hear unclear audio, noise, or silence, do NOT answer and do NOT guess: stay quiet and wait. Never respond to your own voice. GREETING: when you receive the [SYSTEM] activation message, greet the visitor in ${languageName} with one or two short sentences: say hello, say that you are Jarvis, the assistant of Hayaati Web Technology, and ask how you can help. Use natural, everyday phrasing native to ${languageName}, not formal, literary, or machine-translated phrasing. Answer concisely and with cinematic precision.`,
+          systemInstruction: buildSystemInstruction(languageRef.current, Boolean(sessionData?.isOwner)),
         };
 
         const liveConnectPromise = ai.live.connect({
@@ -628,6 +708,7 @@ export function useJarvisVoice({
                     if (liveSessionIdRef.current === sessionId && turnCompleteRef.current && !turnHasAudioRef.current) {
                       setIsSpeaking(false);
                       setAudioLevel(0);
+                      audioLevelRef.current = 0;
                       setIsListening(true);
                     }
                   }, 0);
@@ -646,19 +727,16 @@ export function useJarvisVoice({
                 }
               }
 
+              // Captions arrive as many tiny pieces; they are collected and shown together a few
+              // times per second (one screen update instead of one per word).
               const inputText = msg.serverContent?.inputTranscription?.text || msg.serverContent?.inputAudioTranscription?.text;
-              if (inputText) {
-                appendTranscript(`USER: ${inputText}`);
-                onTranscriptReadyRef.current?.(inputText);
-              }
+              if (inputText) queueCaption('user', inputText);
 
               const outputText = msg.serverContent?.outputTranscription?.text || msg.serverContent?.outputAudioTranscription?.text;
               const textPart = msg.serverContent?.modelTurn?.parts?.[0]?.text;
               const assistantText = outputText || textPart;
-              if (assistantText) {
-                appendTranscript(`JARVIS: ${assistantText}`);
-                onAssistantTextReadyRef.current?.(assistantText);
-              }
+              if (assistantText) queueCaption('assistant', assistantText);
+              if (msg.serverContent?.turnComplete || msg.serverContent?.interrupted) flushCaptions();
             },
             onclose: (event: any) => {
               if (liveSessionIdRef.current !== sessionId) return;
@@ -763,7 +841,7 @@ export function useJarvisVoice({
       // The localized UI welcome string is the single source of truth for the activation greeting.
       try {
         liveSession.sendRealtimeInput({
-          text: `[SYSTEM] Jarvis has just been activated. Greet the visitor now, speaking only ${languageName}: say hello, say you are Jarvis, the assistant of Hayaati Web Technology, and ask how you can help. Keep it to one or two short sentences.`,
+          text: `[SYSTEM] Jarvis has just been activated. Greet the visitor now in everyday ${langProfile.name}: start with ${langProfile.greeting} (NOT a translated "hello"), say you are Jarvis from Hayaati Web Technology, politely ask their name and how you can help. One or two short, warm, natural sentences, the way a friendly local person would say it.`,
         });
       } catch (greetingError) {
         console.warn('[Gemini Live Greeting Error]:', greetingError);
@@ -801,7 +879,7 @@ export function useJarvisVoice({
         }
         const rms = Math.sqrt(sum / inputData.length);
         if (!isSpeakingRef.current) {
-          setAudioLevel(Math.min(1.0, rms * 5.0));
+          audioLevelRef.current = Math.min(1.0, rms * 5.0);
         }
 
         // Echo guard: never stream the mic while Jarvis speaks, while the greeting is
@@ -865,7 +943,7 @@ export function useJarvisVoice({
       else setSpeechError('MIC_FAILED');
       stopListening();
     }
-  }, [cancelSpeech, finishCompletedTurnIfReady, handleInterruption, playLiveAudioChunk, stopListening]);
+  }, [cancelSpeech, finishCompletedTurnIfReady, handleInterruption, playLiveAudioChunk, stopListening, queueCaption, flushCaptions]);
 
   // Speak through the existing Live session when one is open; browser TTS is fallback only.
   const speak = useCallback(
@@ -891,18 +969,23 @@ export function useJarvisVoice({
       setIsSpeaking(true);
       const animInterval = setInterval(() => {
         step++;
-        setAudioLevel(0.2 + Math.sin(step * 0.4) * 0.15);
+        audioLevelRef.current = 0.2 + Math.sin(step * 0.4) * 0.15;
       }, 100);
       const cleanText = text.replace(/[*_#`~>]/g, '').replace(/\s+/g, ' ').trim();
 
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = LOCALE_TO_VOICE_LANG[languageRef.current] || 'en-US';
+        const natural = pickNaturalVoice(utterance.lang);
+        if (natural) utterance.voice = natural;
+        utterance.rate = 1;
+        utterance.pitch = 1;
         const finish = () => {
           clearInterval(animInterval);
           isSpeakingRef.current = false;
           setIsSpeaking(false);
           setAudioLevel(0);
+          audioLevelRef.current = 0;
           onEnd?.();
         };
         utterance.onend = finish;
@@ -914,6 +997,7 @@ export function useJarvisVoice({
           isSpeakingRef.current = false;
           setIsSpeaking(false);
           setAudioLevel(0);
+          audioLevelRef.current = 0;
           onEnd?.();
         }, 2000);
       }
@@ -945,6 +1029,7 @@ export function useJarvisVoice({
     failingLayer,
     speechDetail,
     analyserNode: activeAnalyser,
+    audioLevelRef,
     startListening,
     stopListening,
     speak,

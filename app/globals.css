@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Country language boot: while the visitor's language (e.g. Hindi in India) is loading, the page
+   stays hidden for a moment instead of flashing English first. Removed by LanguageContext (max 2.5s). */
+html[data-lang-pending] body > * { opacity: 0; }
+body > * { transition: opacity 0.35s ease; }
+
 /* =====================================================================
    HERO REDESIGN (UI only) — added classes/variables, nothing above changed
    ===================================================================== */
@@ -312,9 +317,8 @@
    ===================================================================== */
 .chat-panel { --c: 14px; }
 .chat-panel .hero-panel__glass {
-  background-color: rgba(4, 10, 20, 0.5);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  /* Solid-ish tint instead of backdrop blur: blurring the live 3D orb behind it every frame was very heavy on phones. */
+  background-color: rgba(4, 10, 20, 0.72);
 }
 .chat-panel .hero-panel__glass::after { background: rgba(6, 16, 30, 0.14); }
 .chat-panel__body { position: relative; z-index: 1; padding: 0.7rem 0.9rem 0.85rem; }
@@ -721,4 +725,51 @@
   .hero-ad__copy .ad-cta { animation: none; opacity: 1; transform: none; filter: none; }
   .hero-ad__copy .ad-w__in { animation: none; transform: none; filter: none; }
   .ad-progress__seg i { animation: none; transform: scaleX(1); }
+}
+
+/* =====================================================================
+   v18 PERFORMANCE + POLISH
+   ===================================================================== */
+/* Language popup cards: one cheap CSS fade-up (no 30 JS springs), instant tap feedback. */
+.lang-card {
+  animation: lang-card-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.lang-card:hover { transform: translateY(-2px); }
+.lang-card:active { transform: scale(0.96); }
+@keyframes lang-card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lang-card { animation: none; }
+}
+
+/* While a full-screen popup is open the decorative hero CSS loops rest too. */
+html.bg-paused .hero-panel__ring::before,
+html.bg-paused .hero-panel__glass::before,
+html.bg-paused .hero-panel__runner::after,
+html.bg-paused .lang-btn,
+html.bg-paused .lang-btn::before,
+html.bg-paused .lang-btn::after { animation-play-state: paused; }
+
+/* Edge light runners: move with transform (GPU) instead of animating left/top (which re-laid-out the page
+   on every frame). Container units give the travel distance. */
+.hero-panel__runner--h { container-type: inline-size; }
+.hero-panel__runner--v { container-type: size; }
+@supports (width: 1cqw) {
+  .hero-panel__runner--h::after { animation-name: hp-run-h2; will-change: transform, opacity; }
+  .hero-panel__runner--v::after { animation-name: hp-run-v2; will-change: transform, opacity; }
+}
+@keyframes hp-run-h2 {
+  0% { transform: translateX(0); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateX(calc(100cqw - 72px)); opacity: 0; }
+}
+@keyframes hp-run-v2 {
+  0% { transform: translateY(0); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(calc(100cqh - 56px)); opacity: 0; }
 }

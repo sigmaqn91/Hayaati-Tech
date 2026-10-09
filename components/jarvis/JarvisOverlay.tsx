@@ -25,6 +25,7 @@ import { HologramCanvas, AssistantVisualState } from './HologramCanvas';
 import { useJarvisVoice } from './useJarvisVoice';
 import { JarvisBackdrop } from './JarvisBackdrop';
 import { useLanguage } from '@/context/LanguageContext';
+import { QUICK_ACK } from '@/lib/jarvisLocale';
 
 interface JarvisOverlayProps {
   isOpen: boolean;
@@ -180,6 +181,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     failingLayer,
     speechDetail,
     analyserNode,
+    audioLevelRef,
     startListening,
     stopListening,
     speak,
@@ -442,13 +444,8 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
     // Give typed chat an immediate spoken acknowledgement while the existing /api/chat reply is pending.
     if (!audioMuted) {
-      const englishInput = /^[\x00-\x7F]*$/.test(query.trim()) && /[a-zA-Z]/.test(query);
-      const quickReply = englishInput
-        ? 'Got it. One moment.'
-        : language === 'hi'
-          ? 'Samajh gaya. Ek second, main check karta hoon.'
-          : 'Got it. One moment.';
-      speak(quickReply);
+      // Short "one moment" in the visitor's own language (was English for 28 of the 30 languages).
+      speak(QUICK_ACK[language || 'en'] || QUICK_ACK.en);
     }
 
     const requestController = new AbortController();
@@ -659,6 +656,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           <JarvisBackdrop
             state={visualState}
             loudness={audioLevel}
+            levelRef={audioLevelRef}
             centerY={orbGeometry.centerY}
             orbRadius={orbGeometry.orbRadius}
           />
@@ -777,6 +775,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             visualState={visualState}
             audioLevel={audioLevel}
             analyserNode={analyserNode}
+            levelRef={audioLevelRef}
           />
         </div>
 
@@ -803,19 +802,8 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           {embedded && <div className="mt-2 w-24 border-t border-dotted border-[#38e8ff]/50" aria-hidden="true" />}
         </div>
 
-        {/* Spectrum Bar: right under state indicator */}
-        <div className="mt-2.5 flex items-end gap-1 h-4 pointer-events-auto">
-          {[0.4, 0.8, 0.6, 1.0, 0.5, 0.9, 0.3, 0.7, 0.5, 0.8].map((mult, i) => {
-            const barHeight = Math.max(3, (audioLevel || 0.1) * mult * 16);
-            return (
-              <div
-                key={i}
-                style={{ height: `${barHeight}px` }}
-                className="w-1 bg-[#38e8ff] rounded-t transition-all duration-75"
-              />
-            );
-          })}
-        </div>
+        {/* Spectrum Bar: right under state indicator (animated straight on the DOM, no re-renders) */}
+        <SpectrumBars levelRef={audioLevelRef} />
 
         {/* Active Response Caption Subtitle (legacy modal only) */}
         {!embedded && messages.length > 0 && (
@@ -854,10 +842,10 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
               <motion.div
                 key="jarvis-chat-panel"
                 data-jarvis-transcript
-                initial={{ opacity: 0, y: 26, scale: 0.94, filter: 'blur(10px)' }}
-                animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: 18, scale: 0.95, filter: 'blur(10px)' }}
-                transition={{ type: 'spring', stiffness: 220, damping: 24, mass: 0.9 }}
+                initial={{ opacity: 0, y: 22, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 14, scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 28, mass: 0.8 }}
                 className="absolute z-30 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[min(94vw,36rem)] lg:left-[var(--orb-cx)] lg:w-[min(34rem,36vw)] flex flex-col pointer-events-auto"
                 style={{
                   top: 'var(--tr-top, auto)',
@@ -890,11 +878,10 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
                           return (
                             <motion.div
                               key={`msg-${message.id}`}
-                              layout="position"
-                              initial={{ opacity: 0, y: 22, scale: 0.95 }}
-                              animate={{ opacity: fade, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: -18, height: 0, marginTop: 0 }}
-                              transition={{ type: 'spring', stiffness: 260, damping: 26 }}
+                              initial={{ opacity: 0, y: 16 }}
+                              animate={{ opacity: fade, y: 0 }}
+                              exit={{ opacity: 0, y: -12 }}
+                              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                               className={`chat-row ${isUser ? 'chat-row--user' : 'chat-row--ai'}`}
                             >
                               <div className={`chat-bubble ${isUser ? 'chat-bubble--user' : 'chat-bubble--ai'}`}>
@@ -930,7 +917,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       {embedded && (
         <button
           onClick={() => (isOwner ? handleLockOwnerMode() : setShowVerifyModal(true))}
-          className="absolute right-3 top-3 sm:right-5 sm:top-5 z-30 pointer-events-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-[#38e8ff]/30 bg-[#05070a]/70 text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff] text-xs transition-colors cursor-pointer backdrop-blur-sm"
+          className="absolute right-3 top-3 sm:right-5 sm:top-5 z-30 pointer-events-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-[#38e8ff]/30 bg-[#05070a]/85 text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff] text-xs transition-colors cursor-pointer"
           title="Owner Authentication"
           aria-label="Owner Authentication"
         >
@@ -1286,5 +1273,54 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     </div>
   );
 };
+
+// Ten small level bars under the orb. They read the live loudness every animation frame and write the
+// height straight to the elements, so the big Jarvis panel never has to re-render for them.
+const SPECTRUM_MULTS = [0.4, 0.8, 0.6, 1.0, 0.5, 0.9, 0.3, 0.7, 0.5, 0.8];
+function SpectrumBars({ levelRef }: { levelRef: React.MutableRefObject<number> }) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const bars = Array.from(wrap.children) as HTMLElement[];
+    let raf = 0;
+    let shown = -1;
+    let visible = true;
+    const io =
+      typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver((entries) => {
+            visible = entries[0].isIntersecting;
+          })
+        : null;
+    io?.observe(wrap);
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
+      if (!visible) return;
+      const level = Math.round((levelRef.current || 0.1) * 50) / 50;
+      if (level === shown) return;
+      shown = level;
+      for (let i = 0; i < bars.length; i++) {
+        const h = Math.max(3, (level || 0.1) * SPECTRUM_MULTS[i] * 16);
+        bars[i].style.transform = `scaleY(${h / 16})`;
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      io?.disconnect();
+    };
+  }, [levelRef]);
+  return (
+    <div ref={wrapRef} className="mt-2.5 flex items-end gap-1 h-4 pointer-events-auto" aria-hidden="true">
+      {SPECTRUM_MULTS.map((_, i) => (
+        <div
+          key={i}
+          style={{ height: '16px', transform: 'scaleY(0.19)', transformOrigin: '50% 100%' }}
+          className="w-1 bg-[#38e8ff] rounded-t transition-transform duration-75"
+        />
+      ))}
+    </div>
+  );
+}
 
 export default JarvisOverlay;

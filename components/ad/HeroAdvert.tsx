@@ -124,7 +124,7 @@ export function HeroAdvert() {
     const stage = canvas.parentElement as HTMLElement;
     const fit = () => {
       const r = stage.getBoundingClientRect();
-      const ratio = Math.min(window.devicePixelRatio || 1, lowPower ? 1.5 : 2);
+      const ratio = Math.min(window.devicePixelRatio || 1, lowPower ? 1.25 : 2);
       engine.resize(Math.round(r.width), Math.round(r.height), ratio);
       if (reduce) engine.drawStill();
     };
@@ -159,6 +159,10 @@ export function HeroAdvert() {
       if (!running) return;
       raf = requestAnimationFrame(loop);
       if (now - lastDraw < minGap) return;
+      if (document.documentElement.classList.contains('bg-paused')) {
+        last = now;
+        return;
+      }
       const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
       lastDraw = now;

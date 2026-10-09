@@ -137,7 +137,8 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
         dir="ltr"
         className="hero-content relative z-20 lg:min-h-[100svh] flex-none flex flex-col justify-start lg:justify-center pointer-events-none"
       >
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        {/* Phones: no side gutter, so the glass panel runs edge to edge and touches both screen borders. */}
+        <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
           <div
             dir={isRtl ? 'rtl' : 'ltr'}
             className="hero-panel-wrap mx-auto lg:mx-0 w-full max-w-[46rem] lg:w-[min(50vw,42rem)]"
@@ -156,17 +157,17 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
               <span className="hero-panel__runner hero-panel__runner--v" aria-hidden="true" />
 
               <div className="hero-panel__body flex flex-col items-start text-start">
-                {/* System Online HUD Badge */}
-                <div className="inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-0.5 px-3.5 py-1.5 rounded-lg bg-[#05070a]/60 border border-[#38e8ff]/40 shadow-[0_0_12px_rgba(56,232,255,0.15)] mb-4">
-                  <span className="relative flex h-2 w-2 shrink-0">
+                {/* System Online HUD Badge (a little bigger, always stays inside the panel) */}
+                <div className="inline-flex max-w-full flex-wrap items-center gap-x-2.5 gap-y-1 px-4 py-2 sm:px-[1.1rem] sm:py-2.5 rounded-lg bg-[#05070a]/60 border border-[#38e8ff]/45 shadow-[0_0_14px_rgba(56,232,255,0.18)] mb-4">
+                  <span className="relative flex h-2.5 w-2.5 shrink-0">
                     <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-[#38e8ff] opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#38e8ff]" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#38e8ff]" />
                   </span>
-                  <span className="font-mono text-[10px] sm:text-[11px] tracking-widest text-[#38e8ff] uppercase font-bold">
+                  <span className="font-mono text-[12px] sm:text-[13px] tracking-widest text-[#38e8ff] uppercase font-bold">
                     {t.hero.online}
                   </span>
-                  <span className="text-slate-500 font-mono text-[10px]">|</span>
-                  <span className="font-mono text-[9px] sm:text-[10px] text-slate-300 break-all">
+                  <span className="text-slate-500 font-mono text-[12px]">|</span>
+                  <span className="font-mono text-[10.5px] sm:text-[11.5px] text-slate-300 break-all">
                     {t.hero.systemStatus}
                   </span>
                 </div>
@@ -261,7 +262,7 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
             </div>
 
             {/* Monospace Telemetry Details Bar */}
-            <div className="mt-4 px-1 flex flex-wrap items-center justify-between text-[10px] sm:text-[11px] font-mono text-slate-500 gap-x-3 gap-y-1">
+            <div className="mt-4 px-4 sm:px-1 flex flex-wrap items-center justify-between text-[10px] sm:text-[11px] font-mono text-slate-500 gap-x-3 gap-y-1">
               <span>{t.hero.coordinates}</span>
               <span className="text-[#38e8ff]/80 font-semibold tracking-wider">{t.hero.timelineSpan}</span>
             </div>

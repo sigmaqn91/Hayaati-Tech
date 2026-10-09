@@ -147,17 +147,67 @@ export default function HeroCosmos() {
       buildStreams();
       buildTraces();
       buildDust();
+      orbCheckedAt = -1e9;
+      shadeKey = '';
     };
 
-    // Reads the Jarvis orb box (data-jarvis-orb) relative to this canvas. null -> legacy centre.
+    // Jarvis orb box (data-jarvis-orb) relative to this canvas, CACHED. It used to be measured with two
+    // getBoundingClientRect() calls on every frame, which forced a full page layout 30-60 times a second
+    // (the main cause of the hero "chipak-chipak" stutter while Jarvis was active).
     let orbEl: HTMLElement | null = null;
-    const readOrb = () => {
+    let orbCache: { x: number; y: number; size: number } | null = null;
+    let orbCheckedAt = -1e9;
+    const measureOrb = () => {
       if (!orbEl || !orbEl.isConnected) orbEl = document.querySelector<HTMLElement>('[data-jarvis-orb]');
-      if (!orbEl) return null;
+      if (!orbEl) {
+        orbCache = null;
+        return;
+      }
       const o = orbEl.getBoundingClientRect();
-      if (o.width < 2) return null;
+      if (o.width < 2) {
+        orbCache = null;
+        return;
+      }
       const k = canvas.getBoundingClientRect();
-      return { x: o.left - k.left + o.width / 2, y: o.top - k.top + o.height / 2, size: o.width };
+      orbCache = { x: o.left - k.left + o.width / 2, y: o.top - k.top + o.height / 2, size: o.width };
+      buildShade();
+    };
+    const readOrb = (now: number) => {
+      // Re-measure only every 1.5 s (layout changes are rare); resize/ResizeObserver also re-measure.
+      if (now - orbCheckedAt > (orbCache ? 1500 : 250)) {
+        orbCheckedAt = now;
+        measureOrb();
+      }
+      return orbCache;
+    };
+
+    // Static readability veil + vignette, pre-drawn once into an offscreen canvas (was 2 big gradients per frame).
+    const shade = document.createElement('canvas');
+    const shadeCtx = shade.getContext('2d');
+    let shadeKey = '';
+    const buildShade = () => {
+      if (!shadeCtx) return;
+      const cx = orbCache ? orbCache.x : W / 2;
+      const key = `${W}x${H}@${Math.round(cx)}`;
+      if (key === shadeKey) return;
+      shadeKey = key;
+      shade.width = Math.max(1, Math.round(W * dpr));
+      shade.height = Math.max(1, Math.round(H * dpr));
+      const g = shadeCtx;
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, W, H);
+      const vr = Math.max(W * 0.55, H * 0.4);
+      const veil = g.createRadialGradient(cx, H * 0.58, 0, cx, H * 0.58, vr);
+      veil.addColorStop(0, 'rgba(0,0,0,0.5)');
+      veil.addColorStop(0.65, 'rgba(0,0,0,0.2)');
+      veil.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = veil;
+      g.fillRect(0, 0, W, H);
+      const vg = g.createRadialGradient(cx, H * 0.5, Math.min(W, H) * 0.35, cx, H * 0.5, Math.hypot(W, H) * 0.62);
+      vg.addColorStop(0, 'rgba(0,0,0,0)');
+      vg.addColorStop(1, 'rgba(0,0,0,0.7)');
+      g.fillStyle = vg;
+      g.fillRect(0, 0, W, H);
     };
 
     // ---------- drawing ----------
@@ -171,7 +221,7 @@ export default function HeroCosmos() {
         c.fillRect(0, 0, W, H);
       }
       // Centre + radius follow the on-screen Jarvis orb so globe and orb stay concentric.
-      const orb = readOrb();
+      const orb = readOrb(ts * 1000);
       const cx = orb ? orb.x : W / 2;
       const cy = orb ? orb.y : H * 0.42;
       const R = orb ? orb.size * 0.62 : Math.min(W * 0.42, H * 0.3);
@@ -460,20 +510,10 @@ export default function HeroCosmos() {
       c.fillStyle = sg;
       c.fillRect(0, sy - 80, W, 160);
 
-      // 8. readability veil + vignette
+      // 8. readability veil + vignette (pre-rendered)
       c.globalCompositeOperation = 'source-over';
-      const vr = Math.max(W * 0.55, H * 0.4);
-      const veil = c.createRadialGradient(cx, H * 0.58, 0, cx, H * 0.58, vr);
-      veil.addColorStop(0, 'rgba(0,0,0,0.5)');
-      veil.addColorStop(0.65, 'rgba(0,0,0,0.2)');
-      veil.addColorStop(1, 'rgba(0,0,0,0)');
-      c.fillStyle = veil;
-      c.fillRect(0, 0, W, H);
-      const vg = c.createRadialGradient(cx, H * 0.5, Math.min(W, H) * 0.35, cx, H * 0.5, Math.hypot(W, H) * 0.62);
-      vg.addColorStop(0, 'rgba(0,0,0,0)');
-      vg.addColorStop(1, 'rgba(0,0,0,0.7)');
-      c.fillStyle = vg;
-      c.fillRect(0, 0, W, H);
+      buildShade();
+      c.drawImage(shade, 0, 0, W, H);
     };
 
     // ---------- loop control ----------
@@ -487,6 +527,10 @@ export default function HeroCosmos() {
     const frame = (now: number) => {
       if (!running) return;
       raf = requestAnimationFrame(frame);
+      if (document.documentElement.classList.contains('bg-paused')) {
+        last = now;
+        return;
+      }
       const dtMs = now - last;
       if (dtMs < (quality === 2 ? 14 : 30)) return;
       last = now;
@@ -522,7 +566,7 @@ export default function HeroCosmos() {
     if (reduce) draw(2.5, 0);
     // Reduced motion draws a still frame; redraw once the (lazy-loaded) orb has mounted.
     const stillTimers: number[] = reduce
-      ? [500, 1500].map((ms) => window.setTimeout(() => draw(2.5, 0), ms))
+      ? [500, 1500].map((ms) => window.setTimeout(() => { orbCheckedAt = -1e9; draw(2.5, 0); }, ms))
       : [];
 
     let io: IntersectionObserver | null = null;
@@ -539,9 +583,20 @@ export default function HeroCosmos() {
     document.addEventListener('visibilitychange', onVis);
 
     let ro: ResizeObserver | null = null;
+    // Debounced: when Jarvis opens, the hero grows smoothly for ~0.3 s. Re-allocating the full-screen canvas on
+    // every one of those frames caused a visible hitch right at activation; now it resizes once it settles.
+    let resizeTimer = 0;
+    let lastSize = '';
     const onResize = () => {
-      resize();
-      if (reduce) draw(2.5, 0);
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        const r = canvas.getBoundingClientRect();
+        const key = `${Math.round(r.width)}x${Math.round(r.height)}`;
+        if (key === lastSize) return;
+        lastSize = key;
+        resize();
+        if (reduce) draw(2.5, 0);
+      }, 160);
     };
     if (typeof ResizeObserver !== 'undefined') {
       ro = new ResizeObserver(onResize);
@@ -551,6 +606,7 @@ export default function HeroCosmos() {
     }
 
     return () => {
+      window.clearTimeout(resizeTimer);
       stillTimers.forEach((id) => window.clearTimeout(id));
       stop();
       if (io) io.disconnect();

@@ -37,8 +37,15 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
     let prefersReducedMotion = mql.matches;
 
-    // DPR capped at 2
-    const getDpr = () => Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2);
+    // Soft background layer (mostly shown at 40% opacity): 1x pixels on phones, 1.5x on desktop is visually identical
+    // and 2-4x cheaper than the old 2x.
+    const isPhone = window.innerWidth < 768;
+    const getDpr = () => Math.min(window.devicePixelRatio || 1, isPhone ? 1 : 1.5);
+    const minFrameGap = isPhone ? 32 : 15; // ~30 fps on phones, ~60 on desktop
+
+    // Static part (background gradient, horizon, radial fan lines) is pre-drawn once per resize.
+    const staticLayer = document.createElement('canvas');
+    const staticCtx = staticLayer.getContext('2d');
 
     let width = 0;
     let height = 0;
@@ -80,6 +87,7 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
       canvas.style.height = `${height}px`;
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      buildStatic(dpr);
 
       const targetCount = width < 768 ? 70 : 120;
       if (particles.length === 0 || Math.abs(particles.length - targetCount) > 20) {
@@ -87,8 +95,76 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
       }
     };
 
+    const buildStatic = (dpr: number) => {
+      if (!staticCtx || width === 0 || height === 0) return;
+      staticLayer.width = Math.round(width * dpr);
+      staticLayer.height = Math.round(height * dpr);
+      const ctx = staticCtx;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // 1. Near-black base gradient (deep dark cinematic space)
+      const bgGrad = ctx.createRadialGradient(
+        width * 0.5,
+        height * 0.45,
+        0,
+        width * 0.5,
+        height * 0.5,
+        Math.max(width, height) * 0.85
+      );
+      bgGrad.addColorStop(0, '#090e18');
+      bgGrad.addColorStop(0.55, '#05070a');
+      bgGrad.addColorStop(1, '#020305');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // 2. Slowly moving perspective grid in faint cyan
+      // Horizon sits at ~54% of hero height
+      const horizonY = height * 0.54;
+      const vpX = width * 0.5;
+
+      // Draw faint horizon glow line
+      const horizonGrad = ctx.createLinearGradient(0, 0, width, 0);
+      horizonGrad.addColorStop(0, 'rgba(56, 232, 255, 0)');
+      horizonGrad.addColorStop(0.5, 'rgba(56, 232, 255, 0.18)');
+      horizonGrad.addColorStop(1, 'rgba(56, 232, 255, 0)');
+      ctx.beginPath();
+      ctx.strokeStyle = horizonGrad;
+      ctx.lineWidth = 1;
+      ctx.moveTo(0, horizonY);
+      ctx.lineTo(width, horizonY);
+      ctx.stroke();
+
+      // Perspective radial lines (fanning out from vanishing point)
+      const numRadials = width < 768 ? 14 : 22;
+      const spread = width * 1.8;
+      for (let i = 0; i <= numRadials; i++) {
+        const factor = (i / numRadials - 0.5) * 2; // -1 to 1
+        const bottomX = vpX + factor * (spread * 0.5);
+
+        ctx.beginPath();
+        const radGrad = ctx.createLinearGradient(vpX, horizonY, bottomX, height);
+        radGrad.addColorStop(0, 'rgba(56, 232, 255, 0)');
+        radGrad.addColorStop(0.3, 'rgba(56, 232, 255, 0.08)');
+        radGrad.addColorStop(1, 'rgba(56, 232, 255, 0.02)');
+        ctx.strokeStyle = radGrad;
+        ctx.lineWidth = 0.75;
+        ctx.moveTo(vpX, horizonY);
+        ctx.lineTo(bottomX, height);
+        ctx.stroke();
+      }
+
+    };
+
     resize();
-    window.addEventListener('resize', resize);
+    // Debounced resize (window + hero height changes, e.g. when the Jarvis transcript opens)
+    let resizeTimer = 0;
+    const scheduleResize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(resize, 160);
+    };
+    window.addEventListener('resize', scheduleResize);
+    const parentRo =
+      typeof ResizeObserver !== 'undefined' && canvas.parentElement ? new ResizeObserver(scheduleResize) : null;
+    if (parentRo && canvas.parentElement) parentRo.observe(canvas.parentElement);
 
     // Pause off-screen using IntersectionObserver
     const observer = new IntersectionObserver(
@@ -114,38 +190,12 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
     const drawFrame = (time: number) => {
       if (width === 0 || height === 0) return;
 
-      // 1. Near-black base gradient (deep dark cinematic space)
-      const bgGrad = ctx.createRadialGradient(
-        width * 0.5,
-        height * 0.45,
-        0,
-        width * 0.5,
-        height * 0.5,
-        Math.max(width, height) * 0.85
-      );
-      bgGrad.addColorStop(0, '#090e18');
-      bgGrad.addColorStop(0.55, '#05070a');
-      bgGrad.addColorStop(1, '#020305');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, width, height);
-
-      // 2. Slowly moving perspective grid in faint cyan
-      // Horizon sits at ~54% of hero height
+      // 1-2. Pre-rendered static background (gradient, horizon glow, radial fan)
+      if (staticLayer.width > 0) {
+        ctx.drawImage(staticLayer, 0, 0, width, height);
+      }
       const horizonY = height * 0.54;
       const gridHeight = height - horizonY;
-      const vpX = width * 0.5;
-
-      // Draw faint horizon glow line
-      const horizonGrad = ctx.createLinearGradient(0, 0, width, 0);
-      horizonGrad.addColorStop(0, 'rgba(56, 232, 255, 0)');
-      horizonGrad.addColorStop(0.5, 'rgba(56, 232, 255, 0.18)');
-      horizonGrad.addColorStop(1, 'rgba(56, 232, 255, 0)');
-      ctx.beginPath();
-      ctx.strokeStyle = horizonGrad;
-      ctx.lineWidth = 1;
-      ctx.moveTo(0, horizonY);
-      ctx.lineTo(width, horizonY);
-      ctx.stroke();
 
       // Perspective horizontal lines (transversals moving forward toward viewer)
       const numLines = 14;
@@ -166,25 +216,6 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
         ctx.lineWidth = 0.75 + curvedDepth * 0.5;
         ctx.moveTo(0, y);
         ctx.lineTo(width, y);
-        ctx.stroke();
-      }
-
-      // Perspective radial lines (fanning out from vanishing point)
-      const numRadials = width < 768 ? 14 : 22;
-      const spread = width * 1.8;
-      for (let i = 0; i <= numRadials; i++) {
-        const factor = (i / numRadials - 0.5) * 2; // -1 to 1
-        const bottomX = vpX + factor * (spread * 0.5);
-
-        ctx.beginPath();
-        const radGrad = ctx.createLinearGradient(vpX, horizonY, bottomX, height);
-        radGrad.addColorStop(0, 'rgba(56, 232, 255, 0)');
-        radGrad.addColorStop(0.3, 'rgba(56, 232, 255, 0.08)');
-        radGrad.addColorStop(1, 'rgba(56, 232, 255, 0.02)');
-        ctx.strokeStyle = radGrad;
-        ctx.lineWidth = 0.75;
-        ctx.moveTo(vpX, horizonY);
-        ctx.lineTo(bottomX, height);
         ctx.stroke();
       }
 
@@ -266,15 +297,15 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
     };
 
     const loop = (currentTime: number) => {
+      animationFrameId = requestAnimationFrame(loop);
+      if (currentTime - lastTime < minFrameGap) return;
       const dt = Math.min(currentTime - lastTime, 100);
       lastTime = currentTime;
 
-      if (isVisible && isTabVisible && !prefersReducedMotion) {
+      if (isVisible && isTabVisible && !prefersReducedMotion && !document.documentElement.classList.contains('bg-paused')) {
         updateState(dt);
         drawFrame(currentTime);
       }
-
-      animationFrameId = requestAnimationFrame(loop);
     };
 
     // If reduced motion is requested, render a still frame and do not loop
@@ -304,7 +335,9 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
       if (animationFrameId !== null) {
         cancelAnimationFrame(animationFrameId);
       }
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', scheduleResize);
+      window.clearTimeout(resizeTimer);
+      parentRo?.disconnect();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       mql.removeEventListener('change', handleMotionChange);
       observer.disconnect();
