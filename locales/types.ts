@@ -7,6 +7,15 @@ export type SupportedLanguage =
   | 'nl' | 'pl' | 'fa' | 'th' | 'sw';
 
 export interface TranslationSchema {
+  /** Optional: languages without these keys fall back to English (see components/HeroAdvert.tsx). */
+  heroAdvert?: Partial<Record<
+    | 'badge' | 'headline' | 'tagline'
+    | 'service1Title' | 'service1Desc' | 'service2Title' | 'service2Desc'
+    | 'service3Title' | 'service3Desc' | 'service4Title' | 'service4Desc'
+    | 'statLanguages' | 'statServices' | 'founderLabel' | 'builtFor'
+    | 'ctaStart' | 'ctaProjects' | 'ctaAdvertise',
+    string
+  >>;
   meta: {
     code: SupportedLanguage;
     languageName: string;

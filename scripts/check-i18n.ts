@@ -146,6 +146,8 @@ async function runCheck() {
 
     // Audit UI keys
     for (const [key, enVal] of Object.entries(flatEnUi)) {
+      // heroAdvert.* is optional per language: missing keys fall back to English at runtime
+      if (key.startsWith('heroAdvert.') && !(key in flatLangUi)) continue;
       if (!(key in flatLangUi)) {
         failures.push({
           type: 'MISSING_KEY',

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Megaphone, X, Send, ShieldCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useOverlayHistory } from '@/hooks/use-overlay-history';
 
 interface AdvertiseModalProps {
   isOpen: boolean;
@@ -84,6 +85,9 @@ export function AdvertiseModal({ isOpen, onClose }: AdvertiseModalProps) {
       );
     }
   };
+
+  // Back button closes this modal instead of leaving the site
+  useOverlayHistory(isOpen, onClose);
 
   if (!isOpen) return null;
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useOverlayHistory } from '@/hooks/use-overlay-history';
 import {
   Send,
   X,
@@ -89,6 +90,59 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   const { t } = useLanguage();
   const [conversationMode] = useState<boolean>(true);
   const [embeddedActive, setEmbeddedActive] = useState<boolean>(false);
+
+  // Back button closes only the overlay that is open (verification modal, admin panel, legacy full-screen mode)
+  useOverlayHistory(showVerifyModal, () => setShowVerifyModal(false));
+  useOverlayHistory(showAdminPanel, () => setShowAdminPanel(false));
+  useOverlayHistory(isOpen && !embedded, onClose);
+
+  // UI-only: typing box lifts above the on-screen keyboard (visualViewport) and expands while focused
+  const commandInputRef = useRef<HTMLInputElement | null>(null);
+  const inputFocusedRef = useRef<boolean>(false);
+  const baseViewportHRef = useRef<number>(0);
+  const [inputFocused, setInputFocused] = useState<boolean>(false);
+  const [kbInset, setKbInset] = useState<number>(0);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    baseViewportHRef.current = window.innerHeight;
+    if (!vv) return;
+    let raf = 0;
+    const update = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        if (!inputFocusedRef.current) baseViewportHRef.current = window.innerHeight;
+        const base = Math.max(baseViewportHRef.current, window.innerHeight);
+        const inset = Math.max(0, Math.round(base - vv.height - vv.offsetTop));
+        setKbInset((prev) => (Math.abs(prev - inset) > 1 ? inset : prev));
+      });
+    };
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
+    update();
+    return () => {
+      cancelAnimationFrame(raf);
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
+  const handleCommandFocus = () => {
+    inputFocusedRef.current = true;
+    setInputFocused(true);
+  };
+  const handleCommandBlur = () => {
+    inputFocusedRef.current = false;
+    setInputFocused(false);
+  };
+  // Touch devices only (desktop keeps the bar exactly as it was)
+  const [coarsePointer, setCoarsePointer] = useState<boolean>(false);
+  useEffect(() => {
+    setCoarsePointer(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
+  const commandLifted = inputFocused && (kbInset > 80 || coarsePointer);
 
   // Voice Hook
   const {
@@ -571,7 +625,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     <div
       ref={overlayRef}
       className={embedded
-        ? 'absolute inset-0 z-10 flex flex-col bg-transparent text-slate-100 font-mono overflow-hidden select-none pointer-events-none'
+        ? `absolute inset-0 ${commandLifted ? 'z-[25]' : 'z-10'} flex flex-col bg-transparent text-slate-100 font-mono overflow-hidden select-none pointer-events-none`
         : 'fixed inset-0 z-50 flex flex-col bg-[#05070a] text-slate-100 font-mono overflow-hidden select-none h-[100dvh] overscroll-contain touch-manipulation'}
     >
       {/* 1-3. The full-screen HUD chrome stays only in the legacy modal mode. */}
@@ -861,16 +915,55 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       )}
 
       {/* 6. Fixed Bottom Command Bar */}
-      <div className={embedded
-        ? 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30 pointer-events-auto'
-        : 'absolute bottom-0 left-0 right-0 border-t border-[#38e8ff]/20 bg-[#05070a]/95 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30'}>
-        <div className="max-w-3xl mx-auto flex items-center gap-2 sm:gap-3">
+      <motion.div
+        layout="position"
+        transition={{ type: 'spring', stiffness: 380, damping: 36, mass: 0.9 }}
+        style={commandLifted ? { bottom: `${kbInset}px` } : undefined}
+        className={commandLifted
+          ? 'fixed left-0 right-0 px-2.5 pb-2.5 pt-1 z-30 pointer-events-auto'
+          : embedded
+          ? 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30 pointer-events-auto'
+          : 'absolute bottom-0 left-0 right-0 border-t border-[#38e8ff]/20 bg-[#05070a]/95 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30'}>
+        <motion.div
+          animate={commandLifted
+            ? {
+                padding: 10,
+                borderRadius: 16,
+                backgroundColor: 'rgba(7,11,19,0.94)',
+                boxShadow: '0 0 0 1px rgba(56,232,255,0.65), 0 0 26px rgba(56,232,255,0.32), 0 -10px 30px rgba(129,140,248,0.18)',
+              }
+            : {
+                padding: 0,
+                borderRadius: 0,
+                backgroundColor: 'rgba(7,11,19,0)',
+                boxShadow: '0 0 0 0px rgba(56,232,255,0), 0 0 0px rgba(56,232,255,0), 0 0 0px rgba(129,140,248,0)',
+              }}
+          transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+          className={`max-w-3xl mx-auto flex items-center gap-2 sm:gap-3 ${commandLifted ? 'backdrop-blur-xl' : ''}`}
+        >
           {/* Text Command Input Box (font size at least 16px to prevent mobile zoom) */}
           <div className="flex-1 relative">
-            <input
+            <motion.input
+              ref={commandInputRef}
               type="text"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
+              onFocus={handleCommandFocus}
+              onBlur={handleCommandBlur}
+              onPointerDown={(e) => {
+                // Touch: lift the bar as early as possible so the browser has no reason to scroll the page away
+                if (e.pointerType === 'touch') {
+                  inputFocusedRef.current = true;
+                  setInputFocused(true);
+                  window.setTimeout(() => {
+                    if (document.activeElement !== commandInputRef.current) handleCommandBlur();
+                  }, 700);
+                }
+              }}
+              animate={{ fontSize: commandLifted ? 18 : 16, paddingTop: commandLifted ? 14 : 10, paddingBottom: commandLifted ? 14 : 10 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+              enterKeyHint="send"
+              autoComplete="off"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSendMessage();
               }}
@@ -879,8 +972,8 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
                   ? 'Listening for voice transmission...'
                   : 'Type transmission or speak into neural core...'
               }
-              style={{ fontSize: '16px' }}
-              className="w-full bg-[#0a0f18] border border-[#38e8ff]/30 focus:border-[#38e8ff] text-slate-100 placeholder-slate-500 px-4 py-2.5 sm:py-3 rounded-md outline-none transition-colors"
+              style={{ caretColor: '#38e8ff', touchAction: 'manipulation' }}
+              className="w-full bg-[#0a0f18] border border-[#38e8ff]/30 focus:border-[#38e8ff] text-slate-100 placeholder-slate-500 px-4 rounded-md outline-none transition-colors"
             />
           </div>
 
@@ -908,8 +1001,8 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             <Send className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">TRANSMIT</span>
           </button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* 7. Verification Code Modal (Masked Typed Input) */}
       <AnimatePresence>
