@@ -868,3 +868,180 @@ html.bg-paused .lang-btn::after { animation-play-state: paused; }
   88% { opacity: 1; }
   100% { transform: translateY(calc(100cqh - 56px)); opacity: 0; }
 }
+
+/* =====================================================================
+   CITIES & PLACES POSTCARDS — animation only (layout unchanged).
+   Section: ~90% transparent with a slowly moving holographic background behind it.
+   Cards: continuously travelling light beam on the border.
+   ===================================================================== */
+@property --pc-a {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes pc-spin { to { --pc-a: 360deg; } }
+@keyframes pc-glow {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.9; }
+}
+@keyframes pc-grid {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(48px, 48px, 0); }
+}
+@keyframes pc-aurora {
+  0% { transform: translate3d(-6%, -2%, 0) rotate(0deg) scale(1); opacity: 0.75; }
+  50% { transform: translate3d(4%, 3%, 0) rotate(8deg) scale(1.08); opacity: 1; }
+  100% { transform: translate3d(8%, -3%, 0) rotate(-6deg) scale(1); opacity: 0.8; }
+}
+
+/* Moving background (behind the section, which stays transparent) */
+.pc-section::before,
+.pc-section::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+.pc-section::before {
+  inset: -48px;
+  background-image:
+    linear-gradient(rgba(56, 232, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 232, 255, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 15%, transparent 80%);
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 15%, transparent 80%);
+  will-change: transform;
+  animation: pc-grid 12s linear infinite;
+}
+.pc-section::after {
+  left: -25%;
+  top: -15%;
+  width: 150%;
+  height: 130%;
+  background:
+    radial-gradient(closest-side at 25% 30%, rgba(56, 232, 255, 0.13), transparent 70%),
+    radial-gradient(closest-side at 72% 55%, rgba(168, 85, 247, 0.12), transparent 70%),
+    radial-gradient(closest-side at 45% 85%, rgba(236, 72, 153, 0.07), transparent 70%);
+  will-change: transform, opacity;
+  animation: pc-aurora 16s ease-in-out infinite alternate;
+}
+
+/* Animated border beam on each card (drawn over the existing 1px border) */
+.pc-card::before,
+.pc-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  z-index: 2;
+}
+.pc-card::before {
+  padding: 1.5px;
+  background:
+    conic-gradient(from var(--pc-a), transparent 0deg 250deg, rgba(56, 232, 255, 0.4) 300deg, #38e8ff 340deg, #ffffff 358deg, transparent 360deg),
+    conic-gradient(from calc(var(--pc-a) + 180deg), transparent 0deg 270deg, rgba(167, 139, 250, 0.4) 320deg, #c4b5fd 354deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: pc-spin 6s linear infinite;
+}
+.pc-card::after {
+  box-shadow: 0 0 18px rgba(56, 232, 255, 0.18), inset 0 0 18px rgba(56, 232, 255, 0.06);
+  animation: pc-glow 4.5s ease-in-out infinite;
+}
+.pc-card:nth-child(2n)::before { animation-delay: -1.5s; }
+.pc-card:nth-child(3n)::before { animation-delay: -3s; }
+.pc-card:nth-child(4n)::before { animation-delay: -4.5s; }
+.pc-card:nth-child(2n)::after { animation-delay: -2.2s; }
+.pc-card:hover::before { animation-duration: 3s; }
+
+html.bg-paused .pc-section::before,
+html.bg-paused .pc-section::after,
+html.bg-paused .pc-card::before,
+html.bg-paused .pc-card::after { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .pc-section::before, .pc-section::after, .pc-card::before, .pc-card::after { animation: none; }
+}
+
+/* Labels over the postcard images: dark frosted HUD glass, Orbitron + JetBrains Mono, cyan accent,
+   crisp corner brackets, divider ticks, slow edge glow and a shimmer sweep. */
+@keyframes pc-chip-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(56, 232, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 0 10px rgba(56, 232, 255, 0.07); border-color: rgba(56, 232, 255, 0.4); }
+  50% { box-shadow: 0 0 14px rgba(56, 232, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px rgba(56, 232, 255, 0.14); border-color: rgba(56, 232, 255, 0.8); }
+}
+@keyframes pc-chip-sheen {
+  0%, 60% { background-position: 0 0, -150% 0; }
+  100% { background-position: 0 0, 250% 0; }
+}
+@keyframes pc-dot-blink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px #38e8ff; }
+  50% { opacity: 0.3; box-shadow: 0 0 0 transparent; }
+}
+.pc-badge {
+  border: 1px solid rgba(56, 232, 255, 0.4);
+  background-color: transparent;
+  background-image:
+    linear-gradient(160deg, rgba(10, 24, 44, 0.62) 0%, rgba(4, 10, 22, 0.5) 55%, rgba(8, 30, 48, 0.55) 100%),
+    linear-gradient(105deg, transparent 40%, rgba(150, 245, 255, 0.22) 50%, transparent 60%);
+  background-size: 100% 100%, 200% 100%;
+  background-repeat: no-repeat;
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  backdrop-filter: blur(10px) saturate(1.4);
+  line-height: 1.6;
+  white-space: nowrap;
+  animation: pc-chip-glow 3.2s ease-in-out infinite, pc-chip-sheen 5.5s ease-in-out infinite;
+}
+.pc-badge::before,
+.pc-badge::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-color: #38e8ff;
+  border-style: solid;
+  pointer-events: none;
+}
+.pc-badge::before { left: -2px; top: -2px; border-width: 2px 0 0 2px; }
+.pc-badge::after { right: -2px; bottom: -2px; border-width: 0 2px 2px 0; }
+.pc-badge__sep {
+  width: 1px;
+  height: 9px;
+  background: linear-gradient(180deg, transparent, rgba(56, 232, 255, 0.85), transparent);
+}
+.pc-badge__key {
+  font-family: var(--pc-font-mono), ui-monospace, monospace;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8fb3c4;
+}
+.pc-badge__year {
+  font-family: var(--pc-font-display), ui-sans-serif, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #5ef0ff;
+  text-shadow: 0 0 8px rgba(56, 232, 255, 0.75);
+}
+.pc-badge__tag {
+  font-family: var(--pc-font-display), ui-sans-serif, sans-serif;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #5ef0ff;
+  text-shadow: 0 0 8px rgba(56, 232, 255, 0.7);
+}
+.pc-badge__text {
+  font-family: var(--pc-font-mono), ui-monospace, monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: #eef6ff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.pc-badge__dot { flex-shrink: 0; animation: pc-dot-blink 1.6s ease-in-out infinite; }
+.pc-card:nth-child(2n) .pc-badge { animation-delay: -1.6s, -2.7s; }
+html.bg-paused .pc-badge, html.bg-paused .pc-badge__dot { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .pc-badge, .pc-badge__dot { animation: none; }
+}

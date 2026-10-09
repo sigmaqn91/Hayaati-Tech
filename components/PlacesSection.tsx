@@ -6,6 +6,11 @@ import { RealImageSlot } from './RealImageSlot';
 import { useLanguage } from '@/context/LanguageContext';
 import { MapPin, Calendar, Layers, X, BookOpen, Compass } from 'lucide-react';
 import { useOverlayHistory } from '@/hooks/use-overlay-history';
+import { Orbitron, JetBrains_Mono } from 'next/font/google';
+
+// HUD fonts for the labels over the postcard images
+const hudDisplay = Orbitron({ subsets: ['latin'], weight: ['600', '800'], variable: '--pc-font-display', display: 'swap' });
+const hudMono = JetBrains_Mono({ subsets: ['latin'], weight: ['500', '700'], variable: '--pc-font-mono', display: 'swap' });
 
 interface LocalizedPlace extends PlaceCardData {
   title: string;
@@ -27,10 +32,10 @@ export function PlacesSection() {
     <section
       id="places"
       aria-label={t.places.title}
-      className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-[#1e293b]"
+      className="pc-section relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-[#1e293b]"
     >
       {/* Section Header */}
-      <div className="mb-12">
+      <div className="relative z-[1] mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0b0f17] border border-[#38e8ff]/30 text-[#38e8ff] font-mono text-xs uppercase tracking-widest mb-3">
           <MapPin className="w-3.5 h-3.5 text-[#38e8ff]" />
           <span>{t.places.sectionTag}</span>
@@ -44,7 +49,7 @@ export function PlacesSection() {
       </div>
 
       {/* 8 Postcards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="relative z-[1] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {placesData.map((place) => {
           const placeContent = content.places[place.id] || {
             title: '',
@@ -69,7 +74,7 @@ export function PlacesSection() {
             <div
               key={place.id}
               onClick={() => setSelectedPlace(localizedPlace)}
-              className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
+              className="pc-card group relative flex flex-col bg-[#0b0f17]/10 border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
             >
               {/* Real Image Slot */}
               <div className="relative">
@@ -82,12 +87,16 @@ export function PlacesSection() {
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                   className="w-full h-[210px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                 />
-                <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-[#38e8ff]">
-                  {t.common.year} {place.year}
+                <div className={`pc-badge ${hudDisplay.variable} ${hudMono.variable} absolute top-2 right-2 px-2.5 py-0.5 text-[10px] flex items-center gap-1.5`}>
+                  <span className="pc-badge__key">{t.common.year}</span>
+                  <span className="pc-badge__sep" aria-hidden="true" />
+                  <span className="pc-badge__year">{place.year}</span>
                 </div>
-                <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-slate-300 flex items-center gap-1.5 backdrop-blur-xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#38e8ff]" />
-                  <span>{t.places.horizonLabel} {'//'} {t.places.infrastructureLabel}</span>
+                <div className={`pc-badge ${hudDisplay.variable} ${hudMono.variable} absolute bottom-2 left-2 px-2 py-0.5 text-[10px] flex items-center gap-1.5`}>
+                  <span className="pc-badge__dot w-1.5 h-1.5 rounded-full bg-[#38e8ff]" />
+                  <span className="pc-badge__tag">{t.places.horizonLabel}</span>
+                  <span className="pc-badge__sep" aria-hidden="true" />
+                  <span className="pc-badge__text">{t.places.infrastructureLabel}</span>
                 </div>
               </div>
 
