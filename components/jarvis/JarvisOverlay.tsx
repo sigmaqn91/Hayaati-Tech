@@ -142,7 +142,32 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   useEffect(() => {
     setCoarsePointer(window.matchMedia('(pointer: coarse)').matches);
   }, []);
-  const commandLifted = inputFocused && (kbInset > 80 || coarsePointer);
+  const kbOpen = kbInset > 80;
+  const commandLifted = inputFocused && (kbOpen || coarsePointer);
+
+  // Keyboard closed by the phone (back gesture / hide-keyboard) while the input still holds focus:
+  // release the focus so the bar glides back to its place and the next tap opens the keyboard again.
+  const kbSeenRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (!coarsePointer || !inputFocused) {
+      kbSeenRef.current = false;
+      return;
+    }
+    if (kbOpen) {
+      kbSeenRef.current = true;
+      return;
+    }
+    if (kbSeenRef.current) {
+      kbSeenRef.current = false;
+      commandInputRef.current?.blur();
+      return;
+    }
+    // Keyboard never showed up (slow device or hardware keyboard): drop the lifted state after a short wait
+    const id = window.setTimeout(() => {
+      if (!kbSeenRef.current) commandInputRef.current?.blur();
+    }, 1800);
+    return () => window.clearTimeout(id);
+  }, [coarsePointer, inputFocused, kbOpen]);
 
   // Voice Hook
   const {

@@ -1,6 +1,7 @@
 'use client';
 
 import HeroCosmos from './HeroCosmos';
+import { HeroAdvert } from './ad/HeroAdvert';
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
@@ -18,18 +19,29 @@ const LATIN_LANGUAGES = new Set(['en', 'fr', 'de', 'es', 'pt', 'it', 'tr', 'id',
 
 export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
   const { t, language, isRtl } = useLanguage();
-  const [scrollY, setScrollY] = useState(0);
+  const parallaxRef = useRef<HTMLDivElement>(null);
   const [heroImageError, setHeroImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const [headlineHeight, setHeadlineHeight] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
+    // Parallax is written straight to the element (no React re-render per scroll event) and only while the hero is on screen.
+    let raf = 0;
+    const apply = () => {
+      raf = 0;
+      const el = parallaxRef.current;
+      if (el) el.style.transform = `translateY(${Math.min(window.scrollY * 0.15, 80)}px)`;
     };
+    const handleScroll = () => {
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+    apply();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   const isLatin = LATIN_LANGUAGES.has(language);
@@ -71,16 +83,14 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
     <section
       id="hero"
       aria-label={t.nav.home}
-      className="hero-v2 relative min-h-[100svh] overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
+      className="hero-v2 relative min-h-[100svh] flex flex-col overflow-hidden bg-[#05070a] border-b border-[#1e293b]"
     >
       <HeroCosmos />
       <DevBanner />
       {/* Background Image Container with subtle parallax */}
       <div
-        className="absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden"
-        style={{
-          transform: `translateY(${Math.min(scrollY * 0.15, 80)}px)`,
-        }}
+        ref={parallaxRef}
+        className="absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden will-change-transform"
       >
         {!heroImageError ? (
           <Image
@@ -125,7 +135,7 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
       {/* Hero content: glass HUD panel (left on desktop, below the orb on mobile) */}
       <div
         dir="ltr"
-        className="hero-content relative z-20 min-h-[100svh] flex flex-col justify-start lg:justify-center pointer-events-none"
+        className="hero-content relative z-20 lg:min-h-[100svh] flex-none flex flex-col justify-start lg:justify-center pointer-events-none"
       >
         <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div
@@ -258,6 +268,9 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
           </div>
         </div>
       </div>
+
+      {/* Cinematic advertisement: fills the space under the hero panel */}
+      <HeroAdvert />
     </section>
   );
 }

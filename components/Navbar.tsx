@@ -23,7 +23,9 @@ export function Navbar() {
   // Light scroll-spy for the 4 centre links (underline follows the section in view)
   useEffect(() => {
     const ids = ['hero', 'projects', 'about', 'contact'];
-    const onScroll = () => {
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
       let current = 'hero';
       for (const id of ids) {
         const el = document.getElementById(id);
@@ -31,9 +33,16 @@ export function Navbar() {
       }
       setActiveHref(`#${current}`);
     };
-    onScroll();
+    // At most one measurement per frame (scroll events can fire many times per frame)
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(measure);
+    };
+    measure();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   // Which of the 8 sections is in view (only computed while the menu is open)

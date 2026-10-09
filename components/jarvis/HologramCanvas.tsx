@@ -78,6 +78,11 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       el.style.top = `${-pad}px`;
       el.style.maxWidth = 'none';
       el.style.pointerEvents = 'none';
+      // Soft circular edge: anything drifting past the drawing area fades out as a circle (never a hard square).
+      // The solid centre (84%) covers the whole orb and all three rings, so they are untouched.
+      const mask = 'radial-gradient(circle closest-side at 50% 50%, #000 0%, #000 84%, rgba(0,0,0,0.55) 92%, transparent 100%)';
+      el.style.webkitMaskImage = mask;
+      el.style.maskImage = mask;
     };
     applyFrame(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
@@ -442,9 +447,21 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Do not render the orb while it is scrolled out of view
+    let onScreen = true;
+    let rippleTick = 0;
+    let rippleDirty = false;
+    const screenObserver =
+      typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver((entries) => {
+            onScreen = entries[0].isIntersecting;
+          })
+        : null;
+    screenObserver?.observe(container);
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      if (!isTabVisible) return;
+      if (!isTabVisible || !onScreen) return;
 
       const elapsed = clock.getElapsedTime();
       const state = visualStateRef.current;
@@ -544,27 +561,36 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       innerCoreMesh.scale.setScalar(coreScale * 0.9);
 
       // Particle Displacement Update
-      const positions = particleGeometry.attributes.position.array as Float32Array;
-      const count = particlePositions.length / 3;
-      const waveFreq = elapsed * 3.0;
-
-      for (let i = 0; i < count; i++) {
-        const ox = particleOriginals[i * 3];
-        const oy = particleOriginals[i * 3 + 1];
-        const oz = particleOriginals[i * 3 + 2];
-
-        let disp = particlePulse;
-        if (state === 'speaking' || state === 'listening') {
-          // Radial wave ripples along latitude
-          const ripple = Math.sin(oy * 5.0 + waveFreq) * (0.05 + computedAudio * 0.18);
-          disp += ripple;
+      // Speed: without ripples every particle is just scaled by the same factor, so the whole cloud is scaled on the GPU
+      // (identical picture, no 8k-22k point loop per frame). The per-point loop only runs while listening/speaking.
+      if (state === 'speaking' || state === 'listening') {
+        rippleTick++;
+        if (!isMobile || rippleTick % 2 === 0) {
+          const positions = particleGeometry.attributes.position.array as Float32Array;
+          const count = particlePositions.length / 3;
+          const waveFreq = elapsed * 3.0;
+          for (let i = 0; i < count; i++) {
+            const ox = particleOriginals[i * 3];
+            const oy = particleOriginals[i * 3 + 1];
+            const oz = particleOriginals[i * 3 + 2];
+            // Radial wave ripples along latitude
+            const disp = particlePulse + Math.sin(oy * 5.0 + waveFreq) * (0.05 + computedAudio * 0.18);
+            positions[i * 3] = ox * disp;
+            positions[i * 3 + 1] = oy * disp;
+            positions[i * 3 + 2] = oz * disp;
+          }
+          particleGeometry.attributes.position.needsUpdate = true;
         }
-
-        positions[i * 3] = ox * disp;
-        positions[i * 3 + 1] = oy * disp;
-        positions[i * 3 + 2] = oz * disp;
+        particlePoints.scale.setScalar(1);
+        rippleDirty = true;
+      } else {
+        if (rippleDirty) {
+          (particleGeometry.attributes.position.array as Float32Array).set(particleOriginals);
+          particleGeometry.attributes.position.needsUpdate = true;
+          rippleDirty = false;
+        }
+        particlePoints.scale.setScalar(particlePulse);
       }
-      particleGeometry.attributes.position.needsUpdate = true;
 
       // Global subtle tilt toward mouse/neutral
       arcCoreGroup.rotation.y = Math.sin(elapsed * 0.4) * 0.15;
@@ -593,6 +619,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      screenObserver?.disconnect();
       resizeObserver.disconnect();
       cancelAnimationFrame(animationFrameId);
       renderer.dispose();

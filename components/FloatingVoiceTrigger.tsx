@@ -12,11 +12,7 @@ export function FloatingVoiceTrigger({ onOpen }: FloatingVoiceTriggerProps) {
   useEffect(() => {
     const handleScroll = () => {
       // Appear once visitor scrolls past hero section (~450px)
-      if (window.scrollY > 450) {
-        setVisible(true);
-      } else {
-        setVisible(false);
-      }
+      setVisible(window.scrollY > 450);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
