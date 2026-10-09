@@ -15,7 +15,7 @@
 }
 @media (min-width: 1024px) {
   #hero.hero-v2 {
-    --orb-size: min(36vw, 62vh, 600px);
+    --orb-size: min(38vw, 66vh, 640px);
     --orb-cx: 70%;
     --orb-cy: 50%;
     --orb-top: calc(var(--orb-cy) - var(--orb-size) / 2);
@@ -36,6 +36,10 @@
 [dir='rtl'] .hero-v2-shade {
   background: linear-gradient(270deg, rgba(5, 7, 10, 0.78) 0%, rgba(5, 7, 10, 0.45) 40%, rgba(5, 7, 10, 0) 70%),
     linear-gradient(0deg, rgba(5, 7, 10, 0.85) 0%, rgba(5, 7, 10, 0) 28%);
+}
+
+@media (max-width: 1023.98px) {
+  .hero-v2-shade { display: none; }
 }
 
 /* Glass HUD panel with chamfered, glowing border */
@@ -76,16 +80,16 @@
   position: absolute;
   inset: var(--b);
   pointer-events: none;
-  background: rgba(5, 10, 20, 0.55);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  background: rgba(5, 10, 20, 0.22);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   clip-path: polygon(
     var(--ci) 0, calc(100% - var(--ci)) 0, 100% var(--ci), 100% calc(100% - var(--ci)),
     calc(100% - var(--ci)) 100%, var(--ci) 100%, 0 calc(100% - var(--ci)), 0 var(--ci)
   );
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .hero-panel__glass { background: rgba(5, 10, 20, 0.82); }
+  .hero-panel__glass { background: rgba(5, 10, 20, 0.4); }
 }
 .hero-panel__tick {
   position: absolute;

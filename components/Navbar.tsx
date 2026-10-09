@@ -68,7 +68,7 @@ export function Navbar() {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-[#05070a]/90 backdrop-blur-md border-b border-[#38e8ff]/25">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-[#05070a] border-b border-[#38e8ff]/25">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand / Logo */}
         <a

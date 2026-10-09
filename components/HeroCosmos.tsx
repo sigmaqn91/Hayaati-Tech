@@ -174,7 +174,7 @@ export default function HeroCosmos() {
       const orb = readOrb();
       const cx = orb ? orb.x : W / 2;
       const cy = orb ? orb.y : H * 0.42;
-      const R = orb ? orb.size * 0.54 : Math.min(W * 0.42, H * 0.3);
+      const R = orb ? orb.size * 0.62 : Math.min(W * 0.42, H * 0.3);
       const horizon = H * 0.64;
       const photoMul = SHOW_PHOTO ? 0.55 : 1;
 

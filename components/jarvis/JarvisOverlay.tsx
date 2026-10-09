@@ -716,7 +716,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         return (
           <div
             data-jarvis-transcript
-            className="absolute z-30 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[min(92vw,30rem)] lg:left-[var(--orb-cx)] lg:w-[min(28rem,30vw)] overflow-y-auto rounded-md border border-[#38e8ff]/20 bg-[#05070a]/80 px-3 py-2 backdrop-blur-sm pointer-events-auto"
+            className="absolute z-30 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[min(92vw,30rem)] lg:left-[var(--orb-cx)] lg:w-[min(28rem,30vw)] overflow-y-auto px-3 py-2 pointer-events-auto [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]"
             style={{
               top: 'var(--tr-top, auto)',
               maxHeight: 'max(3.5rem, min(7rem, calc(100% - var(--tr-top, 0px) - 5rem)))',
