@@ -104,9 +104,9 @@ export function LanguageSelector() {
         aria-haspopup="dialog"
         aria-label={t.languageSelector.selectLanguage}
         suppressHydrationWarning
-        className="flex items-center gap-1.5 px-2.5 py-1.5 min-h-[44px] text-xs font-mono text-slate-300 hover:text-[#38e8ff] bg-[#080b11] border border-[#1e293b] hover:border-[#38e8ff]/50 transition-colors cursor-pointer"
+        className="lang-btn flex items-center gap-1.5 px-2.5 py-1.5 min-h-[44px] text-xs font-mono text-slate-100 hover:text-white bg-[#08141c] border border-[#38e8ff]/55 hover:border-[#38e8ff] cursor-pointer"
       >
-        <Globe className="w-3.5 h-3.5 text-[#38e8ff]" />
+        <Globe className="lang-btn__globe w-3.5 h-3.5 text-[#38e8ff]" />
         <span className="uppercase" suppressHydrationWarning>{currentLangObj.code}</span>
         <span className="hidden sm:inline text-slate-400" suppressHydrationWarning>({currentLangObj.native})</span>
       </button>

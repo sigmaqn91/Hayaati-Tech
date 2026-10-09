@@ -66,7 +66,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.3;
     container.appendChild(renderer.domElement);
 
     // Root Group for Arc Core
@@ -76,10 +76,10 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     // 2. Inner Wireframe Icosahedron & Nested Geometric Core
     const icosahedronGeo = new THREE.IcosahedronGeometry(0.85, 1);
     const icosahedronMat = new THREE.MeshBasicMaterial({
-      color: 0x38e8ff,
+      color: 0x6af0ff,
       wireframe: true,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.85,
     });
     const icosahedronMesh = new THREE.Mesh(icosahedronGeo, icosahedronMat);
     arcCoreGroup.add(icosahedronMesh);
@@ -87,10 +87,10 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     // Nested Inner Geometric Core (Octahedron for multi-layered arc reactor geometry)
     const innerOctaGeo = new THREE.OctahedronGeometry(0.58, 0);
     const innerOctaMat = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff,
+      color: 0x9ff8ff,
       wireframe: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
     });
     const innerOctaMesh = new THREE.Mesh(innerOctaGeo, innerOctaMat);
     arcCoreGroup.add(innerOctaMesh);
@@ -98,9 +98,11 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     // Inner Solid Glow Core
     const innerCoreGeo = new THREE.SphereGeometry(0.38, 24, 24);
     const innerCoreMat = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff,
+      color: 0xb8fdff,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.6,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
     });
     const innerCoreMesh = new THREE.Mesh(innerCoreGeo, innerCoreMat);
     arcCoreGroup.add(innerCoreMesh);
@@ -114,6 +116,8 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     const cyanColor = new THREE.Color(0x38e8ff);
     const deepBlueColor = new THREE.Color(0x0066cc);
     const amberColor = new THREE.Color(0xffaa00);
+    const whiteColor = new THREE.Color(0xdffcff);
+    const violetColor = new THREE.Color(0x8b7bff);
 
     for (let i = 0; i < particleCount; i++) {
       // Golden spiral distribution on sphere surface + subtle depth jitter
@@ -136,12 +140,17 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       particleOriginals[i * 3 + 2] = z;
 
       // Color mix: Mostly cyan/ice-blue with 4% amber warning accents
-      const isAmber = Math.random() < 0.04;
-      const col = isAmber
-        ? amberColor
-        : Math.random() > 0.4
-        ? cyanColor
-        : deepBlueColor;
+      const roll = Math.random();
+      const col =
+        roll < 0.03
+          ? amberColor
+          : roll < 0.1
+          ? whiteColor
+          : roll < 0.15
+          ? violetColor
+          : Math.random() > 0.4
+          ? cyanColor
+          : deepBlueColor;
 
       particleColors[i * 3] = col.r;
       particleColors[i * 3 + 1] = col.g;
@@ -171,13 +180,13 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     particleTexture.needsUpdate = true;
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: isMobile ? 0.024 : 0.018,
+      size: isMobile ? 0.026 : 0.02,
       vertexColors: true,
       map: particleTexture,
       alphaMap: particleTexture,
       transparent: true,
       alphaTest: 0.01,
-      opacity: 0.85,
+      opacity: 0.95,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -193,7 +202,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       const torusMat = new THREE.MeshBasicMaterial({
         color,
         transparent: true,
-        opacity: 0.5,
+        opacity: 0.75,
         wireframe: true,
       });
       const torusMesh = new THREE.Mesh(torusGeo, torusMat);
@@ -250,7 +259,8 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       uniform float intensity;
       void main() {
         vec3 viewDir = normalize(-vPosition);
-        float fresnel = pow(1.0 - max(0.0, dot(viewDir, vNormal)), 3.0);
+        // abs() makes the halo a true rim glow (old max(0.0, ...) filled the whole disc flat)
+        float fresnel = pow(1.0 - abs(dot(viewDir, normalize(vNormal))), 2.6);
         gl_FragColor = vec4(glowColor, fresnel * intensity);
       }
     `;
@@ -267,8 +277,141 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       side: THREE.BackSide,
       depthWrite: false,
     });
-    const fresnelSphere = new THREE.Mesh(new THREE.SphereGeometry(1.4, 32, 32), fresnelMat);
+    const fresnelSphere = new THREE.Mesh(new THREE.SphereGeometry(1.5, 48, 48), fresnelMat);
     arcCoreGroup.add(fresnelSphere);
+
+    // 5b. Premium glass shell: rim light, iridescent cyan->violet shift, travelling specular shine and a scan sheen
+    const glassMat = new THREE.ShaderMaterial({
+      vertexShader: `
+        varying vec3 vN;
+        varying vec3 vV;
+        void main() {
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          vN = normalize(normalMatrix * normal);
+          vV = normalize(-mv.xyz);
+          gl_Position = projectionMatrix * mv;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vN;
+        varying vec3 vV;
+        uniform float uTime;
+        uniform float intensity;
+        uniform float uAudio;
+        void main() {
+          vec3 n = normalize(vN);
+          vec3 v = normalize(vV);
+          float ndv = clamp(dot(n, v), 0.0, 1.0);
+          float rim = pow(1.0 - ndv, 2.2);
+          // travelling specular highlight
+          vec3 L = normalize(vec3(cos(uTime * 0.55) * 0.9, 0.65, sin(uTime * 0.55) * 0.9 + 0.7));
+          vec3 R = reflect(-L, n);
+          float spec = pow(max(dot(R, v), 0.0), 48.0);
+          float spec2 = pow(max(dot(reflect(-normalize(vec3(-L.x, -0.4, L.z + 0.4)), n), v), 0.0), 90.0);
+          // diagonal sheen band sweeping across the glass
+          float band = smoothstep(0.82, 1.0, sin((n.x * 0.9 + n.y * 0.7) * 5.0 - uTime * 1.5));
+          vec3 cyan = vec3(0.22, 0.91, 1.0);
+          vec3 violet = vec3(0.55, 0.48, 1.0);
+          vec3 col = mix(cyan, violet, smoothstep(-0.6, 0.8, n.x * 0.7 + n.y * 0.5 + sin(uTime * 0.4) * 0.3));
+          col = mix(col, vec3(1.0), clamp(spec * 0.9 + spec2 * 0.5 + band * 0.25, 0.0, 1.0));
+          float a = 0.07 + rim * (0.7 + 0.5 * intensity + uAudio * 0.5) + spec * 0.85 + spec2 * 0.5 + band * (0.06 + rim * 0.5);
+          gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
+        }
+      `,
+      uniforms: {
+        uTime: { value: 0 },
+        intensity: { value: 0.6 },
+        uAudio: { value: 0 },
+      },
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const glassSphere = new THREE.Mesh(new THREE.SphereGeometry(1.3, 64, 64), glassMat);
+    arcCoreGroup.add(glassSphere);
+
+    // 5c. Soft bloom glow behind the orb + hot core glow (additive sprites, kept inside the camera frame)
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = 128;
+    glowCanvas.height = 128;
+    const glowCtx = glowCanvas.getContext('2d');
+    if (glowCtx) {
+      const gg = glowCtx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      gg.addColorStop(0, 'rgba(190,252,255,0.85)');
+      gg.addColorStop(0.18, 'rgba(90,235,255,0.42)');
+      gg.addColorStop(0.5, 'rgba(40,150,255,0.14)');
+      gg.addColorStop(0.8, 'rgba(70,90,255,0.04)');
+      gg.addColorStop(1, 'rgba(0,0,0,0)');
+      glowCtx.fillStyle = gg;
+      glowCtx.fillRect(0, 0, 128, 128);
+    }
+    const glowTexture = new THREE.CanvasTexture(glowCanvas);
+    const bloomMat = new THREE.SpriteMaterial({
+      map: glowTexture,
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false,
+      fog: false,
+    });
+    const bloomSprite = new THREE.Sprite(bloomMat);
+    bloomSprite.scale.set(3.9, 3.9, 1);
+    bloomSprite.renderOrder = -2;
+    scene.add(bloomSprite);
+
+    const coreGlowMat = new THREE.SpriteMaterial({
+      map: glowTexture,
+      color: 0xd8feff,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false,
+      fog: false,
+    });
+    const coreGlowSprite = new THREE.Sprite(coreGlowMat);
+    coreGlowSprite.scale.set(1.25, 1.25, 1);
+    coreGlowSprite.renderOrder = 5;
+    scene.add(coreGlowSprite);
+
+    // 5d. Energy comets running along the three rings (head + fading trail)
+    const cometSprites: Array<{ sprite: THREE.Sprite; mat: THREE.SpriteMaterial; ring: number; lag: number; base: number; speed: number; r: number; head: number }> = [];
+    const ringDefs: Array<[THREE.Group, number, number]> = [
+      [ring1, 1.5, 0x9ffcff],
+      [ring2, 1.75, 0x7fb8ff],
+      [ring3, 2.0, 0xc4b5fd],
+    ];
+    ringDefs.forEach(([group, radius, colour], ri) => {
+      for (let c = 0; c < 2; c++) {
+        for (let k = 0; k < 6; k++) {
+          const mat = new THREE.SpriteMaterial({
+            map: particleTexture,
+            color: k === 0 ? 0xffffff : colour,
+            transparent: true,
+            opacity: 1 - k / 6,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            fog: false,
+          });
+          const sprite = new THREE.Sprite(mat);
+          const sz = k === 0 ? 0.2 : 0.15 - k * 0.018;
+          sprite.scale.set(sz, sz, 1);
+          group.add(sprite);
+          cometSprites.push({
+            sprite,
+            mat,
+            ring: ri,
+            lag: k * 0.07,
+            base: c * Math.PI + ri * 1.3,
+            speed: (ri % 2 === 0 ? 1 : -1) * (0.9 + ri * 0.25),
+            r: radius,
+            head: k === 0 ? 1 : 0,
+          });
+        }
+      }
+    });
 
     // 6. Audio Frequency Data Buffer
     const freqData = new Uint8Array(64);
@@ -346,6 +489,20 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       if (prefersReducedMotion) {
         ringSpeedMultiplier = 0.2;
         particlePulse = 1.0;
+      }
+
+      // Premium shine: share the state-driven intensity with the glass shell, breathe the bloom
+      glassMat.uniforms.uTime.value = elapsed;
+      glassMat.uniforms.intensity.value = fresnelMat.uniforms.intensity.value;
+      glassMat.uniforms.uAudio.value = Math.min(1, computedAudio);
+      const bloomPulse = 0.78 + Math.sin(elapsed * 1.6) * 0.1 + Math.min(1, computedAudio) * 0.35;
+      bloomMat.opacity = Math.min(1, bloomPulse * (state === 'idle' ? 0.9 : 1.1));
+      coreGlowMat.opacity = Math.min(1, 0.75 + Math.sin(elapsed * 2.4) * 0.15 + Math.min(1, computedAudio) * 0.4);
+      coreGlowSprite.scale.setScalar((1.15 + Math.sin(elapsed * 2.4) * 0.08) * coreScale + computedAudio * 0.5);
+      const cometSpeed = ringSpeedMultiplier * (prefersReducedMotion ? 0.3 : 1);
+      for (const cm of cometSprites) {
+        const ang = cm.base + (elapsed * cm.speed * cometSpeed) * 0.8 - cm.lag * Math.sign(cm.speed) * 3.0;
+        cm.sprite.position.set(Math.cos(ang) * cm.r, Math.sin(ang) * cm.r, 0);
       }
 
       // Counter-rotating rings
@@ -432,6 +589,13 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       innerCoreGeo.dispose();
       innerCoreMat.dispose();
       fresnelMat.dispose();
+      glassMat.dispose();
+      glassSphere.geometry.dispose();
+      fresnelSphere.geometry.dispose();
+      bloomMat.dispose();
+      coreGlowMat.dispose();
+      glowTexture.dispose();
+      cometSprites.forEach((cm) => cm.mat.dispose());
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }

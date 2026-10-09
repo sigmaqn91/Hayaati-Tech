@@ -127,24 +127,27 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
         dir="ltr"
         className="hero-content relative z-20 min-h-[100svh] flex flex-col justify-start lg:justify-center pointer-events-none"
       >
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div
             dir={isRtl ? 'rtl' : 'ltr'}
-            className="mx-auto lg:mx-0 w-full max-w-[36rem] lg:w-[min(44vw,36rem)]"
+            className="hero-panel-wrap mx-auto lg:mx-0 w-full max-w-[46rem] lg:w-[min(50vw,42rem)]"
           >
             <div className="hero-panel pointer-events-auto">
               <span className="hero-panel__glow" aria-hidden="true" />
               <span className="hero-panel__ring" aria-hidden="true" />
               <span className="hero-panel__glass" aria-hidden="true" />
               {/* Corner / edge tick marks */}
-              <span className="hero-panel__tick" style={{ top: -1, left: '64%', width: 54, height: 3 }} aria-hidden="true" />
-              <span className="hero-panel__tick" style={{ bottom: -1, left: '14%', width: 40, height: 3 }} aria-hidden="true" />
-              <span className="hero-panel__tick" style={{ left: -1, top: '38%', width: 3, height: 26 }} aria-hidden="true" />
-              <span className="hero-panel__tick" style={{ right: -1, top: '27%', width: 3, height: 28 }} aria-hidden="true" />
+              <span className="hero-panel__tick hero-panel__tick--a" style={{ top: -1, left: '64%', width: 54, height: 3 }} aria-hidden="true" />
+              <span className="hero-panel__tick hero-panel__tick--b" style={{ bottom: -1, left: '14%', width: 40, height: 3 }} aria-hidden="true" />
+              <span className="hero-panel__tick hero-panel__tick--c" style={{ left: -1, top: '38%', width: 3, height: 26 }} aria-hidden="true" />
+              <span className="hero-panel__tick hero-panel__tick--d" style={{ right: -1, top: '27%', width: 3, height: 28 }} aria-hidden="true" />
+              {/* Looping light runners that travel around the panel edge */}
+              <span className="hero-panel__runner hero-panel__runner--h" aria-hidden="true" />
+              <span className="hero-panel__runner hero-panel__runner--v" aria-hidden="true" />
 
               <div className="hero-panel__body flex flex-col items-start text-start">
                 {/* System Online HUD Badge */}
-                <div className="inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-0.5 px-3.5 py-1.5 rounded-lg bg-[#05070a]/60 border border-[#38e8ff]/40 shadow-[0_0_12px_rgba(56,232,255,0.15)] mb-5">
+                <div className="inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-0.5 px-3.5 py-1.5 rounded-lg bg-[#05070a]/60 border border-[#38e8ff]/40 shadow-[0_0_12px_rgba(56,232,255,0.15)] mb-4">
                   <span className="relative flex h-2 w-2 shrink-0">
                     <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-[#38e8ff] opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-[#38e8ff]" />
@@ -191,11 +194,11 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
                 </div>
 
                 {/* Small gradient underline */}
-                <div className="w-24 h-0.5 bg-gradient-to-r from-[#38e8ff] to-transparent rtl:bg-gradient-to-l mt-3 mb-4" />
+                <div className="w-24 h-0.5 bg-gradient-to-r from-[#38e8ff] to-transparent rtl:bg-gradient-to-l mt-2.5 mb-3" />
 
                 {/* Subtitle */}
                 <p
-                  className={`text-slate-300 max-w-[45ch] mb-6 font-normal text-sm sm:text-[0.95rem] lg:text-base ${
+                  className={`hero-panel__subtitle text-slate-200 max-w-[62ch] mb-5 font-normal text-sm sm:text-[0.95rem] lg:text-base ${
                     isLatin ? 'leading-relaxed' : 'leading-[1.6]'
                   }`}
                 >
@@ -208,7 +211,7 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
                   <a
                     href="#timeline"
                     aria-label={t.hero.exploreCta}
-                    className="col-span-2 lg:col-span-1 w-full px-4 py-3.5 min-h-[52px] flex items-center justify-center gap-2.5 bg-[#38e8ff] text-[#05070a] font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-center leading-tight hover:bg-[#38e8ff]/90 shadow-[0_0_22px_rgba(56,232,255,0.35)] transition-all cursor-pointer rounded-md"
+                    className="col-span-2 lg:col-span-1 w-full px-4 py-3 min-h-[48px] flex items-center justify-center gap-2.5 bg-[#38e8ff] text-[#05070a] font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-center leading-tight hover:bg-[#38e8ff]/90 shadow-[0_0_22px_rgba(56,232,255,0.35)] transition-all cursor-pointer rounded-md"
                   >
                     <span>{t.hero.exploreCta}</span>
                     <ArrowRight className="w-4 h-4 shrink-0 text-[#05070a] rtl:-scale-x-100" />
@@ -217,7 +220,7 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
                   {/* Embedded Jarvis CTA (onClick untouched) */}
                   <button
                     onClick={onOpenAssistant}
-                    className="w-full px-2.5 sm:px-4 py-3 min-h-[52px] flex items-center justify-center gap-2.5 bg-[#05101c]/70 border border-[#38e8ff]/45 hover:border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-center leading-tight shadow-[0_0_18px_rgba(56,232,255,0.2)] hover:shadow-[0_0_30px_rgba(56,232,255,0.4)] transition-all cursor-pointer rounded-md"
+                    className="w-full px-2.5 sm:px-4 py-2.5 min-h-[48px] flex items-center justify-center gap-2.5 bg-[#05101c]/70 border border-[#38e8ff]/45 hover:border-[#38e8ff] hover:bg-[#38e8ff]/10 text-white font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-center leading-tight shadow-[0_0_18px_rgba(56,232,255,0.2)] hover:shadow-[0_0_30px_rgba(56,232,255,0.4)] transition-all cursor-pointer rounded-md"
                     aria-label="Activate Jarvis"
                   >
                     <div className="relative w-5 h-5 rounded-full flex items-center justify-center shrink-0">
@@ -238,7 +241,7 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
                   <a
                     href="#projects"
                     aria-label={t.hero.projectsCta}
-                    className="w-full px-2.5 sm:px-4 py-3 min-h-[52px] flex items-center justify-center gap-2.5 bg-[#05101c]/70 text-slate-100 border border-[#38e8ff]/30 hover:border-[#38e8ff] hover:bg-[#38e8ff]/10 hover:text-white font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-center leading-tight transition-all cursor-pointer rounded-md"
+                    className="w-full px-2.5 sm:px-4 py-2.5 min-h-[48px] flex items-center justify-center gap-2.5 bg-[#05101c]/70 text-slate-100 border border-[#38e8ff]/30 hover:border-[#38e8ff] hover:bg-[#38e8ff]/10 hover:text-white font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-center leading-tight transition-all cursor-pointer rounded-md"
                   >
                     <Layers className="w-4 h-4 shrink-0 text-[#38e8ff]" />
                     <span>{t.hero.projectsCta}</span>

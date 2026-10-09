@@ -55,7 +55,15 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
   // Input & Messages
   const [inputQuery, setInputQuery] = useState<string>('');
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([]);
+  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string; lang?: string }>>([]);
+  // UI-only chat view state: the stored messages (used as chat history) are never edited, the view just starts later.
+  const [clearedBefore, setClearedBefore] = useState<number>(0);
+  const messagesLenRef = useRef<number>(0);
+  const langRef = useRef<string>(language || 'en');
+  const prevLangRef = useRef<string>(language || 'en');
+  const [panelOpen, setPanelOpen] = useState<boolean>(false);
+  const userStoppedRef = useRef<boolean>(false);
+  const feedRef = useRef<HTMLDivElement | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [audioMuted, setAudioMuted] = useState<boolean>(false);
 
@@ -104,7 +112,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     welcomeMessage: t.assistant.welcomeMessage,
     onTranscriptReady: (spokenText) => {
       if (!spokenText) return;
-      setMessages((prev) => [...prev, { role: 'user', text: spokenText }]);
+      setMessages((prev) => [...prev, { role: 'user', text: spokenText, lang: langRef.current }]);
       const claim = spokenText.trim();
       if (/\b(main|mai|mein)\s+aliya(\s+khan)?\s+(hoon|hun|hu)\b/i.test(claim) || /(मैं|मै)\s+(आलिया|अलिया)(\s+खान)?/.test(claim) || /\b(i am|i'm|im)\s+(the\s+)?(owner|founder)\b/i.test(claim) || /\b(i am|i'm|im)\s+aliya\s+khan\b/i.test(claim) || /\b(main|मैं)\s+(owner|founder|मालिक|संस्थापक)\b/i.test(claim) || /\b(owner|founder)\s+(hoon|hun)\b/i.test(claim) || /मैं\s+(मालिक|संस्थापक)\s+हूँ/.test(claim)) {
         setShowVerifyModal(true);
@@ -112,7 +120,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     },
     onAssistantTextReady: (assistantText) => {
       if (assistantText) {
-        setMessages((prev) => [...prev, { role: 'assistant', text: assistantText }]);
+        setMessages((prev) => [...prev, { role: 'assistant', text: assistantText, lang: langRef.current }]);
       }
     },
   });
@@ -121,6 +129,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   const handleVoiceTap = () => {
     // Tapping while connecting cancels it, so the button can never get stuck.
     if (isConnecting) {
+      userStoppedRef.current = true;
       cancelSpeech();
       stopListening();
       if (embedded) setEmbeddedActive(false);
@@ -128,6 +137,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     }
 
     if (isSpeaking) {
+      userStoppedRef.current = true;
       cancelSpeech();
       stopListening();
       if (embedded) setEmbeddedActive(false);
@@ -135,11 +145,15 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     }
 
     if (isListening) {
+      userStoppedRef.current = true;
       stopListening();
       if (embedded) setEmbeddedActive(false);
       return;
     }
 
+    // Fresh session: the chat panel opens with a clean view.
+    userStoppedRef.current = false;
+    setClearedBefore(messagesLenRef.current);
     if (embedded) setEmbeddedActive(true);
     startListening();
   };
@@ -158,6 +172,36 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       setEmbeddedActive(false);
     }
   }, [embedded, speechError, isConnecting, isListening]);
+
+  useEffect(() => {
+    messagesLenRef.current = messages.length;
+  }, [messages]);
+
+  useEffect(() => {
+    langRef.current = language || 'en';
+  }, [language]);
+
+  // Website language changed: the old-language chat disappears from the screen (view only, history is kept).
+  useEffect(() => {
+    const current = language || 'en';
+    if (prevLangRef.current !== current) {
+      prevLangRef.current = current;
+      setClearedBefore(messagesLenRef.current);
+    }
+  }, [language]);
+
+  // Chat panel shows while the assistant is on and leaves right after the user switches it off.
+  const sessionLive = isConnecting || isListening || isSpeaking || isProcessing || embeddedActive;
+  useEffect(() => {
+    if (!embedded) return;
+    if (sessionLive) {
+      userStoppedRef.current = false;
+      setPanelOpen(true);
+      return;
+    }
+    const id = window.setTimeout(() => setPanelOpen(false), userStoppedRef.current ? 0 : 2800);
+    return () => window.clearTimeout(id);
+  }, [embedded, sessionLive]);
 
   // Map VoiceError codes to friendly localized messages in terminal
   useEffect(() => {
@@ -289,6 +333,14 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, bootLogs]);
+
+  // Live-chat feel: newest line stays in view, older lines drift up and fade.
+  useEffect(() => {
+    const el = feedRef.current;
+    if (!el) return;
+    const id = window.requestAnimationFrame(() => el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }));
+    return () => window.cancelAnimationFrame(id);
+  }, [messages, panelOpen, clearedBefore]);
 
   // Send Query to original working Gemini connection /api/chat
   const handleSendMessage = async (textToSend?: string) => {
@@ -704,38 +756,97 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         )}
       </div>
 
-      {embedded && messages.length > 0 && (() => {
-        // UI only: merge consecutive same-role chunks into one line; stored messages stay untouched.
-        const merged: Array<{ role: 'user' | 'assistant'; text: string }> = [];
-        for (const m of messages) {
-          const prev = merged[merged.length - 1];
-          if (prev && prev.role === m.role) prev.text = `${prev.text} ${m.text}`.trim();
-          else merged.push({ role: m.role, text: m.text });
-        }
-        const shown = merged.slice(-2);
-        return (
-          <div
-            data-jarvis-transcript
-            className="absolute z-30 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[min(92vw,30rem)] lg:left-[var(--orb-cx)] lg:w-[min(28rem,30vw)] overflow-y-auto px-3 py-2 pointer-events-auto [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]"
-            style={{
-              top: 'var(--tr-top, auto)',
-              maxHeight: 'max(3.5rem, min(7rem, calc(100% - var(--tr-top, 0px) - 5rem)))',
-            }}
-            aria-live="polite"
-          >
-            <div className="space-y-1.5 text-[11px] font-sans">
-              {shown.map((message, index) => (
-                <div key={`${message.role}-${index}`} className="leading-relaxed break-words">
-                  <span className={message.role === 'user' ? 'text-slate-500 mr-2' : 'text-[#38e8ff] mr-2'}>
-                    {message.role === 'user' ? 'YOU:' : 'JARVIS:'}
-                  </span>
-                  <span className="text-slate-200">{message.text}</span>
+      {embedded && (
+        <AnimatePresence>
+          {panelOpen && (() => {
+            // UI only: current-language messages since the view started, same-role chunks merged into one bubble.
+            const merged: Array<{ id: number; role: 'user' | 'assistant'; text: string }> = [];
+            messages.forEach((m, i) => {
+              if (i < clearedBefore) return;
+              if (m.lang && m.lang !== language) return;
+              const prev = merged[merged.length - 1];
+              if (prev && prev.role === m.role) prev.text = `${prev.text} ${m.text}`.trim();
+              else merged.push({ id: i, role: m.role, text: m.text });
+            });
+            const shown = merged.slice(-5);
+            const stateLabel =
+              visualState === 'listening' ? 'LISTENING' : visualState === 'speaking' ? 'SPEAKING' : visualState === 'thinking' ? 'PROCESSING' : 'STANDBY';
+            return (
+              <motion.div
+                key="jarvis-chat-panel"
+                data-jarvis-transcript
+                initial={{ opacity: 0, y: 26, scale: 0.94, filter: 'blur(10px)' }}
+                animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: 18, scale: 0.95, filter: 'blur(10px)' }}
+                transition={{ type: 'spring', stiffness: 220, damping: 24, mass: 0.9 }}
+                className="absolute z-30 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[min(94vw,36rem)] lg:left-[var(--orb-cx)] lg:w-[min(34rem,36vw)] flex flex-col pointer-events-auto"
+                style={{
+                  top: 'var(--tr-top, auto)',
+                  maxHeight: 'max(10rem, min(15rem, calc(100% - var(--tr-top, 0px) - 5rem)))',
+                }}
+                aria-live="polite"
+              >
+                <div className="hero-panel chat-panel flex flex-col min-h-0 max-h-full">
+                  <span className="hero-panel__glow" aria-hidden="true" />
+                  <span className="hero-panel__ring" aria-hidden="true" />
+                  <span className="hero-panel__glass" aria-hidden="true" />
+                  <span className="hero-panel__tick hero-panel__tick--a" style={{ top: -1, left: '18%', width: 46, height: 3 }} aria-hidden="true" />
+                  <span className="hero-panel__tick hero-panel__tick--c" style={{ bottom: -1, right: '16%', width: 38, height: 3 }} aria-hidden="true" />
+                  <span className="chat-panel__scan" aria-hidden="true" />
+
+                  <div className="chat-panel__body flex flex-col min-h-0">
+                    <div className="chat-panel__head">
+                      <span className="chat-panel__dot" aria-hidden="true" />
+                      <span>LIVE TRANSCRIPT</span>
+                      <span className="chat-panel__state">{stateLabel}</span>
+                    </div>
+
+                    <div ref={feedRef} className="chat-feed min-h-0 flex-1">
+                      <div className="flex-1" aria-hidden="true" />
+                      <AnimatePresence initial={false}>
+                        {shown.map((message, idx) => {
+                          const fromEnd = shown.length - 1 - idx;
+                          const fade = [1, 0.86, 0.66, 0.46, 0.3][fromEnd] ?? 0.3;
+                          const isUser = message.role === 'user';
+                          return (
+                            <motion.div
+                              key={`msg-${message.id}`}
+                              layout="position"
+                              initial={{ opacity: 0, y: 22, scale: 0.95 }}
+                              animate={{ opacity: fade, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -18, height: 0, marginTop: 0 }}
+                              transition={{ type: 'spring', stiffness: 260, damping: 26 }}
+                              className={`chat-row ${isUser ? 'chat-row--user' : 'chat-row--ai'}`}
+                            >
+                              <div className={`chat-bubble ${isUser ? 'chat-bubble--user' : 'chat-bubble--ai'}`}>
+                                <span className="chat-bubble__who">{isUser ? 'YOU' : 'JARVIS'}</span>
+                                <span dir="auto" className="chat-bubble__text">{message.text}</span>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                        {isProcessing && (
+                          <motion.div
+                            key="msg-typing"
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                            className="chat-row chat-row--ai"
+                          >
+                            <div className="chat-bubble chat-bubble--ai chat-typing" aria-hidden="true">
+                              <i /><i /><i />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
+              </motion.div>
+            );
+          })()}
+        </AnimatePresence>
+      )}
 
       {embedded && (
         <button
