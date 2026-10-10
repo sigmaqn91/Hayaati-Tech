@@ -129,7 +129,7 @@ export function TechCatalogueSection() {
       </div>
 
       {/* Tech Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {filteredCards.map((card) => {
           const cardContent = content.techCards[card.id] || {
             title: '',
@@ -155,8 +155,8 @@ export function TechCatalogueSection() {
                   title={cardContent.title}
                   width={800}
                   height={500}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="w-full h-[220px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  sizes="(max-width: 640px) 100vw, 50vw"
+                  className="w-full h-[220px] lg:h-auto lg:!aspect-[227/110] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                 />
                 <div className="absolute top-2 right-2 px-2.5 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-[#38e8ff]">
                   {t.places.horizonLabel} {card.era}
