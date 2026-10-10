@@ -1108,7 +1108,7 @@ html.bg-paused .pc-badge, html.bg-paused .pc-badge__dot { animation-play-state: 
 .fv-modal video { height: min(92vh, calc(94vw * 16 / 9)); aspect-ratio: 9 / 16; background: #000; border: 1px solid rgba(255, 255, 255, 0.15); }
 .fv-close { position: absolute; top: 18px; right: 18px; padding: 10px; color: #fff; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.25); cursor: pointer; }
 @keyframes fv-fade { from { opacity: 0; } }
-@media (max-width: 1023px) { .fvc-wrap .fvc-frame { width: min(260px, 70vw); } }
+@media (max-width: 767px) { .fvc-wrap .fvc-frame { width: min(260px, 70vw); } }
 
 /* ===== About section: dark glass over a moving futuristic background ===== */
 .ab-section { background: #04060a; }
@@ -1187,3 +1187,4 @@ html.bg-paused .ab-bg *, html.bg-paused .ab-card::before, html.bg-paused .ab-car
 @media (prefers-reduced-motion: reduce) {
   .ab-bg *, .ab-card::before, .ab-card::after, .fvc-frame::before { animation: none; }
 }
+@media (max-width: 1023px) { .fvc-play { width: 48px; height: 48px; } }

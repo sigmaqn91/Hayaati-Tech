@@ -42,7 +42,7 @@ export function AboutSection() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)_169px] xl:grid-cols-[380px_minmax(0,1fr)_214px] gap-8 xl:gap-10 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,32fr)_minmax(0,50fr)_minmax(0,18fr)] xl:grid-cols-[380px_minmax(0,1fr)_214px] gap-6 lg:gap-8 xl:gap-10 items-start">
         {/* Owner Photo Slot */}
         <div>
           <div className="ab-card relative overflow-hidden bg-[#0b0f17] border border-[#1e293b] aspect-square flex flex-col items-center justify-center p-6 text-center hud-frame">
@@ -71,8 +71,8 @@ export function AboutSection() {
         </div>
 
         {/* Bio & Dossier Details */}
-        <div className="lg:self-stretch">
-          <div className="ab-card ab-glass relative h-full p-6 xl:p-7 border border-[#1e293b] space-y-5 hud-frame flex flex-col justify-center">
+        <div className="md:self-stretch">
+          <div className="ab-card ab-glass relative h-full p-6 md:p-5 lg:p-6 xl:p-7 border border-[#1e293b] space-y-5 hud-frame flex flex-col justify-center">
             <div className="flex items-center justify-between border-b border-[#1e293b] pb-4">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-[#38e8ff]" />
@@ -87,10 +87,10 @@ export function AboutSection() {
 
             {/* Main details, larger text */}
             <div className="pl-5 border-l-2 border-l-[#38e8ff] space-y-4">
-              <div className="text-lg sm:text-xl text-white font-semibold tracking-tight leading-snug">
+              <div className="text-lg sm:text-xl md:text-base lg:text-lg xl:text-xl text-white font-semibold tracking-tight leading-snug">
                 {t.about.leadArchitect}
               </div>
-              <p className="text-base text-slate-300 leading-relaxed font-sans">
+              <p className="text-base md:text-sm lg:text-[15px] xl:text-base text-slate-300 leading-relaxed font-sans">
                 {t.about.bioPlaceholder}
               </p>
             </div>
