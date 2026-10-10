@@ -145,7 +145,7 @@ export function TechCatalogueSection() {
             <div
               key={card.id}
               onClick={() => setActiveModalCard(card)}
-              className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
+              className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame ms-card ab-card"
             >
               {/* Real Image Slot */}
               <div className="relative">
@@ -167,7 +167,15 @@ export function TechCatalogueSection() {
               </div>
 
               {/* Card Content */}
-              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+              <div className="ms-body p-6 flex-1 flex flex-col justify-between space-y-4">
+                {/* Moving high-tech background inside the card, under dark glass (same as Era 2030 milestone cards) */}
+                <div className="ms-body-bg" aria-hidden="true">
+                  <span className="ms-b-aurora" />
+                  <span className="ms-b-grid" />
+                  <span className="ms-b-streak" />
+                  <span className="ms-b-streak" />
+                  <span className="ms-b-glass" />
+                </div>
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-bold text-white text-lg group-hover:text-[#38e8ff] transition-colors leading-snug">
