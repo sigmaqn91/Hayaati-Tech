@@ -1160,3 +1160,45 @@ html.bg-paused .ab-bg *, html.bg-paused .ab-card::before, html.bg-paused .ab-car
 @media (prefers-reduced-motion: reduce) {
   .ab-bg *, .ab-card::before, .ab-card::after { animation: none; }
 }
+
+/* Era milestone cards: only the card itself is animated (About-section style).
+   The text area under each photo gets a live high-tech background behind dark glass,
+   and the card border gets the About light beam (ab-card). Section/page background untouched. */
+.ms-card { position: relative; }
+.ms-body { position: relative; overflow: hidden; isolation: isolate; }
+.ms-body > *:not(.ms-body-bg) { position: relative; z-index: 1; }
+.ms-body-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #04070c; }
+.ms-body-bg > span { position: absolute; display: block; }
+.ms-b-aurora { left: -40%; top: -60%; width: 180%; height: 220%;
+  background:
+    radial-gradient(closest-side at 20% 40%, rgba(56, 232, 255, 0.38), transparent 70%),
+    radial-gradient(closest-side at 80% 55%, rgba(70, 130, 255, 0.32), transparent 70%),
+    radial-gradient(closest-side at 50% 100%, rgba(56, 232, 255, 0.22), transparent 70%);
+  animation: ab-aurora 12s ease-in-out infinite alternate; will-change: transform; }
+.ms-b-grid { inset: -40px;
+  background-image: linear-gradient(rgba(56, 232, 255, 0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 232, 255, 0.16) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: ms-grid 10s linear infinite; will-change: transform; }
+@keyframes ms-grid { to { transform: translate3d(40px, 40px, 0); } }
+.ms-b-streak { left: -40%; height: 1px; width: 40%; opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(56, 232, 255, 0.95), #ffffff, transparent);
+  box-shadow: 0 0 10px rgba(56, 232, 255, 0.7);
+  animation: ms-streak 6s linear infinite; }
+.ms-b-streak:nth-of-type(3) { top: 28%; }
+.ms-b-streak:nth-of-type(4) { top: 72%; animation-delay: -3s; animation-duration: 7.5s; }
+@keyframes ms-streak { 0% { transform: translateX(0); opacity: 0; } 10% { opacity: 0.9; } 85% { opacity: 0.7; } 100% { transform: translateX(380%); opacity: 0; } }
+/* dark transparent glass over the animation keeps the text readable */
+.ms-b-glass { inset: 0;
+  background: linear-gradient(145deg, rgba(14, 24, 38, 0.42), rgba(6, 10, 18, 0.55));
+  -webkit-backdrop-filter: blur(2px) saturate(1.3); backdrop-filter: blur(2px) saturate(1.3);
+  box-shadow: inset 0 1px 0 rgba(150, 245, 255, 0.14), inset 0 0 30px rgba(56, 232, 255, 0.08); }
+.ms-card:nth-child(2) .ms-b-aurora { animation-delay: -3s; }
+.ms-card:nth-child(3) .ms-b-aurora { animation-delay: -6s; }
+.ms-card:nth-child(4) .ms-b-aurora { animation-delay: -9s; }
+.ms-card:nth-child(2) .ms-b-streak, .ms-card:nth-child(2)::before { animation-delay: -1.7s; }
+.ms-card:nth-child(3) .ms-b-streak, .ms-card:nth-child(3)::before { animation-delay: -3.4s; }
+.ms-card:nth-child(4) .ms-b-streak, .ms-card:nth-child(4)::before { animation-delay: -5.1s; }
+html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .ms-body-bg > span { animation: none; }
+}

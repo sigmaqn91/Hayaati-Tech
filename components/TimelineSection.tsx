@@ -147,7 +147,7 @@ export function TimelineSection() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {currentEra.cards.map((card) => {
               const cardContent = content.timelineCards[card.id] || {
                 title: '',
@@ -161,7 +161,7 @@ export function TimelineSection() {
                 <div
                   key={card.id}
                   onClick={() => setActiveModalCard(card)}
-                  className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
+                  className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame ms-card ab-card"
                 >
                   {/* Card Image Slot */}
                   <div className="relative">
@@ -172,7 +172,7 @@ export function TimelineSection() {
                       width={800}
                       height={500}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="w-full h-[200px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                      className="w-full h-[200px] lg:h-auto lg:!aspect-[227/100] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                     />
                     <div className="absolute top-2 right-2 px-2 py-0.5 bg-[#05070a]/90 border border-[#1e293b] text-[10px] font-mono text-[#38e8ff]">
                       {card.year}
@@ -180,7 +180,15 @@ export function TimelineSection() {
                   </div>
 
                   {/* Card Content */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="ms-body p-5 flex-1 flex flex-col justify-between space-y-4">
+                    {/* Moving high-tech background inside the card, under dark glass (About-section style) */}
+                    <div className="ms-body-bg" aria-hidden="true">
+                      <span className="ms-b-aurora" />
+                      <span className="ms-b-grid" />
+                      <span className="ms-b-streak" />
+                      <span className="ms-b-streak" />
+                      <span className="ms-b-glass" />
+                    </div>
                     <div className="space-y-2">
                       <h5 className="font-bold text-white text-base group-hover:text-[#38e8ff] transition-colors leading-snug">
                         {cardContent.title}
