@@ -104,6 +104,8 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   const baseViewportHRef = useRef<number>(0);
   const [inputFocused, setInputFocused] = useState<boolean>(false);
   const [kbInset, setKbInset] = useState<number>(0);
+  const kbInsetRef = useRef<number>(0);
+  kbInsetRef.current = kbInset;
 
   useEffect(() => {
     const vv = window.visualViewport;
@@ -111,6 +113,13 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     if (!vv) return;
     let raf = 0;
     const update = () => {
+      // Pinch zoom also shrinks the visual viewport. Only follow it while the typing box is focused,
+      // otherwise every zoom frame would re-render Jarvis and make zooming jerky.
+      if (!inputFocusedRef.current) {
+        baseViewportHRef.current = window.innerHeight;
+        if (kbInsetRef.current !== 0) setKbInset(0);
+        return;
+      }
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         if (!inputFocusedRef.current) baseViewportHRef.current = window.innerHeight;
