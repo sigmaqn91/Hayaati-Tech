@@ -275,7 +275,7 @@ export function ProjectsSection() {
       </div>
 
       {/* Grouping Tabs */}
-      <div className="flex items-center gap-3 mb-10 pb-4 border-b border-[#1e293b] overflow-x-auto [scrollbar-width:none]">
+      <div className="relative z-0 flex items-center gap-3 mb-10 pb-4 border-b border-[#1e293b] overflow-x-auto [scrollbar-width:none]">
         {tabs.map((tab) => (
           <button
             key={tab.key}

@@ -258,7 +258,9 @@ html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
   inherits: false;
   initial-value: 0deg;
 }
-@keyframes hp-spin { to { --hp-a: 360deg; } }
+/* Own name: ProjectArt also defines an `hp-spin` (a rotate), which used to override this one and spin the
+   whole language-button border instead of running the light around it. */
+@keyframes hp-angle-spin { to { --hp-a: 360deg; } }
 @keyframes hp-rot {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to { transform: translate(-50%, -50%) rotate(360deg); }
@@ -350,7 +352,7 @@ html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
-  animation: hp-spin 3.2s linear infinite;
+  animation: hp-angle-spin 3.2s linear infinite;
   z-index: 1;
 }
 .lang-btn::after {
@@ -366,7 +368,9 @@ html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
   z-index: 0;
 }
 .lang-btn__globe { filter: drop-shadow(0 0 4px rgba(56, 232, 255, 0.9)); animation: lang-globe 2.8s ease-in-out infinite; }
-.lang-btn:hover { transform: scale(1.07, 1.05); }
+@media (hover: hover) {
+  .lang-btn:hover { transform: scale(1.07, 1.05); }
+}
 @keyframes lang-pulse {
   0%, 100% { box-shadow: 0 0 10px rgba(56, 232, 255, 0.28), inset 0 0 8px rgba(56, 232, 255, 0.1); }
   50% { box-shadow: 0 0 20px rgba(56, 232, 255, 0.55), inset 0 0 14px rgba(56, 232, 255, 0.2); }
@@ -1201,4 +1205,15 @@ html.bg-paused .ab-bg *, html.bg-paused .ab-card::before, html.bg-paused .ab-car
 html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
   .ms-body-bg > span { animation: none; }
+}
+
+/* Performance: off-screen sections/cards (marked .anim-off by AnimationGovernor) stop their looping animations
+   and release their GPU layers. They restart 300px before scrolling back into view, so nothing looks different.
+   One-time entrance animations (project cards, hero ad) are excluded. */
+.anim-off::before, .anim-off::after,
+.anim-off :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *),
+.anim-off :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::before,
+.anim-off :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::after {
+  animation-name: none !important;
+  will-change: auto !important;
 }

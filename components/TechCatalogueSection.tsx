@@ -69,8 +69,8 @@ export function TechCatalogueSection() {
         </p>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-thin">
+      {/* Category Tabs (relative z-0 keeps this scroll row from forcing the whole catalogue below it into one huge GPU layer) */}
+      <div className="relative z-0 flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-thin">
         {categories.map((cat) => {
           const isActive = selectedCategory === cat.id;
           return (

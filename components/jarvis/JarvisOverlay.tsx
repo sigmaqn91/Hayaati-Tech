@@ -101,31 +101,52 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   // UI-only: typing box lifts above the on-screen keyboard (visualViewport) and expands while focused
   const commandInputRef = useRef<HTMLInputElement | null>(null);
   const inputFocusedRef = useRef<boolean>(false);
-  const baseViewportHRef = useRef<number>(0);
   const [inputFocused, setInputFocused] = useState<boolean>(false);
-  const [kbInset, setKbInset] = useState<number>(0);
-  const kbInsetRef = useRef<number>(0);
-  kbInsetRef.current = kbInset;
+  // Where the lifted bar sits: the visible part of the page (visual viewport) just above the keyboard.
+  // Also works in Chrome "Desktop site" mode, where the page is zoomed out (or zoomed in on focus):
+  // `scale` makes the bar render at normal phone size there, so the typing text stays readable.
+  type KbBox = { left: number; width: number; bottom: number; scale: number };
+  const [kbBox, setKbBox] = useState<KbBox | null>(null);
+  const [kbOpen, setKbOpen] = useState<boolean>(false);
+  const baseScreenHRef = useRef<number>(0);
 
   useEffect(() => {
     const vv = window.visualViewport;
-    baseViewportHRef.current = window.innerHeight;
     if (!vv) return;
+    // Visible height in screen units: does not change with zoom, only when the keyboard takes space.
+    const screenH = () => vv.height * vv.scale;
+    baseScreenHRef.current = screenH();
     let raf = 0;
     const update = () => {
-      // Pinch zoom also shrinks the visual viewport. Only follow it while the typing box is focused,
+      // Pinch zoom also changes the visual viewport. Only follow it while the typing box is focused,
       // otherwise every zoom frame would re-render Jarvis and make zooming jerky.
       if (!inputFocusedRef.current) {
-        baseViewportHRef.current = window.innerHeight;
-        if (kbInsetRef.current !== 0) setKbInset(0);
+        baseScreenHRef.current = screenH();
         return;
       }
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        if (!inputFocusedRef.current) baseViewportHRef.current = window.innerHeight;
-        const base = Math.max(baseViewportHRef.current, window.innerHeight);
-        const inset = Math.max(0, Math.round(base - vv.height - vv.offsetTop));
-        setKbInset((prev) => (Math.abs(prev - inset) > 1 ? inset : prev));
+        const h = screenH();
+        if (h > baseScreenHRef.current) baseScreenHRef.current = h;
+        const open = baseScreenHRef.current - h > 120;
+        setKbOpen((prev) => (prev === open ? prev : open));
+        const layoutH = document.documentElement.clientHeight;
+        const scale = Math.min(1.6, Math.max(1, 1 / vv.scale));
+        const next: KbBox = {
+          left: Math.round(vv.offsetLeft),
+          width: Math.round(vv.width),
+          bottom: Math.max(0, Math.round(layoutH - vv.offsetTop - vv.height)),
+          scale: Math.round(scale * 100) / 100,
+        };
+        setKbBox((prev) =>
+          prev &&
+          Math.abs(prev.left - next.left) < 1 &&
+          Math.abs(prev.width - next.width) < 1 &&
+          Math.abs(prev.bottom - next.bottom) < 1 &&
+          prev.scale === next.scale
+            ? prev
+            : next
+        );
       });
     };
     vv.addEventListener('resize', update);
@@ -140,6 +161,15 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     };
   }, []);
 
+  // Place the bar right away when the box is tapped (before the keyboard animation starts).
+  useEffect(() => {
+    if (!inputFocused) {
+      setKbOpen(false);
+      return;
+    }
+    window.visualViewport?.dispatchEvent(new Event('resize'));
+  }, [inputFocused]);
+
   const handleCommandFocus = () => {
     inputFocusedRef.current = true;
     setInputFocused(true);
@@ -153,7 +183,6 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   useEffect(() => {
     setCoarsePointer(window.matchMedia('(pointer: coarse)').matches);
   }, []);
-  const kbOpen = kbInset > 80;
   const commandLifted = inputFocused && (kbOpen || coarsePointer);
 
   // Keyboard closed by the phone (back gesture / hide-keyboard) while the input still holds focus:
@@ -946,13 +975,23 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       {/* 6. Fixed Bottom Command Bar */}
       <motion.div
         layout="position"
+        layoutDependency={commandLifted}
         transition={{ type: 'spring', stiffness: 380, damping: 36, mass: 0.9 }}
-        style={commandLifted ? { bottom: `${kbInset}px` } : undefined}
+        style={commandLifted
+          ? kbBox
+            ? { left: kbBox.left, width: kbBox.width, bottom: kbBox.bottom }
+            : { left: 0, right: 0, bottom: 0 }
+          : undefined}
         className={commandLifted
-          ? 'fixed left-0 right-0 px-2.5 pb-2.5 pt-1 z-30 pointer-events-auto'
+          ? 'fixed px-2.5 pb-2.5 pt-1 z-30 pointer-events-auto'
           : embedded
           ? 'absolute bottom-0 left-0 right-0 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30 pointer-events-auto'
           : 'absolute bottom-0 left-0 right-0 border-t border-[#38e8ff]/20 bg-[#05070a]/95 p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-30'}>
+        <div
+          style={commandLifted && kbOpen && kbBox && kbBox.scale !== 1
+            ? { width: `${100 / kbBox.scale}%`, transform: `scale(${kbBox.scale})`, transformOrigin: '0 100%' }
+            : undefined}
+        >
         <motion.div
           animate={commandLifted
             ? {
@@ -979,16 +1018,6 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
               onChange={(e) => setInputQuery(e.target.value)}
               onFocus={handleCommandFocus}
               onBlur={handleCommandBlur}
-              onPointerDown={(e) => {
-                // Touch: lift the bar as early as possible so the browser has no reason to scroll the page away
-                if (e.pointerType === 'touch') {
-                  inputFocusedRef.current = true;
-                  setInputFocused(true);
-                  window.setTimeout(() => {
-                    if (document.activeElement !== commandInputRef.current) handleCommandBlur();
-                  }, 700);
-                }
-              }}
               animate={{ fontSize: commandLifted ? 18 : 16, paddingTop: commandLifted ? 14 : 10, paddingBottom: commandLifted ? 14 : 10 }}
               transition={{ type: 'spring', stiffness: 380, damping: 32 }}
               enterKeyHint="send"
@@ -1031,6 +1060,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             <span className="hidden sm:inline">TRANSMIT</span>
           </button>
         </motion.div>
+        </div>
       </motion.div>
 
       {/* 7. Verification Code Modal (Masked Typed Input) */}

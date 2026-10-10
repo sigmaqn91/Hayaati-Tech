@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -28,6 +28,18 @@ export function RealImageSlot({
   const { t } = useLanguage();
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  // Already in the browser cache (e.g. the same photo opened in a card popup): show it at once, no fade.
+  const [instant, setInstant] = useState(false);
+  const imgRef = useCallback((img: HTMLImageElement | null) => {
+    if (img && img.complete && img.naturalWidth > 0) {
+      setInstant(true);
+      setIsLoaded(true);
+    }
+  }, []);
+  // Card photos are already small 800px WebP files: serve them as they are, so a card and its popup
+  // use the exact same file (the popup opens instantly from cache instead of downloading a new size).
+  // Big banners (wider than 1200) still go through Next's resizer.
+  const isLocal = src.startsWith('/') && width <= 1200;
 
   return (
     <div
@@ -41,12 +53,14 @@ export function RealImageSlot({
           alt={alt}
           width={width}
           height={height}
+          ref={imgRef}
           priority={priority}
           sizes={sizes}
+          unoptimized={isLocal}
           referrerPolicy="no-referrer"
           onError={() => setHasError(true)}
           onLoad={() => setIsLoaded(true)}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${
+          className={`w-full h-full object-cover ${instant ? '' : 'transition-opacity duration-500'} ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         />

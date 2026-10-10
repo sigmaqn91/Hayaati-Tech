@@ -13,6 +13,7 @@ import { ContactSection } from '@/components/ContactSection';
 import dynamic from 'next/dynamic';
 import { FloatingVoiceTrigger } from '@/components/FloatingVoiceTrigger';
 import { Footer } from '@/components/Footer';
+import { AnimationGovernor } from '@/components/AnimationGovernor';
 import { useLanguage } from '@/context/LanguageContext';
 
 const JarvisOverlay = dynamic(
@@ -42,6 +43,9 @@ export default function HomePage() {
     <div
       className="min-h-screen bg-[#05070a] text-slate-100 flex flex-col selection:bg-[#38e8ff]/20 selection:text-[#38e8ff]"
     >
+      {/* Pauses looping animations of off-screen sections/cards (performance only) */}
+      <AnimationGovernor />
+
       {/* Fixed Navigation with Language Selector */}
       <Navbar />
 

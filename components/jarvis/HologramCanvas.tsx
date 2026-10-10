@@ -87,7 +87,8 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
-      antialias: !isMobile,
+      // Phones in "Desktop site" mode are wide (980px) but still phones: skip the heavy anti-aliasing there too.
+      antialias: !isMobile && !window.matchMedia('(pointer: coarse)').matches,
       powerPreference: 'high-performance',
     });
     // The drawing surface is bigger than the container on every side so the rings are never cut off.
