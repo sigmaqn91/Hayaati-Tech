@@ -1088,28 +1088,6 @@ html.bg-paused .pc-badge, html.bg-paused .pc-badge__dot { animation-play-state: 
   .founder-portrait * { transition: none !important; animation: none !important; }
 }
 
-/* ===== About: founder video (glass frame, full-video lightbox) ===== */
-.fvc-frame { position: relative; width: 240px; aspect-ratio: 9 / 16; cursor: pointer; border-radius: 14px; overflow: hidden; background: #000;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.04), 0 0 0 6px rgba(255, 255, 255, 0.10), 0 0 50px 6px rgba(56, 232, 255, 0.18), 0 30px 60px -20px rgba(0, 0, 0, 0.9); }
-.fvc-frame::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), transparent 30%, transparent 75%, rgba(255, 255, 255, 0.06)); }
-.fvc-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.fvc-play { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; transform: translate(-50%, -50%); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; color: #fff; padding-left: 4px;
-  background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.45); backdrop-filter: blur(8px); transition: transform 0.3s ease, background 0.3s ease; }
-.fvc-frame:hover .fvc-play { transform: translate(-50%, -50%) scale(1.08); background: rgba(255, 255, 255, 0.22); }
-.fvc-wrap { position: relative; display: flex; justify-content: center; }
-.fvc-wrap::before { content: ''; position: absolute; left: 50%; top: 50%; width: 170%; height: 90%; transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse, rgba(56, 232, 255, 0.20), rgba(56, 232, 255, 0.05) 45%, transparent 70%); filter: blur(14px); pointer-events: none; }
-.fvc-wrap .fvc-frame { width: 100%; }
-.fv-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;
-  background: rgba(2, 3, 4, 0.92); backdrop-filter: blur(10px); animation: fv-fade 0.35s ease; }
-.fv-modal video { height: min(92vh, calc(94vw * 16 / 9)); aspect-ratio: 9 / 16; background: #000; border: 1px solid rgba(255, 255, 255, 0.15); }
-.fv-close { position: absolute; top: 18px; right: 18px; padding: 10px; color: #fff; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.25); cursor: pointer; }
-@keyframes fv-fade { from { opacity: 0; } }
-@media (max-width: 767px) { .fvc-wrap .fvc-frame { width: min(260px, 70vw); } }
-
 /* ===== About section: dark glass over a moving futuristic background ===== */
 .ab-section { background: #04060a; }
 .ab-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
@@ -1177,14 +1155,8 @@ html.bg-paused .pc-badge, html.bg-paused .pc-badge__dot { animation-play-state: 
 .ab-card::after { box-shadow: 0 0 18px rgba(56, 232, 255, 0.14), inset 0 0 18px rgba(56, 232, 255, 0.05); animation: pc-glow 5s ease-in-out infinite; }
 .ab-card:nth-of-type(2)::before { animation-delay: -2.3s; }
 .ab-glass.ab-card::before { animation-delay: -3.5s; }
-.fvc-frame::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none; z-index: 3;
-  background: conic-gradient(from var(--pc-a), transparent 0deg 250deg, rgba(56, 232, 255, 0.35) 300deg, #38e8ff 340deg, #ffffff 358deg, transparent 360deg);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: pc-spin 7s linear infinite; animation-delay: -5s; }
 
-html.bg-paused .ab-bg *, html.bg-paused .ab-card::before, html.bg-paused .ab-card::after, html.bg-paused .fvc-frame::before { animation-play-state: paused; }
+html.bg-paused .ab-bg *, html.bg-paused .ab-card::before, html.bg-paused .ab-card::after { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .ab-bg *, .ab-card::before, .ab-card::after, .fvc-frame::before { animation: none; }
+  .ab-bg *, .ab-card::before, .ab-card::after { animation: none; }
 }
-@media (max-width: 1023px) { .fvc-play { width: 48px; height: 48px; } }

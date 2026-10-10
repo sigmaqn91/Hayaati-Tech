@@ -26,7 +26,7 @@ export const SITE_STATUS: string[] = [
   'Still in progress: real photo-realistic pictures for most timeline / tech cards (those cards still show a "photorealistic frame pending" placeholder), the "My Projects" list (no projects published yet), more animations, and final polishing.',
   'Real photos on the site right now: the hero background, the 2030 era banner, all 8 Cities & Places postcards, and Aliya\'s own founder photo in the About section. The other picture frames are placeholders until their photos are added.',
   'Cities & Places section: 8 postcards with real pictures, an animated light running along each card border, and a slowly moving grid and soft light behind the section.',
-  'About section (Aliya Khan, founder): one row with her founder photo on the left (a calm night portrait at a café window in the rain), her main details in the middle, and her founder video on the right (she is wearing a black formal suit). Below it, a slim strip with her email and website. The video plays silently on the page; tapping it opens the full video with music. The section has a dark glass look over a softly moving futuristic background, with light running along the card borders. Her photo and video are protected from easy saving.',
+  'About section (Aliya Khan, founder): her founder photo on the left (a calm night portrait at a café window in the rain) and her main details beside it, with a slim strip below for her email and website. There is no video in this section. The section has a dark glass look over a softly moving futuristic background, with light running along the card borders. Her photo is protected from easy saving.',
 ];
 
 const clip = (s: string | null | undefined, n: number) => {

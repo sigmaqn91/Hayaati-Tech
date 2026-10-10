@@ -150,8 +150,8 @@ export function FounderPortrait({ src, alt, name, title }: { src: string; alt: s
 
       <div className="founder-caption pointer-events-none absolute left-8 right-8 bottom-7 sm:left-10 sm:bottom-9 md:left-6 md:right-4 md:bottom-6 xl:left-10 xl:bottom-9 text-left whitespace-nowrap">
         <span className="founder-rule block h-px bg-white/60 mb-3" />
-        <Typed text={name} start={on} delay={1500} step={70} className="block text-white text-lg sm:text-xl md:text-sm lg:text-base xl:text-xl font-light uppercase tracking-[0.32em] md:tracking-[0.24em] xl:tracking-[0.32em]" />
-        <Typed text={title} start={on} delay={1500 + name.length * 70 + 200} step={28} className="block mt-1.5 text-[10px] sm:text-[11px] md:text-[8px] lg:text-[9px] xl:text-[11px] text-white/70 uppercase tracking-[0.28em] md:tracking-[0.2em] xl:tracking-[0.28em]" />
+        <Typed text={name} start={on} delay={1500} step={70} className="block text-white text-lg sm:text-xl md:text-lg xl:text-xl font-light uppercase tracking-[0.32em] md:tracking-[0.28em] xl:tracking-[0.32em]" />
+        <Typed text={title} start={on} delay={1500 + name.length * 70 + 200} step={28} className="block mt-1.5 text-[10px] sm:text-[11px] md:text-[10px] xl:text-[11px] text-white/70 uppercase tracking-[0.28em] md:tracking-[0.2em] xl:tracking-[0.28em]" />
       </div>
 
       {/* Invisible decoy: any "save image" gets only this tiny blurred copy */}
