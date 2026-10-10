@@ -74,7 +74,7 @@ export function PlacesSection() {
             <div
               key={place.id}
               onClick={() => setSelectedPlace(localizedPlace)}
-              className="pc-card group relative flex flex-col bg-[#0b0f17]/10 border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
+              className="pc-card ms-card group relative flex flex-col bg-[#0b0f17]/10 border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
             >
               {/* Real Image Slot */}
               <div className="relative">
@@ -101,7 +101,15 @@ export function PlacesSection() {
               </div>
 
               {/* Postcard Body */}
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+              <div className="ms-body p-5 flex-1 flex flex-col justify-between space-y-4">
+                {/* Moving high-tech background inside the card, under dark glass (same as Era 2030 and Tech Catalogue cards) */}
+                <div className="ms-body-bg" aria-hidden="true">
+                  <span className="ms-b-aurora" />
+                  <span className="ms-b-grid" />
+                  <span className="ms-b-streak" />
+                  <span className="ms-b-streak" />
+                  <span className="ms-b-glass" />
+                </div>
                 <div className="space-y-2">
                   <div className="text-[10px] font-mono text-[#38e8ff] uppercase tracking-wider flex items-center gap-1.5">
                     <Compass className="w-3 h-3 text-[#38e8ff]" />
