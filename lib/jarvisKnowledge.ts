@@ -23,8 +23,10 @@ export const SITE_STATUS: string[] = [
   'The website is UNDER DEVELOPMENT. The banner at the top says "Under development - the full experience is being built, launching soon".',
   'It is already online (hosted on Vercel at www.hayaatiweb.site) on purpose, as an early public preview: visitors can already explore the design, try Jarvis, and Aliya keeps improving it live. The full official launch comes when all sections are complete.',
   'Finished and working now: the futuristic hero banner (3D orb, animated background, glass panel), Jarvis voice + chat assistant in 30 languages, the language selector (30 languages, opens in the visitor\'s country language), the 2030 / 2035 / 2050 timeline, the future tech catalogue, cities & places, advertise form, about and contact sections, and the animated advert under the hero.',
-  'Still in progress: real photo-realistic pictures for most timeline / tech / places cards (those cards still show a "photorealistic frame pending" placeholder), the "My Projects" list (no projects published yet), more animations, and final polishing.',
-  'Real photos on the site right now: the hero background and the 2030 era banner. The other picture frames are placeholders until their photos are added.',
+  'Still in progress: real photo-realistic pictures for most timeline / tech cards (those cards still show a "photorealistic frame pending" placeholder), the "My Projects" list (no projects published yet), more animations, and final polishing.',
+  'Real photos on the site right now: the hero background, the 2030 era banner, all 8 Cities & Places postcards, and Aliya\'s own founder photo in the About section. The other picture frames are placeholders until their photos are added.',
+  'Cities & Places section: 8 postcards with real pictures, an animated light running along each card border, and a slowly moving grid and soft light behind the section.',
+  'About section (Aliya Khan, founder): one row with her founder photo on the left (a calm night portrait at a café window in the rain), her main details in the middle, and her founder video on the right (she is wearing a black formal suit). Below it, a slim strip with her email and website. The video plays silently on the page; tapping it opens the full video with music. The section has a dark glass look over a softly moving futuristic background, with light running along the card borders. Her photo and video are protected from easy saving.',
 ];
 
 const clip = (s: string | null | undefined, n: number) => {

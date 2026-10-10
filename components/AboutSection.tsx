@@ -5,6 +5,7 @@ import { aboutData } from '@/data/about';
 import { useLanguage } from '@/context/LanguageContext';
 import { User, Mail, Globe } from 'lucide-react';
 import { FounderPortrait } from '@/components/FounderPortrait';
+import { FounderVideoFrame } from '@/components/FounderVideoCard';
 
 export function AboutSection() {
   const { t } = useLanguage();
@@ -13,8 +14,21 @@ export function AboutSection() {
     <section
       id="about"
       aria-label={t.about.title}
-      className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-[#1e293b]"
+      className="ab-section relative overflow-hidden border-b border-[#1e293b]"
     >
+      {/* Moving futuristic background behind dark glass */}
+      <div className="ab-bg" aria-hidden="true">
+        <div className="ab-aurora" />
+        <div className="ab-grid" />
+        <div className="ab-floor" />
+        <div className="ab-streaks">
+          <i /><i /><i /><i /><i /><i />
+        </div>
+        <div className="ab-dust" />
+        <div className="ab-veil" />
+      </div>
+
+      <div className="relative z-[1] py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <div className="mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0b0f17] border border-[#38e8ff]/30 text-[#38e8ff] font-mono text-xs uppercase tracking-widest mb-3">
           <User className="w-3.5 h-3.5 text-[#38e8ff]" />
@@ -28,10 +42,10 @@ export function AboutSection() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)_169px] xl:grid-cols-[380px_minmax(0,1fr)_214px] gap-8 xl:gap-10 items-start">
         {/* Owner Photo Slot */}
-        <div className="lg:col-span-4">
-          <div className="relative overflow-hidden bg-[#0b0f17] border border-[#1e293b] aspect-square flex flex-col items-center justify-center p-6 text-center hud-frame">
+        <div>
+          <div className="ab-card relative overflow-hidden bg-[#0b0f17] border border-[#1e293b] aspect-square flex flex-col items-center justify-center p-6 text-center hud-frame">
             {aboutData.photoUrl ? (
               <FounderPortrait
                 src={aboutData.photoUrl}
@@ -57,8 +71,8 @@ export function AboutSection() {
         </div>
 
         {/* Bio & Dossier Details */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="p-6 sm:p-8 bg-[#0b0f17] border border-[#1e293b] space-y-6 hud-frame">
+        <div className="lg:self-stretch">
+          <div className="ab-card ab-glass relative h-full p-6 xl:p-7 border border-[#1e293b] space-y-5 hud-frame flex flex-col justify-center">
             <div className="flex items-center justify-between border-b border-[#1e293b] pb-4">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-[#38e8ff]" />
@@ -71,48 +85,46 @@ export function AboutSection() {
               </span>
             </div>
 
-            <div className="space-y-4 text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
-              <div className="p-5 bg-[#070a0f] border-l-2 border-l-[#38e8ff] border-y border-r border-[#1e293b] text-xs font-mono text-slate-300 space-y-3">
-                <div className="text-white font-bold uppercase tracking-wider">
-                  {t.about.leadArchitect}
-                </div>
-                <p className="leading-relaxed">
-                  {t.about.bioPlaceholder}
-                </p>
+            {/* Main details, larger text */}
+            <div className="pl-5 border-l-2 border-l-[#38e8ff] space-y-4">
+              <div className="text-lg sm:text-xl text-white font-semibold tracking-tight leading-snug">
+                {t.about.leadArchitect}
               </div>
+              <p className="text-base text-slate-300 leading-relaxed font-sans">
+                {t.about.bioPlaceholder}
+              </p>
             </div>
 
-            {/* Direct Contact Matrix */}
-            <div className="pt-6 border-t border-[#1e293b] grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 bg-[#070a0f] border border-[#1e293b] space-y-1">
-                <span className="text-[10px] font-mono text-slate-500 uppercase block">
-                  {t.about.contactDirect}
-                </span>
-                <a
-                  href={`mailto:${aboutData.email}`}
-                  className="text-xs font-mono text-[#38e8ff] hover:underline flex items-center gap-1.5"
-                >
-                  <Mail className="w-3.5 h-3.5" />
-                  <span>{aboutData.email}</span>
-                </a>
-              </div>
-              <div className="p-4 bg-[#070a0f] border border-[#1e293b] space-y-1">
-                <span className="text-[10px] font-mono text-slate-500 uppercase block">
-                  {t.footer.liveDomainLabel}
-                </span>
-                <a
-                  href={`https://${aboutData.domain}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-mono text-slate-300 hover:text-[#38e8ff] flex items-center gap-1.5"
-                >
-                  <Globe className="w-3.5 h-3.5 text-[#38e8ff]" />
-                  <span>{aboutData.domain}</span>
-                </a>
-              </div>
-            </div>
           </div>
         </div>
+
+        {/* Founder video, same row as the photo */}
+        <FounderVideoFrame />
+      </div>
+
+      {/* Remaining details in a compact strip */}
+      <div className="ab-card ab-glass relative mt-8 px-6 py-4 border border-[#1e293b] hud-frame flex flex-col md:flex-row md:items-center gap-4 md:gap-10">
+        <div className="space-y-1">
+          <span className="text-[10px] font-mono text-slate-500 uppercase block">{t.about.contactDirect}</span>
+          <a href={`mailto:${aboutData.email}`} className="text-sm font-mono text-[#38e8ff] hover:underline flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            <span>{aboutData.email}</span>
+          </a>
+        </div>
+        <span className="hidden md:block w-px h-9 bg-[#1e293b]" />
+        <div className="space-y-1">
+          <span className="text-[10px] font-mono text-slate-500 uppercase block">{t.footer.liveDomainLabel}</span>
+          <a
+            href={`https://${aboutData.domain}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-mono text-slate-300 hover:text-[#38e8ff] flex items-center gap-2"
+          >
+            <Globe className="w-4 h-4 text-[#38e8ff]" />
+            <span>{aboutData.domain}</span>
+          </a>
+        </div>
+      </div>
       </div>
     </section>
   );
