@@ -53,7 +53,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       if (cancelled) return;
       cleanup = initOrb(container);
     };
-    const idleId = w.requestIdleCallback ? w.requestIdleCallback(start, { timeout: 700 }) : window.setTimeout(start, 200);
+    const idleId = w.requestIdleCallback ? w.requestIdleCallback(start, { timeout: 250 }) : window.setTimeout(start, 100);
     return () => {
       cancelled = true;
       if (w.cancelIdleCallback && w.requestIdleCallback) w.cancelIdleCallback(idleId);

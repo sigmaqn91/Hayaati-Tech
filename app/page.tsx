@@ -16,9 +16,14 @@ import { Footer } from '@/components/Footer';
 import { AnimationGovernor } from '@/components/AnimationGovernor';
 import { useLanguage } from '@/context/LanguageContext';
 
+// Start downloading Jarvis (orb + chat) as soon as the page script runs, instead of waiting until the
+// whole page has finished rendering: the orb shows up several seconds sooner on phones.
+const loadJarvis = () => import('@/components/jarvis/JarvisOverlay');
+if (typeof window !== 'undefined') loadJarvis().catch(() => {});
+
 const JarvisOverlay = dynamic(
   () =>
-    import('@/components/jarvis/JarvisOverlay')
+    loadJarvis()
       .then((mod) => mod.JarvisOverlay)
       .catch(() => {
         // Retry chunk import in case of transient dev reload or chunk hash mismatch

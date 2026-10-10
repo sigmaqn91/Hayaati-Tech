@@ -96,7 +96,14 @@ export function FounderPortrait({ src, alt, name, title }: { src: string; alt: s
     io.observe(frame);
 
     let raf = 0;
+    // Depth effect only while the portrait is near the screen (no layout reads on every scroll frame elsewhere).
+    let near = true;
+    const nearIo = new IntersectionObserver(([entry]) => {
+      near = entry.isIntersecting;
+    }, { rootMargin: '200px 0px' });
+    nearIo.observe(frame);
     const onScroll = () => {
+      if (!near) return;
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         const r = frame.getBoundingClientRect();
@@ -111,6 +118,7 @@ export function FounderPortrait({ src, alt, name, title }: { src: string; alt: s
     window.addEventListener('resize', onScroll);
     return () => {
       io.disconnect();
+      nearIo.disconnect();
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);

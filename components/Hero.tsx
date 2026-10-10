@@ -68,10 +68,16 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
   useEffect(() => {
     // Parallax is written straight to the element (no React re-render per scroll event) and only while the hero is on screen.
     let raf = 0;
+    let last = -1;
     const apply = () => {
       raf = 0;
       const el = parallaxRef.current;
-      if (el) el.style.transform = `translateY(${Math.min(window.scrollY * 0.15, 80)}px)`;
+      const y = Math.round(Math.min(window.scrollY * 0.15, 80) * 10) / 10;
+      // Below the hero the value stays at 80: skip the write so scrolling the rest of the page does no extra work.
+      if (el && y !== last) {
+        last = y;
+        el.style.transform = `translateY(${y}px)`;
+      }
     };
     const handleScroll = () => {
       if (!raf) raf = requestAnimationFrame(apply);

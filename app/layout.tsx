@@ -6,6 +6,11 @@ import { GEO_BOOT_SCRIPT } from '@/lib/geoLanguage';
 
 const appUrl = getSiteUrl();
 
+const REFRESH_TOP_SCRIPT = `(function(){try{var n=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];if(n&&n.type==='reload'){if('scrollRestoration' in history)history.scrollRestoration='manual';if(location.hash)history.replaceState(history.state,'',location.pathname+location.search);window.scrollTo(0,0);addEventListener('load',function(){window.scrollTo(0,0)})}}catch(e){}})();`;
+
+// Same stylesheet (and id) HeroAdvert adds itself; added here from <head> so it is not render-blocking but starts early.
+const AD_FONTS_SCRIPT = `(function(){try{if(document.getElementById('ad-serif-font'))return;var l=document.createElement('link');l.id='ad-serif-font';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500&family=Sora:wght@300;400;500&family=JetBrains+Mono:wght@500;700&family=Cormorant+Garamond:wght@400;500&display=swap';document.head.appendChild(l)}catch(e){}})();`;
+
 // Normal responsive viewport: no forced zoom lock (pinch zoom stays available), inputs are 16px so no auto-zoom,
 // and the visual viewport shrinks for the on-screen keyboard (handled in JarvisOverlay).
 export const viewport: Viewport = {
@@ -72,6 +77,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Refresh = a fresh start: the page opens at the top (hero) instead of jumping back to the old scroll
+            position or to the last menu section (#about ...) kept in the address bar. */}
+        <script dangerouslySetInnerHTML={{ __html: REFRESH_TOP_SCRIPT }} />
+        {/* Hero advert fonts start downloading right away (before, they waited for the whole page to load). */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script dangerouslySetInnerHTML={{ __html: AD_FONTS_SCRIPT }} />
         {/* Picks the visitor's language before the page paints (saved choice > country > browser). */}
         <script dangerouslySetInnerHTML={{ __html: GEO_BOOT_SCRIPT }} />
         {/* Jarvis voice: open the connection to Google's Live server early, so activation connects faster. */}

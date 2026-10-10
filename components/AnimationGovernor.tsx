@@ -6,7 +6,8 @@
  * The page has 700+ looping CSS animations (card glass, border beams, project art, badges ...).
  * Before, all of them ran every frame even far off-screen, which made scrolling heavy and could
  * make phones reload the tab. Now every section / card is watched: when it is off-screen its
- * looping animations stop (CSS `.anim-off` rules in globals.css) and its moving layers are released,
+ * looping animations stop (CSS rules in globals.css) and its moving layers are released; below the hero
+ * they also start paused until first seen, so the first load does not start them all at once.
  * and they start again just before it scrolls back into view (300px early, so nobody sees the switch).
  * One-time entrance animations are excluded and play exactly as before.
  */
@@ -14,6 +15,7 @@
 import { useEffect } from 'react';
 
 const ZONES = 'section, footer, .ms-card, .pc-card, .ab-card, .hp-card';
+const ON = 'anim-on';
 const OFF = 'anim-off';
 
 export function AnimationGovernor() {
@@ -24,6 +26,7 @@ export function AnimationGovernor() {
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
+          e.target.classList.toggle(ON, e.isIntersecting);
           e.target.classList.toggle(OFF, !e.isIntersecting);
         }
       },

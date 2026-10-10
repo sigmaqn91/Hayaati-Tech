@@ -1207,13 +1207,16 @@ html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
   .ms-body-bg > span { animation: none; }
 }
 
-/* Performance: off-screen sections/cards (marked .anim-off by AnimationGovernor) stop their looping animations
-   and release their GPU layers. They restart 300px before scrolling back into view, so nothing looks different.
+/* Performance: off-screen sections/cards stop their looping animations and release their GPU layers.
+   AnimationGovernor marks each one .anim-on while it is on (or near) the screen and .anim-off when it leaves.
+   Below-the-hero sections and cards start paused until marked on, so opening the site does not start 700+
+   animations at once. They restart 300px before scrolling into view, so nothing looks different.
    One-time entrance animations (project cards, hero ad) are excluded. */
-.anim-off::before, .anim-off::after,
-.anim-off :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *),
-.anim-off :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::before,
-.anim-off :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::after {
+:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on))::before,
+:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on))::after,
+:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on)) :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *),
+:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on)) :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::before,
+:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on)) :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::after {
   animation-name: none !important;
   will-change: auto !important;
 }
