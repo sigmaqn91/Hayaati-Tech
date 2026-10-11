@@ -139,7 +139,7 @@ export default function RatingsPage() {
 
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="rt-card">
-                <p className="rt-label">Sections & cards (most "needs work" first)</p>
+                <p className="rt-label">Sections & cards (most &quot;needs work&quot; first)</p>
                 <ul className="mt-2 flex flex-col gap-1 max-h-[28rem] overflow-y-auto">
                   {verdictRows.length === 0 && <li className="text-sm text-slate-500">Nothing marked yet.</li>}
                   {verdictRows.map(([id, v]) => (
