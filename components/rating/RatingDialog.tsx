@@ -118,6 +118,14 @@ export function RatingDialog({ open, auto, onClose, fill }: RatingDialogProps) {
     if (!open || !fill || readRated()) return;
     const f = fill.data;
     const timers: number[] = [];
+    // Scroll only the popup's own list to the feedback box (scrollIntoView also moved the popup frame itself)
+    const showMessageBox = () => {
+      const box = panelRef.current?.querySelector<HTMLElement>('.rt-scroll');
+      const el = messageRef.current;
+      if (!box || !el) return;
+      const delta = el.getBoundingClientRect().top - box.getBoundingClientRect().top;
+      box.scrollTo({ top: box.scrollTop + delta - (box.clientHeight - el.offsetHeight) / 2, behavior: 'smooth' });
+    };
     const norm = (x: string) => x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
     const resolve = (q: string): string | null => {
       const raw = q.trim();
@@ -168,7 +176,7 @@ export function RatingDialog({ open, auto, onClose, fill }: RatingDialogProps) {
     if (text) {
       timers.push(
         window.setTimeout(() => {
-          messageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          showMessageBox();
           const prev = messageNowRef.current.trim();
           const base = prev ? `${prev} ` : '';
           const full = (base + text).slice(0, 1500);
@@ -185,7 +193,7 @@ export function RatingDialog({ open, auto, onClose, fill }: RatingDialogProps) {
             if (i < chars.length) timers.push(window.setTimeout(tick, 22));
             else {
               setMessage(full);
-              el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              showMessageBox();
             }
           };
           timers.push(window.setTimeout(tick, 120));
