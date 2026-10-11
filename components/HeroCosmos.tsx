@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { crispPixelRatio } from '@/lib/crispPixels';
 
 // true = hero photo wapas dikhao (animation halka glow ban jaata hai). false = poora black + animation.
 const SHOW_PHOTO = false;
@@ -29,6 +30,13 @@ export default function HeroCosmos() {
     let W = 1;
     let H = 1;
     let dpr = 1;
+    // Sharpness steps: start at the screen's real pixel density (crisp on 4K / Retina, capped at 2x),
+    // and only if the device can't keep up step down to softer levels BEFORE any animation detail is cut.
+    const deviceDpr = crispPixelRatio(2);
+    const sharpSteps = [2, 1.5, 1.25, 1]
+      .map((s) => Math.min(deviceDpr, s))
+      .filter((s, i, a) => a.indexOf(s) === i);
+    let sharpIdx = 0;
 
     // ---------- geometry (computed once) ----------
     const norm = (v: Vec): Vec => {
@@ -140,7 +148,7 @@ export default function HeroCosmos() {
 
     const resize = () => {
       const r = canvas.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, quality === 2 ? 1.25 : 1);
+      dpr = quality === 0 ? 1 : sharpSteps[sharpIdx];
       W = Math.max(1, Math.round(r.width));
       H = Math.max(1, Math.round(r.height));
       canvas.width = Math.max(1, Math.round(W * dpr));
@@ -589,7 +597,8 @@ export default function HeroCosmos() {
       if (frames >= 90) {
         const avg = acc / frames;
         if ((quality === 2 && avg > 26) || (quality === 1 && avg > 45)) {
-          quality = quality === 2 ? 1 : 0;
+          if (sharpIdx < sharpSteps.length - 1) sharpIdx++;
+          else quality = quality === 2 ? 1 : 0;
           resize();
         }
         frames = 0;

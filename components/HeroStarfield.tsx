@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { crispPixelRatio } from '@/lib/crispPixels';
 
 interface HeroStarfieldProps {
   hasImage?: boolean;
@@ -37,10 +38,10 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
     let prefersReducedMotion = mql.matches;
 
-    // Soft background layer (mostly shown at 40% opacity): 1x pixels on phones, 1.5x on desktop is visually identical
-    // and 2-4x cheaper than the old 2x.
+    // Soft background layer (mostly shown at 40% opacity): 1x pixels on phones; on computers the screen's real
+    // pixel density (up to 2x) so thin grid lines stay sharp on 4K / Retina screens.
     const isPhone = window.innerWidth < 768;
-    const getDpr = () => Math.min(window.devicePixelRatio || 1, isPhone ? 1 : 1.5);
+    const getDpr = () => (isPhone ? 1 : crispPixelRatio(2));
     const minFrameGap = isPhone ? 32 : 15; // ~30 fps on phones, ~60 on desktop
 
     // Static part (background gradient, horizon, radial fan lines) is pre-drawn once per resize.

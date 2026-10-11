@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { crispPixelRatio } from '@/lib/crispPixels';
 
 export type AssistantVisualState = 'idle' | 'listening' | 'thinking' | 'speaking';
 
@@ -119,7 +120,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       el.style.maskImage = mask;
     };
     applyFrame(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 1.75));
+    renderer.setPixelRatio(crispPixelRatio(2));
     // Production: skip three.js's shader-error read-back (a GPU stall at start-up that only helps while debugging).
     renderer.debug.checkShaderErrors = process.env.NODE_ENV !== 'production';
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -516,7 +517,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     screenObserver?.observe(container);
 
     // Adaptive sharpness: if the phone cannot keep up, render slightly fewer pixels (looks the same, runs smooth).
-    let pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 1.75);
+    let pixelRatio = crispPixelRatio(2);
     let perfFrames = 0;
     let perfAcc = 0;
     let lastFrameAt = 0;

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createSculpture, type SculptureEngine } from './sculptureEngine';
+import { crispPixelRatio } from '@/lib/crispPixels';
 
 // Looping cinematic advertisement for the hero (UI only, English copy built from real site information).
 interface AdScene {
@@ -128,7 +129,7 @@ export function HeroAdvert() {
     const stage = canvas.parentElement as HTMLElement;
     const fit = () => {
       const r = stage.getBoundingClientRect();
-      const ratio = Math.min(window.devicePixelRatio || 1, lowPower ? 1.25 : 2);
+      const ratio = crispPixelRatio(lowPower ? 1.25 : 2);
       engine.resize(Math.round(r.width), Math.round(r.height), ratio);
       if (reduce) engine.drawStill();
     };
