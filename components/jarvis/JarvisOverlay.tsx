@@ -27,6 +27,7 @@ import { JarvisBackdrop } from './JarvisBackdrop';
 import { useLanguage } from '@/context/LanguageContext';
 import { QUICK_ACK } from '@/lib/jarvisLocale';
 import { collectLiveSiteSnapshot } from '@/lib/jarvisKnowledge';
+import { runJarvisAction } from '@/lib/jarvisActions';
 
 // Owner flow phrases (voice captions arrive in small pieces, so these run on the whole spoken turn).
 const OWNER_NAME = '(a+l[iy]+a+h?|aaliya)';
@@ -135,7 +136,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
   const sessionIdRef = useRef<string>(`sess-${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { t } = useLanguage();
+  const { t, content, setLanguage } = useLanguage();
   const [conversationMode] = useState<boolean>(true);
   const [embeddedActive, setEmbeddedActive] = useState<boolean>(false);
 
@@ -316,6 +317,8 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         claimTimerRef.current = window.setTimeout(() => openVerifyBox(), 6000);
       }
     },
+    // Website actions Jarvis performs for the visitor (section, scroll, card, language, rating)
+    onToolCall: (name, args) => runJarvisAction(name, args, { setLanguage, content }),
     onAssistantTextReady: (assistantText) => {
       if (assistantText) {
         setMessages((prev) => [...prev, { role: 'assistant', text: assistantText, lang: langRef.current }]);
@@ -658,6 +661,15 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         data = responseText ? JSON.parse(responseText) : {};
       } catch {
         data = {};
+      }
+
+      const actions: Array<{ name: string; args?: Record<string, unknown> }> = Array.isArray(data.actions) ? data.actions : [];
+      if (res.ok && actions.length) {
+        const results = actions.map((a) => runJarvisAction(a.name, a.args, { setLanguage, content }));
+        if (!data.reply) {
+          const failed = results.find((r) => !r.ok);
+          data.reply = failed ? `Sorry, I could not do that (${failed.error}).` : 'Done.';
+        }
       }
 
       if (res.ok && data.reply) {

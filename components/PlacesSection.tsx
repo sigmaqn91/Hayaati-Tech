@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { placesData, PlaceCardData } from '@/data/places';
 import { RealImageSlot } from './RealImageSlot';
 import { useLanguage } from '@/context/LanguageContext';
@@ -28,6 +28,37 @@ export function PlacesSection() {
 
   // Back button closes the place dossier instead of leaving the site
   useOverlayHistory(!!selectedPlace, () => setSelectedPlace(null));
+
+  // Jarvis website actions: open a postcard (same as tapping it) / close it
+  const contentRef = useRef(content);
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+  useEffect(() => {
+    const onCard = (e: Event) => {
+      const detail = (e as CustomEvent<{ id?: string; kind?: string }>).detail;
+      if (detail?.kind !== 'place') return;
+      const place = placesData.find((p) => p.id === detail.id);
+      const pc = place && contentRef.current.places[place.id];
+      if (!place || !pc) return;
+      setSelectedPlace({
+        ...place,
+        title: pc.title,
+        location: pc.location,
+        story: pc.story,
+        infrastructureTags: pc.infrastructureTags,
+        alt: pc.alt || pc.title,
+        prompt: pc.prompt,
+      });
+    };
+    const onClose = () => setSelectedPlace(null);
+    window.addEventListener('jarvis:open-card', onCard);
+    window.addEventListener('jarvis:close-popups', onClose);
+    return () => {
+      window.removeEventListener('jarvis:open-card', onCard);
+      window.removeEventListener('jarvis:close-popups', onClose);
+    };
+  }, []);
 
   return (
     <section

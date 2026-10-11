@@ -13,6 +13,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { RATED_STORAGE_KEY } from '@/lib/ratingCatalog';
+import type { RatingFill } from '@/lib/jarvisActions';
 
 const loadDialog = () => import('./RatingDialog');
 const RatingDialog = dynamic(() => loadDialog().then((m) => m.RatingDialog), { ssr: false, loading: () => null });
@@ -40,6 +41,8 @@ export function RatingCenter() {
   const [open, setOpen] = useState(false);
   const [auto, setAuto] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // Jarvis filling the popup for the visitor (stars, good / needs work, tags, feedback text)
+  const [fill, setFill] = useState<{ data: RatingFill; nonce: number } | null>(null);
   const openRef = useRef(false);
   const elapsedRef = useRef(0);
   openRef.current = open;
@@ -51,8 +54,27 @@ export function RatingCenter() {
       setAuto(false);
       setOpen(true);
     };
+    const onFill = (e: Event) => {
+      const data = (e as CustomEvent<RatingFill>).detail;
+      if (!data) return;
+      setMounted(true);
+      setAuto(false);
+      setOpen(true);
+      setFill({ data, nonce: Date.now() });
+    };
+    const onClose = () => {
+      if (!openRef.current) return;
+      setOpen(false);
+      elapsedRef.current = 0;
+    };
     window.addEventListener('rating:open', onOpen);
-    return () => window.removeEventListener('rating:open', onOpen);
+    window.addEventListener('rating:fill', onFill);
+    window.addEventListener('jarvis:close-popups', onClose);
+    return () => {
+      window.removeEventListener('rating:open', onOpen);
+      window.removeEventListener('rating:fill', onFill);
+      window.removeEventListener('jarvis:close-popups', onClose);
+    };
   }, []);
 
   // Every-minute timer until rated
@@ -84,7 +106,7 @@ export function RatingCenter() {
   };
 
   if (!mounted) return null;
-  return <RatingDialog open={open} auto={auto} onClose={onClose} />;
+  return <RatingDialog open={open} auto={auto} onClose={onClose} fill={fill} />;
 }
 
 export default RatingCenter;

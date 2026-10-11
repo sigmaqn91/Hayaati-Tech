@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { techCatalogue, TechCardData } from '@/data/future';
 import { RealImageSlot } from './RealImageSlot';
 import { TechCardModal } from './TechCardModal';
@@ -14,6 +14,36 @@ export function TechCatalogueSection() {
   const [selectedEra, setSelectedEra] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeModalCard, setActiveModalCard] = useState<TechCardData | null>(null);
+
+  // Jarvis website actions (same as tapping a category tab or a card)
+  useEffect(() => {
+    const onCategory = (e: Event) => {
+      const category = (e as CustomEvent<{ category?: string }>).detail?.category;
+      if (!category) return;
+      setSelectedCategory(category);
+      setSelectedEra('all');
+      setSearchQuery('');
+    };
+    const onCard = (e: Event) => {
+      const detail = (e as CustomEvent<{ id?: string; kind?: string }>).detail;
+      if (detail?.kind !== 'tech') return;
+      const card = techCatalogue.find((c) => c.id === detail.id);
+      if (!card) return;
+      setSelectedCategory(card.category);
+      setSelectedEra('all');
+      setSearchQuery('');
+      setActiveModalCard(card);
+    };
+    const onClose = () => setActiveModalCard(null);
+    window.addEventListener('jarvis:show-category', onCategory);
+    window.addEventListener('jarvis:open-card', onCard);
+    window.addEventListener('jarvis:close-popups', onClose);
+    return () => {
+      window.removeEventListener('jarvis:show-category', onCategory);
+      window.removeEventListener('jarvis:open-card', onCard);
+      window.removeEventListener('jarvis:close-popups', onClose);
+    };
+  }, []);
 
   const categories = [
     { id: 'all', label: t.tech.categories.all },

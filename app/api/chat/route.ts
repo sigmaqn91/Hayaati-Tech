@@ -3,6 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { checkChatRateLimit, RATE_CONFIG } from '@/lib/rateLimit';
 import { verifyOwnerSession } from '@/lib/jarvisAuth';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
+import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION } from '@/lib/jarvisTools';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -152,7 +153,7 @@ Language Instructions:
 `;
 
     // Same website status + owner facts the voice Jarvis uses, so typed answers know the site too.
-    const systemInstruction = `${BASE_SYSTEM_INSTRUCTION}\n${langInstruction}\n${buildJarvisKnowledge('')}`;
+    const systemInstruction = `${BASE_SYSTEM_INSTRUCTION}\n${langInstruction}\n${JARVIS_TOOLS_INSTRUCTION}\n${buildJarvisKnowledge('')}`;
 
     // Pass conversation history safely
     const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
@@ -173,7 +174,8 @@ Language Instructions:
     });
 
     // Grounding: search grounding only when grounded === true and appropriate, do NOT ground blindly
-    const tools = grounded === true ? [{ googleSearch: {} }] : undefined;
+    // Otherwise Jarvis gets the website actions (go to a section, open a card, fill the rating ...); the browser runs them.
+    const tools: any[] = grounded === true ? [{ googleSearch: {} }] : [{ functionDeclarations: JARVIS_FUNCTION_DECLARATIONS }];
 
     let response: any = null;
     let lastError: any = null;
@@ -196,7 +198,7 @@ Language Instructions:
         });
         response = await Promise.race([generationPromise, timeoutPromise]);
         const replyText = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (replyText && replyText.trim().length > 0) {
+        if ((replyText && replyText.trim().length > 0) || readActions(response).length > 0) {
           break; // Successful generation
         }
       } catch (modelErr: any) {
@@ -255,8 +257,9 @@ Language Instructions:
       );
     }
 
-    const replyText = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!replyText || replyText.trim().length === 0) {
+    const replyText: string = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const actions = readActions(response);
+    if (replyText.trim().length === 0 && actions.length === 0) {
       console.error('[Gemini Chat Error]: Model returned empty response text.');
       return NextResponse.json(
         { error: 'Empty response received.', code: 'generic_error' },
@@ -268,7 +271,7 @@ Language Instructions:
     if (rateCheck.cookieToSet) headers.set('Set-Cookie', rateCheck.cookieToSet);
 
     return NextResponse.json(
-      { reply: replyText.trim(), isOwner },
+      { reply: replyText.trim(), isOwner, ...(actions.length ? { actions } : {}) },
       { status: 200, headers }
     );
   } catch (fatalErr: any) {
@@ -289,4 +292,14 @@ Language Instructions:
       { status, headers: { 'Content-Type': 'application/json' } }
     );
   }
+}
+
+/** Website actions Jarvis chose (function calls), passed to the browser to run. */
+function readActions(response: any): Array<{ name: string; args: Record<string, unknown> }> {
+  const parts: any[] = response?.candidates?.[0]?.content?.parts || [];
+  return parts
+    .map((p) => p?.functionCall)
+    .filter((c) => c && typeof c.name === 'string')
+    .slice(0, 5)
+    .map((c) => ({ name: c.name as string, args: (c.args || {}) as Record<string, unknown> }));
 }

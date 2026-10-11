@@ -15,6 +15,7 @@ const loadGenAI = () => {
 };
 import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
+import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION } from '@/lib/jarvisTools';
 
 // Maps language codes from Hayaati's 30 locales to BCP-47 / Live voice language tags
 const LOCALE_TO_VOICE_LANG: Record<string, string> = {
@@ -159,6 +160,7 @@ function buildSystemInstruction(languageCode: string, isOwner: boolean, knowledg
     NAME_GREETING_RULE,
     'VOICE: Sound like a real, warm human, not a robot: relaxed natural pace, natural pauses and intonation, friendly energy, short sentences. Do not read lists or symbols aloud; talk like a person.',
     'LISTENING: Listen carefully to the visitor\'s full sentence and answer what they actually said. If you hear only noise or silence, stay quiet and wait. If speech was unclear, politely ask them to repeat it once. Never respond to your own voice. Keep answers short and clear.',
+    JARVIS_TOOLS_INSTRUCTION,
     knowledge,
   ]
     .filter(Boolean)
@@ -182,6 +184,8 @@ interface UseJarvisVoiceOptions {
   welcomeMessage?: string;
   /** Live facts about the page (hero text, sections, photos) read at activation time. */
   getSiteSnapshot?: () => string;
+  /** Runs a website action Jarvis asked for (lib/jarvisTools.ts) and returns its result for Jarvis. */
+  onToolCall?: (name: string, args: Record<string, unknown> | undefined) => Record<string, unknown>;
 }
 
 export function useJarvisVoice({
@@ -190,6 +194,7 @@ export function useJarvisVoice({
   language = 'en',
   welcomeMessage = '',
   getSiteSnapshot,
+  onToolCall,
 }: UseJarvisVoiceOptions = {}) {
   const [isSupported, setIsSupported] = useState<boolean>(true);
   const [isListening, setIsListening] = useState<boolean>(false);
@@ -279,6 +284,11 @@ export function useJarvisVoice({
   useEffect(() => {
     onAssistantTextReadyRef.current = onAssistantTextReady;
   }, [onAssistantTextReady]);
+
+  const onToolCallRef = useRef(onToolCall);
+  useEffect(() => {
+    onToolCallRef.current = onToolCall;
+  }, [onToolCall]);
 
   useEffect(() => {
     languageRef.current = language;
@@ -823,6 +833,8 @@ export function useJarvisVoice({
             },
           },
           systemInstruction: buildSystemInstruction(languageRef.current, Boolean(sessionData?.isOwner), knowledge),
+          // Website actions Jarvis can do for the visitor (go to a section, open a card, fill the rating ...)
+          tools: [{ functionDeclarations: JARVIS_FUNCTION_DECLARATIONS }],
           // Hear the visitor quickly and reliably: sensitive start-of-speech detection, short pre-roll and a
           // natural pause length before Jarvis answers.
           realtimeInputConfig: {
@@ -844,6 +856,25 @@ export function useJarvisVoice({
               if (liveSessionIdRef.current !== sessionId) return;
               if (msg.serverContent?.interrupted) {
                 handleInterruption();
+              }
+
+              // Jarvis asked to do something on the website: do it, then tell him how it went.
+              const calls = msg.toolCall?.functionCalls;
+              if (Array.isArray(calls) && calls.length) {
+                const functionResponses = calls.map((call: any) => {
+                  let response: Record<string, unknown>;
+                  try {
+                    response = onToolCallRef.current?.(String(call.name || ''), call.args) || { ok: false, error: 'not available' };
+                  } catch {
+                    response = { ok: false, error: 'action failed' };
+                  }
+                  return { id: call.id, name: call.name, response };
+                });
+                try {
+                  liveSessionRef.current?.sendToolResponse({ functionResponses });
+                } catch (error) {
+                  console.warn('[Gemini Live Tool Response Error]:', error);
+                }
               }
 
               if (msg.serverContent?.turnComplete) {

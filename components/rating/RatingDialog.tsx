@@ -9,14 +9,19 @@ import {
   RATING_ISSUES,
   STAR_LABELS,
   RATED_STORAGE_KEY,
+  RATING_ITEM_IDS,
+  RATING_ISSUE_IDS,
   type RatingVerdict,
 } from '@/lib/ratingCatalog';
+import { findCard, type RatingFill } from '@/lib/jarvisActions';
 
 interface RatingDialogProps {
   open: boolean;
   /** true when the popup opened by itself (timer), false when the visitor pressed the Rate button */
   auto: boolean;
   onClose: (rated: boolean) => void;
+  /** Jarvis fills the form for the visitor (never submits). A new nonce means a new fill. */
+  fill?: { data: RatingFill; nonce: number } | null;
 }
 
 type Status = 'idle' | 'sending' | 'done' | 'error';
@@ -67,7 +72,7 @@ function VerdictToggle({
   );
 }
 
-export function RatingDialog({ open, auto, onClose }: RatingDialogProps) {
+export function RatingDialog({ open, auto, onClose, fill }: RatingDialogProps) {
   const { t, content, language } = useLanguage();
   const reduceMotion = useReducedMotion();
   const areas = useMemo(() => buildRatingAreas(t, content), [t, content]);
@@ -86,6 +91,11 @@ export function RatingDialog({ open, auto, onClose }: RatingDialogProps) {
   const [errorText, setErrorText] = useState('');
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+  const messageNowRef = useRef('');
+  useEffect(() => {
+    messageNowRef.current = message;
+  }, [message]);
 
   useEffect(() => {
     if (!open) return;
@@ -101,6 +111,82 @@ export function RatingDialog({ open, auto, onClose }: RatingDialogProps) {
       document.documentElement.classList.remove('bg-paused');
     };
   }, [open]);
+
+  // Jarvis fill: picks the stars, marks good / needs work, ticks the tags and types the feedback
+  // letter by letter, exactly as if the visitor did it. The visitor checks it and presses Submit.
+  useEffect(() => {
+    if (!open || !fill || readRated()) return;
+    const f = fill.data;
+    const timers: number[] = [];
+    const norm = (x: string) => x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    const resolve = (q: string): string | null => {
+      const raw = q.trim();
+      if (RATING_ITEM_IDS.has(raw)) return raw;
+      const card = findCard(raw, content);
+      if (card && RATING_ITEM_IDS.has(card.id)) return card.id;
+      const n = norm(raw);
+      for (const area of areas) {
+        if (norm(area.label) === n || norm(area.id) === n) return area.id;
+        const item = area.items.find((it) => norm(it.label) === n);
+        if (item) return item.id;
+      }
+      const loose = areas.find((area) => n && (norm(area.label).includes(n) || n.includes(norm(area.id))));
+      return loose ? loose.id : null;
+    };
+    const marks: Array<[string, RatingVerdict]> = [];
+    (f.good || []).forEach((q) => {
+      const id = resolve(q);
+      if (id) marks.push([id, 'good']);
+    });
+    (f.needsWork || []).forEach((q) => {
+      const id = resolve(q);
+      if (id) marks.push([id, 'bad']);
+    });
+
+    panelRef.current?.querySelector('.rt-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+    timers.push(
+      window.setTimeout(() => {
+        if (f.stars) setStars(f.stars);
+        if (marks.length) {
+          setVerdicts((prev) => {
+            const next = { ...prev };
+            marks.forEach(([id, v]) => (next[id] = v));
+            return next;
+          });
+          // Open the section of the first marked card so the visitor sees it
+          const owner = areas.find((a) => a.items.some((it) => marks.some(([id]) => id === it.id)));
+          if (owner) setExpanded(owner.id);
+        }
+        const tags = (f.issues || []).filter((i) => RATING_ISSUE_IDS.has(i));
+        if (tags.length) setIssues((prev) => Array.from(new Set([...prev, ...tags])));
+        if (f.name) setName(f.name);
+        if (f.email) setEmail(f.email);
+      }, 350)
+    );
+
+    const text = (f.feedback || '').trim();
+    if (text) {
+      timers.push(
+        window.setTimeout(() => {
+          messageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const prev = messageNowRef.current.trim();
+          const base = prev ? `${prev} ` : '';
+          const chars = Array.from(text);
+          const step = Math.max(1, Math.ceil(chars.length / 90)); // long texts finish in about 2 seconds
+          let i = 0;
+          const tick = () => {
+            i = Math.min(chars.length, i + step);
+            setMessage((base + chars.slice(0, i).join('')).slice(0, 1500));
+            if (i < chars.length) timers.push(window.setTimeout(tick, 22));
+            else messageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          };
+          timers.push(window.setTimeout(tick, 120));
+        }, 1100) // after the marked section has finished opening, so the box stays in view
+      );
+    }
+    return () => timers.forEach((id) => window.clearTimeout(id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, fill?.nonce]);
 
   const done = status === 'done';
   const close = () => onClose(done || alreadyRated);
@@ -378,6 +464,7 @@ export function RatingDialog({ open, auto, onClose }: RatingDialogProps) {
                         <label className="block mt-3">
                           <span className="sr-only">Tell us what is missing or what we should fix</span>
                           <textarea
+                            ref={messageRef}
                             value={message}
                             onChange={(e) => setMessage(e.target.value.slice(0, 1500))}
                             rows={4}

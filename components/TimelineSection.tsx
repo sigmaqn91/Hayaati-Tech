@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { timelineEras, TimelineCardData } from '@/data/future';
 import { RealImageSlot } from './RealImageSlot';
 import { TechCardModal } from './TechCardModal';
@@ -12,6 +12,32 @@ export function TimelineSection() {
   const { t, content } = useLanguage();
   const [selectedEraIndex, setSelectedEraIndex] = useState(0);
   const [activeModalCard, setActiveModalCard] = useState<TimelineCardData | null>(null);
+
+  // Jarvis website actions (same as tapping an era button or a card)
+  useEffect(() => {
+    const onEra = (e: Event) => {
+      const era = (e as CustomEvent<{ era?: string }>).detail?.era;
+      const index = timelineEras.findIndex((x) => x.era === era);
+      if (index >= 0) setSelectedEraIndex(index);
+    };
+    const onCard = (e: Event) => {
+      const detail = (e as CustomEvent<{ id?: string; kind?: string }>).detail;
+      if (detail?.kind !== 'timeline') return;
+      const index = timelineEras.findIndex((x) => x.cards.some((c) => c.id === detail.id));
+      if (index < 0) return;
+      setSelectedEraIndex(index);
+      setActiveModalCard(timelineEras[index].cards.find((c) => c.id === detail.id) || null);
+    };
+    const onClose = () => setActiveModalCard(null);
+    window.addEventListener('jarvis:show-era', onEra);
+    window.addEventListener('jarvis:open-card', onCard);
+    window.addEventListener('jarvis:close-popups', onClose);
+    return () => {
+      window.removeEventListener('jarvis:show-era', onEra);
+      window.removeEventListener('jarvis:open-card', onCard);
+      window.removeEventListener('jarvis:close-popups', onClose);
+    };
+  }, []);
 
   const currentEra = timelineEras[selectedEraIndex];
   const eraContent = content.eras[currentEra.id] || {
