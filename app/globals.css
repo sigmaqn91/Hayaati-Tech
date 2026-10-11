@@ -1220,3 +1220,117 @@ html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
   animation-name: none !important;
   will-change: auto !important;
 }
+
+/* Era Banner: special luxury treatment (richer than the cards). Layout and sizes untouched;
+   the photo stays fully visible (only thin HUD lines at its edges). Paused off-screen by the
+   section rule above, and fully still for reduced-motion users. */
+.eb-stage { position: relative; }
+.eb-aura { position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  box-shadow: 0 0 36px rgba(56, 232, 255, 0.16), 0 0 90px rgba(70, 130, 255, 0.10);
+  animation: eb-breathe 6s ease-in-out infinite; }
+.eb-aura::before { content: ''; position: absolute; inset: -3px;
+  background: conic-gradient(from var(--pc-a), rgba(56, 232, 255, 0) 0deg, rgba(56, 232, 255, 0.55) 60deg, rgba(150, 120, 255, 0.35) 140deg, rgba(56, 232, 255, 0) 200deg, rgba(56, 232, 255, 0.45) 280deg, rgba(56, 232, 255, 0) 360deg);
+  filter: blur(14px); opacity: 0.55; animation: pc-spin 14s linear infinite; }
+@keyframes eb-breathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.eb-card { z-index: 1; }
+
+/* dual running light on the banner border (two beams, cyan + ice white) */
+.eb-card::before, .eb-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.eb-card::before { padding: 2px;
+  background: conic-gradient(from var(--pc-a),
+    transparent 0deg 110deg, rgba(56, 232, 255, 0.35) 140deg, #38e8ff 168deg, #ffffff 178deg, transparent 180deg,
+    transparent 290deg, rgba(150, 120, 255, 0.35) 320deg, #7fdcff 348deg, #ffffff 358deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: pc-spin 9s linear infinite; }
+.eb-card::after { box-shadow: 0 0 22px rgba(56, 232, 255, 0.22), inset 0 0 26px rgba(56, 232, 255, 0.08); animation: pc-glow 5s ease-in-out infinite; }
+
+/* photo HUD: corner brackets, slow scan line, light sheen, glowing seam */
+.eb-photo { position: relative; }
+.eb-photo-fx { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+.eb-photo-fx > span { position: absolute; display: block; }
+.eb-corner { width: 26px; height: 26px; border: 0 solid #38e8ff; filter: drop-shadow(0 0 5px rgba(56, 232, 255, 0.9));
+  animation: eb-corner 3.2s ease-in-out infinite; }
+.eb-tl { top: 12px; left: 12px; border-top-width: 2px; border-left-width: 2px; }
+.eb-tr { top: 12px; right: 12px; border-top-width: 2px; border-right-width: 2px; animation-delay: -0.8s; }
+.eb-bl { bottom: 12px; left: 12px; border-bottom-width: 2px; border-left-width: 2px; animation-delay: -1.6s; }
+.eb-br { bottom: 12px; right: 12px; border-bottom-width: 2px; border-right-width: 2px; animation-delay: -2.4s; }
+@keyframes eb-corner { 0%, 100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+.eb-scan { left: 0; right: 0; top: 0; height: 100%;
+  background: linear-gradient(to bottom, transparent 0%, rgba(56, 232, 255, 0.05) 46%, rgba(56, 232, 255, 0.10) 49.6%, rgba(200, 250, 255, 0.75) 50%, transparent 50.3%);
+  animation: eb-scan 9s cubic-bezier(.45, 0, .55, 1) infinite; will-change: transform; }
+@keyframes eb-scan { 0% { transform: translateY(-52%); opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { transform: translateY(50%); opacity: 0; } }
+.eb-sheen { top: -20%; bottom: -20%; left: -40%; width: 30%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.10) 45%, rgba(180, 245, 255, 0.16) 50%, rgba(255, 255, 255, 0.10) 55%, transparent);
+  transform: skewX(-18deg); animation: eb-sheen 11s ease-in-out infinite; will-change: transform; }
+@keyframes eb-sheen { 0%, 62% { transform: translateX(0) skewX(-18deg); opacity: 0; } 66% { opacity: 1; } 96% { opacity: 1; } 100% { transform: translateX(560%) skewX(-18deg); opacity: 0; } }
+.eb-seam { left: 0; right: 0; bottom: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(56, 232, 255, 0.2) 20%, #38e8ff 45%, #ffffff 50%, #38e8ff 55%, rgba(56, 232, 255, 0.2) 80%, transparent);
+  background-size: 200% 100%; box-shadow: 0 0 12px rgba(56, 232, 255, 0.8);
+  animation: eb-seam 4s linear infinite; }
+@keyframes eb-seam { from { background-position: 200% 0; } to { background-position: 0 0; } }
+
+/* text area: extra layers under the same dark glass */
+.eb-b-aurora2 { left: -30%; top: -50%; width: 160%; height: 200%;
+  background:
+    radial-gradient(closest-side at 70% 30%, rgba(140, 110, 255, 0.24), transparent 70%),
+    radial-gradient(closest-side at 25% 80%, rgba(56, 232, 255, 0.20), transparent 70%);
+  animation: ab-aurora 16s ease-in-out infinite alternate-reverse; will-change: transform; }
+.eb-b-streak3 { top: 50%; left: -40%; height: 1px; width: 30%; opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(160, 140, 255, 0.9), #ffffff, transparent);
+  box-shadow: 0 0 10px rgba(140, 120, 255, 0.7);
+  animation: ms-streak 8.5s linear infinite; animation-delay: -5s; }
+.eb-b-dust { inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 20%, rgba(200, 250, 255, 0.85), transparent 60%),
+    radial-gradient(1px 1px at 34% 70%, rgba(255, 255, 255, 0.7), transparent 60%),
+    radial-gradient(1.5px 1.5px at 58% 35%, rgba(150, 230, 255, 0.8), transparent 60%),
+    radial-gradient(1px 1px at 76% 82%, rgba(255, 255, 255, 0.6), transparent 60%),
+    radial-gradient(1.5px 1.5px at 90% 15%, rgba(190, 170, 255, 0.8), transparent 60%);
+  background-size: 360px 260px; animation: eb-dust 22s linear infinite; }
+@keyframes eb-dust { from { background-position: 0 0; } to { background-position: 60px -260px; } }
+.eb-b-radar { right: -90px; top: 50%; width: 320px; height: 320px; margin-top: -160px; border-radius: 50%; opacity: 0.45;
+  background:
+    repeating-radial-gradient(circle, transparent 0 38px, rgba(56, 232, 255, 0.22) 39px, transparent 40px),
+    conic-gradient(from 0deg, transparent 0deg 300deg, rgba(56, 232, 255, 0.35) 355deg, transparent 360deg);
+  animation: eb-radar 8s linear infinite; will-change: transform; }
+@keyframes eb-radar { to { transform: rotate(360deg); } }
+.eb-b-wave { left: 0; right: 0; bottom: 0; height: 40%; opacity: 0.5;
+  background: repeating-linear-gradient(90deg, rgba(56, 232, 255, 0.14) 0 1px, transparent 1px 14px);
+  -webkit-mask: linear-gradient(to top, #000, transparent); mask: linear-gradient(to top, #000, transparent);
+  animation: eb-wave 5s linear infinite; }
+@keyframes eb-wave { to { background-position: 140px 0; } }
+
+/* title: soft light passing over the text */
+.eb-title { background: linear-gradient(100deg, #ffffff 0 42%, #9ff3ff 49%, #ffffff 56% 100%); background-size: 260% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: eb-title 7s ease-in-out infinite; }
+@keyframes eb-title { 0%, 30% { background-position: 100% 0; } 70%, 100% { background-position: 0 0; } }
+
+/* story + milestone boxes become glass so the live background shows through; a light runs down the edge */
+.eb-panel { position: relative; overflow: hidden; background: linear-gradient(145deg, rgba(10, 18, 30, 0.55), rgba(4, 8, 14, 0.70)) !important;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: inset 0 1px 0 rgba(150, 245, 255, 0.08); }
+.eb-panel::before { content: ''; position: absolute; left: 0; top: 0; width: 2px; height: 40%; pointer-events: none;
+  background: linear-gradient(to bottom, transparent, #38e8ff, #ffffff, transparent); box-shadow: 0 0 8px rgba(56, 232, 255, 0.8);
+  animation: eb-edge 4.5s ease-in-out infinite; }
+@keyframes eb-edge { 0% { transform: translateY(-110%); } 100% { transform: translateY(260%); } }
+.eb-item:nth-child(2)::before { animation-delay: -1.5s; }
+.eb-item:nth-child(3)::before { animation-delay: -3s; }
+.eb-item > span:first-child { box-shadow: 0 0 8px rgba(56, 232, 255, 0.9); animation: eb-dot 3s ease-in-out infinite; }
+.eb-item:nth-child(2) > span:first-child { animation-delay: -1s; }
+.eb-item:nth-child(3) > span:first-child { animation-delay: -2s; }
+@keyframes eb-dot { 0%, 100% { opacity: 0.5; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.25); } }
+
+/* active era tab gets a running border light too */
+.eb-tab-active { position: relative; }
+.eb-tab-active::before { content: ''; position: absolute; inset: -1px; pointer-events: none; padding: 1.5px;
+  background: conic-gradient(from var(--pc-a), transparent 0deg 260deg, rgba(56, 232, 255, 0.4) 310deg, #ffffff 356deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: pc-spin 5s linear infinite; }
+
+html.bg-paused .eb-aura, html.bg-paused .eb-aura::before, html.bg-paused .eb-card::before, html.bg-paused .eb-card::after, html.bg-paused .eb-photo-fx > span,
+html.bg-paused .eb-title, html.bg-paused .eb-panel::before, html.bg-paused .eb-item > span:first-child, html.bg-paused .eb-tab-active::before { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .eb-aura, .eb-aura::before, .eb-card::before, .eb-card::after, .eb-photo-fx > span, .eb-title, .eb-panel::before, .eb-item > span:first-child, .eb-tab-active::before { animation: none; }
+}

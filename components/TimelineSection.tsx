@@ -54,7 +54,7 @@ export function TimelineSection() {
               onClick={() => setSelectedEraIndex(index)}
               className={`flex items-center gap-2.5 px-5 py-3 min-h-[44px] font-mono text-xs uppercase tracking-wider transition-all border cursor-pointer ${
                 isActive
-                  ? 'bg-[#38e8ff]/10 border-[#38e8ff] text-[#38e8ff] shadow-[0_0_12px_rgba(56,232,255,0.2)]'
+                  ? 'eb-tab-active bg-[#38e8ff]/10 border-[#38e8ff] text-[#38e8ff] shadow-[0_0_12px_rgba(56,232,255,0.2)]'
                   : 'bg-[#0b0f17] border-[#1e293b] text-slate-400 hover:text-white hover:border-slate-500'
               }`}
             >
@@ -70,8 +70,11 @@ export function TimelineSection() {
 
       {/* Selected Era Main Display Container */}
       <div className="space-y-12">
-        {/* Panoramic Banner */}
-        <div className="relative overflow-hidden bg-[#0b0f17] border border-[#1e293b] hud-frame">
+        {/* Panoramic Banner (Era Banner luxury animation: halo, dual border light, photo HUD, live glass text area) */}
+        <div className="eb-stage">
+        <div className="eb-aura" aria-hidden="true" />
+        <div className="relative overflow-hidden bg-[#0b0f17] border border-[#1e293b] hud-frame ms-card eb-card">
+          <div className="eb-photo">
           <RealImageSlot
             src={currentEra.bannerImage}
             alt={eraContent.bannerAlt || eraContent.title}
@@ -80,10 +83,35 @@ export function TimelineSection() {
             height={700}
             sizes="(max-width: 1280px) 100vw, 1200px"
             className="w-full h-[280px] sm:h-[380px] md:h-[460px] object-cover"
+            original
           />
+            {/* Thin HUD effects at the photo edges; the photo stays fully visible */}
+            <div className="eb-photo-fx" aria-hidden="true">
+              <span className="eb-corner eb-tl" />
+              <span className="eb-corner eb-tr" />
+              <span className="eb-corner eb-bl" />
+              <span className="eb-corner eb-br" />
+              <span className="eb-scan" />
+              <span className="eb-sheen" />
+              <span className="eb-seam" />
+            </div>
+          </div>
 
           {/* Banner HUD Info Overlay */}
-          <div className="p-6 md:p-8 bg-[#0b0f17] border-t border-[#1e293b]">
+          <div className="ms-body eb-body p-6 md:p-8 bg-[#0b0f17] border-t border-[#1e293b]">
+            {/* Moving high-tech background inside the banner text area, under dark glass (richer than the cards) */}
+            <div className="ms-body-bg" aria-hidden="true">
+              <span className="ms-b-aurora" />
+              <span className="ms-b-grid" />
+              <span className="ms-b-streak" />
+              <span className="ms-b-streak" />
+              <span className="eb-b-aurora2" />
+              <span className="eb-b-streak3" />
+              <span className="eb-b-dust" />
+              <span className="eb-b-radar" />
+              <span className="eb-b-wave" />
+              <span className="ms-b-glass" />
+            </div>
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-[#38e8ff]" />
@@ -96,7 +124,7 @@ export function TimelineSection() {
               </div>
             </div>
 
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6">
+            <h3 className="eb-title text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6">
               {eraContent.title}
             </h3>
 
@@ -108,7 +136,7 @@ export function TimelineSection() {
                   <BookOpen className="w-3.5 h-3.5" />
                   <span>{t.timeline.storyTitle}</span>
                 </div>
-                <div className="p-5 bg-[#070a0f] border-l-2 border-l-[#38e8ff] border-y border-r border-[#1e293b] text-sm text-slate-300 leading-relaxed font-sans">
+                <div className="eb-panel p-5 bg-[#070a0f] border-l-2 border-l-[#38e8ff] border-y border-r border-[#1e293b] text-sm text-slate-300 leading-relaxed font-sans">
                   &quot;{eraContent.story}&quot;
                 </div>
               </div>
@@ -123,7 +151,7 @@ export function TimelineSection() {
                   {eraContent.breakthroughs.map((breakthrough, idx) => (
                     <li
                       key={idx}
-                      className="p-3 bg-[#070a0f] border border-[#1e293b] text-xs font-mono text-slate-300 flex items-start gap-2.5"
+                      className="eb-panel eb-item p-3 bg-[#070a0f] border border-[#1e293b] text-xs font-mono text-slate-300 flex items-start gap-2.5"
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-[#38e8ff] mt-1.5 shrink-0" />
                       <span>{breakthrough}</span>
@@ -133,6 +161,7 @@ export function TimelineSection() {
               </div>
             </div>
           </div>
+        </div>
         </div>
 
         {/* 4 Breakthrough Cards Grid for Current Era */}

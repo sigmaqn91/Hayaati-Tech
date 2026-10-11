@@ -13,6 +13,8 @@ interface RealImageSlotProps {
   priority?: boolean;
   className?: string;
   sizes?: string;
+  /** Serve the original file exactly as uploaded (no resize or recompress). */
+  original?: boolean;
 }
 
 export function RealImageSlot({
@@ -24,6 +26,7 @@ export function RealImageSlot({
   priority = false,
   className = '',
   sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+  original = false,
 }: RealImageSlotProps) {
   const { t } = useLanguage();
   const [hasError, setHasError] = useState(false);
@@ -39,7 +42,7 @@ export function RealImageSlot({
   // Card photos are already small 800px WebP files: serve them as they are, so a card and its popup
   // use the exact same file (the popup opens instantly from cache instead of downloading a new size).
   // Big banners (wider than 1200) still go through Next's resizer.
-  const isLocal = src.startsWith('/') && width <= 1200;
+  const isLocal = src.startsWith('/') && (width <= 1200 || original);
 
   return (
     <div
