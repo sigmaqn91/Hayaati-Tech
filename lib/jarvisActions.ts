@@ -82,14 +82,15 @@ export function findCard(query: string, content: ContentSchema): CardRef | null 
   return bestScore >= 0.6 ? best : null;
 }
 
-// Long jumps: go straight to just before the section and glide only the last part, so the phone never has to
-// draw every photo and animation in between (that is what makes a long smooth scroll stutter).
+// Next sections glide smoothly so the visitor sees the way down. Only very long jumps (more than about three
+// screens, e.g. top of page to contact) go most of the way at once, so the phone never has to draw
+// many photos and animations in between (that is what makes a long smooth scroll stutter).
 const scrollToId = (id: string) => {
   const el = document.getElementById(id);
   if (!el) return false;
   const target = el.getBoundingClientRect().top + window.scrollY;
   const glide = window.innerHeight * 0.6;
-  if (Math.abs(target - window.scrollY) > glide * 2) {
+  if (Math.abs(target - window.scrollY) > window.innerHeight * 3) {
     window.scrollTo({ top: target + (target > window.scrollY ? -glide : glide), behavior: 'instant' as ScrollBehavior });
   }
   requestAnimationFrame(() => window.scrollTo({ top: target, behavior: 'smooth' }));
@@ -97,6 +98,15 @@ const scrollToId = (id: string) => {
 };
 
 const emit = (name: string, detail?: unknown) => window.dispatchEvent(new CustomEvent(name, { detail }));
+
+/** Form fill handed to AdvertiseSection / ContactSection. The section sets `handled` when it took it. */
+export interface FormFill {
+  form: 'advertise' | 'contact';
+  fields: Record<string, string>;
+  handled?: boolean;
+}
+
+const str = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : undefined);
 
 const asList = (v: unknown): string[] | undefined =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string' && x.trim() !== '').slice(0, 40) : undefined;
@@ -179,6 +189,36 @@ export function runJarvisAction(name: string, args: Record<string, unknown> | un
         };
         emit('rating:fill', fill);
         return { ok: true, done: 'rating popup filled; the visitor must check it and press Submit themselves' };
+      }
+      case 'fill_form': {
+        const form = a.form === 'contact' ? 'contact' : a.form === 'advertise' ? 'advertise' : null;
+        if (!form) return { ok: false, error: 'unknown form' };
+        const fields: Record<string, string> = {};
+        const put = (key: string, v: string | undefined) => {
+          if (v) fields[key] = v;
+        };
+        put('name', str(a.name, 100));
+        put('email', str(a.email, 150));
+        if (form === 'advertise') {
+          put('projectName', str(a.project_name, 150));
+          put('projectLink', str(a.project_link, 300));
+          put('category', str(a.category, 20));
+          put('budget', str(a.budget, 100));
+          put('description', str(a.description, 2000) || str(a.message, 2000));
+        } else {
+          put('message', str(a.message, 2000) || str(a.description, 2000));
+        }
+        if (!Object.keys(fields).length) return { ok: false, error: 'no field values given' };
+        emit('jarvis:close-popups');
+        const detail: FormFill = { form, fields };
+        emit('jarvis:fill-form', detail);
+        if (!detail.handled) return { ok: false, error: 'the form is not available on the page' };
+        scrollToId(form);
+        return {
+          ok: true,
+          done: `${form} form filled: ${Object.keys(fields).join(', ')}`,
+          note: 'not sent; the visitor must check it and press the send button',
+        };
       }
       case 'close_popup': {
         emit('jarvis:close-popups');

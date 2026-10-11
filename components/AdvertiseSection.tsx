@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { FormFill } from '@/lib/jarvisActions';
 import { useLanguage } from '@/context/LanguageContext';
 import { Megaphone, Send, ShieldCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -17,6 +18,22 @@ export function AdvertiseSection() {
   });
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Jarvis fills this form for the visitor (never sends it; the visitor presses send)
+  useEffect(() => {
+    const onFill = (e: Event) => {
+      const detail = (e as CustomEvent<FormFill>).detail;
+      if (!detail || detail.form !== 'advertise') return;
+      const allowed = ['name', 'email', 'projectName', 'projectLink', 'category', 'budget', 'description'];
+      const next: Record<string, string> = {};
+      for (const [k, v] of Object.entries(detail.fields)) if (allowed.includes(k)) next[k] = v;
+      setFormData((prev) => ({ ...prev, ...next }));
+      setStatus((s) => (s === 'sent' || s === 'failed' ? 'idle' : s));
+      detail.handled = true;
+    };
+    window.addEventListener('jarvis:fill-form', onFill);
+    return () => window.removeEventListener('jarvis:fill-form', onFill);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
