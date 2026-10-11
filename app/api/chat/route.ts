@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 import { checkChatRateLimit, RATE_CONFIG } from '@/lib/rateLimit';
 import { verifyOwnerSession } from '@/lib/jarvisAuth';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
-import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION } from '@/lib/jarvisTools';
+import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION, JARVIS_FEEDBACK_INSTRUCTION } from '@/lib/jarvisTools';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -153,7 +153,7 @@ Language Instructions:
 `;
 
     // Same website status + owner facts the voice Jarvis uses, so typed answers know the site too.
-    const systemInstruction = `${BASE_SYSTEM_INSTRUCTION}\n${langInstruction}\n${JARVIS_TOOLS_INSTRUCTION}\n${buildJarvisKnowledge('')}`;
+    const systemInstruction = `${BASE_SYSTEM_INSTRUCTION}\n${langInstruction}\n${JARVIS_TOOLS_INSTRUCTION}\n${isOwner ? '' : `${JARVIS_FEEDBACK_INSTRUCTION}\n`}${buildJarvisKnowledge('')}`;
 
     // Pass conversation history safely
     const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];

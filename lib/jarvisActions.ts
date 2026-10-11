@@ -82,10 +82,17 @@ export function findCard(query: string, content: ContentSchema): CardRef | null 
   return bestScore >= 0.6 ? best : null;
 }
 
+// Long jumps: go straight to just before the section and glide only the last part, so the phone never has to
+// draw every photo and animation in between (that is what makes a long smooth scroll stutter).
 const scrollToId = (id: string) => {
   const el = document.getElementById(id);
   if (!el) return false;
-  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const target = el.getBoundingClientRect().top + window.scrollY;
+  const glide = window.innerHeight * 0.6;
+  if (Math.abs(target - window.scrollY) > glide * 2) {
+    window.scrollTo({ top: target + (target > window.scrollY ? -glide : glide), behavior: 'instant' as ScrollBehavior });
+  }
+  requestAnimationFrame(() => window.scrollTo({ top: target, behavior: 'smooth' }));
   return true;
 };
 
@@ -107,8 +114,15 @@ export function runJarvisAction(name: string, args: Record<string, unknown> | un
       case 'scroll_page': {
         const dir = String(a.direction || 'down');
         const h = window.innerHeight * 0.8;
-        if (dir === 'top') window.scrollTo({ top: 0, behavior: 'smooth' });
-        else if (dir === 'bottom') window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+        if (dir === 'top') {
+          if (window.scrollY > window.innerHeight * 1.2) window.scrollTo({ top: window.innerHeight * 0.6, behavior: 'instant' as ScrollBehavior });
+          requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        }
+        else if (dir === 'bottom') {
+          const end = document.documentElement.scrollHeight - window.innerHeight;
+          window.scrollTo({ top: Math.max(0, end - window.innerHeight * 0.6), behavior: 'instant' as ScrollBehavior });
+          requestAnimationFrame(() => window.scrollTo({ top: end, behavior: 'smooth' }));
+        }
         else window.scrollBy({ top: dir === 'up' ? -h : h, behavior: 'smooth' });
         return { ok: true, done: `scrolled ${dir}` };
       }

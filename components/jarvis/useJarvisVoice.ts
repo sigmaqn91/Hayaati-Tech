@@ -15,7 +15,7 @@ const loadGenAI = () => {
 };
 import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
-import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION } from '@/lib/jarvisTools';
+import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION, JARVIS_FEEDBACK_INSTRUCTION } from '@/lib/jarvisTools';
 
 // Maps language codes from Hayaati's 30 locales to BCP-47 / Live voice language tags
 const LOCALE_TO_VOICE_LANG: Record<string, string> = {
@@ -161,6 +161,7 @@ function buildSystemInstruction(languageCode: string, isOwner: boolean, knowledg
     'VOICE: Sound like a real, warm human, not a robot: relaxed natural pace, natural pauses and intonation, friendly energy, short sentences. Do not read lists or symbols aloud; talk like a person.',
     'LISTENING: Listen carefully to the visitor\'s full sentence and answer what they actually said. If you hear only noise or silence, stay quiet and wait. If speech was unclear, politely ask them to repeat it once. Never respond to your own voice. Keep answers short and clear.',
     JARVIS_TOOLS_INSTRUCTION,
+    isOwner ? '' : JARVIS_FEEDBACK_INSTRUCTION,
     knowledge,
   ]
     .filter(Boolean)

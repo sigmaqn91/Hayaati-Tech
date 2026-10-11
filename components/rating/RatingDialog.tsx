@@ -171,14 +171,22 @@ export function RatingDialog({ open, auto, onClose, fill }: RatingDialogProps) {
           messageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           const prev = messageNowRef.current.trim();
           const base = prev ? `${prev} ` : '';
-          const chars = Array.from(text);
-          const step = Math.max(1, Math.ceil(chars.length / 90)); // long texts finish in about 2 seconds
-          let i = 0;
+          const full = (base + text).slice(0, 1500);
+          const chars = Array.from(full);
+          // Smooth on phones: the letters are written straight into the box (no re-render of the whole
+          // popup per letter); the form value is saved once at the end.
+          const start = Math.min(Array.from(base).length, chars.length);
+          const step = Math.max(1, Math.ceil((chars.length - start) / 90)); // about 2 seconds
+          let i = start;
           const tick = () => {
             i = Math.min(chars.length, i + step);
-            setMessage((base + chars.slice(0, i).join('')).slice(0, 1500));
+            const el = messageRef.current;
+            if (el) el.value = chars.slice(0, i).join('');
             if (i < chars.length) timers.push(window.setTimeout(tick, 22));
-            else messageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            else {
+              setMessage(full);
+              el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
           };
           timers.push(window.setTimeout(tick, 120));
         }, 1100) // after the marked section has finished opening, so the box stays in view
