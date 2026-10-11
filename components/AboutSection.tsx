@@ -9,6 +9,10 @@ import { Beam } from '@/components/Beam';
 
 export function AboutSection() {
   const { t } = useLanguage();
+  // Her name inside the heading gets its own elegant font; the rest of the (translated) title stays as is.
+  const nameAt = t.about.title.indexOf(aboutData.ownerName);
+  const titleParts =
+    nameAt >= 0 ? [t.about.title.slice(0, nameAt), t.about.title.slice(nameAt + aboutData.ownerName.length)] : null;
 
   return (
     <section
@@ -29,13 +33,28 @@ export function AboutSection() {
       </div>
 
       <div className="relative z-[1] py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="mb-12">
+      {/* Heading card: same dark glass + pool-water light as the details card, full width */}
+      <div className="ab-card ab-glass ab-water-card relative mb-8 p-6 sm:p-8 border border-[#1e293b] hud-frame">
+        <Beam />
+        <div className="ab-water" aria-hidden="true">
+          <span className="ab-water-a" />
+          <span className="ab-water-b" />
+          <span className="ab-water-shine" />
+        </div>
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0b0f17] border border-[#38e8ff]/30 text-[#38e8ff] font-mono text-xs uppercase tracking-widest mb-3">
           <User className="w-3.5 h-3.5 text-[#38e8ff]" />
           <span>{t.about.sectionTag}</span>
         </div>
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-          {t.about.title}
+          {titleParts ? (
+            <>
+              {titleParts[0]}
+              <span className="ab-name">{aboutData.ownerName}</span>
+              {titleParts[1]}
+            </>
+          ) : (
+            t.about.title
+          )}
         </h2>
         <p className="text-sm sm:text-base text-slate-400 mt-2 max-w-2xl font-normal">
           {t.about.subtitle}
