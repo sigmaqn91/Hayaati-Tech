@@ -119,7 +119,10 @@ export function HeroAdvert() {
       (navigator.hardwareConcurrency || 4) <= 4 ||
       ((navigator as unknown as { deviceMemory?: number }).deviceMemory || 4) <= 4;
     const engine = createSculpture(canvas, { lowPower });
-    if (!engine) return;
+    if (!engine) {
+      root.classList.add('is-live');
+      return;
+    }
     engineRef.current = engine;
 
     const stage = canvas.parentElement as HTMLElement;
@@ -139,6 +142,8 @@ export function HeroAdvert() {
     }
 
     if (reduce) {
+      canvas.classList.add('is-live');
+      root.classList.add('is-live');
       return () => {
         if (ro) ro.disconnect();
         else window.removeEventListener('resize', fit);
@@ -155,6 +160,7 @@ export function HeroAdvert() {
     let last = 0;
     let lastDraw = 0;
     const minGap = lowPower ? 1000 / 30 : 1000 / 45;
+    let shown = false;
 
     const loop = (now: number) => {
       if (!running) return;
@@ -176,12 +182,29 @@ export function HeroAdvert() {
         setScene(sceneRef.current);
       }
       engine.frame(clock);
+      if (!shown) {
+        shown = true;
+        // Sculpture and words start together: the copy waits (paused) until the first picture is drawn.
+        requestAnimationFrame(() => {
+          canvas.classList.add('is-live');
+          root.classList.add('is-live');
+        });
+      }
     };
     const start = () => {
       if (running) return;
       running = true;
       last = performance.now();
       lastDraw = 0;
+      // First picture right away, so the advert starts fading in immediately (not a few frames later).
+      if (!shown) {
+        engine.frame(clock);
+        shown = true;
+        requestAnimationFrame(() => {
+          canvas.classList.add('is-live');
+          root.classList.add('is-live');
+        });
+      }
       raf = requestAnimationFrame(loop);
     };
     const stop = () => {
@@ -204,9 +227,11 @@ export function HeroAdvert() {
         { threshold: 0.05 }
       );
       io.observe(root);
-    } else {
-      sync();
     }
+    // On the first screen: start at once instead of waiting for the observer's first report.
+    const box = root.getBoundingClientRect();
+    if (box.top < window.innerHeight && box.bottom > 0) sync();
+    else if (!io) sync();
     const onVis = () => sync();
     document.addEventListener('visibilitychange', onVis);
 

@@ -144,7 +144,10 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
             src="/images/hero/hero-main.webp"
             alt={t.hero.imageAlt}
             fill
-            priority
+            // Sits under the black cosmos animation, so it must never hold up the visible hero: same file,
+            // still loaded right away, just after the hero code (low priority instead of a blocking preload).
+            loading="eager"
+            fetchPriority="low"
             sizes="100vw"
             referrerPolicy="no-referrer"
             onError={() => setHeroImageError(true)}

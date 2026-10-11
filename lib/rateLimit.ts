@@ -651,3 +651,34 @@ export async function checkVoiceActionLimit(
 
   return { ok: true };
 }
+
+// ==========================================
+// 8. Website Rating submissions
+// ==========================================
+
+/** One visitor can send at most 3 ratings per hour (stops spam; a real visitor rates once). */
+export async function checkRatingRateLimit(
+  reqOrIp: NextRequest | Request | string,
+  kind: 'rating' | 'rating-admin' = 'rating'
+): Promise<{
+  allowed: boolean;
+  retryAfterSeconds?: number;
+  cookieToSet?: string;
+}> {
+  logRedisWarningOnce();
+  const identity = getVisitorIdentity(reqOrIp);
+  const WINDOW_SECONDS = 60 * 60;
+  // Owner report page: up to 30 opens / code tries per hour (blocks code guessing).
+  const LIMIT = kind === 'rating' ? 3 : 30;
+
+  for (const key of identity.keys) {
+    const counter = await getCounter(`rate:${kind}:${key}`);
+    if (counter.count >= LIMIT) {
+      return { allowed: false, retryAfterSeconds: counter.ttlRemaining || WINDOW_SECONDS, cookieToSet: identity.cookieToSet };
+    }
+  }
+  for (const key of identity.keys) {
+    await atomicIncrement(`rate:${kind}:${key}`, WINDOW_SECONDS);
+  }
+  return { allowed: true, cookieToSet: identity.cookieToSet };
+}

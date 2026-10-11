@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion, type Variants } from 'motion/react';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
+import { RatingButton } from './rating/RatingButton';
 import { Home, Clock, Cpu, MapPin, Layers, Megaphone, User, Mail, ChevronRight } from 'lucide-react';
 import { useOverlayHistory, runWhenHistoryIdle } from '@/hooks/use-overlay-history';
 
@@ -182,6 +183,7 @@ export function Navbar() {
 
         {/* Right Action Bar (Language + Mobile Toggle) */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <RatingButton />
           <LanguageSelector />
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

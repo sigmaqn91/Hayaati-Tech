@@ -9,6 +9,8 @@ type Vec = [number, number, number];
 
 export default function HeroCosmos() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Black veil over the animation that fades away on the first drawn frame (smooth start, no pop-in).
+  const veilRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -556,6 +558,20 @@ export default function HeroCosmos() {
     let acc = 0;
     let visible = true;
 
+    let revealed = false;
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      const v = veilRef.current;
+      if (!v) return;
+      requestAnimationFrame(() => {
+        v.style.opacity = '0';
+        window.setTimeout(() => {
+          v.style.display = 'none';
+        }, 1300);
+      });
+    };
+
     const frame = (now: number) => {
       if (!running) return;
       raf = requestAnimationFrame(frame);
@@ -567,6 +583,7 @@ export default function HeroCosmos() {
       if (dtMs < (quality === 2 ? 14 : 30)) return;
       last = now;
       draw(now / 1000, Math.min(dtMs, 60) / 1000);
+      reveal();
       acc += dtMs;
       frames++;
       if (frames >= 90) {
@@ -583,6 +600,11 @@ export default function HeroCosmos() {
       if (running || reduce) return;
       running = true;
       last = performance.now();
+      // First picture right away (not two frames later), so the fade-in starts at once.
+      if (!revealed) {
+        draw(last / 1000, 0);
+        reveal();
+      }
       raf = requestAnimationFrame(frame);
     };
     const stop = () => {
@@ -595,7 +617,10 @@ export default function HeroCosmos() {
     };
 
     resize();
-    if (reduce) draw(2.5, 0);
+    if (reduce) {
+      draw(2.5, 0);
+      reveal();
+    }
     // Reduced motion draws a still frame; redraw once the (lazy-loaded) orb has mounted.
     const stillTimers: number[] = reduce
       ? [500, 1500].map((ms) => window.setTimeout(() => { orbCheckedAt = -1e9; draw(2.5, 0); }, ms))
@@ -649,6 +674,7 @@ export default function HeroCosmos() {
   }, []);
 
   return (
+    <>
     <canvas
       ref={canvasRef}
       aria-hidden="true"
@@ -663,5 +689,19 @@ export default function HeroCosmos() {
         background: SHOW_PHOTO ? 'transparent' : '#000',
       }}
     />
+    <div
+      ref={veilRef}
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 1,
+        pointerEvents: 'none',
+        background: SHOW_PHOTO ? '#05070a' : '#000',
+        opacity: 1,
+        transition: 'opacity 1.1s cubic-bezier(0.22, 1, 0.36, 1)',
+      }}
+    />
+    </>
   );
 }

@@ -53,9 +53,15 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       if (cancelled) return;
       cleanup = initOrb(container);
     };
-    const idleId = w.requestIdleCallback ? w.requestIdleCallback(start, { timeout: 250 }) : window.setTimeout(start, 100);
+    // Wait one frame first: the background animation and the advert have drawn their first picture and their
+    // fade-in is on screen, and only then the (heavier) orb is built, so nothing on the first screen pops or stalls.
+    let idleId = 0;
+    const raf1 = requestAnimationFrame(() => {
+      idleId = w.requestIdleCallback ? w.requestIdleCallback(start, { timeout: 200 }) : window.setTimeout(start, 50);
+    });
     return () => {
       cancelled = true;
+      cancelAnimationFrame(raf1);
       if (w.cancelIdleCallback && w.requestIdleCallback) w.cancelIdleCallback(idleId);
       else window.clearTimeout(idleId);
       cleanup?.();
@@ -114,6 +120,8 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     };
     applyFrame(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 1.75));
+    // Production: skip three.js's shader-error read-back (a GPU stall at start-up that only helps while debugging).
+    renderer.debug.checkShaderErrors = process.env.NODE_ENV !== 'production';
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.3;
     container.appendChild(renderer.domElement);
@@ -651,7 +659,38 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       renderer.render(scene, camera);
     };
 
-    animationFrameId = requestAnimationFrame(animate);
+    // Smooth entrance: the shaders are prepared in the background (parallel compile, the page keeps moving),
+    // then the orb fades/glides in on its first finished frame instead of popping in with a jerk.
+    // The orb itself (particles, rings, colours, sharpness) is exactly the same as before.
+    let disposed = false;
+    const orbEl = renderer.domElement;
+    orbEl.style.opacity = '0';
+    orbEl.style.transform = 'scale(0.94)';
+    orbEl.style.transformOrigin = '50% 50%';
+    orbEl.style.willChange = 'opacity, transform';
+    const begin = () => {
+      if (disposed) return;
+      animationFrameId = requestAnimationFrame(animate);
+      // Two frames later the first picture is on screen: start the fade.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          if (disposed) return;
+          orbEl.style.transition = 'opacity 1.1s cubic-bezier(0.22, 1, 0.36, 1), transform 1.3s cubic-bezier(0.22, 1, 0.36, 1)';
+          orbEl.style.opacity = '1';
+          orbEl.style.transform = 'scale(1)';
+          window.setTimeout(() => {
+            if (!disposed) orbEl.style.willChange = 'auto';
+          }, 1500);
+        })
+      );
+    };
+    if (prefersReducedMotion) {
+      orbEl.style.transform = 'none';
+      orbEl.style.opacity = '1';
+      begin();
+    } else {
+      renderer.compileAsync(scene, camera).then(begin, begin);
+    }
 
     // 8. Resize Observer
     const handleResize = () => {
@@ -670,6 +709,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     resizeObserver.observe(container);
 
     return () => {
+      disposed = true;
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       screenObserver?.disconnect();
       resizeObserver.disconnect();

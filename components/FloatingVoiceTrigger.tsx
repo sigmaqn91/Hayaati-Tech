@@ -19,10 +19,29 @@ export function FloatingVoiceTrigger({ onOpen }: FloatingVoiceTriggerProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  if (!visible) return null;
+  // Smooth in and out (fade + small lift) instead of popping; it stays mounted only while visible or fading out.
+  const [mounted, setMounted] = useState(false);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    if (visible) {
+      setMounted(true);
+      const id = requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)));
+      return () => cancelAnimationFrame(id);
+    }
+    setShown(false);
+    const id = window.setTimeout(() => setMounted(false), 450);
+    return () => window.clearTimeout(id);
+  }, [visible]);
+
+  if (!mounted) return null;
 
   return (
-    <aside aria-label="JARVIS" className="fixed bottom-6 right-6 z-40">
+    <aside
+      aria-label="JARVIS"
+      className={`fixed bottom-6 right-6 z-40 transition-[opacity,transform] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        shown ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-3 scale-95 pointer-events-none'
+      }`}
+    >
       <button
         onClick={onOpen}
         aria-label="JARVIS"

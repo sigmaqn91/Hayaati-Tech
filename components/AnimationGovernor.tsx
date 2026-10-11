@@ -42,11 +42,44 @@ export function AnimationGovernor() {
       });
     };
 
+    // Image warm-up: a lazy photo starts downloading when it is about one and a half screens away (the browser's
+    // own lazy loading waits until it is much closer), so photos are already there when the visitor scrolls to
+    // them. Same files, same quality: only the moment the download starts is earlier.
+    const imgIo = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const img = e.target as HTMLImageElement;
+          imgIo.unobserve(img);
+          if (img.loading === 'lazy') img.loading = 'eager';
+        }
+      },
+      { rootMargin: '150% 0px 150% 0px' }
+    );
+    const scanImages = () => {
+      document.querySelectorAll<HTMLImageElement>('img[loading="lazy"]').forEach((img) => {
+        if (watched.has(img)) return;
+        watched.add(img);
+        imgIo.observe(img);
+      });
+    };
+    // Only after the page itself has finished loading, so photos never compete with the hero.
+    let imagesOn = document.readyState === 'complete';
+    const onLoad = () => {
+      imagesOn = true;
+      scanImages();
+    };
+    if (imagesOn) scanImages();
+    else window.addEventListener('load', onLoad, { once: true });
+
     scan();
     let t = 0;
     const mo = new MutationObserver(() => {
       window.clearTimeout(t);
-      t = window.setTimeout(scan, 150);
+      t = window.setTimeout(() => {
+        scan();
+        if (imagesOn) scanImages();
+      }, 150);
     });
     mo.observe(document.body, { childList: true, subtree: true });
 
@@ -54,6 +87,8 @@ export function AnimationGovernor() {
       window.clearTimeout(t);
       mo.disconnect();
       io.disconnect();
+      imgIo.disconnect();
+      window.removeEventListener('load', onLoad);
     };
   }, []);
 

@@ -1,7 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { GoogleGenAI, Modality } from '@google/genai/web';
+// The Gemini Live SDK is big and is only needed once voice is switched on: it is fetched in the background after
+// the page (and the orb) are up, so it no longer holds back the orb on first load. Activation still finds it ready.
+let genaiPromise: Promise<typeof import('@google/genai/web')> | null = null;
+const loadGenAI = () => {
+  if (!genaiPromise) {
+    genaiPromise = import('@google/genai/web').catch((e) => {
+      genaiPromise = null;
+      throw e;
+    });
+  }
+  return genaiPromise;
+};
 import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 
@@ -242,10 +253,17 @@ export function useJarvisVoice({
   useEffect(() => {
     const w = window as any;
     const hasIdle = typeof w.requestIdleCallback === 'function';
+    const onIdle = () => {
+      warmVoiceServer();
+      loadGenAI().catch(() => {});
+    };
     const id: number = hasIdle
-      ? w.requestIdleCallback(() => warmVoiceServer(), { timeout: 4000 })
-      : window.setTimeout(warmVoiceServer, 2500);
-    const onWarm = () => warmVoiceServer();
+      ? w.requestIdleCallback(() => onIdle(), { timeout: 4000 })
+      : window.setTimeout(() => onIdle(), 2500);
+    const onWarm = () => {
+      warmVoiceServer();
+      loadGenAI().catch(() => {});
+    };
     window.addEventListener('jarvis:warm', onWarm);
     return () => {
       window.removeEventListener('jarvis:warm', onWarm);
@@ -647,6 +665,7 @@ export function useJarvisVoice({
 
     // Start token, microphone permission and input AudioContext work together.
     // The Live connection begins as soon as the token arrives; mic setup continues in parallel.
+    loadGenAI().catch(() => {});
     const tokenPromise = (async () => {
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 15000);
@@ -765,9 +784,11 @@ export function useJarvisVoice({
     try {
       // Get the ephemeral token first. Do not wait for microphone setup before
       // starting the Live WebSocket connection.
+      const genaiReady = loadGenAI();
       sessionData = await tokenPromise;
       // The server took a concurrency slot + one hourly attempt when it issued the token.
       slotHeldRef.current = true;
+      const { GoogleGenAI, Modality } = await genaiReady;
       liveOpenedRef.current = false;
       greetingDoneRef.current = false;
       speechEndedAtRef.current = 0;
