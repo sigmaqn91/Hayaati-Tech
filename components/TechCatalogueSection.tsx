@@ -6,6 +6,7 @@ import { RealImageSlot } from './RealImageSlot';
 import { TechCardModal } from './TechCardModal';
 import { useLanguage } from '@/context/LanguageContext';
 import { Cpu, Search, Sparkles, Filter, ArrowUpRight } from 'lucide-react';
+import { Beam } from '@/components/Beam';
 
 export function TechCatalogueSection() {
   const { t, content } = useLanguage();
@@ -147,6 +148,7 @@ export function TechCatalogueSection() {
               onClick={() => setActiveModalCard(card)}
               className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame ms-card ab-card"
             >
+              <Beam />
               {/* Real Image Slot */}
               <div className="relative">
                 <RealImageSlot

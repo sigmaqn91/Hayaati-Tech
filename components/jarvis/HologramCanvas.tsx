@@ -498,11 +498,22 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
 
     // 7. Animation Loop
     let animationFrameId: number;
+    let disposed = false;
     let clock = new THREE.Clock();
     let isTabVisible = true;
 
+    // Loop state: started by begin() below. While the orb is off-screen (or the tab hidden) the loop stops asking
+    // for frames altogether and wake() starts it again, so the rest of the page scrolls without 60 idle wake-ups a second.
+    let loopStarted = false;
+    let looping = false;
+    const wake = () => {
+      if (!loopStarted || looping || disposed) return;
+      looping = true;
+      animationFrameId = requestAnimationFrame(animate);
+    };
     const handleVisibilityChange = () => {
       isTabVisible = !document.hidden;
+      wake();
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
@@ -512,6 +523,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       typeof IntersectionObserver !== 'undefined'
         ? new IntersectionObserver((entries) => {
             onScreen = entries[0].isIntersecting;
+            wake();
           })
         : null;
     screenObserver?.observe(container);
@@ -523,11 +535,12 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     let lastFrameAt = 0;
 
     const animate = (now?: number) => {
-      animationFrameId = requestAnimationFrame(animate);
       if (!isTabVisible || !onScreen) {
         lastFrameAt = 0;
+        looping = false;
         return;
       }
+      animationFrameId = requestAnimationFrame(animate);
       if (document.documentElement.classList.contains('bg-paused')) {
         lastFrameAt = 0;
         return;
@@ -663,7 +676,6 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     // Smooth entrance: the shaders are prepared in the background (parallel compile, the page keeps moving),
     // then the orb fades/glides in on its first finished frame instead of popping in with a jerk.
     // The orb itself (particles, rings, colours, sharpness) is exactly the same as before.
-    let disposed = false;
     const orbEl = renderer.domElement;
     orbEl.style.opacity = '0';
     orbEl.style.transform = 'scale(0.94)';
@@ -671,6 +683,8 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     orbEl.style.willChange = 'opacity, transform';
     const begin = () => {
       if (disposed) return;
+      loopStarted = true;
+      looping = true;
       animationFrameId = requestAnimationFrame(animate);
       // Two frames later the first picture is on screen: start the fade.
       requestAnimationFrame(() =>

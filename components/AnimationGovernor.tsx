@@ -10,6 +10,10 @@
  * they also start paused until first seen, so the first load does not start them all at once.
  * and they start again just before it scrolls back into view (300px early, so nobody sees the switch).
  * One-time entrance animations are excluded and play exactly as before.
+ *
+ * SVG drawings with built-in (SMIL) animations, e.g. the project cards' orbiting dots, are not affected by
+ * CSS at all and used to run forever, repainting the page every frame wherever the visitor was. They are now
+ * paused the same way (300px before/after the screen) and simply carry on when they come back.
  */
 
 import { useEffect } from 'react';
@@ -34,11 +38,28 @@ export function AnimationGovernor() {
       { rootMargin: '300px 0px 300px 0px' }
     );
 
+    const smilIo = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const svg = e.target as SVGSVGElement;
+          if (e.isIntersecting) svg.unpauseAnimations();
+          else svg.pauseAnimations();
+        }
+      },
+      { rootMargin: '300px 0px 300px 0px' }
+    );
+
     const scan = () => {
       document.querySelectorAll(ZONES).forEach((el) => {
         if (watched.has(el)) return;
         watched.add(el);
         io.observe(el);
+      });
+      document.querySelectorAll<SVGSVGElement>('svg').forEach((svg) => {
+        if (watched.has(svg) || svg.ownerSVGElement) return;
+        if (!svg.querySelector('animate, animateMotion, animateTransform, set')) return;
+        watched.add(svg);
+        smilIo.observe(svg);
       });
     };
 
@@ -87,6 +108,7 @@ export function AnimationGovernor() {
       window.clearTimeout(t);
       mo.disconnect();
       io.disconnect();
+      smilIo.disconnect();
       imgIo.disconnect();
       window.removeEventListener('load', onLoad);
     };

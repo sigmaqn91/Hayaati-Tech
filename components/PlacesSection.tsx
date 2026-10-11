@@ -7,6 +7,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { MapPin, Calendar, Layers, X, BookOpen, Compass } from 'lucide-react';
 import { useOverlayHistory } from '@/hooks/use-overlay-history';
 import { Orbitron, JetBrains_Mono } from 'next/font/google';
+import { Beam } from '@/components/Beam';
 
 // HUD fonts for the labels over the postcard images
 const hudDisplay = Orbitron({ subsets: ['latin'], weight: ['600', '800'], variable: '--pc-font-display', display: 'swap' });
@@ -76,6 +77,7 @@ export function PlacesSection() {
               onClick={() => setSelectedPlace(localizedPlace)}
               className="pc-card ms-card group relative flex flex-col bg-[#0b0f17]/10 border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame"
             >
+              <Beam />
               {/* Real Image Slot */}
               <div className="relative">
                 <RealImageSlot

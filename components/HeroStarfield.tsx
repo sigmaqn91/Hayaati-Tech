@@ -173,6 +173,7 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
         for (const entry of entries) {
           isVisible = entry.isIntersecting;
         }
+        wake();
       },
       { threshold: 0.05 }
     );
@@ -181,6 +182,7 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
     // Tab visibility handling
     const handleVisibilityChange = () => {
       isTabVisible = !document.hidden;
+      wake();
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
@@ -298,6 +300,12 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
     };
 
     const loop = (currentTime: number) => {
+      // Off-screen or hidden tab: stop asking for frames at all (an idle loop still wakes the page 60x a second
+      // while the visitor scrolls the rest of the site). wake() restarts it when the hero comes back.
+      if (!isVisible || !isTabVisible) {
+        animationFrameId = null;
+        return;
+      }
       animationFrameId = requestAnimationFrame(loop);
       if (currentTime - lastTime < minFrameGap) return;
       const dt = Math.min(currentTime - lastTime, 100);
@@ -308,6 +316,12 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
         drawFrame(currentTime);
       }
     };
+
+    function wake() {
+      if (animationFrameId !== null || prefersReducedMotion || !isVisible || !isTabVisible) return;
+      lastTime = performance.now();
+      animationFrameId = requestAnimationFrame(loop);
+    }
 
     // If reduced motion is requested, render a still frame and do not loop
     if (prefersReducedMotion) {

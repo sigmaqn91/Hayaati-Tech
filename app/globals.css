@@ -327,6 +327,36 @@ html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
 
 
 /* =====================================================================
+   BORDER BEAM (components/Beam.tsx): the running border light of cards and header buttons.
+   Same picture as the old animated conic-gradient ::before, but drawn once and turned by the GPU
+   (rotate) behind the same ring mask, so the processor no longer repaints every visible card
+   (photo included) on every frame. The parent's rules below set inset, thickness, colours, speed.
+   A conic gradient "from A" is exactly the same gradient rotated by A, and the turning square
+   (142% of the longer side) always covers the whole box, so every pixel matches.
+   ===================================================================== */
+.beam {
+  position: absolute;
+  inset: 0;
+  margin: 0 !important; /* never picks up space-y margins of the card */
+  pointer-events: none;
+  overflow: hidden;
+  container-type: size;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.beam__ray {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 142cqmax;
+  height: 142cqmax;
+  margin: -71cqmax 0 0 -71cqmax;
+  animation: beam-spin 7s linear infinite;
+}
+@keyframes beam-spin { to { transform: rotate(360deg); } }
+
+/* =====================================================================
    LANGUAGE BUTTON highlight (UI only): slightly larger (+5% length, +3% height),
    glowing border runner + pulse. transform keeps layout, so it never leaves the navbar.
    ===================================================================== */
@@ -340,20 +370,15 @@ html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
   animation: lang-pulse 2.8s ease-in-out infinite;
   transition: color 0.2s ease, border-color 0.2s ease;
 }
-.lang-btn::before {
-  content: '';
-  position: absolute;
+.lang-btn > .beam {
   inset: -1px;
   padding: 1.5px;
   border-radius: inherit;
-  pointer-events: none;
-  background: conic-gradient(from var(--hp-a, 0deg) at 50% 50%, transparent 0deg 220deg, rgba(56, 232, 255, 0.4) 290deg, #38e8ff 335deg, #ffffff 357deg, transparent 360deg);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  animation: hp-angle-spin 3.2s linear infinite;
   z-index: 1;
+}
+.lang-btn > .beam > .beam__ray {
+  background: conic-gradient(from 0deg at 50% 50%, transparent 0deg 220deg, rgba(56, 232, 255, 0.4) 290deg, #38e8ff 335deg, #ffffff 357deg, transparent 360deg);
+  animation: beam-spin 3.2s linear infinite;
 }
 .lang-btn::after {
   content: '';
@@ -371,9 +396,11 @@ html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
 @media (hover: hover) {
   .lang-btn:hover { transform: scale(1.07, 1.05); }
 }
+/* The last shadow is fully transparent (draws nothing): it only keeps the glow's outer edge fixed at its largest
+   size, so the pulse no longer makes Chrome re-plan every layer of the whole page on every frame. */
 @keyframes lang-pulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(56, 232, 255, 0.28), inset 0 0 8px rgba(56, 232, 255, 0.1); }
-  50% { box-shadow: 0 0 20px rgba(56, 232, 255, 0.55), inset 0 0 14px rgba(56, 232, 255, 0.2); }
+  0%, 100% { box-shadow: 0 0 10px rgba(56, 232, 255, 0.28), inset 0 0 8px rgba(56, 232, 255, 0.1), 0 0 20px rgba(56, 232, 255, 0); }
+  50% { box-shadow: 0 0 20px rgba(56, 232, 255, 0.55), inset 0 0 14px rgba(56, 232, 255, 0.2), 0 0 20px rgba(56, 232, 255, 0); }
 }
 @keyframes lang-sheen {
   0% { background-position: 160% 0; }
@@ -384,7 +411,7 @@ html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
   50% { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .lang-btn, .lang-btn::before, .lang-btn::after, .lang-btn__globe { animation: none; }
+  .lang-btn, .lang-btn::before, .lang-btn::after, .lang-btn__globe, .lang-btn > .beam > .beam__ray { animation: none; }
 }
 
 /* =====================================================================
@@ -863,7 +890,8 @@ html.bg-paused .hero-panel__glass::before,
 html.bg-paused .hero-panel__runner::after,
 html.bg-paused .lang-btn,
 html.bg-paused .lang-btn::before,
-html.bg-paused .lang-btn::after { animation-play-state: paused; }
+html.bg-paused .lang-btn::after,
+html.bg-paused .lang-btn > .beam > .beam__ray { animation-play-state: paused; }
 
 /* Edge light runners: move with transform (GPU) instead of animating left/top (which re-laid-out the page
    on every frame). Container units give the travel distance. */
@@ -943,7 +971,6 @@ html.bg-paused .lang-btn::after { animation-play-state: paused; }
 }
 
 /* Animated border beam on each card (drawn over the existing 1px border) */
-.pc-card::before,
 .pc-card::after {
   content: '';
   position: absolute;
@@ -951,47 +978,46 @@ html.bg-paused .lang-btn::after { animation-play-state: paused; }
   pointer-events: none;
   z-index: 2;
 }
-.pc-card::before {
-  padding: 1.5px;
+.pc-card > .beam { inset: -1px; padding: 1.5px; z-index: 2; }
+.pc-card > .beam > .beam__ray {
   background:
-    conic-gradient(from var(--pc-a), transparent 0deg 250deg, rgba(56, 232, 255, 0.4) 300deg, #38e8ff 340deg, #ffffff 358deg, transparent 360deg),
-    conic-gradient(from calc(var(--pc-a) + 180deg), transparent 0deg 270deg, rgba(167, 139, 250, 0.4) 320deg, #c4b5fd 354deg, transparent 360deg);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: pc-spin 6s linear infinite;
+    conic-gradient(from 0deg, transparent 0deg 250deg, rgba(56, 232, 255, 0.4) 300deg, #38e8ff 340deg, #ffffff 358deg, transparent 360deg),
+    conic-gradient(from 180deg, transparent 0deg 270deg, rgba(167, 139, 250, 0.4) 320deg, #c4b5fd 354deg, transparent 360deg);
+  animation: beam-spin 6s linear infinite;
 }
 .pc-card::after {
   box-shadow: 0 0 18px rgba(56, 232, 255, 0.18), inset 0 0 18px rgba(56, 232, 255, 0.06);
   animation: pc-glow 4.5s ease-in-out infinite;
 }
-.pc-card:nth-child(2n)::before { animation-delay: -1.5s; }
-.pc-card:nth-child(3n)::before { animation-delay: -3s; }
-.pc-card:nth-child(4n)::before { animation-delay: -4.5s; }
+.pc-card:nth-child(2n) > .beam > .beam__ray { animation-delay: -1.5s; }
+.pc-card:nth-child(3n) > .beam > .beam__ray { animation-delay: -3s; }
+.pc-card:nth-child(4n) > .beam > .beam__ray { animation-delay: -4.5s; }
 .pc-card:nth-child(2n)::after { animation-delay: -2.2s; }
-.pc-card:hover::before { animation-duration: 3s; }
+.pc-card:hover > .beam > .beam__ray { animation-duration: 3s; }
 
 html.bg-paused .pc-section::before,
 html.bg-paused .pc-section::after,
 html.bg-paused .pc-card::before,
-html.bg-paused .pc-card::after { animation-play-state: paused; }
+html.bg-paused .pc-card::after,
+html.bg-paused .pc-card > .beam > .beam__ray { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .pc-section::before, .pc-section::after, .pc-card::before, .pc-card::after { animation: none; }
+  .pc-section::before, .pc-section::after, .pc-card::before, .pc-card::after, .pc-card > .beam > .beam__ray { animation: none; }
 }
 
 /* Labels over the postcard images: dark frosted HUD glass, Orbitron + JetBrains Mono, cyan accent,
    crisp corner brackets, divider ticks, slow edge glow and a shimmer sweep. */
 @keyframes pc-chip-glow {
-  0%, 100% { box-shadow: 0 0 6px rgba(56, 232, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 0 10px rgba(56, 232, 255, 0.07); border-color: rgba(56, 232, 255, 0.4); }
-  50% { box-shadow: 0 0 14px rgba(56, 232, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px rgba(56, 232, 255, 0.14); border-color: rgba(56, 232, 255, 0.8); }
+  /* last shadow is fully transparent: it only keeps the glow's outer edge fixed (see lang-pulse) */
+  0%, 100% { box-shadow: 0 0 6px rgba(56, 232, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 0 10px rgba(56, 232, 255, 0.07), 0 0 14px rgba(56, 232, 255, 0); border-color: rgba(56, 232, 255, 0.4); }
+  50% { box-shadow: 0 0 14px rgba(56, 232, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px rgba(56, 232, 255, 0.14), 0 0 14px rgba(56, 232, 255, 0); border-color: rgba(56, 232, 255, 0.8); }
 }
 @keyframes pc-chip-sheen {
   0%, 60% { background-position: 0 0, -150% 0; }
   100% { background-position: 0 0, 250% 0; }
 }
 @keyframes pc-dot-blink {
-  0%, 100% { opacity: 1; box-shadow: 0 0 8px #38e8ff; }
-  50% { opacity: 0.3; box-shadow: 0 0 0 transparent; }
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px #38e8ff, 0 0 8px rgba(56, 232, 255, 0); }
+  50% { opacity: 0.3; box-shadow: 0 0 0 transparent, 0 0 8px rgba(56, 232, 255, 0); }
 }
 .pc-badge {
   border: 1px solid rgba(56, 232, 255, 0.4);
@@ -1126,11 +1152,17 @@ html.bg-paused .pc-badge, html.bg-paused .pc-badge__dot { animation-play-state: 
 @keyframes ab-grid { to { transform: translate3d(60px, 60px, 0); } }
 /* 3D floor grid rolling toward the viewer */
 .ab-floor { left: -50%; right: -50%; bottom: -10%; height: 60%; transform-origin: 50% 100%; transform: perspective(500px) rotateX(70deg);
-  background-image: linear-gradient(rgba(56, 232, 255, 0.22) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 232, 255, 0.16) 1px, transparent 1px);
+  background-image: linear-gradient(90deg, rgba(56, 232, 255, 0.16) 1px, transparent 1px);
   background-size: 80px 80px;
   -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 85%); mask-image: linear-gradient(to top, #000 0%, transparent 85%);
-  animation: ab-floor 4s linear infinite; opacity: 0.9; }
-@keyframes ab-floor { to { background-position: 0 80px, 0 0; } }
+  overflow: hidden; opacity: 0.9; }
+/* The moving (horizontal) floor lines: same lines, one tile taller, slid 80px by the GPU instead of repainting the
+   floor every frame. They sit above the still lines exactly like the first background layer did before. */
+.ab-floor::before { content: ''; position: absolute; inset: -80px 0 0 0;
+  background-image: linear-gradient(rgba(56, 232, 255, 0.22) 1px, transparent 1px);
+  background-size: 80px 80px;
+  animation: ab-floor-move 4s linear infinite; }
+@keyframes ab-floor-move { to { transform: translateY(80px); } }
 /* thin data streaks travelling across */
 .ab-streaks { inset: 0; }
 .ab-streaks i { position: absolute; left: -30%; height: 1px; width: 26%;
@@ -1163,19 +1195,18 @@ html.bg-paused .pc-badge, html.bg-paused .pc-badge__dot { animation-play-state: 
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06); }
 
 /* running light on card borders (cyan + white only) */
-.ab-card::before, .ab-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3; }
-.ab-card::before { padding: 1.5px;
-  background: conic-gradient(from var(--pc-a), transparent 0deg 250deg, rgba(56, 232, 255, 0.35) 300deg, #38e8ff 340deg, #ffffff 358deg, transparent 360deg);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: pc-spin 7s linear infinite; }
+.ab-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.ab-card > .beam { padding: 1.5px; z-index: 3; }
+.ab-card > .beam > .beam__ray {
+  background: conic-gradient(from 0deg, transparent 0deg 250deg, rgba(56, 232, 255, 0.35) 300deg, #38e8ff 340deg, #ffffff 358deg, transparent 360deg);
+  animation: beam-spin 7s linear infinite; }
 .ab-card::after { box-shadow: 0 0 18px rgba(56, 232, 255, 0.14), inset 0 0 18px rgba(56, 232, 255, 0.05); animation: pc-glow 5s ease-in-out infinite; }
-.ab-card:nth-of-type(2)::before { animation-delay: -2.3s; }
-.ab-glass.ab-card::before { animation-delay: -3.5s; }
+.ab-card:nth-of-type(2) > .beam > .beam__ray { animation-delay: -2.3s; }
+.ab-glass.ab-card > .beam > .beam__ray { animation-delay: -3.5s; }
 
-html.bg-paused .ab-bg *, html.bg-paused .ab-card::before, html.bg-paused .ab-card::after { animation-play-state: paused; }
+html.bg-paused .ab-bg *, html.bg-paused .ab-floor::before, html.bg-paused .ab-card::after, html.bg-paused .ab-card > .beam > .beam__ray { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .ab-bg *, .ab-card::before, .ab-card::after { animation: none; }
+  .ab-bg *, .ab-floor::before, .ab-card::after, .ab-card > .beam > .beam__ray { animation: none; }
 }
 
 /* Era milestone cards: only the card itself is animated (About-section style).
@@ -1212,9 +1243,9 @@ html.bg-paused .ab-bg *, html.bg-paused .ab-card::before, html.bg-paused .ab-car
 .ms-card:nth-child(2) .ms-b-aurora { animation-delay: -3s; }
 .ms-card:nth-child(3) .ms-b-aurora { animation-delay: -6s; }
 .ms-card:nth-child(4) .ms-b-aurora { animation-delay: -9s; }
-.ms-card:nth-child(2) .ms-b-streak, .ms-card:nth-child(2)::before { animation-delay: -1.7s; }
-.ms-card:nth-child(3) .ms-b-streak, .ms-card:nth-child(3)::before { animation-delay: -3.4s; }
-.ms-card:nth-child(4) .ms-b-streak, .ms-card:nth-child(4)::before { animation-delay: -5.1s; }
+.ms-card:nth-child(2) .ms-b-streak, .ms-card:nth-child(2) > .beam > .beam__ray { animation-delay: -1.7s; }
+.ms-card:nth-child(3) .ms-b-streak, .ms-card:nth-child(3) > .beam > .beam__ray { animation-delay: -3.4s; }
+.ms-card:nth-child(4) .ms-b-streak, .ms-card:nth-child(4) > .beam > .beam__ray { animation-delay: -5.1s; }
 html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
   .ms-body-bg > span { animation: none; }
@@ -1234,6 +1265,11 @@ html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
   will-change: auto !important;
 }
 
+/* The hero advert's looping text shimmer is left out of the rule above (its one-time word entrances must not
+   restart), so it kept repainting while the visitor was far down the page. Off-screen it now just holds still
+   (paused, not reset) and continues from the same point when the hero comes back. */
+#hero.anim-off .hero-ad * { animation-play-state: paused; }
+
 /* Era Banner: special luxury treatment (richer than the cards). Layout and sizes untouched;
    the photo stays fully visible (only thin HUD lines at its edges). Paused off-screen by the
    section rule above, and fully still for reduced-motion users. */
@@ -1241,21 +1277,21 @@ html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
 .eb-aura { position: absolute; inset: 0; pointer-events: none; z-index: 0;
   box-shadow: 0 0 36px rgba(56, 232, 255, 0.16), 0 0 90px rgba(70, 130, 255, 0.10);
   animation: eb-breathe 6s ease-in-out infinite; }
-.eb-aura::before { content: ''; position: absolute; inset: -3px;
-  background: conic-gradient(from var(--pc-a), rgba(56, 232, 255, 0) 0deg, rgba(56, 232, 255, 0.55) 60deg, rgba(150, 120, 255, 0.35) 140deg, rgba(56, 232, 255, 0) 200deg, rgba(56, 232, 255, 0.45) 280deg, rgba(56, 232, 255, 0) 360deg);
-  filter: blur(14px); opacity: 0.55; animation: pc-spin 14s linear infinite; }
+.eb-aura > .beam { inset: -3px; -webkit-mask: none; mask: none; filter: blur(14px); opacity: 0.55; }
+.eb-aura > .beam > .beam__ray {
+  background: conic-gradient(from 0deg, rgba(56, 232, 255, 0) 0deg, rgba(56, 232, 255, 0.55) 60deg, rgba(150, 120, 255, 0.35) 140deg, rgba(56, 232, 255, 0) 200deg, rgba(56, 232, 255, 0.45) 280deg, rgba(56, 232, 255, 0) 360deg);
+  animation: beam-spin 14s linear infinite; }
 @keyframes eb-breathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 .eb-card { z-index: 1; }
 
 /* dual running light on the banner border (two beams, cyan + ice white) */
-.eb-card::before, .eb-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.eb-card::before { padding: 2px;
-  background: conic-gradient(from var(--pc-a),
+.eb-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.eb-card > .beam { padding: 2px; z-index: 5; }
+.eb-card > .beam > .beam__ray {
+  background: conic-gradient(from 0deg,
     transparent 0deg 110deg, rgba(56, 232, 255, 0.35) 140deg, #38e8ff 168deg, #ffffff 178deg, transparent 180deg,
     transparent 290deg, rgba(150, 120, 255, 0.35) 320deg, #7fdcff 348deg, #ffffff 358deg, transparent 360deg);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: pc-spin 9s linear infinite; }
+  animation: beam-spin 9s linear infinite; }
 .eb-card::after { box-shadow: 0 0 22px rgba(56, 232, 255, 0.22), inset 0 0 26px rgba(56, 232, 255, 0.08); animation: pc-glow 5s ease-in-out infinite; }
 
 /* photo HUD: corner brackets, slow scan line, light sheen, glowing seam */
@@ -1342,10 +1378,10 @@ html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
   animation: pc-spin 5s linear infinite; }
 
-html.bg-paused .eb-aura, html.bg-paused .eb-aura::before, html.bg-paused .eb-card::before, html.bg-paused .eb-card::after, html.bg-paused .eb-photo-fx > span,
+html.bg-paused .eb-aura, html.bg-paused .eb-aura > .beam > .beam__ray, html.bg-paused .eb-card > .beam > .beam__ray, html.bg-paused .eb-card::after, html.bg-paused .eb-photo-fx > span,
 html.bg-paused .eb-title, html.bg-paused .eb-panel::before, html.bg-paused .eb-item > span:first-child, html.bg-paused .eb-tab-active::before { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .eb-aura, .eb-aura::before, .eb-card::before, .eb-card::after, .eb-photo-fx > span, .eb-title, .eb-panel::before, .eb-item > span:first-child, .eb-tab-active::before { animation: none; }
+  .eb-aura, .eb-aura > .beam > .beam__ray, .eb-card > .beam > .beam__ray, .eb-card::after, .eb-photo-fx > span, .eb-title, .eb-panel::before, .eb-item > span:first-child, .eb-tab-active::before { animation: none; }
 }
 
 /* =====================================================================

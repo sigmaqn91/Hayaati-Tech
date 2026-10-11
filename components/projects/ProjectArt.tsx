@@ -646,7 +646,11 @@ export const projectArtCss = `
 @keyframes hp-card-in{from{opacity:0;transform:perspective(900px) translateY(40px) rotateX(18deg) scale(.96);filter:blur(6px)}to{opacity:1;transform:perspective(900px) translateY(0) rotateX(0) scale(1);filter:blur(0)}}
 .hp-border{position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent 0 60%,var(--accent) 75%,#fff 80%,var(--accent) 85%,transparent 100%);animation:hp-spin 5s linear infinite}
 .hp-spot{background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%)}
-.hp-scan{position:absolute;left:0;right:0;height:35%;background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--accent) 22%,transparent),transparent);animation:hp-scan 4.5s ease-in-out infinite;pointer-events:none;mix-blend-mode:screen}
+.hp-scan{position:absolute;left:0;right:0;height:35%;background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--accent) 22%,transparent),transparent);animation:hp-scan-y 4.5s ease-in-out infinite;pointer-events:none;mix-blend-mode:screen}
+/* Same path as before (top -40% -> 110% of the banner), moved by the GPU instead of being re-laid-out and
+   repainted every frame. The band is 35% of the banner tall, so -40% / 110% of the banner = -40/35 / 110/35 of itself. */
+@keyframes hp-scan-y{0%{transform:translateY(-114.2857%)}100%{transform:translateY(314.2857%)}}
+/* still used by the hero panel's scan line (it picks up this keyframe name), so it stays exactly as it was */
 @keyframes hp-scan{0%{top:-40%}100%{top:110%}}
 .hp-shine{position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.18) 45%,transparent 60%);transform:translateX(-120%);transition:transform .9s ease;pointer-events:none}
 .group:hover .hp-shine{transform:translateX(120%)}
@@ -654,11 +658,16 @@ export const projectArtCss = `
 @keyframes hp-sheen{to{background-position:-250% 0}}
 .hp-ping{animation:hp-ping 1.6s cubic-bezier(0,0,.2,1) infinite}
 @keyframes hp-ping{75%,100%{transform:scale(2.4);opacity:0}}
-.hp-grid-bg{background-image:linear-gradient(rgba(56,232,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(56,232,255,.06) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);animation:hp-grid 20s linear infinite}
+.hp-grid-bg{overflow:hidden;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+/* The same grid, one tile bigger up/left, slid 44px by the GPU (identical to moving the background by 44px),
+   so the whole Projects section is no longer repainted on every frame. */
+.hp-grid-bg::before{content:'';position:absolute;inset:-44px 0 0 -44px;background-image:linear-gradient(rgba(56,232,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(56,232,255,.06) 1px,transparent 1px);background-size:44px 44px;animation:hp-grid-move 20s linear infinite}
+@keyframes hp-grid-move{to{transform:translate(44px,44px)}}
+/* still used by the hero panel's grid (it picks up this keyframe name), so it stays exactly as it was */
 @keyframes hp-grid{to{background-position:44px 44px}}
 
 @media (prefers-reduced-motion: reduce){
-  [class*="hp-"]{animation:none !important}
+  [class*="hp-"],.hp-grid-bg::before{animation:none !important}
   .hp-draw{stroke-dashoffset:0}
   .hp-type{transform:scaleX(1)}
 }

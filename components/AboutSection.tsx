@@ -5,6 +5,7 @@ import { aboutData } from '@/data/about';
 import { useLanguage } from '@/context/LanguageContext';
 import { User, Mail, Globe } from 'lucide-react';
 import { FounderPortrait } from '@/components/FounderPortrait';
+import { Beam } from '@/components/Beam';
 
 export function AboutSection() {
   const { t } = useLanguage();
@@ -45,6 +46,7 @@ export function AboutSection() {
         {/* Owner Photo Slot */}
         <div>
           <div className="ab-card relative overflow-hidden bg-[#0b0f17] border border-[#1e293b] aspect-square flex flex-col items-center justify-center p-6 text-center hud-frame">
+            <Beam />
             {aboutData.photoUrl ? (
               <FounderPortrait
                 src={aboutData.photoUrl}
@@ -72,6 +74,7 @@ export function AboutSection() {
         {/* Bio & Dossier Details */}
         <div className="md:self-stretch">
           <div className="ab-card ab-glass relative h-full p-6 sm:p-8 border border-[#1e293b] space-y-5 hud-frame flex flex-col justify-center">
+            <Beam />
             <div className="flex items-center justify-between border-b border-[#1e293b] pb-4">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-[#38e8ff]" />
@@ -100,6 +103,7 @@ export function AboutSection() {
 
       {/* Remaining details in a compact strip */}
       <div className="ab-card ab-glass relative mt-8 px-6 py-4 border border-[#1e293b] hud-frame flex flex-col md:flex-row md:items-center gap-4 md:gap-10">
+        <Beam />
         <div className="space-y-1">
           <span className="text-[10px] font-mono text-slate-500 uppercase block">{t.about.contactDirect}</span>
           <a href={`mailto:${aboutData.email}`} className="text-sm font-mono text-[#38e8ff] hover:underline flex items-center gap-2">

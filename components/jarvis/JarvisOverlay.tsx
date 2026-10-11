@@ -1333,16 +1333,21 @@ function SpectrumBars({ levelRef }: { levelRef: React.MutableRefObject<number> }
     let raf = 0;
     let shown = -1;
     let visible = true;
+    // Off-screen the loop stops completely (no idle frame requests while the visitor scrolls the page).
     const io =
       typeof IntersectionObserver !== 'undefined'
         ? new IntersectionObserver((entries) => {
             visible = entries[0].isIntersecting;
+            if (visible && !raf) raf = requestAnimationFrame(tick);
           })
         : null;
     io?.observe(wrap);
     const tick = () => {
+      if (!visible) {
+        raf = 0;
+        return;
+      }
       raf = requestAnimationFrame(tick);
-      if (!visible) return;
       const level = Math.round((levelRef.current || 0.1) * 50) / 50;
       if (level === shown) return;
       shown = level;

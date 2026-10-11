@@ -6,6 +6,7 @@ import { RealImageSlot } from './RealImageSlot';
 import { TechCardModal } from './TechCardModal';
 import { useLanguage } from '@/context/LanguageContext';
 import { Clock, Calendar, ArrowRight, Zap, BookOpen } from 'lucide-react';
+import { Beam } from '@/components/Beam';
 
 export function TimelineSection() {
   const { t, content } = useLanguage();
@@ -72,8 +73,9 @@ export function TimelineSection() {
       <div className="space-y-12">
         {/* Panoramic Banner (Era Banner luxury animation: halo, dual border light, photo HUD, live glass text area) */}
         <div className="eb-stage">
-        <div className="eb-aura" aria-hidden="true" />
+        <div className="eb-aura" aria-hidden="true"><Beam /></div>
         <div className="relative overflow-hidden bg-[#0b0f17] border border-[#1e293b] hud-frame ms-card eb-card">
+          <Beam />
           <div className="eb-photo">
           <RealImageSlot
             src={currentEra.bannerImage}
@@ -192,6 +194,7 @@ export function TimelineSection() {
                   onClick={() => setActiveModalCard(card)}
                   className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame ms-card ab-card"
                 >
+                  <Beam />
                   {/* Card Image Slot */}
                   <div className="relative">
                     <RealImageSlot
