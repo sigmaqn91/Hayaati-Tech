@@ -5,23 +5,26 @@ import React, { useEffect, useRef, useState } from 'react';
 /*
   Founder portrait for the About frame.
   - The file on the server is tile-scrambled, so opening its URL directly shows a jumbled picture.
-    The canvas puts the tiles back in order and shows the photo at full quality.
+    The canvas puts the tiles back in order and shows the photo at full original quality (exact pixels).
   - Right-click, long-press and drag are blocked. If a save still gets through, it lands on the
     invisible decoy <img> on top, which is a tiny blurred copy.
   - Screenshots cannot be blocked by any website.
 */
 
-const GRID = 10;
-const TILE = 96;
-const PAD = 4;
+// Lossless PNG (1254 x 1254 original, 11 x 11 tiles of 114px, no padding needed),
+// so the rebuilt photo is pixel-for-pixel the original file.
+const GRID = 11;
+const TILE = 114;
+const PAD = 0;
 const CELL = TILE + PAD * 2;
 const SIZE = GRID * TILE;
 // PERM[i] = original tile index stored at scrambled position i
 const PERM = [
-  19, 62, 0, 51, 55, 39, 8, 75, 33, 16, 2, 63, 79, 45, 65, 34, 6, 27, 38, 64, 36, 24, 10, 43, 11, 71, 85, 92, 46, 41,
-  77, 9, 56, 28, 86, 48, 91, 32, 88, 68, 54, 18, 83, 20, 14, 99, 66, 31, 17, 15, 84, 29, 3, 87, 53, 57, 30, 90, 37, 12,
-  22, 72, 49, 44, 69, 52, 97, 13, 67, 21, 60, 76, 42, 81, 26, 78, 95, 74, 98, 25, 82, 1, 23, 61, 7, 93, 58, 50, 59, 35,
-  80, 47, 96, 94, 40, 4, 5, 70, 73, 89,
+  69, 74, 21, 70, 71, 104, 9, 120, 51, 54, 115, 79, 87, 96, 73, 75, 12, 107, 31, 68, 42, 10, 93, 49, 89, 83, 98, 112, 52, 114,
+  81, 86, 108, 33, 48, 92, 101, 95, 103, 111, 64, 50, 110, 26, 23, 56, 41, 102, 76, 116, 100, 18, 94, 22, 11, 55, 82, 118, 106, 39,
+  109, 14, 34, 15, 6, 66, 80, 59, 40, 36, 46, 72, 117, 99, 8, 57, 20, 13, 65, 113, 28, 38, 25, 105, 53, 32, 17, 2, 37, 78,
+  58, 91, 47, 24, 19, 30, 29, 0, 3, 60, 16, 67, 77, 84, 27, 119, 85, 97, 90, 1, 88, 4, 61, 45, 5, 7, 35, 43, 63, 44,
+  62,
 ];
 
 const DECOY =
@@ -47,7 +50,6 @@ function Typed({ text, start, delay, step, className }: { text: string; start: b
 
 export function FounderPortrait({ src, alt, name, title }: { src: string; alt: string; name: string; title: string }) {
   const frameRef = useRef<HTMLDivElement>(null);
-  const depthRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [drawn, setDrawn] = useState(false);
   const [inView, setInView] = useState(false);
@@ -63,7 +65,7 @@ export function FounderPortrait({ src, alt, name, title }: { src: string; alt: s
       if (!c || !ctx) return;
       c.width = SIZE;
       c.height = SIZE;
-      ctx.imageSmoothingQuality = 'high';
+      ctx.imageSmoothingEnabled = false; // 1:1 tile copy, exact pixels
       PERM.forEach((s, i) => {
         const sx = (i % GRID) * CELL + PAD;
         const sy = Math.floor(i / GRID) * CELL + PAD;
@@ -74,7 +76,7 @@ export function FounderPortrait({ src, alt, name, title }: { src: string; alt: s
     img.src = src;
   }, [src]);
 
-  // Reveal when the frame comes into view; subtle scroll depth afterwards
+  // Reveal when the frame comes into view (no scroll zoom/shift, so the photo is never cropped or upscaled)
   useEffect(() => {
     const frame = frameRef.current;
     if (!frame) return;
@@ -95,33 +97,8 @@ export function FounderPortrait({ src, alt, name, title }: { src: string; alt: s
     );
     io.observe(frame);
 
-    let raf = 0;
-    // Depth effect only while the portrait is near the screen (no layout reads on every scroll frame elsewhere).
-    let near = true;
-    const nearIo = new IntersectionObserver(([entry]) => {
-      near = entry.isIntersecting;
-    }, { rootMargin: '200px 0px' });
-    nearIo.observe(frame);
-    const onScroll = () => {
-      if (!near) return;
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const r = frame.getBoundingClientRect();
-        const vh = window.innerHeight || 1;
-        // -1 (frame below viewport) .. 1 (frame above viewport)
-        const p = Math.max(-1, Math.min(1, (vh / 2 - (r.top + r.height / 2)) / vh));
-        if (depthRef.current) depthRef.current.style.transform = `translate3d(0, ${(p * 14).toFixed(2)}px, 0)`;
-      });
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
     return () => {
       io.disconnect();
-      nearIo.disconnect();
-      cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
     };
   }, []);
 
@@ -136,30 +113,17 @@ export function FounderPortrait({ src, alt, name, title }: { src: string; alt: s
       onContextMenu={block}
       onDragStart={block}
     >
-      <div ref={depthRef} className="absolute -inset-[4%] will-change-transform">
+      <div className="absolute inset-0">
         <canvas ref={canvasRef} className="founder-photo block w-full h-full" />
       </div>
 
       {/* Soft shade at the bottom so the name reads well */}
       <div className="founder-shade pointer-events-none absolute inset-0" />
 
-      {/* Single slow light sweep */}
-      <div className="founder-sweep pointer-events-none absolute inset-0 overflow-hidden">
-        <span />
-      </div>
-
-      {/* Thin hairline frame drawn in from the corners */}
-      <div className="founder-lines pointer-events-none absolute inset-3 sm:inset-4">
-        <i className="t" />
-        <i className="r" />
-        <i className="b" />
-        <i className="l" />
-      </div>
-
-      <div className="founder-caption pointer-events-none absolute left-8 right-8 bottom-7 sm:left-10 sm:bottom-9 md:left-6 md:right-4 md:bottom-6 xl:left-10 xl:bottom-9 text-left whitespace-nowrap">
+      <div className="founder-caption pointer-events-none absolute left-10 right-10 bottom-10 sm:left-14 sm:bottom-14 text-left whitespace-nowrap">
         <span className="founder-rule block h-px bg-white/60 mb-3" />
-        <Typed text={name} start={on} delay={1500} step={70} className="block text-white text-lg sm:text-xl md:text-lg xl:text-xl font-light uppercase tracking-[0.32em] md:tracking-[0.28em] xl:tracking-[0.32em]" />
-        <Typed text={title} start={on} delay={1500 + name.length * 70 + 200} step={28} className="block mt-1.5 text-[10px] sm:text-[11px] md:text-[10px] xl:text-[11px] text-white/70 uppercase tracking-[0.28em] md:tracking-[0.2em] xl:tracking-[0.28em]" />
+        <Typed text={name} start={on} delay={1500} step={70} className="block text-white text-lg sm:text-2xl font-light uppercase tracking-[0.32em]" />
+        <Typed text={title} start={on} delay={1500 + name.length * 70 + 200} step={28} className="block mt-1.5 text-[10px] sm:text-xs text-white/70 uppercase tracking-[0.28em]" />
       </div>
 
       {/* Invisible decoy: any "save image" gets only this tiny blurred copy */}
