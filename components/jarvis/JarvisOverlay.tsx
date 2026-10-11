@@ -28,6 +28,40 @@ import { useLanguage } from '@/context/LanguageContext';
 import { QUICK_ACK } from '@/lib/jarvisLocale';
 import { collectLiveSiteSnapshot } from '@/lib/jarvisKnowledge';
 
+// Owner flow phrases (voice captions arrive in small pieces, so these run on the whole spoken turn).
+const OWNER_NAME = '(a+l[iy]+a+h?|aaliya)';
+const OWNER_CLAIM_PATTERNS: RegExp[] = [
+  new RegExp(`\\b(main|mai|mein|i am|i'm|im|this is|it's|its|my name is)\\s+${OWNER_NAME}(\\s+khan)?\\b`, 'i'),
+  new RegExp(`\\b${OWNER_NAME}\\s+khan\\s+(hoon|hun|hu|here|bol\\s+rahi)\\b`, 'i'),
+  /\b(i am|i'm|im)\s+(the\s+)?(owner|founder)\b/i,
+  /\b(main|मैं)\s+(owner|founder|मालिक|संस्थापक)\b/i,
+  /\b(owner|founder)\s+(hoon|hun|hu)\b/i,
+  /(मैं|मै|में)\s*(आलिया|अलिया|आलिआ)/,
+  /मैं\s+(मालिक|संस्थापक|ओनर|फाउंडर)\s+(हूँ|हूं|हु)/,
+  /(میں|مَیں)\s*(عالیہ|علیا|عالیا|علیہ)/,
+];
+const isOwnerClaim = (text: string) => OWNER_CLAIM_PATTERNS.some((re) => re.test(text));
+
+// Jarvis asking for the code (after a claim) / clearly naming the verification code on its own.
+const ASKS_FOR_CODE = /verif|code|कोड|सत्यापन|वेरिफ़?िकेशन|کوڈ|تصدیق/i;
+const NAMES_VERIFY_CODE = /verification\s+code|access\s+code|owner\s+code|वेरिफ़?िकेशन\s+कोड|सत्यापन\s+कोड|تصدیقی\s+کوڈ/i;
+
+// "Okay bye Jarvis", "bye Jarvis, see you", "Allah Hafiz", "owner mode off" ...
+const GOODBYE = /\b(bye+|bye\s*bye|good\s*bye|alvida|khuda\s*hafiz|allah\s*hafiz|see\s+you|see\s+ya|tata|logout|log\s+out)\b|बाय|अलविदा|खुदा\s*हाफ़?िज़?|ख़ुदा\s*हाफ़?िज़?|अल्लाह\s*हाफ़?िज़?|फिर\s+मिलेंगे|خدا\s*حافظ|اللہ\s*حافظ|الوداع|بائے/i;
+const JARVIS_NAME = /jarvis|jarwis|जार्विस|जारविस|جاروس|جارویس/i;
+const OWNER_MODE_OFF = /\bowner\s*mod(e)?\s*(off|band|lock|close)\b/i;
+const isOwnerGoodbye = (text: string) => {
+  const clean = text.trim();
+  if (!clean) return false;
+  if (OWNER_MODE_OFF.test(clean)) return true;
+  if (!GOODBYE.test(clean)) return false;
+  // Only a real goodbye: a short line, or "bye" at the start/end of a line that names Jarvis
+  const words = clean.split(/\s+/);
+  if (words.length <= 6) return true;
+  if (!JARVIS_NAME.test(clean) || words.length > 12) return false;
+  return GOODBYE.test(words.slice(0, 4).join(' ')) || GOODBYE.test(words.slice(-4).join(' '));
+};
+
 interface JarvisOverlayProps {
   isOpen: boolean;
   onClose: () => void;
@@ -75,6 +109,18 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   const [verifyCode, setVerifyCode] = useState<string>('');
   const [verifyError, setVerifyError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
+  const [verifyGranted, setVerifyGranted] = useState<boolean>(false);
+  const verifyInputRef = useRef<HTMLInputElement | null>(null);
+  const [verifyFocused, setVerifyFocused] = useState<boolean>(false);
+  const isOwnerRef = useRef<boolean>(false);
+  const showVerifyRef = useRef<boolean>(false);
+  // Spoken turn text (voice captions come in pieces) + "she said she is the owner, wait for Jarvis to ask for the code"
+  const turnRoleRef = useRef<'user' | 'assistant' | null>(null);
+  const userTurnRef = useRef<string>('');
+  const assistantTurnRef = useRef<string>('');
+  const claimPendingRef = useRef<boolean>(false);
+  const claimTimerRef = useRef<number | null>(null);
+  const byeHandledRef = useRef<boolean>(false);
 
   // Admin Slide-in Panel
   const [showAdminPanel, setShowAdminPanel] = useState<boolean>(false);
@@ -163,12 +209,12 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
   // Place the bar right away when the box is tapped (before the keyboard animation starts).
   useEffect(() => {
-    if (!inputFocused) {
+    if (!inputFocused && !verifyFocused) {
       setKbOpen(false);
       return;
     }
     window.visualViewport?.dispatchEvent(new Event('resize'));
-  }, [inputFocused]);
+  }, [inputFocused, verifyFocused]);
 
   const handleCommandFocus = () => {
     inputFocusedRef.current = true;
@@ -178,12 +224,22 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     inputFocusedRef.current = false;
     setInputFocused(false);
   };
+  // The owner code box follows the keyboard the same way, so it always sits right above it.
+  const handleVerifyFocus = () => {
+    inputFocusedRef.current = true;
+    setVerifyFocused(true);
+  };
+  const handleVerifyBlur = () => {
+    inputFocusedRef.current = false;
+    setVerifyFocused(false);
+  };
   // Touch devices only (desktop keeps the bar exactly as it was)
   const [coarsePointer, setCoarsePointer] = useState<boolean>(false);
   useEffect(() => {
     setCoarsePointer(window.matchMedia('(pointer: coarse)').matches);
   }, []);
   const commandLifted = inputFocused && (kbOpen || coarsePointer);
+  const verifyLifted = verifyFocused && coarsePointer && kbOpen && kbBox !== null;
 
   // Keyboard closed by the phone (back gesture / hide-keyboard) while the input still holds focus:
   // release the focus so the bar glides back to its place and the next tap opens the keyboard again.
@@ -226,6 +282,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     speak,
     sendLiveText,
     notifyOwnerVerified,
+    notifyOwnerLocked,
     cancelSpeech,
   } = useJarvisVoice({
     language: language || 'en',
@@ -240,17 +297,90 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     onTranscriptReady: (spokenText) => {
       if (!spokenText) return;
       setMessages((prev) => [...prev, { role: 'user', text: spokenText, lang: langRef.current }]);
-      const claim = spokenText.trim();
-      if (/\b(main|mai|mein)\s+aliya(\s+khan)?\s+(hoon|hun|hu)\b/i.test(claim) || /(मैं|मै)\s+(आलिया|अलिया)(\s+खान)?/.test(claim) || /\b(i am|i'm|im)\s+(the\s+)?(owner|founder)\b/i.test(claim) || /\b(i am|i'm|im)\s+aliya\s+khan\b/i.test(claim) || /\b(main|मैं)\s+(owner|founder|मालिक|संस्थापक)\b/i.test(claim) || /\b(owner|founder)\s+(hoon|hun)\b/i.test(claim) || /मैं\s+(मालिक|संस्थापक)\s+हूँ/.test(claim)) {
-        setShowVerifyModal(true);
+      if (turnRoleRef.current !== 'user') userTurnRef.current = '';
+      turnRoleRef.current = 'user';
+      userTurnRef.current = `${userTurnRef.current} ${spokenText}`.trim();
+      const said = userTurnRef.current;
+      if (isOwnerRef.current) {
+        if (!byeHandledRef.current && isOwnerGoodbye(said)) {
+          byeHandledRef.current = true;
+          handleLockOwnerMode('goodbye');
+        }
+        return;
+      }
+      if (!claimPendingRef.current && !showVerifyRef.current && isOwnerClaim(said)) {
+        // Let Jarvis welcome her first; the code box opens when Jarvis asks for the code
+        // (or by itself a few seconds later if Jarvis does not mention it).
+        claimPendingRef.current = true;
+        if (claimTimerRef.current) window.clearTimeout(claimTimerRef.current);
+        claimTimerRef.current = window.setTimeout(() => openVerifyBox(), 6000);
       }
     },
     onAssistantTextReady: (assistantText) => {
       if (assistantText) {
         setMessages((prev) => [...prev, { role: 'assistant', text: assistantText, lang: langRef.current }]);
+        if (turnRoleRef.current !== 'assistant') assistantTurnRef.current = '';
+        turnRoleRef.current = 'assistant';
+        assistantTurnRef.current = `${assistantTurnRef.current} ${assistantText}`.trim();
+        const reply = assistantTurnRef.current;
+        if (!isOwnerRef.current && !showVerifyRef.current) {
+          if ((claimPendingRef.current && ASKS_FOR_CODE.test(reply)) || NAMES_VERIFY_CODE.test(reply)) {
+            openVerifyBox(350);
+          }
+        }
       }
     },
   });
+
+  // Opens the owner code box (keyboard comes up with it). Safe to call more than once.
+  function openVerifyBox(delay = 0) {
+    claimPendingRef.current = false;
+    if (claimTimerRef.current) {
+      window.clearTimeout(claimTimerRef.current);
+      claimTimerRef.current = null;
+    }
+    if (isOwnerRef.current) return;
+    const open = () => {
+      if (isOwnerRef.current) return;
+      setVerifyError(null);
+      setVerifyGranted(false);
+      setShowVerifyModal(true);
+    };
+    if (delay > 0) {
+      claimTimerRef.current = window.setTimeout(open, delay);
+    } else {
+      open();
+    }
+  }
+
+  useEffect(() => {
+    isOwnerRef.current = isOwner;
+    if (isOwner) byeHandledRef.current = false;
+  }, [isOwner]);
+
+  useEffect(() => {
+    showVerifyRef.current = showVerifyModal;
+    if (!showVerifyModal) {
+      verifyInputRef.current?.blur();
+      return;
+    }
+    // Put the cursor in the code box as soon as it appears (and again after its pop-in animation),
+    // so the phone keyboard opens by itself and stays open.
+    const focusBox = () => {
+      const el = verifyInputRef.current;
+      if (el && document.activeElement !== el) el.focus({ preventScroll: true });
+    };
+    focusBox();
+    const ids = [60, 220, 480].map((ms) => window.setTimeout(focusBox, ms));
+    return () => ids.forEach((id) => window.clearTimeout(id));
+  }, [showVerifyModal]);
+
+  useEffect(
+    () => () => {
+      if (claimTimerRef.current) window.clearTimeout(claimTimerRef.current);
+    },
+    []
+  );
 
   // Tap handler: start immediately, ignore taps while connecting, and stop an active session.
   const handleVoiceTap = () => {
@@ -476,6 +606,14 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
     setInputQuery('');
     setMessages((prev) => [...prev, { role: 'user', text: query }]);
+
+    // "Okay bye Jarvis" while verified: owner mode switches off by itself
+    if (isOwner && isOwnerGoodbye(query)) {
+      commandInputRef.current?.blur();
+      await handleLockOwnerMode('goodbye');
+      return;
+    }
+
     setIsProcessing(true);
 
     // Keep an active Live session alive: typed input goes directly into the same session.
@@ -594,9 +732,15 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       const data = await res.json();
 
       if (res.ok && data.success) {
+        // Keyboard goes away first, a short "granted" tick shows, then the box closes.
+        verifyInputRef.current?.blur();
+        setVerifyGranted(true);
         setIsOwner(true);
-        setShowVerifyModal(false);
         setVerifyCode('');
+        window.setTimeout(() => {
+          setShowVerifyModal(false);
+          setVerifyGranted(false);
+        }, 650);
         const welcome = 'Owner credentials verified. Welcome back, Aliya Khan.';
         setMessages((prev) => [...prev, { role: 'assistant', text: welcome }]);
         const notified = notifyOwnerVerified();
@@ -606,6 +750,11 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         fetchAdminData();
       } else {
         setVerifyError(data.error || 'Verification failed. Access denied.');
+        // Keep the keyboard up so the code can be typed again straight away
+        window.setTimeout(() => {
+          verifyInputRef.current?.focus({ preventScroll: true });
+          verifyInputRef.current?.select();
+        }, 0);
       }
     } catch {
       setVerifyError('Verification pipeline disrupted.');
@@ -615,18 +764,27 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   };
 
   // Lock Owner Mode / Logout
-  const handleLockOwnerMode = async () => {
+  // reason 'goodbye': she said "okay bye Jarvis" - Jarvis says the goodbye itself in the live voice session.
+  async function handleLockOwnerMode(reason: 'button' | 'goodbye' = 'button') {
     try {
+      isOwnerRef.current = false;
       await fetch('/api/jarvis/logout', { method: 'POST' });
       setIsOwner(false);
       setShowAdminPanel(false);
+      if (reason === 'goodbye') {
+        const byeMsg = 'Owner mode switched off. Goodbye, Aliya. See you soon.';
+        setMessages((prev) => [...prev, { role: 'assistant', text: byeMsg }]);
+        const notified = notifyOwnerLocked();
+        if (!notified && !audioMuted) speak(byeMsg);
+        return;
+      }
       const lockedMsg = 'Owner mode locked. Standard visitor security reinstated.';
       setMessages((prev) => [...prev, { role: 'assistant', text: lockedMsg }]);
       if (!audioMuted) speak(lockedMsg);
     } catch (err) {
       console.error(err);
     }
-  };
+  }
 
   // Fetch Admin Data
   const fetchAdminData = async () => {
@@ -761,7 +919,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
           {/* Lock / Authenticate Status */}
           {isOwner ? (
             <button
-              onClick={handleLockOwnerMode}
+              onClick={() => handleLockOwnerMode()}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 text-xs hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/50 transition-colors cursor-pointer"
               title="Lock Owner Mode"
             >
@@ -1070,10 +1228,22 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={embedded
+            style={verifyLifted && kbBox
+              ? { left: kbBox.left, width: kbBox.width, bottom: kbBox.bottom }
+              : undefined}
+            className={verifyLifted
+              ? 'fixed px-2.5 pb-2.5 z-50 pointer-events-auto'
+              : embedded
               ? 'absolute bottom-[5.5rem] left-3 right-3 sm:left-auto sm:right-4 sm:w-[min(92vw,28rem)] z-40 pointer-events-auto'
               : 'absolute inset-0 z-40 bg-[#05070a]/90 backdrop-blur-md flex items-center justify-center p-4'}
           >
+            {/* With the phone keyboard open the box sits right above it, at normal phone size */}
+            <div
+              className="w-full flex justify-center"
+              style={verifyLifted && kbBox && kbBox.scale !== 1
+                ? { width: `${100 / kbBox.scale}%`, transform: `scale(${kbBox.scale})`, transformOrigin: '0 100%' }
+                : undefined}
+            >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -1104,10 +1274,20 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
                     CONFIDENTIAL ACCESS CODE
                   </label>
                   <input
+                    ref={verifyInputRef}
                     type="password"
                     autoFocus
                     value={verifyCode}
                     onChange={(e) => setVerifyCode(e.target.value)}
+                    onFocus={handleVerifyFocus}
+                    onBlur={handleVerifyBlur}
+                    enterKeyHint="go"
+                    autoComplete="off"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    readOnly={verifyGranted}
+                    style={{ touchAction: 'manipulation' }}
                     placeholder="••••••••••••"
                     className="w-full bg-[#05070a] border border-[#38e8ff]/40 focus:border-[#38e8ff] px-4 py-2.5 rounded text-sm text-[#38e8ff] tracking-widest outline-none font-mono"
                   />
@@ -1130,14 +1310,22 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
                   </button>
                   <button
                     type="submit"
-                    disabled={!verifyCode.trim() || isVerifying}
-                    className="px-5 py-2 rounded bg-[#38e8ff] text-[#05070a] font-bold text-xs hover:bg-[#38e8ff]/90 disabled:opacity-40"
+                    disabled={verifyGranted || !verifyCode.trim() || isVerifying}
+                    className={verifyGranted
+                      ? 'px-5 py-2 rounded bg-emerald-400 text-[#05070a] font-bold text-xs flex items-center gap-1.5'
+                      : 'px-5 py-2 rounded bg-[#38e8ff] text-[#05070a] font-bold text-xs hover:bg-[#38e8ff]/90 disabled:opacity-40'}
                   >
-                    {isVerifying ? 'VERIFYING...' : 'CONFIRM ACCESS'}
+                    {verifyGranted ? (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        ACCESS GRANTED
+                      </>
+                    ) : isVerifying ? 'VERIFYING...' : 'CONFIRM ACCESS'}
                   </button>
                 </div>
               </form>
             </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1307,7 +1495,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             {/* Lock Button */}
             <div className="pt-4 border-t border-[#38e8ff]/20 mt-4">
               <button
-                onClick={handleLockOwnerMode}
+                onClick={() => handleLockOwnerMode()}
                 className="w-full py-2.5 rounded border border-rose-500/50 bg-rose-500/10 text-rose-400 font-bold hover:bg-rose-500/20 text-xs flex items-center justify-center gap-2"
               >
                 <Lock className="w-4 h-4" />
