@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
+import { crispPixelRatio } from '@/lib/crispPixels';
 
 interface RealImageSlotProps {
   src: string;
@@ -33,12 +34,33 @@ export function RealImageSlot({
   const [isLoaded, setIsLoaded] = useState(false);
   // Already in the browser cache (e.g. the same photo opened in a card popup): show it at once, no fade.
   const [instant, setInstant] = useState(false);
+  const imgEl = useRef<HTMLImageElement | null>(null);
   const imgRef = useCallback((img: HTMLImageElement | null) => {
+    imgEl.current = img;
     if (img && img.complete && img.naturalWidth > 0) {
       setInstant(true);
       setIsLoaded(true);
     }
   }, []);
+  // Big original shown much smaller (e.g. a 1586px postcard in a 450px card): phone Chrome draws such a
+  // shrunk photo grainy/noisy. Giving the photo its own drawing layer makes Chrome shrink it smoothly, so it
+  // looks crystal clear at normal size (same file, same size and crop). Only for strongly shrunk photos;
+  // lightly shrunk ones are already sharp and stay as they are.
+  useEffect(() => {
+    const img = imgEl.current;
+    if (!img || !isLoaded) return;
+    const check = () => {
+      const r = img.getBoundingClientRect();
+      if (!img.naturalWidth || r.width < 2) return;
+      const scale = Math.max(r.width / img.naturalWidth, r.height / img.naturalHeight) * crispPixelRatio(4);
+      if (1 / scale > 1.8) img.style.setProperty('will-change', 'transform', 'important');
+      else img.style.removeProperty('will-change');
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [isLoaded, src]);
+
   // Card photos are already small 800px WebP files: serve them as they are, so a card and its popup
   // use the exact same file (the popup opens instantly from cache instead of downloading a new size).
   // Big banners (wider than 1200) still go through Next's resizer.
