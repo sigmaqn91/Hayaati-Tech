@@ -52,6 +52,7 @@ export function TimelineSection() {
   return (
     <section
       id="timeline"
+      data-active-era={currentEra.era}
       aria-label={t.timeline.title}
       className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-[#1e293b]"
     >
@@ -70,7 +71,7 @@ export function TimelineSection() {
       </div>
 
       {/* Era Navigation Selector (2030 -> 2035 -> 2050) */}
-      <div className="flex flex-wrap items-center gap-3 mb-10 pb-4 border-b border-[#1e293b]">
+      <div data-tour="era-tabs" className="flex flex-wrap items-center gap-3 mb-10 pb-4 border-b border-[#1e293b]">
         {timelineEras.map((era, index) => {
           const isActive = index === selectedEraIndex;
           const localizedTitle = content.eras[era.id]?.title || '';
@@ -79,6 +80,7 @@ export function TimelineSection() {
             <button
               key={era.id}
               onClick={() => setSelectedEraIndex(index)}
+              aria-pressed={isActive}
               className={`flex items-center gap-2.5 px-5 py-3 min-h-[44px] font-mono text-xs uppercase tracking-wider transition-all border cursor-pointer ${
                 isActive
                   ? 'eb-tab-active bg-[#38e8ff]/10 border-[#38e8ff] text-[#38e8ff] shadow-[0_0_12px_rgba(56,232,255,0.2)]'

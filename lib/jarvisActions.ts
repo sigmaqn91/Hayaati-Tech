@@ -8,6 +8,8 @@ import { placesData } from '@/data/places';
 import { RATED_STORAGE_KEY } from '@/lib/ratingCatalog';
 import type { ContentSchema, SupportedLanguage } from '@/locales/types';
 import { JARVIS_SECTIONS, JARVIS_TECH_CATEGORIES, JARVIS_ERAS } from '@/lib/jarvisTools';
+import { describeScreen, glideTo, glideToElement, nextFrames, NAV_OFFSET } from '@/lib/jarvisScreen';
+import { runTour } from '@/lib/jarvisTour';
 
 export type JarvisActionResult = { ok: boolean; done?: string; error?: string; [key: string]: unknown };
 
@@ -82,18 +84,12 @@ export function findCard(query: string, content: ContentSchema): CardRef | null 
   return bestScore >= 0.6 ? best : null;
 }
 
-// Next sections glide smoothly so the visitor sees the way down. Only very long jumps (more than about three
-// screens, e.g. top of page to contact) go most of the way at once, so the phone never has to draw
-// many photos and animations in between (that is what makes a long smooth scroll stutter).
-const scrollToId = (id: string) => {
-  const el = document.getElementById(id);
+// Calm glide to a section, just under the navbar; resolves when the page has arrived.
+const scrollToId = async (id: string, selector?: string) => {
+  const el = (selector && document.querySelector(selector)) || document.getElementById(id);
   if (!el) return false;
-  const target = el.getBoundingClientRect().top + window.scrollY;
-  const glide = window.innerHeight * 0.6;
-  if (Math.abs(target - window.scrollY) > window.innerHeight * 3) {
-    window.scrollTo({ top: target + (target > window.scrollY ? -glide : glide), behavior: 'instant' as ScrollBehavior });
-  }
-  requestAnimationFrame(() => window.scrollTo({ top: target, behavior: 'smooth' }));
+  if (id === 'hero') await glideTo(0);
+  else await glideToElement(el);
   return true;
 };
 
@@ -111,7 +107,12 @@ const str = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.
 const asList = (v: unknown): string[] | undefined =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string' && x.trim() !== '').slice(0, 40) : undefined;
 
-export function runJarvisAction(name: string, args: Record<string, unknown> | undefined, ctx: JarvisActionContext): JarvisActionResult {
+/** Runs one action and resolves once the page has finished moving, with what is now on screen. */
+export async function runJarvisAction(
+  name: string,
+  args: Record<string, unknown> | undefined,
+  ctx: JarvisActionContext
+): Promise<JarvisActionResult> {
   const a = args || {};
   try {
     switch (name) {
@@ -119,22 +120,18 @@ export function runJarvisAction(name: string, args: Record<string, unknown> | un
         const section = String(a.section || '');
         if (!(JARVIS_SECTIONS as readonly string[]).includes(section)) return { ok: false, error: 'unknown section' };
         emit('jarvis:close-popups');
-        return scrollToId(section) ? { ok: true, done: `scrolled to ${section}` } : { ok: false, error: 'section not on page' };
+        return (await scrollToId(section))
+          ? { ok: true, done: `scrolled to ${section}`, screen: describeScreen() }
+          : { ok: false, error: 'section not on page' };
       }
       case 'scroll_page': {
         const dir = String(a.direction || 'down');
-        const h = window.innerHeight * 0.8;
-        if (dir === 'top') {
-          if (window.scrollY > window.innerHeight * 1.2) window.scrollTo({ top: window.innerHeight * 0.6, behavior: 'instant' as ScrollBehavior });
-          requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
-        }
-        else if (dir === 'bottom') {
-          const end = document.documentElement.scrollHeight - window.innerHeight;
-          window.scrollTo({ top: Math.max(0, end - window.innerHeight * 0.6), behavior: 'instant' as ScrollBehavior });
-          requestAnimationFrame(() => window.scrollTo({ top: end, behavior: 'smooth' }));
-        }
-        else window.scrollBy({ top: dir === 'up' ? -h : h, behavior: 'smooth' });
-        return { ok: true, done: `scrolled ${dir}` };
+        const h = (window.innerHeight - NAV_OFFSET) * 0.8;
+        if (dir === 'top') await glideTo(0);
+        else if (dir === 'bottom') await glideTo(document.documentElement.scrollHeight);
+        else await glideTo(window.scrollY + (dir === 'up' ? -h : h));
+        await nextFrames();
+        return { ok: true, done: `scrolled ${dir}`, screen: describeScreen() };
       }
       case 'open_card': {
         const card = findCard(String(a.card || ''), ctx.content);
@@ -148,16 +145,25 @@ export function runJarvisAction(name: string, args: Record<string, unknown> | un
         if (!(JARVIS_ERAS as readonly string[]).includes(era)) return { ok: false, error: 'unknown era' };
         emit('jarvis:close-popups');
         emit('jarvis:show-era', { era });
-        scrollToId('timeline');
-        return { ok: true, done: `showing era ${era}` };
+        await nextFrames();
+        await scrollToId('timeline', '[data-tour="era-tabs"]');
+        const screen = describeScreen();
+        return screen.era_shown === era
+          ? { ok: true, done: `showing era ${era}`, screen }
+          : { ok: false, error: `era ${era} did not open`, screen };
       }
       case 'show_tech_category': {
         const category = String(a.category || '');
         if (!(JARVIS_TECH_CATEGORIES as readonly string[]).includes(category)) return { ok: false, error: 'unknown category' };
         emit('jarvis:close-popups');
         emit('jarvis:show-category', { category });
-        scrollToId('tech');
-        return { ok: true, done: `showing catalogue category ${category}` };
+        await nextFrames();
+        await scrollToId('tech', '[data-tour="tech-tabs"]');
+        const shown = document.getElementById('tech')?.getAttribute('data-active-category');
+        const screen = describeScreen();
+        return shown === category
+          ? { ok: true, done: `showing catalogue category ${category}`, screen }
+          : { ok: false, error: `category ${category} did not open`, screen };
       }
       case 'change_language': {
         const code = String(a.language || '');
@@ -213,13 +219,17 @@ export function runJarvisAction(name: string, args: Record<string, unknown> | un
         const detail: FormFill = { form, fields };
         emit('jarvis:fill-form', detail);
         if (!detail.handled) return { ok: false, error: 'the form is not available on the page' };
-        scrollToId(form);
+        await scrollToId(form);
         return {
           ok: true,
           done: `${form} form filled: ${Object.keys(fields).join(', ')}`,
           note: 'not sent; the visitor must check it and press the send button',
         };
       }
+      case 'tour':
+        return (await runTour(String(a.action || 'next'), typeof a.target === 'string' ? a.target : undefined)) as JarvisActionResult;
+      case 'whats_on_screen':
+        return { ok: true, ...describeScreen() };
       case 'close_popup': {
         emit('jarvis:close-popups');
         return { ok: true, done: 'popup closed' };

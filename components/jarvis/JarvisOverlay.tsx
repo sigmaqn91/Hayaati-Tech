@@ -664,12 +664,40 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       }
 
       const actions: Array<{ name: string; args?: Record<string, unknown> }> = Array.isArray(data.actions) ? data.actions : [];
+      let screenResult: { name: string; result: Record<string, unknown> } | null = null;
       if (res.ok && actions.length) {
-        const results = actions.map((a) => runJarvisAction(a.name, a.args, { setLanguage, content }));
-        if (!data.reply) {
+        const results = [];
+        for (const a of actions) {
+          const result = await runJarvisAction(a.name, a.args, { setLanguage, content });
+          results.push(result);
+          if (result.ok && (a.name === 'tour' || a.name === 'whats_on_screen')) screenResult = { name: a.name, result };
+        }
+        if (!data.reply && !screenResult) {
           const failed = results.find((r) => !r.ok);
           data.reply = failed ? `Sorry, I could not do that (${failed.error}).` : 'Done.';
         }
+      }
+
+      // Tour / screen reading in typed chat: Jarvis is told what is on the screen now and describes only that.
+      if (res.ok && screenResult) {
+        if (data.reply) setMessages((prev) => [...prev, { role: 'assistant', text: data.reply }]);
+        const follow = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: query.slice(0, 400),
+            history: [...historyPayload, ...(data.reply ? [{ role: 'model', text: data.reply }] : [])].slice(-6),
+            language,
+            screen: JSON.stringify({ tool: screenResult.name, ...screenResult.result }),
+          }),
+          signal: requestController.signal,
+        }).catch(() => null);
+        const followData = follow ? await follow.json().catch(() => ({})) : {};
+        data = {
+          ...data,
+          reply: follow?.ok && followData.reply ? followData.reply : data.reply ? '' : 'Done.',
+        };
+        if (!data.reply) return;
       }
 
       if (res.ok && data.reply) {

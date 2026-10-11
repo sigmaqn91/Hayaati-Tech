@@ -186,7 +186,10 @@ interface UseJarvisVoiceOptions {
   /** Live facts about the page (hero text, sections, photos) read at activation time. */
   getSiteSnapshot?: () => string;
   /** Runs a website action Jarvis asked for (lib/jarvisTools.ts) and returns its result for Jarvis. */
-  onToolCall?: (name: string, args: Record<string, unknown> | undefined) => Record<string, unknown>;
+  onToolCall?: (
+    name: string,
+    args: Record<string, unknown> | undefined
+  ) => Record<string, unknown> | Promise<Record<string, unknown>>;
 }
 
 export function useJarvisVoice({
@@ -287,6 +290,9 @@ export function useJarvisVoice({
   }, [onAssistantTextReady]);
 
   const onToolCallRef = useRef(onToolCall);
+  // Website actions run one after another, each only after Jarvis has finished saying what he is about to do.
+  const toolQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const cancelledToolIdsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     onToolCallRef.current = onToolCall;
   }, [onToolCall]);
@@ -466,6 +472,20 @@ export function useJarvisVoice({
   // Handle a genuine server-side Live API interruption/barge-in event.
   // Do not infer interruptions from microphone volume; Gemini Live's VAD is
   // responsible for deciding whether incoming activity is user speech.
+  /** Resolves when the Jarvis audio already queued has finished playing (plus a short, natural pause). */
+  const waitForSpeechToFinish = useCallback(async (sessionId: number) => {
+    const pause = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
+    await pause(120); // audio chunks sent just before the tool call
+    for (let i = 0; i < 240; i++) {
+      if (liveSessionIdRef.current !== sessionId) return;
+      const ctx = playbackContextRef.current;
+      const left = ctx ? nextPlayTimeRef.current - ctx.currentTime : 0;
+      if (left <= 0.03) break;
+      await pause(Math.min(250, left * 1000 + 20));
+    }
+    await pause(350);
+  }, []);
+
   const handleInterruption = useCallback(() => {
     cancelSpeech();
     turnCompleteRef.current = true;
@@ -859,23 +879,35 @@ export function useJarvisVoice({
                 handleInterruption();
               }
 
-              // Jarvis asked to do something on the website: do it, then tell him how it went.
+              // Jarvis asked to do something on the website. It runs after the words he already said have
+              // finished playing (so the screen changes right after he says it, not seconds before), the page
+              // settles, and then he is told what is on the screen now, so he only describes what is visible.
+              const cancelled = msg.toolCallCancellation?.ids;
+              if (Array.isArray(cancelled)) cancelled.forEach((id: string) => cancelledToolIdsRef.current.add(String(id)));
               const calls = msg.toolCall?.functionCalls;
               if (Array.isArray(calls) && calls.length) {
-                const functionResponses = calls.map((call: any) => {
-                  let response: Record<string, unknown>;
-                  try {
-                    response = onToolCallRef.current?.(String(call.name || ''), call.args) || { ok: false, error: 'not available' };
-                  } catch {
-                    response = { ok: false, error: 'action failed' };
+                toolQueueRef.current = toolQueueRef.current.then(async () => {
+                  await waitForSpeechToFinish(sessionId);
+                  if (liveSessionIdRef.current !== sessionId) return;
+                  const functionResponses = [];
+                  for (const call of calls) {
+                    if (cancelledToolIdsRef.current.has(String(call.id))) continue;
+                    let response: Record<string, unknown>;
+                    try {
+                      response =
+                        (await onToolCallRef.current?.(String(call.name || ''), call.args)) || { ok: false, error: 'not available' };
+                    } catch {
+                      response = { ok: false, error: 'action failed' };
+                    }
+                    functionResponses.push({ id: call.id, name: call.name, response });
                   }
-                  return { id: call.id, name: call.name, response };
+                  if (!functionResponses.length || liveSessionIdRef.current !== sessionId) return;
+                  try {
+                    liveSessionRef.current?.sendToolResponse({ functionResponses });
+                  } catch (error) {
+                    console.warn('[Gemini Live Tool Response Error]:', error);
+                  }
                 });
-                try {
-                  liveSessionRef.current?.sendToolResponse({ functionResponses });
-                } catch (error) {
-                  console.warn('[Gemini Live Tool Response Error]:', error);
-                }
               }
 
               if (msg.serverContent?.turnComplete) {

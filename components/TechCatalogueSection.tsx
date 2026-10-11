@@ -83,6 +83,7 @@ export function TechCatalogueSection() {
   return (
     <section
       id="tech"
+      data-active-category={selectedCategory}
       aria-label={t.tech.title}
       className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-[#1e293b]"
     >
@@ -101,13 +102,14 @@ export function TechCatalogueSection() {
       </div>
 
       {/* Category Tabs (relative z-0 keeps this scroll row from forcing the whole catalogue below it into one huge GPU layer) */}
-      <div className="relative z-0 flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-thin">
+      <div data-tour="tech-tabs" className="relative z-0 flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-thin">
         {categories.map((cat) => {
           const isActive = selectedCategory === cat.id;
           return (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
+              aria-pressed={isActive}
               className={`shrink-0 px-4 py-2.5 min-h-[44px] text-xs font-mono uppercase tracking-wider transition-all border cursor-pointer ${
                 isActive
                   ? 'bg-[#38e8ff]/10 border-[#38e8ff] text-[#38e8ff] shadow-[0_0_12px_rgba(56,232,255,0.2)]'

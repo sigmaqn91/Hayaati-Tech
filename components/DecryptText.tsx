@@ -60,5 +60,6 @@ export function DecryptText({ text, className = '', speed = 25 }: DecryptTextPro
     return () => clearInterval(interval);
   }, [text, speed]);
 
-  return <span className={className}>{displayText}</span>;
+  // data-final: the finished words, so Jarvis reads the heading correctly even mid-animation
+  return <span className={className} data-final={text}>{displayText}</span>;
 }
