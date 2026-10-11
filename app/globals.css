@@ -1192,6 +1192,27 @@ html.bg-paused .ab-bg *, html.bg-paused .ab-floor::before, html.bg-paused .ab-ca
   .ab-bg *, .ab-floor::before, .ab-card::after, .ab-card > .beam > .beam__ray { animation: none; }
 }
 
+/* About details card: dark glass with soft pool-water light (caustics) moving behind the text, plus a slow glass shine.
+   Only GPU transforms/opacity are animated; the texture is one small tileable image. */
+.ab-water-card { isolation: isolate; }
+.ab-water { position: absolute; inset: 0; margin: 0 !important; overflow: hidden; pointer-events: none; z-index: -1;
+  -webkit-mask: radial-gradient(ellipse 120% 110% at 30% 20%, #000 35%, rgba(0, 0, 0, 0.45) 100%);
+  mask: radial-gradient(ellipse 120% 110% at 30% 20%, #000 35%, rgba(0, 0, 0, 0.45) 100%); }
+.ab-water > span { position: absolute; display: block; }
+.ab-water-a, .ab-water-b { inset: -50%; background: url('/images/fx/caustics.png') repeat; mix-blend-mode: screen; will-change: transform; }
+.ab-water-a { background-size: 460px 460px; opacity: 0.16; animation: ab-water-a 26s ease-in-out infinite alternate; }
+.ab-water-b { background-size: 620px 620px; opacity: 0.11; animation: ab-water-b 34s ease-in-out infinite alternate; }
+@keyframes ab-water-a { from { transform: translate3d(0, 0, 0) rotate(0.001deg); } to { transform: translate3d(-140px, 90px, 0) rotate(0.001deg); } }
+@keyframes ab-water-b { from { transform: translate3d(0, 0, 0) scale(1.04); } to { transform: translate3d(160px, -110px, 0) scale(1); } }
+.ab-water-shine { top: -30%; bottom: -30%; left: -50%; width: 38%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.05) 42%, rgba(190, 245, 255, 0.10) 50%, rgba(255, 255, 255, 0.05) 58%, transparent);
+  transform: skewX(-16deg); animation: ab-water-shine 12s ease-in-out infinite; will-change: transform; }
+@keyframes ab-water-shine { 0%, 55% { transform: translateX(0) skewX(-16deg); opacity: 0; } 60% { opacity: 1; } 95% { opacity: 1; } 100% { transform: translateX(480%) skewX(-16deg); opacity: 0; } }
+.ab-water-card::before { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 38%); }
+html.bg-paused .ab-water > span { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .ab-water > span { animation: none; } }
+
 /* Era milestone cards: only the card itself is animated (About-section style).
    The text area under each photo gets a live high-tech background behind dark glass,
    and the card border gets the About light beam (ab-card). Section/page background untouched. */

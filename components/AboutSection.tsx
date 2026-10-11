@@ -86,8 +86,14 @@ export function AboutSection() {
         </div>
 
         {/* Bio & Dossier Details */}
-        <div className="ab-card ab-glass relative p-6 sm:p-8 border border-[#1e293b] space-y-5 hud-frame">
+        <div className="ab-card ab-glass ab-water-card relative p-6 sm:p-8 border border-[#1e293b] space-y-5 hud-frame">
           <Beam />
+          {/* Soft moving pool-water light and glass shine behind the text */}
+          <div className="ab-water" aria-hidden="true">
+            <span className="ab-water-a" />
+            <span className="ab-water-b" />
+            <span className="ab-water-shine" />
+          </div>
           <div className="flex items-center justify-between border-b border-[#1e293b] pb-4">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 bg-[#38e8ff]" />
