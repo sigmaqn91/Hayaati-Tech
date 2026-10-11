@@ -121,11 +121,19 @@ export function PlacesSection() {
                   className="w-full h-[210px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                 />
                 <div className={`pc-badge ${hudDisplay.variable} ${hudMono.variable} absolute top-2 right-2 px-2.5 py-0.5 text-[10px] flex items-center gap-1.5`}>
+                  <span className="pc-badge__fx pc-badge__sheen" aria-hidden="true" />
+                  <span className="pc-badge__fx pc-badge__tint" aria-hidden="true" />
+                  <span className="pc-badge__fx pc-badge__glow-a" aria-hidden="true" />
+                  <span className="pc-badge__fx pc-badge__glow" aria-hidden="true" />
                   <span className="pc-badge__key">{t.common.year}</span>
                   <span className="pc-badge__sep" aria-hidden="true" />
                   <span className="pc-badge__year">{place.year}</span>
                 </div>
                 <div className={`pc-badge ${hudDisplay.variable} ${hudMono.variable} absolute bottom-2 left-2 px-2 py-0.5 text-[10px] flex items-center gap-1.5`}>
+                  <span className="pc-badge__fx pc-badge__sheen" aria-hidden="true" />
+                  <span className="pc-badge__fx pc-badge__tint" aria-hidden="true" />
+                  <span className="pc-badge__fx pc-badge__glow-a" aria-hidden="true" />
+                  <span className="pc-badge__fx pc-badge__glow" aria-hidden="true" />
                   <span className="pc-badge__dot w-1.5 h-1.5 rounded-full bg-[#38e8ff]" />
                   <span className="pc-badge__tag">{t.places.horizonLabel}</span>
                   <span className="pc-badge__sep" aria-hidden="true" />

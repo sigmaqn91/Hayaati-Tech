@@ -12,7 +12,7 @@ import type { ProjectArtKey } from '@/data/projects';
 const svgProps = {
   viewBox: '0 0 400 250',
   preserveAspectRatio: 'xMidYMid slice' as const,
-  className: 'absolute inset-0 w-full h-full',
+  className: 'hp-art absolute inset-0 w-full h-full',
   'aria-hidden': true,
 };
 
@@ -601,6 +601,9 @@ export function ProjectArt({ art }: { art?: ProjectArtKey }) {
 
 /** Keyframes used by the banners and the cards. Rendered once by ProjectsSection. */
 export const projectArtCss = `
+/* Each drawing is sealed off (its size never depends on what is inside, and an outer <svg> already clips to its
+   box), so its many moving dots only ever make the browser recheck and redraw that one drawing, never the page. */
+.hp-art{contain:strict}
 .hp-spin-slow{animation:hp-spin 60s linear infinite;transform-box:fill-box;transform-origin:center}
 .hp-spin-rev{animation:hp-spin 40s linear infinite reverse;transform-box:fill-box;transform-origin:center}
 @keyframes hp-spin{to{transform:rotate(360deg)}}

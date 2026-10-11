@@ -546,6 +546,9 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
         return;
       }
       const t = typeof now === 'number' ? now : performance.now();
+      // 60 FPS cap: 90/120 Hz phones ask for a frame every 8-11 ms; the orb is drawn at most every ~16.7 ms
+      // (exactly like a 60 Hz screen, where nothing changes), which halves its GPU work there.
+      if (lastFrameAt && t - lastFrameAt < 14.5) return;
       if (lastFrameAt) {
         perfAcc += Math.min(t - lastFrameAt, 100);
         perfFrames++;

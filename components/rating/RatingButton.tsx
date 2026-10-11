@@ -15,6 +15,7 @@ export function RatingButton() {
       className="lang-btn rate-btn flex items-center gap-1.5 px-2.5 py-1.5 min-h-[44px] text-xs font-mono text-slate-100 hover:text-white bg-[#08141c] border border-[#38e8ff]/55 hover:border-[#38e8ff] cursor-pointer"
     >
       <Beam />
+      <span className="lang-btn__sheen" aria-hidden="true" />
       <Star className="rate-btn__star w-3.5 h-3.5 text-[#38e8ff] fill-[#38e8ff]/35" />
       <span className="uppercase tracking-wider">Rate</span>
     </button>

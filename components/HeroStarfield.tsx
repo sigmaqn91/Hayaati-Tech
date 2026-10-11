@@ -78,10 +78,13 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
       const parentWidth = parent?.clientWidth || window.innerWidth;
       const parentHeight = parent?.clientHeight || window.innerHeight;
 
+      const dpr = getDpr();
+      // Phone browsers fire "resize" every time the address bar slides in/out while scrolling. The hero keeps its
+      // size then, so the canvas is no longer thrown away and rebuilt (that was a hitch on every scroll-up).
+      if (width === parentWidth && height === parentHeight && canvas.width === Math.round(parentWidth * dpr)) return;
       width = parentWidth;
       height = parentHeight;
 
-      const dpr = getDpr();
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       canvas.style.width = `${width}px`;

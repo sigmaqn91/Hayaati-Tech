@@ -18,9 +18,13 @@
 
 import { useEffect } from 'react';
 
-const ZONES = 'section, footer, .ms-card, .pc-card, .ab-card, .hp-card';
+// Small zones that hold the looping animations (see the matching rule in globals.css). Sections are watched only
+// for their own background ::before / ::after, so turning one on or off no longer re-checks its whole content.
+const ZONES = 'section, footer, .ms-card, .pc-card, .ab-card, .hp-card, .eb-aura, .ab-bg, .hp-grid-bg, .eb-tab-active > .beam';
 const ON = 'anim-on';
 const OFF = 'anim-off';
+const SECTION = 'section:not(#hero)';
+const SEC_ON = 'sec-on';
 
 export function AnimationGovernor() {
   useEffect(() => {
@@ -30,6 +34,14 @@ export function AnimationGovernor() {
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
+          // Sections below the hero use their own class name (sec-on): the browser keeps one "what to re-check"
+          // list per class name, and anim-on/anim-off is the zones' name, so a section flipping anim-on made it
+          // re-check all ~3000 elements inside (a hitch every time a section came into view). sec-on only
+          // affects the section's own background layers.
+          if (e.target.matches(SECTION)) {
+            e.target.classList.toggle(SEC_ON, e.isIntersecting);
+            continue;
+          }
           e.target.classList.toggle(ON, e.isIntersecting);
           e.target.classList.toggle(OFF, !e.isIntersecting);
         }
@@ -77,11 +89,39 @@ export function AnimationGovernor() {
       },
       { rootMargin: '150% 0px 150% 0px' }
     );
+    // Photo pre-decode: a phone keeps only a limited number of big photos unpacked in memory, so photos the visitor
+    // scrolled past are thrown out and had to be unpacked again (2-3 MB originals) at the very moment they came back
+    // on screen, which is the delay when scrolling back up. Now each photo is unpacked about one screen before it
+    // appears, in the background. Same file, same pixels: only the moment of unpacking moves earlier.
+    const decoded = new WeakMap<HTMLImageElement, number>();
+    const predecode = (img: HTMLImageElement) => {
+      const now = performance.now();
+      if (now - (decoded.get(img) || -1e9) < 4000) return;
+      decoded.set(img, now);
+      img.decode().catch(() => {});
+    };
+    const decodeIo = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const img = e.target as HTMLImageElement;
+          if (img.complete && img.naturalWidth) predecode(img);
+          else img.addEventListener('load', () => predecode(img), { once: true });
+        }
+      },
+      { rootMargin: '100% 0px 100% 0px' }
+    );
+    const decodeWatched = new WeakSet<Element>();
     const scanImages = () => {
       document.querySelectorAll<HTMLImageElement>('img[loading="lazy"]').forEach((img) => {
         if (watched.has(img)) return;
         watched.add(img);
         imgIo.observe(img);
+      });
+      document.querySelectorAll<HTMLImageElement>('main img').forEach((img) => {
+        if (decodeWatched.has(img)) return;
+        decodeWatched.add(img);
+        decodeIo.observe(img);
       });
     };
     // Only after the page itself has finished loading, so photos never compete with the hero.
@@ -110,6 +150,7 @@ export function AnimationGovernor() {
       io.disconnect();
       smilIo.disconnect();
       imgIo.disconnect();
+      decodeIo.disconnect();
       window.removeEventListener('load', onLoad);
     };
   }, []);

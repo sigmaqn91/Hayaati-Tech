@@ -57,8 +57,16 @@ export function RealImageSlot({
       else img.style.removeProperty('will-change');
     };
     check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    // Only width changes can change the shrink factor. Phone address-bar slides (height only) fire "resize" on
+    // every scroll direction change; skipping them saves a layout read per photo at exactly that moment.
+    let lastW = window.innerWidth;
+    const onResize = () => {
+      if (window.innerWidth === lastW) return;
+      lastW = window.innerWidth;
+      check();
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, [isLoaded, src]);
 
   // Card photos are already small 800px WebP files: serve them as they are, so a card and its popup

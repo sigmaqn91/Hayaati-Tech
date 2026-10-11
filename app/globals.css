@@ -118,8 +118,9 @@ body > * { transition: opacity 0.35s ease; }
   width: 55%;
   background: linear-gradient(105deg, transparent, rgba(120, 240, 255, 0.12) 50%, transparent);
   transform: translateX(-130%);
-  will-change: transform;
-  animation: hp-sheen 6s ease-in-out infinite;
+  /* No animation: the Projects art defines its own "hp-sheen" (a background-position move) which always won over
+     the one below, and moving a full-size background does not move anything, so this sheen has always sat still
+     outside the glass, invisible. It only made the hero redraw every frame; same picture without it. */
 }
 .hero-panel__glass::after {
   content: '';
@@ -197,14 +198,29 @@ body > * { transition: opacity 0.35s ease; }
   inset: -40px 0 0 -40px;
   width: calc(100% + 80px);
   height: calc(100% + 80px);
+  -webkit-mask-image: radial-gradient(ellipse 80% 90% at 30% 40%, #000 20%, transparent 80%);
+  mask-image: radial-gradient(ellipse 80% 90% at 30% 40%, #000 20%, transparent 80%);
+}
+/* The grid lines drift 44px every 9s under a fixed soft mask (until now via the Projects art's background-position
+   "hp-grid", which won the name clash). Same drift, same jump at the loop, but the lines sit on their own layer that
+   the GPU slides, so the hero panel is not repainted every frame. 40px up/left extra (one tile, so the lines stay on
+   the same pixels) keeps the slid layer covering the visible glass. */
+.hero-panel__holo-grid::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: -40px;
+  right: 0;
+  bottom: 0;
   background-image:
     linear-gradient(rgba(56, 232, 255, 0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(56, 232, 255, 0.07) 1px, transparent 1px);
   background-size: 40px 40px;
-  -webkit-mask-image: radial-gradient(ellipse 80% 90% at 30% 40%, #000 20%, transparent 80%);
-  mask-image: radial-gradient(ellipse 80% 90% at 30% 40%, #000 20%, transparent 80%);
-  will-change: transform;
-  animation: hp-grid 9s linear infinite;
+  animation: hero-holo-grid 9s linear infinite;
+}
+@keyframes hero-holo-grid {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(44px, 44px, 0); }
 }
 .hero-panel__holo-aurora {
   position: absolute;
@@ -228,8 +244,9 @@ body > * { transition: opacity 0.35s ease; }
   background: linear-gradient(180deg, transparent, rgba(56, 232, 255, 0.07) 70%, rgba(150, 245, 255, 0.22) 100%);
   border-bottom: 1px solid rgba(150, 245, 255, 0.25);
   opacity: 0;
-  will-change: transform, opacity;
-  animation: hp-scan 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  /* No animation: the "hp-scan" that reached this line (Projects art's, it won the name clash) only moved `top`
+     and never its opacity, so the line has always stayed fully transparent while re-laying-out the hero every
+     frame. Same picture without it. */
 }
 @keyframes hp-grid {
   from { transform: translate3d(0, 0, 0); }
@@ -247,11 +264,10 @@ body > * { transition: opacity 0.35s ease; }
   85%, 100% { transform: translate3d(0, 380%, 0); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-panel__holo-grid, .hero-panel__holo-aurora, .hero-panel__holo-scan { animation: none; }
+  .hero-panel__holo-grid::before, .hero-panel__holo-aurora { animation: none; }
 }
-html.bg-paused .hero-panel__holo-grid,
-html.bg-paused .hero-panel__holo-aurora,
-html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
+html.bg-paused .hero-panel__holo-grid::before,
+html.bg-paused .hero-panel__holo-aurora { animation-play-state: paused; }
 
 @property --hp-a {
   syntax: '<angle>';
@@ -366,9 +382,28 @@ html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
   border-radius: 6px;
   transform: scale(1.05, 1.03);
   transform-origin: 100% 50%; /* grows toward the left, away from the menu button */
-  box-shadow: 0 0 12px rgba(56, 232, 255, 0.35), inset 0 0 10px rgba(56, 232, 255, 0.12);
-  animation: lang-pulse 2.8s ease-in-out infinite;
   transition: color 0.2s ease, border-color 0.2s ease;
+}
+/* Pulse: the same two glows as before (dim and bright), each on its own layer behind the text; one fades out while
+   the other fades in (opacity only, GPU), instead of the processor redrawing the header (and with it the whole page)
+   on every frame. spread 1px puts each glow's outer edge exactly on the button's outer border, like before. */
+.lang-btn::before,
+.lang-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 5px;
+  pointer-events: none;
+}
+.lang-btn::before {
+  box-shadow: 0 0 10px 1px rgba(56, 232, 255, 0.28), inset 0 0 8px rgba(56, 232, 255, 0.1);
+  animation: lang-pulse-a 2.8s ease-in-out infinite;
+}
+.lang-btn::after {
+  box-shadow: 0 0 20px 1px rgba(56, 232, 255, 0.55), inset 0 0 14px rgba(56, 232, 255, 0.2);
+  opacity: 0;
+  animation: lang-pulse-b 2.8s ease-in-out infinite;
 }
 .lang-btn > .beam {
   inset: -1px;
@@ -380,38 +415,51 @@ html.bg-paused .hero-panel__holo-scan { animation-play-state: paused; }
   background: conic-gradient(from 0deg at 50% 50%, transparent 0deg 220deg, rgba(56, 232, 255, 0.4) 290deg, #38e8ff 335deg, #ffffff 357deg, transparent 360deg);
   animation: beam-spin 3.2s linear infinite;
 }
-.lang-btn::after {
-  content: '';
+.lang-btn__sheen {
   position: absolute;
   inset: 0;
   border-radius: inherit;
+  overflow: hidden;
   pointer-events: none;
-  background: linear-gradient(105deg, transparent 40%, rgba(150, 245, 255, 0.22) 50%, transparent 60%);
-  background-size: 260% 100%;
-  background-position: 160% 0;
-  animation: lang-sheen 3.6s ease-in-out infinite;
   z-index: 0;
+}
+/* Light sweep: the same 260%-wide gradient as before, slid by the GPU (translate) instead of being repainted
+   at a new background-position every frame. -98.46% / 36.92% of its width = background-position 160% / -60%. */
+.lang-btn__sheen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 260%;
+  background: linear-gradient(105deg, transparent 40%, rgba(150, 245, 255, 0.22) 50%, transparent 60%);
+  transform: translateX(-98.4615%);
+  animation: lang-sheen-x 3.6s ease-in-out infinite;
 }
 .lang-btn__globe { filter: drop-shadow(0 0 4px rgba(56, 232, 255, 0.9)); animation: lang-globe 2.8s ease-in-out infinite; }
 @media (hover: hover) {
   .lang-btn:hover { transform: scale(1.07, 1.05); }
 }
-/* The last shadow is fully transparent (draws nothing): it only keeps the glow's outer edge fixed at its largest
-   size, so the pulse no longer makes Chrome re-plan every layer of the whole page on every frame. */
-@keyframes lang-pulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(56, 232, 255, 0.28), inset 0 0 8px rgba(56, 232, 255, 0.1), 0 0 20px rgba(56, 232, 255, 0); }
-  50% { box-shadow: 0 0 20px rgba(56, 232, 255, 0.55), inset 0 0 14px rgba(56, 232, 255, 0.2), 0 0 20px rgba(56, 232, 255, 0); }
+@keyframes lang-pulse-a {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
-@keyframes lang-sheen {
-  0% { background-position: 160% 0; }
-  60%, 100% { background-position: -60% 0; }
+@keyframes lang-pulse-b {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+@keyframes lang-sheen-x {
+  0% { transform: translateX(-98.4615%); }
+  60%, 100% { transform: translateX(36.9231%); }
 }
 @keyframes lang-globe {
   0%, 100% { opacity: 0.85; }
   50% { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .lang-btn, .lang-btn::before, .lang-btn::after, .lang-btn__globe, .lang-btn > .beam > .beam__ray { animation: none; }
+  .lang-btn::before, .lang-btn::after, .lang-btn__sheen::before, .lang-btn__globe, .lang-btn > .beam > .beam__ray { animation: none; }
+  .lang-btn { box-shadow: 0 0 12px rgba(56, 232, 255, 0.35), inset 0 0 10px rgba(56, 232, 255, 0.12); }
+  .lang-btn::before, .lang-btn::after { display: none; }
 }
 
 /* =====================================================================
@@ -890,6 +938,7 @@ html.bg-paused .hero-panel__glass::before,
 html.bg-paused .hero-panel__runner::after,
 html.bg-paused .lang-btn,
 html.bg-paused .lang-btn::before,
+html.bg-paused .lang-btn__sheen::before,
 html.bg-paused .lang-btn::after,
 html.bg-paused .lang-btn > .beam > .beam__ray { animation-play-state: paused; }
 
@@ -1006,32 +1055,65 @@ html.bg-paused .pc-card > .beam > .beam__ray { animation-play-state: paused; }
 
 /* Labels over the postcard images: dark frosted HUD glass, Orbitron + JetBrains Mono, cyan accent,
    crisp corner brackets, divider ticks, slow edge glow and a shimmer sweep. */
-@keyframes pc-chip-glow {
-  /* last shadow is fully transparent: it only keeps the glow's outer edge fixed (see lang-pulse) */
-  0%, 100% { box-shadow: 0 0 6px rgba(56, 232, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 0 10px rgba(56, 232, 255, 0.07), 0 0 14px rgba(56, 232, 255, 0); border-color: rgba(56, 232, 255, 0.4); }
-  50% { box-shadow: 0 0 14px rgba(56, 232, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px rgba(56, 232, 255, 0.14), 0 0 14px rgba(56, 232, 255, 0); border-color: rgba(56, 232, 255, 0.8); }
+/* The chip's glow pulse, its shimmer and the dot's glow move with opacity/transform only (GPU): the brighter half
+   of the glow (border + shadows) fades in on .pc-badge__glow while the dim one fades out, the shimmer is the same 200%-wide gradient slid by
+   translate, the dark tint sits on top of it as before. Same picture, but the photo cards are no longer
+   repainted every frame. */
+@keyframes pc-chip-glow-o {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
-@keyframes pc-chip-sheen {
-  0%, 60% { background-position: 0 0, -150% 0; }
-  100% { background-position: 0 0, 250% 0; }
+@keyframes pc-chip-glow-a {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes pc-chip-sheen-x {
+  0%, 60% { transform: translateX(75%); }
+  100% { transform: translateX(-125%); }
 }
 @keyframes pc-dot-blink {
-  0%, 100% { opacity: 1; box-shadow: 0 0 8px #38e8ff, 0 0 8px rgba(56, 232, 255, 0); }
-  50% { opacity: 0.3; box-shadow: 0 0 0 transparent, 0 0 8px rgba(56, 232, 255, 0); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes pc-dot-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 .pc-badge {
   border: 1px solid rgba(56, 232, 255, 0.4);
   background-color: transparent;
-  background-image:
-    linear-gradient(160deg, rgba(10, 24, 44, 0.62) 0%, rgba(4, 10, 22, 0.5) 55%, rgba(8, 30, 48, 0.55) 100%),
-    linear-gradient(105deg, transparent 40%, rgba(150, 245, 255, 0.22) 50%, transparent 60%);
-  background-size: 100% 100%, 200% 100%;
-  background-repeat: no-repeat;
   -webkit-backdrop-filter: blur(10px) saturate(1.4);
   backdrop-filter: blur(10px) saturate(1.4);
   line-height: 1.6;
   white-space: nowrap;
-  animation: pc-chip-glow 3.2s ease-in-out infinite, pc-chip-sheen 5.5s ease-in-out infinite;
+}
+.pc-badge__fx { position: absolute; z-index: -1; pointer-events: none; }
+.pc-badge__sheen { inset: -1px; overflow: hidden; }
+.pc-badge__sheen::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 1px;
+  width: calc(200% - 4px);
+  background: linear-gradient(105deg, transparent 40%, rgba(150, 245, 255, 0.22) 50%, transparent 60%);
+  transform: translateX(75%);
+  animation: pc-chip-sheen-x 5.5s ease-in-out infinite;
+}
+.pc-badge__tint { inset: 0; background: linear-gradient(160deg, rgba(10, 24, 44, 0.62) 0%, rgba(4, 10, 22, 0.5) 55%, rgba(8, 30, 48, 0.55) 100%); }
+.pc-badge__glow-a {
+  inset: -1px;
+  border: 1px solid transparent;
+  box-shadow: 0 0 6px rgba(56, 232, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 0 10px rgba(56, 232, 255, 0.07);
+  animation: pc-chip-glow-a 3.2s ease-in-out infinite;
+}
+/* border: 0.667 over the chip's own 0.4 border = 0.8 at full strength, and exactly the old in-between values */
+.pc-badge__glow {
+  inset: -1px;
+  border: 1px solid rgba(56, 232, 255, 0.667);
+  box-shadow: 0 0 14px rgba(56, 232, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 14px rgba(56, 232, 255, 0.14);
+  opacity: 0;
+  animation: pc-chip-glow-o 3.2s ease-in-out infinite;
 }
 .pc-badge::before,
 .pc-badge::after {
@@ -1082,11 +1164,16 @@ html.bg-paused .pc-card > .beam > .beam__ray { animation-play-state: paused; }
   color: #eef6ff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
-.pc-badge__dot { flex-shrink: 0; animation: pc-dot-blink 1.6s ease-in-out infinite; }
-.pc-card:nth-child(2n) .pc-badge { animation-delay: -1.6s, -2.7s; }
-html.bg-paused .pc-badge, html.bg-paused .pc-badge__dot { animation-play-state: paused; }
+.pc-badge__dot { position: relative; flex-shrink: 0; animation: pc-dot-blink 1.6s ease-in-out infinite; }
+.pc-badge__dot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 8px #38e8ff; animation: pc-dot-glow 1.6s ease-in-out infinite; }
+.pc-card:nth-child(2n) .pc-badge__glow, .pc-card:nth-child(2n) .pc-badge__glow-a { animation-delay: -1.6s; }
+.pc-card:nth-child(2n) .pc-badge__sheen::before { animation-delay: -2.7s; }
+html.bg-paused .pc-badge__glow, html.bg-paused .pc-badge__glow-a, html.bg-paused .pc-badge__sheen::before, html.bg-paused .pc-badge__dot, html.bg-paused .pc-badge__dot::after { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .pc-badge, .pc-badge__dot { animation: none; }
+  .pc-badge__glow, .pc-badge__glow-a, .pc-badge__sheen::before, .pc-badge__dot, .pc-badge__dot::after { animation: none; }
+  /* still picture exactly as before: no glow, shimmer resting at its start position, dot without glow */
+  .pc-badge__glow, .pc-badge__glow-a, .pc-badge__dot::after { display: none; }
+  .pc-badge__sheen::before { transform: none; }
 }
 
 /* =====================================================================
@@ -1264,16 +1351,23 @@ html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
   .ms-body-bg > span { animation: none; }
 }
 
-/* Performance: off-screen sections/cards stop their looping animations and release their GPU layers.
-   AnimationGovernor marks each one .anim-on while it is on (or near) the screen and .anim-off when it leaves.
-   Below-the-hero sections and cards start paused until marked on, so opening the site does not start 700+
-   animations at once. They restart 300px before scrolling into view, so nothing looks different.
-   One-time entrance animations (project cards, hero ad) are excluded. */
-:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on))::before,
-:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on))::after,
-:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on)) :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *),
-:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on)) :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::before,
-:is(.anim-off, main > section:not(#hero):not(.anim-on), footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on)) :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::after {
+/* Performance: off-screen cards and moving backgrounds stop their looping animations and release their GPU layers.
+   AnimationGovernor marks each zone .anim-on while it is on (or near) the screen and .anim-off when it leaves.
+   Below-the-hero zones start paused until marked on, so opening the site does not start 700+ animations at once.
+   They restart 300px before scrolling into view, so nothing looks different. One-time entrance animations
+   (project cards, hero ad) are excluded.
+   Zones are the small blocks that actually hold animations (cards, the About / Era backgrounds, the active era tab),
+   not whole sections: switching a whole section on or off made the browser re-check every one of its ~1500
+   elements in the middle of a scroll (a visible hitch each time a section came into view). A section itself only
+   pauses its own ::before / ::after backgrounds (class sec-on, see AnimationGovernor). */
+:is(#hero.anim-off, footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on), .eb-aura:not(.anim-on), .ab-bg:not(.anim-on), .hp-grid-bg:not(.anim-on), .eb-tab-active > .beam:not(.anim-on)):not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *),
+:is(#hero.anim-off, footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on), .eb-aura:not(.anim-on), .ab-bg:not(.anim-on), .hp-grid-bg:not(.anim-on), .eb-tab-active > .beam:not(.anim-on))::before,
+:is(#hero.anim-off, footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on), .eb-aura:not(.anim-on), .ab-bg:not(.anim-on), .hp-grid-bg:not(.anim-on), .eb-tab-active > .beam:not(.anim-on))::after,
+:is(#hero.anim-off, footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on), .eb-aura:not(.anim-on), .ab-bg:not(.anim-on), .hp-grid-bg:not(.anim-on), .eb-tab-active > .beam:not(.anim-on)) :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *),
+:is(#hero.anim-off, footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on), .eb-aura:not(.anim-on), .ab-bg:not(.anim-on), .hp-grid-bg:not(.anim-on), .eb-tab-active > .beam:not(.anim-on)) :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::before,
+:is(#hero.anim-off, footer:not(.anim-on), .ms-card:not(.anim-on), .pc-card:not(.anim-on), .ab-card:not(.anim-on), .hp-card:not(.anim-on), .eb-aura:not(.anim-on), .ab-bg:not(.anim-on), .hp-grid-bg:not(.anim-on), .eb-tab-active > .beam:not(.anim-on)) :not(.hp-card-in, .hp-draw, .hp-tower, .hero-ad, .hero-ad *)::after,
+main > section:not(#hero):not(.sec-on)::before,
+main > section:not(#hero):not(.sec-on)::after {
   animation-name: none !important;
   will-change: auto !important;
 }
@@ -1326,11 +1420,15 @@ html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.10) 45%, rgba(180, 245, 255, 0.16) 50%, rgba(255, 255, 255, 0.10) 55%, transparent);
   transform: skewX(-18deg); animation: eb-sheen 11s ease-in-out infinite; will-change: transform; }
 @keyframes eb-sheen { 0%, 62% { transform: translateX(0) skewX(-18deg); opacity: 0; } 66% { opacity: 1; } 96% { opacity: 1; } 100% { transform: translateX(560%) skewX(-18deg); opacity: 0; } }
-.eb-seam { left: 0; right: 0; bottom: 0; height: 2px;
+.eb-seam { left: 0; right: 0; bottom: 0; height: 2px; overflow: hidden;
+  box-shadow: 0 0 12px rgba(56, 232, 255, 0.8); }
+/* The running light: the same repeating gradient (tile = 2x the line), two tiles wide, slid one tile by the GPU
+   (identical to background-position 200% -> 0, without repainting every frame). */
+.eb-seam::before { content: ''; position: absolute; top: 0; bottom: 0; left: -200%; width: 400%;
   background: linear-gradient(90deg, transparent, rgba(56, 232, 255, 0.2) 20%, #38e8ff 45%, #ffffff 50%, #38e8ff 55%, rgba(56, 232, 255, 0.2) 80%, transparent);
-  background-size: 200% 100%; box-shadow: 0 0 12px rgba(56, 232, 255, 0.8);
+  background-size: 50% 100%;
   animation: eb-seam 4s linear infinite; }
-@keyframes eb-seam { from { background-position: 200% 0; } to { background-position: 0 0; } }
+@keyframes eb-seam { from { transform: translateX(0); } to { transform: translateX(50%); } }
 
 /* text area: extra layers under the same dark glass */
 .eb-b-aurora2 { left: -30%; top: -50%; width: 160%; height: 200%;
@@ -1342,26 +1440,29 @@ html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
   background: linear-gradient(90deg, transparent, rgba(160, 140, 255, 0.9), #ffffff, transparent);
   box-shadow: 0 0 10px rgba(140, 120, 255, 0.7);
   animation: ms-streak 8.5s linear infinite; animation-delay: -5s; }
-.eb-b-dust { inset: 0;
+.eb-b-dust { top: 0; left: -60px; right: 0; bottom: -260px;
   background-image:
     radial-gradient(1.5px 1.5px at 12% 20%, rgba(200, 250, 255, 0.85), transparent 60%),
     radial-gradient(1px 1px at 34% 70%, rgba(255, 255, 255, 0.7), transparent 60%),
     radial-gradient(1.5px 1.5px at 58% 35%, rgba(150, 230, 255, 0.8), transparent 60%),
     radial-gradient(1px 1px at 76% 82%, rgba(255, 255, 255, 0.6), transparent 60%),
     radial-gradient(1.5px 1.5px at 90% 15%, rgba(190, 170, 255, 0.8), transparent 60%);
-  background-size: 360px 260px; animation: eb-dust 22s linear infinite; }
-@keyframes eb-dust { from { background-position: 0 0; } to { background-position: 60px -260px; } }
+  background-size: 360px 260px; background-position: 60px 0; animation: eb-dust 22s linear infinite; }
+/* Same drift as background-position 0 0 -> 60px -260px, but the dust layer (60px wider, 260px taller, so it always
+   covers the box) is slid by the GPU instead of being repainted every frame. */
+@keyframes eb-dust { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(60px, -260px, 0); } }
 .eb-b-radar { right: -90px; top: 50%; width: 320px; height: 320px; margin-top: -160px; border-radius: 50%; opacity: 0.45;
   background:
     repeating-radial-gradient(circle, transparent 0 38px, rgba(56, 232, 255, 0.22) 39px, transparent 40px),
     conic-gradient(from 0deg, transparent 0deg 300deg, rgba(56, 232, 255, 0.35) 355deg, transparent 360deg);
   animation: eb-radar 8s linear infinite; will-change: transform; }
 @keyframes eb-radar { to { transform: rotate(360deg); } }
-.eb-b-wave { left: 0; right: 0; bottom: 0; height: 40%; opacity: 0.5;
+.eb-b-wave { left: -140px; right: 0; bottom: 0; height: 40%; opacity: 0.5;
   background: repeating-linear-gradient(90deg, rgba(56, 232, 255, 0.14) 0 1px, transparent 1px 14px);
   -webkit-mask: linear-gradient(to top, #000, transparent); mask: linear-gradient(to top, #000, transparent);
   animation: eb-wave 5s linear infinite; }
-@keyframes eb-wave { to { background-position: 140px 0; } }
+/* 140px = 10 stripes: sliding the (140px wider) layer by the GPU is identical to the old background move */
+@keyframes eb-wave { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(140px, 0, 0); } }
 
 /* title: soft light passing over the text */
 .eb-title { background: linear-gradient(100deg, #ffffff 0 42%, #9ff3ff 49%, #ffffff 56% 100%); background-size: 260% 100%;
@@ -1383,18 +1484,17 @@ html.bg-paused .ms-body-bg > span { animation-play-state: paused; }
 .eb-item:nth-child(3) > span:first-child { animation-delay: -2s; }
 @keyframes eb-dot { 0%, 100% { opacity: 0.5; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.25); } }
 
-/* active era tab gets a running border light too */
+/* active era tab gets a running border light too (Beam: same light, turned by the GPU) */
 .eb-tab-active { position: relative; }
-.eb-tab-active::before { content: ''; position: absolute; inset: -1px; pointer-events: none; padding: 1.5px;
-  background: conic-gradient(from var(--pc-a), transparent 0deg 260deg, rgba(56, 232, 255, 0.4) 310deg, #ffffff 356deg, transparent 360deg);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: pc-spin 5s linear infinite; }
+.eb-tab-active > .beam { inset: -1px; padding: 1.5px; }
+.eb-tab-active > .beam > .beam__ray {
+  background: conic-gradient(from 0deg, transparent 0deg 260deg, rgba(56, 232, 255, 0.4) 310deg, #ffffff 356deg, transparent 360deg);
+  animation: beam-spin 5s linear infinite; }
 
 html.bg-paused .eb-aura, html.bg-paused .eb-aura > .beam > .beam__ray, html.bg-paused .eb-card > .beam > .beam__ray, html.bg-paused .eb-card::after, html.bg-paused .eb-photo-fx > span,
-html.bg-paused .eb-title, html.bg-paused .eb-panel::before, html.bg-paused .eb-item > span:first-child, html.bg-paused .eb-tab-active::before { animation-play-state: paused; }
+html.bg-paused .eb-title, html.bg-paused .eb-panel::before, html.bg-paused .eb-item > span:first-child, html.bg-paused .eb-tab-active > .beam > .beam__ray, html.bg-paused .eb-seam::before { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .eb-aura, .eb-aura > .beam > .beam__ray, .eb-card > .beam > .beam__ray, .eb-card::after, .eb-photo-fx > span, .eb-title, .eb-panel::before, .eb-item > span:first-child, .eb-tab-active::before { animation: none; }
+  .eb-aura, .eb-aura > .beam > .beam__ray, .eb-card > .beam > .beam__ray, .eb-card::after, .eb-photo-fx > span, .eb-title, .eb-panel::before, .eb-item > span:first-child, .eb-tab-active > .beam > .beam__ray, .eb-seam::before { animation: none; }
 }
 
 /* =====================================================================

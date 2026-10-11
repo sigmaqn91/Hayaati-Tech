@@ -87,6 +87,7 @@ export function TimelineSection() {
                   : 'bg-[#0b0f17] border-[#1e293b] text-slate-400 hover:text-white hover:border-slate-500'
               }`}
             >
+              {isActive ? <Beam /> : null}
               <Calendar className="w-3.5 h-3.5" />
               <span className="font-bold">{localizedYearLabel}</span>
               {localizedTitle ? (

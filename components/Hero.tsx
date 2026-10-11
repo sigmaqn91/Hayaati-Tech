@@ -121,8 +121,15 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
     };
 
     updateHeadlineHeight();
-    window.addEventListener('resize', updateHeadlineHeight);
-    return () => window.removeEventListener('resize', updateHeadlineHeight);
+    // Height-only resizes (phone address bar sliding while scrolling) cannot change the headline's wrapping.
+    let lastW = window.innerWidth;
+    const onResize = () => {
+      if (window.innerWidth === lastW) return;
+      lastW = window.innerWidth;
+      updateHeadlineHeight();
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, [language, line1, line2]);
 
   return (
