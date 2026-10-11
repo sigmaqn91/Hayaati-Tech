@@ -18,7 +18,7 @@ import type { NextRequest } from 'next/server';
 export interface RateLimitConfig {
   chatLimitPerVisitor: number; // default: 20 per 10 mins
   voiceSessionsPerHour: number; // default: 3 per hour
-  voiceSessionMaxSeconds: number; // default: 180 seconds
+  voiceSessionMaxSeconds: number; // default: 600 seconds (10 minutes, enough for the full guided tour)
   maxConcurrentVoiceSessions: number; // default: 5
   globalDailyChatCap: number; // default: 500
   globalDailyVoiceMinutesCap: number; // default: 60
@@ -28,7 +28,7 @@ export interface RateLimitConfig {
 export const RATE_CONFIG: RateLimitConfig = {
   chatLimitPerVisitor: parseInt(process.env.CHAT_LIMIT_PER_VISITOR || '20', 10),
   voiceSessionsPerHour: parseInt(process.env.VOICE_SESSIONS_PER_VISITOR_PER_HOUR || '3', 10),
-  voiceSessionMaxSeconds: parseInt(process.env.VOICE_SESSION_MAX_SECONDS || '180', 10),
+  voiceSessionMaxSeconds: parseInt(process.env.VOICE_SESSION_MAX_SECONDS || '600', 10),
   maxConcurrentVoiceSessions: parseInt(process.env.MAX_CONCURRENT_VOICE_SESSIONS || '5', 10),
   globalDailyChatCap: parseInt(process.env.GLOBAL_DAILY_CHAT_CAP || '500', 10),
   globalDailyVoiceMinutesCap: parseInt(process.env.GLOBAL_DAILY_VOICE_MINUTES_CAP || '60', 10),

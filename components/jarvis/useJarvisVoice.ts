@@ -1019,7 +1019,7 @@ export function useJarvisVoice({
       const maxSeconds =
         typeof sessionData?.sessionMaxSeconds === 'number' && sessionData.sessionMaxSeconds > 0
           ? sessionData.sessionMaxSeconds
-          : 180;
+          : 600;
       sessionTimeoutRef.current = setTimeout(() => {
         if (liveSessionIdRef.current !== sessionId) return;
         cancelSpeech();
