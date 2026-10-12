@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useReducedMotion, type Variants } from 'motion
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
 import { RatingButton } from './rating/RatingButton';
-import { Home, Clock, Cpu, MapPin, Layers, Megaphone, User, Mail, ChevronRight, Sliders, Gift } from 'lucide-react';
+import { Home, Clock, Cpu, MapPin, Layers, Megaphone, User, Mail, ChevronRight, Sliders, Gift, FileText } from 'lucide-react';
 import { isOwnerUi, openAdminControl, OWNER_EVENT } from '@/lib/ownerState';
 import { useOverlayHistory, runWhenHistoryIdle } from '@/hooks/use-overlay-history';
 
@@ -341,6 +341,17 @@ export function Navbar() {
                       <span className="flex-1 min-w-0 text-start">Guest</span>
                       <ChevronRight className="w-3.5 h-3.5 shrink-0 rtl:-scale-x-100 opacity-60" aria-hidden="true" />
                     </button>
+
+                    {/* Terms & Conditions (its own page) */}
+                    <a
+                      href="/terms"
+                      className="group mt-1 w-full relative flex items-center gap-3 px-3 min-h-[44px] font-mono text-[13px] border border-transparent text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff]/30 hover:bg-[#38e8ff]/[0.06] transition-colors"
+                    >
+                      <span className="w-5 shrink-0" aria-hidden="true" />
+                      <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <span className="flex-1 min-w-0 text-start">Terms &amp; Conditions</span>
+                      <ChevronRight className="w-3.5 h-3.5 shrink-0 rtl:-scale-x-100 opacity-0 group-hover:opacity-70" aria-hidden="true" />
+                    </a>
 
                     {owner && (
                       <button
