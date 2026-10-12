@@ -7,6 +7,7 @@ import { User, Mail, Globe } from 'lucide-react';
 import { FounderPortrait } from '@/components/FounderPortrait';
 import { Beam } from '@/components/Beam';
 import { CouponRequestPanel } from '@/components/tour/CouponRequestPanel';
+import { DeskCouponMachine } from '@/components/tour/DeskCouponMachine';
 
 export function AboutSection() {
   const { t } = useLanguage();
@@ -87,6 +88,8 @@ export function AboutSection() {
                   <span className="eb-sheen" />
                   <span className="eb-seam" />
                 </div>
+                {/* Premium Tour coupon printer on the desk (only while a visitor's coupon is being prepared) */}
+                <DeskCouponMachine />
               </>
             ) : (
               /* Honest Placeholder */

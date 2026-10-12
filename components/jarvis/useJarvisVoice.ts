@@ -16,7 +16,7 @@ const loadGenAI = () => {
 import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION, JARVIS_FEEDBACK_INSTRUCTION } from '@/lib/jarvisTools';
-import { beginTour, endTour, tourNext, TOUR_FUNCTION_DECLARATIONS, type TourMode } from '@/lib/jarvisTour';
+import { beginTour, endTour, rewindForResume, tourActive, tourNext, TOUR_FUNCTION_DECLARATIONS, type TourMode } from '@/lib/jarvisTour';
 
 // Maps language codes from Hayaati's 30 locales to BCP-47 / Live voice language tags
 const LOCALE_TO_VOICE_LANG: Record<string, string> = {
@@ -169,6 +169,9 @@ function buildSystemInstruction(languageCode: string, isOwner: boolean, knowledg
     .join('\n\n');
 }
 
+// Seconds of quiet between two tour stops (the card opens in this moment).
+const TOUR_STOP_BREATH = 0.3;
+
 // Tour sessions (Quick Tour / Premium Full Tour buttons): one-sided narration, only the tour_next tool.
 function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = ''): string {
   const lp = getJarvisLang(languageCode);
@@ -291,6 +294,21 @@ export function useJarvisVoice({
   const tourEndAfterTurnRef = useRef<boolean>(false);
   const tourPendingToolsRef = useRef<number>(0);
   const tourNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The next stop's screen change, waiting for the moment Jarvis's current words end (see playLiveAudioChunk).
+  const tourPendingShowRef = useRef<{ show: () => void; fallback: ReturnType<typeof setTimeout> } | null>(null);
+  const tourShowTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Stall guard and automatic reconnection (a long tour can outlive one Live connection).
+  const tourWatchdogRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastServerMsgAtRef = useRef<number>(0);
+  const lastToolResponseAtRef = useRef<number>(0);
+  const lastNudgeAtRef = useRef<number>(0);
+  const nudgesWithoutAudioRef = useRef<number>(0);
+  const tourResumeTicketRef = useRef<string | null>(null);
+  const tourResumedRef = useRef<boolean>(false);
+  const tourResumingRef = useRef<boolean>(false);
+  const tourResumeAtNextToolRef = useRef<boolean>(false);
+  const keepTourOnStopRef = useRef<boolean>(false);
+  const resumeTourRef = useRef<(rewind: boolean) => void>(() => {});
 
   // Warm the voice server once the page is idle, and again when the visitor hovers "Activate Jarvis".
   useEffect(() => {
@@ -440,7 +458,7 @@ export function useJarvisVoice({
         body: JSON.stringify(
           liveOpenedRef.current
             ? { action: 'release', durationSeconds }
-            : { action: 'refund', tour: tourModeRef.current, coupon: tourCouponRef.current }
+            : { action: 'refund', tour: tourModeRef.current, coupon: tourCouponRef.current, resumed: tourResumedRef.current }
         ),
         keepalive: true,
       }).catch(() => {});
@@ -453,7 +471,21 @@ export function useJarvisVoice({
       clearTimeout(tourNudgeTimerRef.current);
       tourNudgeTimerRef.current = null;
     }
-    if (tourModeRef.current) {
+    if (tourWatchdogRef.current) {
+      clearInterval(tourWatchdogRef.current);
+      tourWatchdogRef.current = null;
+    }
+    const pendingShow = tourPendingShowRef.current;
+    tourPendingShowRef.current = null;
+    if (pendingShow) clearTimeout(pendingShow.fallback);
+    if (keepTourOnStopRef.current) {
+      // Reconnecting: the stop Jarvis was talking about stays on screen, the tour itself goes on.
+      pendingShow?.show();
+    } else {
+      tourShowTimersRef.current.forEach((t) => clearTimeout(t));
+      tourShowTimersRef.current = [];
+    }
+    if (tourModeRef.current && !keepTourOnStopRef.current) {
       endTour();
       window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'ended', mode: tourModeRef.current } }));
       tourModeRef.current = null;
@@ -461,6 +493,9 @@ export function useJarvisVoice({
       tourCouponRef.current = null;
       tourEndAfterTurnRef.current = false;
       tourPendingToolsRef.current = 0;
+      tourResumeTicketRef.current = null;
+      tourResumedRef.current = false;
+      tourResumeAtNextToolRef.current = false;
       setTourMode(null);
     }
 
@@ -539,11 +574,14 @@ export function useJarvisVoice({
       tourNudgeTimerRef.current = setTimeout(() => stopListeningRef.current(), 900);
       return;
     }
-    if (tourPendingToolsRef.current > 0) return;
+    if (tourPendingToolsRef.current > 0 || tourPendingShowRef.current) return;
     const intro = tourIntroRef.current;
+    // Right after a stop was handed over Jarvis is already preparing his words: the watchdog covers that case.
+    if (!intro && Date.now() - lastToolResponseAtRef.current < 3000) return;
     tourNudgeTimerRef.current = setTimeout(() => {
       tourNudgeTimerRef.current = null;
       if (!tourModeRef.current || tourPendingToolsRef.current > 0 || isSpeakingRef.current) return;
+      lastNudgeAtRef.current = Date.now();
       try {
         liveSessionRef.current?.sendRealtimeInput({
           text: intro
@@ -551,7 +589,7 @@ export function useJarvisVoice({
             : '[SYSTEM] Continue the tour now: call tour_next right away, without asking anything.',
         });
       } catch {}
-    }, intro ? 14000 : 2500);
+    }, intro ? 14000 : 1200);
   };
   const stopListeningRef = useRef<() => void>(() => {});
   stopListeningRef.current = stopListening;
@@ -635,6 +673,22 @@ export function useJarvisVoice({
       // UI to LISTENING.
       turnCompleteRef.current = false;
       turnHasAudioRef.current = true;
+      nudgesWithoutAudioRef.current = 0;
+      // First words about the next tour stop: the screen changes exactly when the current words end, and a
+      // short natural breath (the card opening) comes before the new words. No waiting, no visible scrolling.
+      const pendingShow = tourPendingShowRef.current;
+      if (pendingShow) {
+        tourPendingShowRef.current = null;
+        clearTimeout(pendingShow.fallback);
+        if (queueDry) pendingShow.show();
+        else {
+          const boundary = nextPlayTimeRef.current;
+          nextPlayTimeRef.current += TOUR_STOP_BREATH;
+          const t = setTimeout(pendingShow.show, Math.max(0, (boundary - pCtx.currentTime) * 1000 - 40));
+          tourShowTimersRef.current.push(t);
+          if (tourShowTimersRef.current.length > 8) tourShowTimersRef.current.shift();
+        }
+      }
       if (tourNudgeTimerRef.current && !tourEndAfterTurnRef.current) {
         clearTimeout(tourNudgeTimerRef.current);
         tourNudgeTimerRef.current = null;
@@ -790,14 +844,16 @@ export function useJarvisVoice({
   }, []);
 
   // Start Live Microphone Capture and Stream into Gemini Live WebSocket
-  const startListening = useCallback(async (options?: { tour?: TourMode; coupon?: string }) => {
+  const startListening = useCallback(async (options?: { tour?: TourMode; coupon?: string; resume?: string }) => {
     if (typeof window === 'undefined') return;
     const tour: TourMode | null = options?.tour === 'quick' || options?.tour === 'full' ? options.tour : null;
+    // A tour continuing on a fresh connection (its last words may still be playing: they are not cut).
+    const resume = tour && options?.resume ? options.resume : null;
     // The free Quick Tour never needs the microphone; the full tour only for its opening questions.
-    const needMic = tour !== 'quick';
+    const needMic = tour !== 'quick' && !resume;
 
     // Interrupt any current speech output
-    if (isSpeakingRef.current) {
+    if (isSpeakingRef.current && !resume) {
       cancelSpeech();
     }
 
@@ -813,12 +869,16 @@ export function useJarvisVoice({
     } catch {}
     setIsConnecting(true);
     tourModeRef.current = tour;
-    tourIntroRef.current = tour === 'full';
-    tourCouponRef.current = tour === 'full' ? options?.coupon || null : null;
+    tourIntroRef.current = tour === 'full' && !resume;
+    if (!resume) tourCouponRef.current = tour === 'full' ? options?.coupon || null : null;
     tourEndAfterTurnRef.current = false;
     tourPendingToolsRef.current = 0;
+    tourResumedRef.current = Boolean(resume);
+    tourResumeAtNextToolRef.current = false;
+    lastNudgeAtRef.current = 0;
+    nudgesWithoutAudioRef.current = 0;
     setTourMode(tour);
-    if (tour) window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'connecting', mode: tour } }));
+    if (tour && !resume) window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'connecting', mode: tour } }));
 
     // Start token, microphone permission and input AudioContext work together.
     // The Live connection begins as soon as the token arrives; mic setup continues in parallel.
@@ -833,7 +893,7 @@ export function useJarvisVoice({
           body: JSON.stringify({
             action: 'session',
             language: languageRef.current,
-            ...(tour ? { tour, coupon: tourCouponRef.current || undefined } : {}),
+            ...(tour ? { tour, coupon: resume ? undefined : tourCouponRef.current || undefined, resume: resume || undefined } : {}),
           }),
           signal: controller.signal,
         });
@@ -987,6 +1047,8 @@ export function useJarvisVoice({
           // Website actions Jarvis can do for the visitor (go to a section, open a card, fill the rating ...).
           // A tour session has only tour_next; a normal session has no tour tool at all.
           tools: [{ functionDeclarations: tour ? TOUR_FUNCTION_DECLARATIONS : JARVIS_FUNCTION_DECLARATIONS }],
+          // A long tour keeps its conversation inside the model's memory limit (oldest parts are summarised away).
+          ...(tour ? { contextWindowCompression: { slidingWindow: {} } } : {}),
           // Hear the visitor quickly and reliably: sensitive start-of-speech detection, short pre-roll and a
           // natural pause length before Jarvis answers.
           realtimeInputConfig: {
@@ -1006,9 +1068,12 @@ export function useJarvisVoice({
           callbacks: {
             onmessage: (msg: any) => {
               if (liveSessionIdRef.current !== sessionId) return;
+              lastServerMsgAtRef.current = Date.now();
               if (msg.serverContent?.interrupted) {
                 handleInterruption();
               }
+              // Google is about to renew this connection: a tour moves to a fresh one at its next stop.
+              if (msg.goAway && tourModeRef.current) tourResumeAtNextToolRef.current = true;
 
               // Jarvis asked to do something on the website. It runs after the words he already said have
               // finished playing (so the screen changes right after he says it, not seconds before), the page
@@ -1016,14 +1081,64 @@ export function useJarvisVoice({
               const cancelled = msg.toolCallCancellation?.ids;
               if (Array.isArray(cancelled)) cancelled.forEach((id: string) => cancelledToolIdsRef.current.add(String(id)));
               const calls = msg.toolCall?.functionCalls;
-              if (Array.isArray(calls) && calls.length) {
-                if (tourModeRef.current) {
-                  tourPendingToolsRef.current += 1;
-                  if (tourNudgeTimerRef.current) {
-                    clearTimeout(tourNudgeTimerRef.current);
-                    tourNudgeTimerRef.current = null;
-                  }
+              if (Array.isArray(calls) && calls.length && tourModeRef.current) {
+                // Tour: the next stop is prepared and handed to Jarvis AT ONCE (while his last words are still
+                // playing), so his next words follow without a gap. The screen changes when those words end.
+                if (tourResumeAtNextToolRef.current && !tourEndAfterTurnRef.current) {
+                  resumeTourRef.current(false);
+                  return;
                 }
+                if (tourNudgeTimerRef.current) {
+                  clearTimeout(tourNudgeTimerRef.current);
+                  tourNudgeTimerRef.current = null;
+                }
+                const earlier = tourPendingShowRef.current;
+                if (earlier) {
+                  tourPendingShowRef.current = null;
+                  clearTimeout(earlier.fallback);
+                  earlier.show();
+                }
+                if (tourIntroRef.current) {
+                  // Opening questions are over: the microphone switches off for the rest of the tour.
+                  tourIntroRef.current = false;
+                  releaseMicForTour();
+                }
+                const functionResponses = [];
+                let show: (() => void) | null = null;
+                for (const call of calls) {
+                  if (cancelledToolIdsRef.current.has(String(call.id))) continue;
+                  let response: Record<string, unknown>;
+                  if (call.name === 'tour_next') {
+                    const stop = tourNext();
+                    response = stop.response;
+                    show = stop.show;
+                    if (stop.finished) tourEndAfterTurnRef.current = true;
+                  } else {
+                    response = { ok: false, error: 'only tour_next is available during the tour' };
+                  }
+                  functionResponses.push({ id: call.id, name: call.name, response });
+                }
+                if (functionResponses.length) {
+                  try {
+                    liveSessionRef.current?.sendToolResponse({ functionResponses });
+                  } catch (error) {
+                    console.warn('[Gemini Live Tool Response Error]:', error);
+                  }
+                  lastToolResponseAtRef.current = Date.now();
+                }
+                if (show) {
+                  const run = show;
+                  // If no new words arrive, the screen still changes when the current words have finished.
+                  const fallback = setTimeout(() => {
+                    if (tourPendingShowRef.current?.show !== run) return;
+                    tourPendingShowRef.current = null;
+                    const ctx = playbackContextRef.current;
+                    const left = ctx ? nextPlayTimeRef.current - ctx.currentTime : 0;
+                    tourShowTimersRef.current.push(setTimeout(run, Math.max(0, left * 1000)));
+                  }, 2500);
+                  tourPendingShowRef.current = { show: run, fallback };
+                }
+              } else if (Array.isArray(calls) && calls.length) {
                 toolQueueRef.current = toolQueueRef.current.then(async () => {
                   await waitForSpeechToFinish(sessionId);
                   if (liveSessionIdRef.current !== sessionId) return;
@@ -1032,24 +1147,13 @@ export function useJarvisVoice({
                     if (cancelledToolIdsRef.current.has(String(call.id))) continue;
                     let response: Record<string, unknown>;
                     try {
-                      if (tourModeRef.current) {
-                        // Opening questions are over: the microphone switches off for the rest of the tour.
-                        if (tourIntroRef.current) {
-                          tourIntroRef.current = false;
-                          releaseMicForTour();
-                        }
-                        response = call.name === 'tour_next' ? await tourNext() : { ok: false, error: 'only tour_next is available during the tour' };
-                        if (response.finished) tourEndAfterTurnRef.current = true;
-                      } else {
-                        response =
-                          (await onToolCallRef.current?.(String(call.name || ''), call.args)) || { ok: false, error: 'not available' };
-                      }
+                      response =
+                        (await onToolCallRef.current?.(String(call.name || ''), call.args)) || { ok: false, error: 'not available' };
                     } catch {
                       response = { ok: false, error: 'action failed' };
                     }
                     functionResponses.push({ id: call.id, name: call.name, response });
                   }
-                  if (tourModeRef.current) tourPendingToolsRef.current = Math.max(0, tourPendingToolsRef.current - 1);
                   if (!functionResponses.length || liveSessionIdRef.current !== sessionId) return;
                   try {
                     liveSessionRef.current?.sendToolResponse({ functionResponses });
@@ -1107,6 +1211,11 @@ export function useJarvisVoice({
               const closeReason = event?.reason || '';
               const ageMs = Date.now() - sessionOpenedAt;
               console.warn(`[Gemini Live Session Closed] code=${closeCode ?? 'unknown'} reason=${closeReason || 'none'}`);
+              // A tour that is still running continues on a fresh connection instead of stopping.
+              if (tourModeRef.current && tourActive() && !tourEndAfterTurnRef.current && ageMs > 5000) {
+                resumeTourRef.current(!tourResumeAtNextToolRef.current);
+                return;
+              }
               if (ageMs < 5000) {
                 setSpeechDetail(`Live closed code=${closeCode ?? 'unknown'} reason=${closeReason || 'none'} after ${ageMs}ms`);
                 setSpeechError(closeCode === 401 || closeCode === 403 ? 'NO_KEY' : 'NETWORK');
@@ -1117,6 +1226,10 @@ export function useJarvisVoice({
             onerror: (err: any) => {
               if (liveSessionIdRef.current !== sessionId) return;
               console.warn('[Gemini Live Session Error]:', err);
+              if (tourModeRef.current && tourActive() && !tourEndAfterTurnRef.current && Date.now() - sessionOpenedAt > 5000) {
+                resumeTourRef.current(true);
+                return;
+              }
               setSpeechDetail(`Live error status=${err?.status || err?.statusCode || 'n/a'} ${String(err?.message || err?.type || '').slice(0, 160)}`);
               setFailingLayer('GEMINI_LIVE');
               const status = err?.status || err?.statusCode;
@@ -1190,13 +1303,48 @@ export function useJarvisVoice({
       }, 25000);
 
       if (tour) {
-        beginTour(tour, maxSeconds);
-        window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'live', mode: tour } }));
+        tourResumeTicketRef.current = typeof sessionData?.resumeTicket === 'string' ? sessionData.resumeTicket : null;
+        if (!resume) {
+          beginTour(tour, maxSeconds);
+          window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'live', mode: tour } }));
+        }
+        tourResumingRef.current = false;
+        lastServerMsgAtRef.current = Date.now();
+        lastToolResponseAtRef.current = Date.now();
+        // Stall guard: if Jarvis goes quiet without moving on (nothing playing, nothing pending, no message from
+        // the server), he is reminded; if reminders do not help, the tour continues on a fresh connection.
+        if (tourWatchdogRef.current) clearInterval(tourWatchdogRef.current);
+        tourWatchdogRef.current = setInterval(() => {
+          if (liveSessionIdRef.current !== sessionId || !tourModeRef.current) return;
+          if (tourIntroRef.current || tourEndAfterTurnRef.current || tourResumingRef.current || tourPendingShowRef.current) return;
+          const pctx = playbackContextRef.current;
+          const queued = pctx ? nextPlayTimeRef.current - pctx.currentTime : 0;
+          if (queued > 0.05 || activeAudioSourcesRef.current.length > 0) return;
+          const now = Date.now();
+          if (now - lastServerMsgAtRef.current < 3500 || now - lastToolResponseAtRef.current < 4000 || now - lastNudgeAtRef.current < 6000) return;
+          if (nudgesWithoutAudioRef.current >= 3) {
+            resumeTourRef.current(true);
+            return;
+          }
+          nudgesWithoutAudioRef.current += 1;
+          lastNudgeAtRef.current = now;
+          try {
+            liveSessionRef.current?.sendRealtimeInput({
+              text: '[SYSTEM] Continue the tour now: call tour_next right away, without asking anything.',
+            });
+          } catch {}
+        }, 1000);
       }
 
       // Greet immediately after the session opens, before microphone processor creation. Earlier history (if any)
       // goes in the SAME message: two separate messages made the model answer twice and delayed the greeting.
-      if (tour) {
+      if (tour && resume) {
+        try {
+          liveSession.sendRealtimeInput({
+            text: `[SYSTEM] You are in the middle of the ${tour === 'full' ? 'Premium Full Tour' : 'Quick Tour'}; the visitor has been listening to you all along. Do not greet, do not welcome, do not ask anything and do not mention any connection. Call tour_next right now and continue the tour naturally from that stop in everyday ${langProfile.name}.`,
+          });
+        } catch {}
+      } else if (tour) {
         try {
           liveSession.sendRealtimeInput({
             text:
@@ -1322,6 +1470,13 @@ export function useJarvisVoice({
       else setFailingLayer('GEMINI_LIVE');
 
       const code = err?.code;
+      if (resume) {
+        // The tour could not continue on a fresh connection: it ends quietly (no error box).
+        tourResumingRef.current = false;
+        stopListening();
+        releaseLateMic();
+        return;
+      }
       if (tour) {
         window.dispatchEvent(
           new CustomEvent('jarvis:tour-status', {
@@ -1345,6 +1500,28 @@ export function useJarvisVoice({
       releaseLateMic();
     }
   }, [cancelSpeech, finishCompletedTurnIfReady, handleInterruption, playLiveAudioChunk, stopListening, queueCaption, flushCaptions, releaseMicForTour, waitForSpeechToFinish]);
+
+  // A tour moves to a fresh Live connection (connection renewed by Google, network drop, or Jarvis stuck).
+  // No new coupon or attempt is used (signed resume ticket); the tour continues where it was.
+  resumeTourRef.current = (rewind: boolean) => {
+    const mode = tourModeRef.current;
+    const ticket = tourResumeTicketRef.current;
+    if (tourResumingRef.current) return;
+    if (!mode || !ticket || !tourActive()) {
+      stopListening();
+      return;
+    }
+    tourResumingRef.current = true;
+    tourResumeAtNextToolRef.current = false;
+    if (rewind) rewindForResume();
+    keepTourOnStopRef.current = true;
+    try {
+      stopListening();
+    } finally {
+      keepTourOnStopRef.current = false;
+    }
+    startListening({ tour: mode, resume: ticket });
+  };
 
   // Speak through the existing Live session when one is open; browser TTS is fallback only.
   const speak = useCallback(

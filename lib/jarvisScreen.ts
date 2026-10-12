@@ -25,43 +25,26 @@ const maxScroll = () => Math.max(0, document.documentElement.scrollHeight - wind
 let scrollToken = 0;
 
 /**
- * Glide to a page position with a gentle ease and resolve when the page has arrived. Distance-based
- * duration keeps it calm; very long jumps (more than about three screens) go most of the way at once so
- * the phone never has to draw many photos in between (that is what made long smooth scrolls stutter).
+ * Go to a page position for Jarvis. Jarvis drives the site, so there is no visible scrolling: the page is simply
+ * there (less work for the phone, and the screen changes exactly when Jarvis talks about it). Resolves after the
+ * next frame has been drawn.
  */
 export function glideTo(y: number): Promise<void> {
-  const target = Math.round(Math.min(Math.max(0, y), maxScroll()));
-  const token = ++scrollToken;
-  const vh = window.innerHeight;
-  let from = window.scrollY;
-  if (Math.abs(target - from) > vh * 3) {
-    from = target + (target > from ? -vh * 0.7 : vh * 0.7);
-    window.scrollTo({ top: from, behavior: 'instant' as ScrollBehavior });
-  }
-  const dist = target - from;
-  if (Math.abs(dist) < 2) return Promise.resolve();
-  const duration = Math.min(1500, 650 + (Math.abs(dist) / vh) * 450);
-  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  return new Promise<void>((resolve) => {
-    const start = performance.now();
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      if (token === scrollToken) window.scrollTo({ top: target, behavior: 'instant' as ScrollBehavior });
-      resolve();
-    };
-    // rAF pauses in a background tab; the timer makes sure Jarvis never waits forever.
-    window.setTimeout(finish, duration + 400);
-    const step = (now: number) => {
-      if (done || token !== scrollToken) return finish();
-      const t = Math.min(1, (now - start) / duration);
-      window.scrollTo({ top: from + dist * ease(t), behavior: 'instant' as ScrollBehavior });
-      if (t < 1) requestAnimationFrame(step);
-      else finish();
-    };
-    requestAnimationFrame(step);
+  jumpTo(y);
+  // (rAF pauses in a background tab; the timer makes sure nothing waits forever)
+  return new Promise<void>((r) => {
+    requestAnimationFrame(() => r());
+    window.setTimeout(r, 120);
   });
+}
+
+/** Where the page ends up when an element's top is placed just under the navbar. */
+export const scrollTargetFor = (el: Element) => Math.round(Math.min(Math.max(0, docTop(el) - NAV_OFFSET), maxScroll()));
+
+/** Jump straight to a page position (no visible scrolling: Jarvis drives the site during a tour). */
+export function jumpTo(y: number) {
+  ++scrollToken; // stops any glide that is still running
+  window.scrollTo({ top: Math.round(Math.min(Math.max(0, y), maxScroll())), behavior: 'instant' as ScrollBehavior });
 }
 
 /** Bring an element's top just under the navbar (or as close as the page allows). */
@@ -88,16 +71,21 @@ function textOf(node: Node): string {
   return '';
 }
 
-/** Texts inside `root` that are actually visible on the screen right now (headings marked with #). */
-export function visibleTexts(root: Element, limit = 1800): string[] {
+/**
+ * Texts inside `root` that are visible on the screen right now (headings marked with #). With `atScrollY`, the
+ * texts that WILL be visible once the page is at that position (read before the jump, from the layout).
+ */
+export function visibleTexts(root: Element, limit = 1800, atScrollY?: number): string[] {
   const vh = window.innerHeight;
+  const shift = atScrollY === undefined ? 0 : atScrollY - window.scrollY;
   const out: string[] = [];
   const seen = new Set<string>();
   let total = 0;
   root.querySelectorAll('h1, h2, h3, h4, h5, p, li, label, [data-tour-text]').forEach((el) => {
     if (total > limit) return;
     if (el.parentElement?.closest('li, p, h1, h2, h3, h4, h5')) return;
-    const r = el.getBoundingClientRect();
+    const b = el.getBoundingClientRect();
+    const r = { top: b.top - shift, bottom: b.bottom - shift, height: b.height };
     if (r.height < 4 || r.bottom < NAV_OFFSET + 20 || r.top > vh - 20) return;
     if (!isShown(el)) return;
     let text = textOf(el).replace(/\s+/g, ' ').trim();
@@ -112,7 +100,8 @@ export function visibleTexts(root: Element, limit = 1800): string[] {
   let photos = 0;
   root.querySelectorAll('img[alt]').forEach((img) => {
     if (photos >= 4) return;
-    const r = img.getBoundingClientRect();
+    const b = img.getBoundingClientRect();
+    const r = { top: b.top - shift, bottom: b.bottom - shift, height: b.height };
     const alt = img.getAttribute('alt')?.trim();
     if (!alt || r.height < 120 || r.bottom < NAV_OFFSET + 60 || r.top > vh - 60 || !isShown(img)) return;
     const line = `Photo: ${alt.length > 160 ? alt.slice(0, 157) + '...' : alt}`;

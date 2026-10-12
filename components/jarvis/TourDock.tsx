@@ -74,7 +74,7 @@ export function TourDock({ mode, speaking, onEnd }: TourDockProps) {
               <span className="text-slate-500">/</span>
               <span className="text-slate-100 font-semibold">{title}</span>
               <span className="ms-auto text-slate-400 tabular-nums tracking-normal">
-                {progress.maxSeconds ? `${mmss(elapsed)} / ${mmss(progress.maxSeconds)}` : ''}
+                {progress.maxSeconds ? mmss(Math.max(0, Math.ceil(progress.maxSeconds - elapsed))) : ''}
               </span>
             </div>
             <div className="mt-1 truncate text-[12.5px] text-slate-300">

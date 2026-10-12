@@ -210,7 +210,7 @@ export function PremiumTourDialog({ open, onClose }: PremiumTourDialogProps) {
               disabled={busy}
               onClick={() => {
                 onClose();
-                window.setTimeout(() => goToFounderForCoupon(), 180);
+                window.setTimeout(() => goToFounderForCoupon(), 40);
               }}
               className="mt-4 w-full min-h-[48px] rounded-lg border border-[#c4b5fd]/40 bg-[#c4b5fd]/[0.06] text-[#ede9fe] font-mono text-xs font-bold uppercase tracking-wider hover:border-[#c4b5fd]/80 hover:bg-[#c4b5fd]/[0.12] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
             >

@@ -27,7 +27,7 @@ export function TechCardModal({ card: openCard, onClose }: TechCardModalProps) {
     const id = window.setTimeout(() => {
       setCard(null);
       setClosing(false);
-    }, 260);
+    }, 180);
     return () => window.clearTimeout(id);
   }, [openCard]);
 
@@ -65,12 +65,13 @@ export function TechCardModal({ card: openCard, onClose }: TechCardModalProps) {
       aria-modal="true"
       aria-labelledby="modal-card-title"
       data-closing={closing ? '' : undefined}
-      className="tcm-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 overflow-y-auto"
+      className="tcm-backdrop fixed inset-0 z-50 flex p-4 bg-black/85 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="tcm-panel relative w-full max-w-3xl bg-[#0b0f17] border border-[#38e8ff]/60 shadow-[0_0_30px_rgba(56,232,255,0.2)] my-8 hud-frame">
+      {/* Keyed by card: when Jarvis moves to the next card the popup switches straight to it with a quick pop */}
+      <div key={card.id} className="tcm-panel relative w-full max-w-3xl bg-[#0b0f17] border border-[#38e8ff]/60 shadow-[0_0_30px_rgba(56,232,255,0.2)] m-auto hud-frame">
         {/* Top Header Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#1e293b] bg-[#070a0f]">
           <div className="flex items-center gap-3">
@@ -98,6 +99,9 @@ export function TechCardModal({ card: openCard, onClose }: TechCardModalProps) {
               title={displayTitle}
               width={1200}
               height={650}
+              // Loads at once (no lazy wait): the same file is usually already in the cache from the card grid,
+              // so the popup opens with its photo instead of an empty frame.
+              priority
               sizes="(max-width: 768px) 100vw, 800px"
               className="w-full h-auto max-h-[360px] object-cover"
             />
