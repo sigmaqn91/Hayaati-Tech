@@ -303,6 +303,7 @@ export function useJarvisVoice({
   const tourIntroRef = useRef<boolean>(false);
   const tourCouponRef = useRef<string | null>(null);
   const tourEndAfterTurnRef = useRef<boolean>(false);
+  const tourGoodbyeStartedRef = useRef<boolean>(false);
   const tourPendingToolsRef = useRef<number>(0);
   const tourNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The next stop's screen change, waiting for the moment Jarvis's current words end (see playLiveAudioChunk).
@@ -576,6 +577,7 @@ export function useJarvisVoice({
       tourIntroRef.current = false;
       tourCouponRef.current = null;
       tourEndAfterTurnRef.current = false;
+      tourGoodbyeStartedRef.current = false;
       tourPendingToolsRef.current = 0;
       tourResumeTicketRef.current = null;
       tourResumedRef.current = false;
@@ -655,7 +657,9 @@ export function useJarvisVoice({
     if (tourNudgeTimerRef.current) clearTimeout(tourNudgeTimerRef.current);
     tourNudgeTimerRef.current = null;
     if (tourEndAfterTurnRef.current) {
-      tourNudgeTimerRef.current = setTimeout(() => stopListeningRef.current(), 900);
+      // The turn that just ended may still be the last stop (the goodbye has not started yet): close only after
+      // the goodbye has been spoken; if it never comes, a longer safety timer closes the session.
+      tourNudgeTimerRef.current = setTimeout(() => stopListeningRef.current(), tourGoodbyeStartedRef.current ? 900 : 20000);
       return;
     }
     if (tourPendingToolsRef.current > 0 || tourPendingShowRef.current) return;
@@ -795,10 +799,11 @@ export function useJarvisVoice({
           scheduleTourShow(pendingShow.show, boundary);
         }
       }
-      if (tourNudgeTimerRef.current && !tourEndAfterTurnRef.current) {
+      if (tourNudgeTimerRef.current) {
         clearTimeout(tourNudgeTimerRef.current);
         tourNudgeTimerRef.current = null;
       }
+      if (tourModeRef.current && tourEndAfterTurnRef.current) tourGoodbyeStartedRef.current = true;
       isSpeakingRef.current = true;
       setIsSpeaking(true);
       setIsListening(false);
@@ -979,6 +984,7 @@ export function useJarvisVoice({
     tourIntroRef.current = tour === 'full' && !resume;
     if (!resume) tourCouponRef.current = tour === 'full' ? options?.coupon || null : null;
     tourEndAfterTurnRef.current = false;
+    tourGoodbyeStartedRef.current = false;
     tourPendingToolsRef.current = 0;
     tourResumedRef.current = Boolean(resume);
     tourResumeAtNextToolRef.current = false;

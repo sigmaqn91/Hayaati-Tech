@@ -147,6 +147,10 @@ const END_RESERVE: Record<TourMode, number> = { quick: 28, full: 40 };
 // Below this many speaking seconds per weight, a whole category is summed up instead of opening each card.
 const MIN_SECONDS_PER_WEIGHT = 6;
 const WORDS_PER_SECOND = 2.3;
+// Quick Tour: Jarvis tends to speak faster than the words he is asked for, so the real speaking time of each stop
+// is measured (screen change to screen change) and the word count asked for is adjusted for the rest of the tour.
+let wordsPerSecond = WORDS_PER_SECOND;
+let lastRequest: { seconds: number; shownAt: number } | null = null;
 const COLLAPSED_WEIGHT = 2.4;
 
 const state = {
@@ -184,6 +188,8 @@ export function beginTour(mode: TourMode, maxSeconds: number) {
   state.maxSeconds = maxSeconds;
   state.collapsed = new Set();
   state.content = defaultBundle.content;
+  wordsPerSecond = WORDS_PER_SECOND;
+  lastRequest = null;
   ended = false;
   shownIndex = -1;
   refreshSiteLanguage();
@@ -326,9 +332,9 @@ function preloadAround(from: number) {
 // --- What Jarvis is told ---------------------------------------------------------------------------------
 
 function instruction(seconds: number, extra = '') {
-  const words = Math.round(seconds * WORDS_PER_SECOND);
+  const words = Math.round(seconds * wordsPerSecond);
   return (
-    `${extra}Speak for about ${seconds} seconds (about ${words} words), in friendly, natural everyday speech, only about what this result shows. ` +
+    `${extra}Speak for about ${seconds} seconds (about ${words} words), calmly and warmly at an easy, unhurried pace with natural pauses (do not rush, do not finish early), in friendly, natural everyday speech, only about what this result shows. ` +
     'Do not ask the visitor anything and do not wait for an answer. As soon as you finish speaking, call tour_next.'
   );
 }
@@ -455,6 +461,21 @@ function finish(reason: 'done' | 'time'): PreparedStop {
   };
 }
 
+/** Quick Tour: learn how long Jarvis really speaks per requested second and ask for more or fewer words next time. */
+function calibratePace(response: Record<string, unknown> | null) {
+  if (state.mode !== 'quick' || !response) return;
+  const now = Date.now();
+  const prev = lastRequest;
+  const text = String(response.what_to_do_now || '');
+  const m = text.match(/about (\d+) seconds/);
+  lastRequest = m ? { seconds: Number(m[1]), shownAt: now } : null;
+  if (!prev || prev.seconds < 8) return;
+  const actual = (now - prev.shownAt) / 1000 - 0.3;
+  if (actual < 3 || actual > prev.seconds * 2.5) return;
+  const ratio = Math.min(1.6, Math.max(0.6, prev.seconds / actual));
+  wordsPerSecond = Math.min(4.6, Math.max(1.8, wordsPerSecond * (0.4 + 0.6 * ratio)));
+}
+
 /** The only tour tool Jarvis has during a tour. Synchronous: the answer goes back to Jarvis at once. */
 export function tourNext(): PreparedStop {
   if (!state.active) {
@@ -480,6 +501,7 @@ export function tourNext(): PreparedStop {
       prepared.show = () => {
         show();
         if (index > shownIndex) progress(index);
+        calibratePace(prepared.response);
       };
       return prepared;
     } catch {
