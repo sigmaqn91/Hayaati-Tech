@@ -190,7 +190,7 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
     GREETING_PRONUNCIATION_RULE,
     'THIS IS A ONE-SIDED GUIDED TOUR: you narrate the website by yourself from start to end. Never ask "shall we continue?", never ask permission, never wait for the visitor between stops. ' +
       (full
-        ? 'Only at the very start you may ask at most two short questions (for example their name, and what interests them most). After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then and lean a little towards what they said they like.'
+        ? 'Only at the very start you ask ONE short question: their name. Ask nothing else (not what they like, not who they are, not what they want to see). After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then.'
         : 'Do not ask the visitor anything at all.'),
     'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again. Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show.',
     'TIME: the tour must finish within its time. Keep to the speaking time given in each result; it is calculated so the whole tour fits.',
@@ -1412,7 +1412,7 @@ export function useJarvisVoice({
           liveSession.sendRealtimeInput({
             text:
               tour === 'full'
-                ? `[SYSTEM] The visitor pressed the Premium Full Tour button. Greet them now in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them warmly to the full tour of Hayaati Web Technology, then ask at most two short questions: their name, and what interests them most in the future (cities, space, AI, health ...). After their answer, or if they stay silent, call tour_next.`
+                ? `[SYSTEM] The visitor pressed the Premium Full Tour button. Greet them now in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them warmly to the full tour of Hayaati Web Technology, then ask ONLY their name, nothing else (no other question about interests, preferences or who they are). After their answer, or if they stay silent, call tour_next.`
                 : `[SYSTEM] The visitor pressed the Quick Tour button. In one or two short sentences in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them to a quick three-minute tour of the highlights, then call tour_next right away. Do not ask anything.`,
           });
         } catch {}
