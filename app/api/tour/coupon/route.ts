@@ -16,8 +16,10 @@ export async function POST(req: NextRequest) {
     body = {};
   }
 
-  // The verified owner (founder) can request and test as many coupons as she likes.
-  const owner = verifyOwnerSession(req);
+  // The founder can request and test as many coupons as she likes, but only while owner mode is ON:
+  // the signed owner session alone is not enough (it can outlive owner mode for up to 2 hours), so the page
+  // also says owner mode is on. Without a valid signed session that flag does nothing.
+  const owner = verifyOwnerSession(req) && body?.ownerMode === true;
   const limit = owner ? { ok: true as const, retryAfter: 0 } : await checkVoiceActionLimit(req, 'coupon', 20, 600);
   if (!limit.ok) {
     return NextResponse.json({ ok: false, reason: 'rate_limited', retryAfterSeconds: limit.retryAfter }, { status: 429 });

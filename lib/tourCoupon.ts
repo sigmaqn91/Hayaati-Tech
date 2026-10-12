@@ -4,6 +4,7 @@
 // The code itself is created and checked only on the server (app/api/tour/coupon, lib/couponStore.ts).
 
 import { NAV_OFFSET, docTop, jumpTo, nextFrames } from '@/lib/jarvisScreen';
+import { isOwnerUi } from '@/lib/ownerState';
 
 export const COUPON_STORAGE_KEY = 'hayaati_tour_coupon';
 /** Founder section shows the request panel (only for visitors who came from the Premium Tour box). */
@@ -44,7 +45,7 @@ export async function checkCoupon(code: string): Promise<CouponState> {
     const res = await fetch('/api/tour/coupon', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'check', code }),
+      body: JSON.stringify({ action: 'check', code, ownerMode: isOwnerUi() }),
     });
     const data = await res.json().catch(() => ({}));
     if (res.status === 429) return 'rate_limited';
@@ -59,7 +60,7 @@ export async function requestCouponCode(): Promise<{ ok: true; code: string } | 
     const res = await fetch('/api/tour/coupon', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'request' }),
+      body: JSON.stringify({ action: 'request', ownerMode: isOwnerUi() }),
     });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data?.code) return { ok: true, code: String(data.code) };
