@@ -100,7 +100,7 @@ function fullPlan(): TourStep[] {
     { key: 'places', kind: 'section', section: 'places', start: '#places', label: 'Cities & Places of the Future: eight postcards of future cities, on Earth, the Moon, Mars and in orbit', weight: 1.2 },
     { key: 'projects', kind: 'section', section: 'projects', start: '#projects', label: 'My Projects by founder Aliya Khan (Hayaati Mehendi Studio is live)', weight: 0.8 },
     { key: 'advertise', kind: 'section', section: 'advertise', start: '#advertise', label: 'Advertise with Hayaati (a form to list a project or business)', weight: 0.6 },
-    { key: 'about', kind: 'section', section: 'about', start: '#about', label: 'About the founder, Aliya Khan (this is also where visitors request their free Premium Tour coupon)', weight: 1 },
+    { key: 'about', kind: 'section', section: 'about', start: '#about', label: 'About the founder, Aliya Khan (the founder; visitors do not request the Premium Tour coupon here, they request it with the Request coupon button after pressing the Premium Tour button)', weight: 1 },
     { key: 'contact', kind: 'section', section: 'contact', start: '#contact', label: 'Contact (the last stop of the tour)', weight: 0.9 }
   );
   return steps;
@@ -454,7 +454,7 @@ function finish(reason: 'done' | 'time'): PreparedStop {
       what_to_do_now:
         'The tour is complete. Say a warm, short goodbye in two or three sentences: thank the visitor for taking the tour' +
         (quick
-          ? ', and mention gently that the Premium Full Tour shows every era and all 42 catalogue cards in detail, free the first time with a coupon from the founder section.'
+          ? ', then say in complete, natural spoken sentences (never a clipped fragment, never a script) that this Quick Tour has now ended, and that if they want to know everything in full detail they can take the Premium Tour. If you mention the coupon: the Premium Tour is free the first time, and the "Request coupon" button appears after pressing the Premium Tour button (the coupon is not requested from the founder section by itself).'
           : ' and invite them to explore the website on their own and to share their opinion with the rating button.') +
         ' Do not call any tool again.',
     },
