@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { Check, Copy, Crown, Compass, Send, Gift } from 'lucide-react';
+import { playApply, playCopy, playGiftFly, playGreen, playPress, playPrint, playRed, playSend, playTick, playWrap, playYellow } from '@/lib/couponSounds';
 import { Beam } from '@/components/Beam';
 import {
   COUPON_FLOW_EVENT,
@@ -63,6 +64,7 @@ export function CouponRequestPanel() {
       const from = sealRef.current?.getBoundingClientRect();
       const to = rect('[data-coupon-machine-slot]');
       if (from && to && !still) setFlight({ kind: 'send', from, to, id: Date.now() });
+      playSend(SEND_MS);
       await sleep(SEND_MS);
       if (!alive()) return;
       setFlight(null);
@@ -73,6 +75,8 @@ export function CouponRequestPanel() {
         if (!alive()) return;
         setCount(left);
         broadcast('waiting', { count: left });
+        if (left === wait) playYellow();
+        else playTick(left);
         await sleep(1000);
       }
       const res = await request;
@@ -80,6 +84,7 @@ export function CouponRequestPanel() {
       if (!res.ok) {
         setDenied(res.reason === 'already_used' ? 'used' : 'error');
         broadcast('denied');
+        playRed();
         window.setTimeout(() => alive() && broadcast('idle'), 4000);
         return;
       }
@@ -88,6 +93,9 @@ export function CouponRequestPanel() {
 
       // 3. Green light: the coupon prints out of the machine like a receipt.
       broadcast('printing', { code: res.code });
+      playGreen();
+      // The light turns green first; a breath later the printer starts.
+      if (!still) window.setTimeout(() => alive() && playPrint(PRINT_MS - 280), 280);
       await sleep(still ? 300 : PRINT_MS);
       if (!alive()) return;
 
@@ -99,8 +107,10 @@ export function CouponRequestPanel() {
         // Wrapped just above the printer's slot, where the printed coupon stands.
         const ticket = new DOMRect(slot.left, slot.top - slot.width * 0.95, slot.width, slot.width * 0.9);
         setFlight({ kind: 'gift', from: ticket, to: target, id: Date.now() });
+        playWrap(WRAP_MS);
         await sleep(WRAP_MS);
         broadcast('flying', { code: res.code });
+        playGiftFly(FLY_MS);
         await sleep(FLY_MS);
       }
       if (!alive()) return;
@@ -139,6 +149,7 @@ export function CouponRequestPanel() {
   if (!active) return null;
 
   const copy = async () => {
+    playCopy();
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
@@ -229,7 +240,10 @@ export function CouponRequestPanel() {
                 <p className="mt-2 text-[12.5px] text-slate-400">Works once, for one Full Tour.</p>
                 <button
                   type="button"
-                  onClick={() => applyCouponFromFounder(code)}
+                  onClick={() => {
+                    playApply();
+                    applyCouponFromFounder(code);
+                  }}
                   className="cp-apply mt-4 w-full sm:w-auto min-h-[48px] px-6 rounded-md bg-[#38e8ff] text-[#05070a] font-mono text-xs sm:text-sm font-bold uppercase tracking-wider hover:bg-[#38e8ff]/90 shadow-[0_0_22px_rgba(56,232,255,0.35)] transition-all cursor-pointer"
                 >
                   Apply for Full Tour
@@ -253,6 +267,7 @@ export function CouponRequestPanel() {
                 <button
                   type="button"
                   onClick={async () => {
+                    playPress();
                     jumpTo(0);
                     await nextFrames();
                     startQuickTour();
