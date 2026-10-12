@@ -13,7 +13,7 @@ const loadGenAI = () => {
   }
   return genaiPromise;
 };
-import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE, RETELL_RULE, TOUR_TONE_RULE } from '@/lib/jarvisLocale';
+import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE, RETELL_RULE, TOUR_TONE_RULE, BRAND_PRONUNCIATION_RULE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION, JARVIS_FEEDBACK_INSTRUCTION } from '@/lib/jarvisTools';
 import { beginTour, endTour, rewindForResume, tourActive, tourNext, TOUR_FUNCTION_DECLARATIONS, type TourMode } from '@/lib/jarvisTour';
@@ -158,6 +158,7 @@ function buildSystemInstruction(languageCode: string, isOwner: boolean, knowledg
     `LOCAL, NATURAL SPEECH (very important): ${lp.style}${where}`,
     `GREETING: The normal greeting in ${lp.name} is ${lp.greeting}. Always open with that culturally correct greeting, never with a literal translation of the English word "hello".`,
     GREETING_PRONUNCIATION_RULE,
+    BRAND_PRONUNCIATION_RULE,
     NAME_GREETING_RULE,
     'VOICE: Sound like a real, warm human, not a robot: relaxed natural pace, natural pauses and intonation, friendly energy, short sentences. Do not read lists or symbols aloud; talk like a person.',
     'LISTENING: Listen carefully to the visitor\'s full sentence and answer what they actually said. If you hear only noise or silence, stay quiet and wait. If speech was unclear, politely ask them to repeat it once. Never respond to your own voice. Keep answers short and clear.',
@@ -188,6 +189,7 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
     TOUR_TONE_RULE,
     `GREETING: the normal greeting in ${lp.name} is ${lp.greeting}.`,
     GREETING_PRONUNCIATION_RULE,
+    BRAND_PRONUNCIATION_RULE,
     'THIS IS A ONE-SIDED GUIDED TOUR: you narrate the website by yourself from start to end. Never ask "shall we continue?", never ask permission, never wait for the visitor between stops. ' +
       (full
         ? 'Only at the very start you ask ONE short question: their name. Ask nothing else (not what they like, not who they are, not what they want to see). After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then.'

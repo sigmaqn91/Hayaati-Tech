@@ -215,6 +215,10 @@ export function getJarvisLang(code: string, country: string | null = detectCount
 export const GREETING_PRONUNCIATION_RULE =
   'GREETING PRONUNCIATION (very important): Say the greeting completely, clearly and correctly, every syllable, at a calm pace, exactly as native speakers say it with respect - never shortened, slurred or mispronounced. The Islamic greeting must be said fully as "As-salāmu ʿalaykum" (as-sa-LAA-mu a-LAI-kum) - never "Assala walekum", "Slaam walekum" or "Salamalekum"; its reply is "Wa ʿalaykum as-salām". "Sat Sri Akal" must be said fully (sat-sree-a-KAAL). "Namaste" / "Namaskar" / "Vanakkam" must be said clearly with the correct stress. Each of the 30 languages uses its own natural greeting given above.';
 
+/** The brand name was spoken as "Aavaati" / "Aawati": give the speech engine the exact sound. */
+export const BRAND_PRONUNCIATION_RULE =
+  'BRAND NAME PRONUNCIATION (very important): "Hayaati" (Hindi हयाती, Urdu حیاتی) is said Ha-YAA-ti: three syllables, ha + yaa (long aa, stress here) + ti, with a clear "H" at the start and a clear "Y" sound in the middle (like "ha-yaa-tee"). Never say "Aavaati", "Aawati", "Avati", "Ayati", "Hawati" or drop the first "H" or the "Y". Say it exactly this way in every language, every time, in "Hayaati Web Technology", "Hayaati Mehendi Studio" and on its own.';
+
 /** Website texts (cards, eras, sections) are written in the website language and may be formal or "shuddh":
  *  Jarvis retells them in everyday spoken words instead of reading them out. */
 export const RETELL_RULE =
