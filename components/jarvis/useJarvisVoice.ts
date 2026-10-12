@@ -1640,6 +1640,7 @@ export function useJarvisVoice({
       clearTimeout(earlier.fallback);
       scheduleTourShow(earlier.show);
     }
+    const afterIntro = tourIntroRef.current;
     if (tourIntroRef.current) {
       // Opening questions are over: the microphone switches off for the rest of the tour.
       tourIntroRef.current = false;
@@ -1653,7 +1654,12 @@ export function useJarvisVoice({
       const stop = tourNext();
       show = stop.show;
       if (stop.finished) tourEndAfterTurnRef.current = true;
-      given = stop.response;
+      given = afterIntro
+        ? {
+            ...stop.response,
+            note: 'You have already greeted and introduced yourself at the start of this tour. Do not greet again, do not say hello or introduce yourself or ask anything; begin straight with this stop.',
+          }
+        : stop.response;
       return given;
     };
     try {
