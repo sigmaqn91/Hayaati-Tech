@@ -5,7 +5,7 @@ import { Compass, Crown } from 'lucide-react';
 import { PremiumTourDialog } from './PremiumTourDialog';
 import { OPEN_PREMIUM_EVENT, startQuickTour } from '@/lib/tourCoupon';
 import { Beam } from '@/components/Beam';
-import { playPress, prefetchCouponSounds } from '@/lib/couponSounds';
+import { playPress } from '@/lib/couponSounds';
 
 const warmJarvis = () => window.dispatchEvent(new CustomEvent('jarvis:warm'));
 
@@ -13,13 +13,6 @@ const warmJarvis = () => window.dispatchEvent(new CustomEvent('jarvis:warm'));
 export function TourButtons() {
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [running, setRunning] = useState(false);
-
-  // The coupon-flow sound files (small) download quietly once the page is idle, so they are ready on the first tap.
-  useEffect(() => {
-    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
-    const t = window.setTimeout(() => (w.requestIdleCallback ? w.requestIdleCallback(prefetchCouponSounds, { timeout: 4000 }) : prefetchCouponSounds()), 3500);
-    return () => window.clearTimeout(t);
-  }, []);
 
   useEffect(() => {
     const onStatus = (e: Event) => {
