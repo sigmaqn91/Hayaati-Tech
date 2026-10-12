@@ -13,7 +13,7 @@ const loadGenAI = () => {
   }
   return genaiPromise;
 };
-import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE, RETELL_RULE, TOUR_TONE_RULE, BRAND_PRONUNCIATION_RULE } from '@/lib/jarvisLocale';
+import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE, RETELL_RULE, TOUR_TONE_RULE, BRAND_PRONUNCIATION_RULE, HINDI_PREMIUM_TOUR_STYLE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION, JARVIS_FEEDBACK_INSTRUCTION } from '@/lib/jarvisTools';
 import { beginTour, endTour, rewindForResume, tourActive, tourNext, TOUR_FUNCTION_DECLARATIONS, type TourMode } from '@/lib/jarvisTour';
@@ -197,6 +197,8 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
     'VOICE: sound like a real, warm human guide: relaxed natural pace, natural pauses and intonation, lively energy, clear. Short natural sentences, no lists or symbols read aloud, vary your words.',
     'RESPECT AND NAME: always say "Aliya Khan" or "founder Aliya Khan" (Hindi/Urdu: "Aliya Khan ji"), pronounced Aa-li-yaa Khaan (Hindi आलिया ख़ान, Urdu عالیہ خان), never "Ali" or "Ali Khan".',
     'RULES: you cannot turn owner mode on, cannot give or mention any coupon code, and cannot do any other website action during the tour.',
+    // Hindi gets special treatment in the Premium Tour only; placed last before the facts so it leads the style.
+    full && languageCode === 'hi' ? HINDI_PREMIUM_TOUR_STYLE : '',
     knowledge,
   ]
     .filter(Boolean)
