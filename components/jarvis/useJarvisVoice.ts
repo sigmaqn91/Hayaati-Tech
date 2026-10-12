@@ -297,6 +297,8 @@ export function useJarvisVoice({
   // The next stop's screen change, waiting for the moment Jarvis's current words end (see playLiveAudioChunk).
   const tourPendingShowRef = useRef<{ show: () => void; fallback: ReturnType<typeof setTimeout> } | null>(null);
   const tourShowTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Premium Tour: stops are handed over one after another, each only after Jarvis's words have finished playing.
+  const tourFullQueueRef = useRef<Promise<void>>(Promise.resolve());
   // Stall guard and automatic reconnection (a long tour can outlive one Live connection).
   const tourWatchdogRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastServerMsgAtRef = useRef<number>(0);
@@ -1489,7 +1491,30 @@ export function useJarvisVoice({
   // Tour: the next stop is prepared and handed to Jarvis AT ONCE (while his last words are still playing), so
   // his next words follow without a gap. The screen changes when those words end. `calls` are his tour_next
   // calls; null means his turn ended without one, so the stop is handed to him as a message instead.
+  // Premium Tour: strictly one stop after the other. Jarvis's current words play to the end, then the screen
+  // changes to the next stop, and only then is he told what that stop is. He can never speak about a stop that
+  // is not on the screen (a short breath between stops instead of any mismatch). The Quick Tour is unchanged.
   handTourStopRef.current = (calls) => {
+    if (tourModeRef.current !== 'full') {
+      handOverTourStop(calls, false);
+      return;
+    }
+    const sessionId = liveSessionIdRef.current;
+    tourPendingToolsRef.current += 1;
+    tourFullQueueRef.current = tourFullQueueRef.current
+      .then(async () => {
+        try {
+          await waitForSpeechToFinish(sessionId);
+          if (liveSessionIdRef.current !== sessionId || tourModeRef.current !== 'full') return;
+          handOverTourStop(calls, true);
+        } finally {
+          tourPendingToolsRef.current = Math.max(0, tourPendingToolsRef.current - 1);
+        }
+      })
+      .catch(() => {});
+  };
+
+  const handOverTourStop = (calls: { id?: string; name?: string }[] | null, showFirst: boolean) => {
     if (!tourModeRef.current) return;
     // Jarvis has not started speaking about the stop he was just handed (a double tour_next, or his turn end
     // and his tour_next arriving together): he gets that same stop again, the tour does not move on.
@@ -1543,19 +1568,28 @@ export function useJarvisVoice({
       return given;
     };
     try {
+      const functionResponses = [];
+      let textResponse: Record<string, unknown> | null = null;
       if (calls) {
-        const functionResponses = [];
         for (const call of calls) {
           if (cancelledToolIdsRef.current.has(String(call.id))) continue;
           const response =
             call.name === 'tour_next' ? takeStop() : { ok: false, error: 'only tour_next is available during the tour' };
           functionResponses.push({ id: call.id, name: call.name, response });
         }
-        if (functionResponses.length) liveSessionRef.current?.sendToolResponse({ functionResponses });
       } else {
-        const response = takeStop();
+        textResponse = takeStop();
+      }
+      // Premium Tour: the stop is on the screen before Jarvis hears what it is.
+      if (showFirst && show) {
+        const run: () => void = show;
+        show = null;
+        run();
+      }
+      if (functionResponses.length) liveSessionRef.current?.sendToolResponse({ functionResponses });
+      if (textResponse) {
         liveSessionRef.current?.sendRealtimeInput({
-          text: `[SYSTEM] tour_next result (the next stop): ${JSON.stringify(response)}`,
+          text: `[SYSTEM] tour_next result (the next stop): ${JSON.stringify(textResponse)}`,
         });
       }
     } catch (error) {

@@ -69,7 +69,8 @@ function fullPlan(): TourStep[] {
       key: `era-${era}`,
       kind: 'era',
       section: 'timeline',
-      start: i === 0 ? '#timeline' : '[data-tour="era-tabs"]',
+      // Every era starts at the era buttons, so its banner sits right at the top of the screen.
+      start: '[data-tour="era-tabs"]',
       era,
       label: `Future Timeline, era ${era}: the banner, its story, breakthroughs and milestones`,
       weight: 1.9,
