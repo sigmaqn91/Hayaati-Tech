@@ -616,7 +616,7 @@ export function useJarvisVoice({
   // Do not infer interruptions from microphone volume; Gemini Live's VAD is
   // responsible for deciding whether incoming activity is user speech.
   /** Resolves when the Jarvis audio already queued has finished playing (plus a short, natural pause). */
-  const waitForSpeechToFinish = useCallback(async (sessionId: number) => {
+  const waitForSpeechToFinish = useCallback(async (sessionId: number | null) => {
     const pause = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
     await pause(120); // audio chunks sent just before the tool call
     for (let i = 0; i < 240; i++) {
