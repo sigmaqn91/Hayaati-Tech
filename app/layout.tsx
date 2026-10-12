@@ -28,6 +28,7 @@ export const metadata: Metadata = {
   title: 'Hayaati Web Technology — Future (2030–2050)',
   description:
     'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030–2050. Built by Aliya Khan.',
+  applicationName: 'Hayaati Web Technology',
   metadataBase: new URL(appUrl),
   alternates: {
     canonical: '/',
@@ -52,7 +53,8 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'Hayaati Web Technology',
-  url: 'https://www.hayaatiweb.site',
+  alternateName: ['Hayaati Web', 'Hayaati'],
+  url: `${appUrl}/`,
   description:
     'A cinematic blueprint of human innovation, cognitive machines, orbital colonies, and sustainable habitats across 2030–2050.',
   creator: {
@@ -64,7 +66,8 @@ const jsonLd = {
   publisher: {
     '@type': 'Organization',
     name: 'Hayaati Web Technology',
-    url: 'https://www.hayaatiweb.site',
+    url: `${appUrl}/`,
+    logo: `${appUrl}/icon.png`,
     contactPoint: {
       '@type': 'ContactPoint',
       email: 'Hayaati.Technology@gmail.com',
