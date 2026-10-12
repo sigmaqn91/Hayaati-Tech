@@ -5,6 +5,7 @@ import { Compass, Crown } from 'lucide-react';
 import { PremiumTourDialog } from './PremiumTourDialog';
 import { OPEN_PREMIUM_EVENT, startQuickTour } from '@/lib/tourCoupon';
 import { Beam } from '@/components/Beam';
+import { playPress } from '@/lib/couponSounds';
 
 const warmJarvis = () => window.dispatchEvent(new CustomEvent('jarvis:warm'));
 
@@ -45,7 +46,11 @@ export function TourButtons() {
 
       <button
         type="button"
-        onClick={() => !running && setPremiumOpen(true)}
+        onClick={() => {
+          if (running) return;
+          playPress();
+          setPremiumOpen(true);
+        }}
         onPointerEnter={warmJarvis}
         onFocus={warmJarvis}
         disabled={running}
