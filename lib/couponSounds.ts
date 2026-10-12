@@ -160,10 +160,12 @@ export function playRed() {
   play('bell-small', { delay: 0.32, gain: 0.6, rate: 0.6 });
 }
 
-/** The receipt printer prints the coupon, then it is torn off. */
+/** The receipt printer prints the coupon in two quick, light passes, then it is torn off. */
 export function playPrint(ms: number) {
-  play('printer', { gain: 0.9 });
-  play('tear', { delay: Math.max(0.6, ms / 1000 - 0.45), gain: 0.55 });
+  const d = ms / 1000;
+  play('printer', { gain: 0.85 });
+  play('printer', { delay: Math.min(0.62, d * 0.42), gain: 0.85 });
+  play('tear', { delay: Math.max(0.9, d - 0.3), gain: 0.5 });
 }
 
 /** Gift wrapping on the desk: paper folded and crinkled, then the ribbon pulled. */
