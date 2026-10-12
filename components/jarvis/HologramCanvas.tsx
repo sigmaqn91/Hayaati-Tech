@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { crispPixelRatio } from '@/lib/crispPixels';
+import { getDeviceProfile } from '@/lib/deviceProfile';
 
 export type AssistantVisualState = 'idle' | 'listening' | 'thinking' | 'speaking';
 
@@ -52,7 +53,14 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     };
     const start = () => {
       if (cancelled) return;
-      cleanup = initOrb(container);
+      // A browser without working 3D (blocked GPU, privacy mode, old phone) must never take the page down with it:
+      // the orb is simply left out there and everything else keeps working.
+      try {
+        cleanup = initOrb(container);
+      } catch (err) {
+        console.warn('[Jarvis orb] 3D not available on this device/browser', err);
+        container.replaceChildren();
+      }
     };
     // Wait one frame first: the background animation and the advert have drawn their first picture and their
     // fade-in is on screen, and only then the (heavier) orb is built, so nothing on the first screen pops or stalls.
@@ -74,7 +82,10 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
     // Detect mobile or low performance
     const isMobile = window.innerWidth < 768;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const particleCount = isMobile ? 8000 : 22000;
+    // Light tier (weak phone/browser): the phone particle count and plain 1x pixels, so the orb stays smooth there.
+    const light = getDeviceProfile().tier === 'low';
+    const particleCount = isMobile || light ? 8000 : 22000;
+    const maxRatio = light ? 1 : 2;
 
     // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
@@ -120,7 +131,7 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       el.style.maskImage = mask;
     };
     applyFrame(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(crispPixelRatio(2));
+    renderer.setPixelRatio(crispPixelRatio(maxRatio));
     // Production: skip three.js's shader-error read-back (a GPU stall at start-up that only helps while debugging).
     renderer.debug.checkShaderErrors = process.env.NODE_ENV !== 'production';
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -528,14 +539,27 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
         : null;
     screenObserver?.observe(container);
 
+    // Graphics memory reclaimed by the phone (context lost): stop drawing until the browser gives it back,
+    // then carry on (three.js rebuilds its GPU state itself) instead of flashing a broken orb.
+    let contextLost = false;
+    const onContextLost = () => {
+      contextLost = true;
+    };
+    const onContextRestored = () => {
+      contextLost = false;
+      wake();
+    };
+    renderer.domElement.addEventListener('webglcontextlost', onContextLost);
+    renderer.domElement.addEventListener('webglcontextrestored', onContextRestored);
+
     // Adaptive sharpness: if the phone cannot keep up, render slightly fewer pixels (looks the same, runs smooth).
-    let pixelRatio = crispPixelRatio(2);
+    let pixelRatio = crispPixelRatio(maxRatio);
     let perfFrames = 0;
     let perfAcc = 0;
     let lastFrameAt = 0;
 
     const animate = (now?: number) => {
-      if (!isTabVisible || !onScreen) {
+      if (!isTabVisible || !onScreen || contextLost) {
         lastFrameAt = 0;
         looping = false;
         return;
@@ -731,6 +755,8 @@ export const HologramCanvas: React.FC<HologramCanvasProps> = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       screenObserver?.disconnect();
       resizeObserver.disconnect();
+      renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
+      renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       cancelAnimationFrame(animationFrameId);
       renderer.dispose();
       particleGeometry.dispose();

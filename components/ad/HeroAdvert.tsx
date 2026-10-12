@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createSculpture, type SculptureEngine } from './sculptureEngine';
 import { crispPixelRatio } from '@/lib/crispPixels';
+import { getDeviceProfile } from '@/lib/deviceProfile';
 
 // Looping cinematic advertisement for the hero (UI only, English copy built from real site information).
 interface AdScene {
@@ -117,6 +118,7 @@ export function HeroAdvert() {
 
     const lowPower =
       window.innerWidth < 768 ||
+      getDeviceProfile().tier === 'low' ||
       (navigator.hardwareConcurrency || 4) <= 4 ||
       ((navigator as unknown as { deviceMemory?: number }).deviceMemory || 4) <= 4;
     const engine = createSculpture(canvas, { lowPower });

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { crispPixelRatio } from '@/lib/crispPixels';
+import { getDeviceProfile } from '@/lib/deviceProfile';
 
 // true = hero photo wapas dikhao (animation halka glow ban jaata hai). false = poora black + animation.
 const SHOW_PHOTO = false;
@@ -25,14 +26,15 @@ export default function HeroCosmos() {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const cores = navigator.hardwareConcurrency || 4;
     const mem = (navigator as unknown as { deviceMemory?: number }).deviceMemory || 4;
-    let quality = cores <= 4 || mem <= 4 || window.innerWidth < 600 ? 1 : 2;
+    const light = getDeviceProfile().tier === 'low';
+    let quality = light || cores <= 4 || mem <= 4 || window.innerWidth < 600 ? 1 : 2;
 
     let W = 1;
     let H = 1;
     let dpr = 1;
     // Sharpness steps: start at the screen's real pixel density (crisp on 4K / Retina, capped at 2x),
     // and only if the device can't keep up step down to softer levels BEFORE any animation detail is cut.
-    const deviceDpr = crispPixelRatio(2);
+    const deviceDpr = crispPixelRatio(light ? 1 : 2);
     const sharpSteps = [2, 1.5, 1.25, 1]
       .map((s) => Math.min(deviceDpr, s))
       .filter((s, i, a) => a.indexOf(s) === i);

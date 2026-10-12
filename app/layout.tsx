@@ -3,6 +3,7 @@ import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { getSiteUrl } from '@/lib/siteUrl';
 import { GEO_BOOT_SCRIPT } from '@/lib/geoLanguage';
+import { DEVICE_BOOT_SCRIPT } from '@/lib/deviceProfile';
 
 const appUrl = getSiteUrl();
 
@@ -11,11 +12,14 @@ const REFRESH_TOP_SCRIPT = `(function(){try{var n=performance.getEntriesByType&&
 // Same stylesheet (and id) HeroAdvert adds itself; added here from <head> so it is not render-blocking but starts early.
 const AD_FONTS_SCRIPT = `(function(){try{if(document.getElementById('ad-serif-font'))return;var l=document.createElement('link');l.id='ad-serif-font';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500&family=Sora:wght@300;400;500&family=JetBrains+Mono:wght@500;700&family=Cormorant+Garamond:wght@400;500&display=swap';document.head.appendChild(l)}catch(e){}})();`;
 
-// Normal responsive viewport: no forced zoom lock (pinch zoom stays available), inputs are 16px so no auto-zoom,
-// and the visual viewport shrinks for the on-screen keyboard (handled in JarvisOverlay).
+// Desktop layout everywhere: phones in every browser open the 980px desktop layout (the same look as Chrome's
+// "Desktop site" mode) instead of a squeezed mobile layout. Computers ignore this tag; tablets and screens that are
+// 980px or wider are switched back to their own width by DEVICE_BOOT_SCRIPT before the first paint.
+// No zoom lock (pinch zoom stays available), and the visual viewport shrinks for the on-screen keyboard (JarvisOverlay).
 export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
+  width: 980,
+  // No initial-scale: the browser fits the 980px page to the screen width (an explicit 1 would open it zoomed in).
+  initialScale: undefined,
   viewportFit: 'cover',
   interactiveWidget: 'resizes-visual',
 };
@@ -77,6 +81,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Device brain: picks the layout width and the device's performance tier before anything is drawn. */}
+        <script dangerouslySetInnerHTML={{ __html: DEVICE_BOOT_SCRIPT }} />
         {/* Refresh = a fresh start: the page opens at the top (hero) instead of jumping back to the old scroll
             position or to the last menu section (#about ...) kept in the address bar. */}
         <script dangerouslySetInnerHTML={{ __html: REFRESH_TOP_SCRIPT }} />

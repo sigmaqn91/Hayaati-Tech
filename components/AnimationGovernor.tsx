@@ -17,6 +17,7 @@
  */
 
 import { useEffect } from 'react';
+import { getDeviceProfile } from '@/lib/deviceProfile';
 
 // Small zones that hold the looping animations (see the matching rule in globals.css). Sections are watched only
 // for their own background ::before / ::after, so turning one on or off no longer re-checks its whole content.
@@ -30,6 +31,14 @@ export function AnimationGovernor() {
   useEffect(() => {
     if (typeof IntersectionObserver === 'undefined') return;
     const watched = new WeakSet<Element>();
+    // Light tier: loops run only while actually on screen (no early start), so a weak phone draws as little as
+    // possible. On a slow connection photos start downloading about half a screen ahead instead of one and a half:
+    // the photos the visitor is looking at get the whole connection and finish first.
+    const device = getDeviceProfile();
+    const light = device.tier === 'low';
+    const animMargin = light ? '60px 0px 60px 0px' : '300px 0px 300px 0px';
+    const fetchAhead = device.slowNet ? '60%' : '150%';
+    const decodeAhead = light ? '50%' : '100%';
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -47,7 +56,7 @@ export function AnimationGovernor() {
         }
       },
       // Start a little before a card scrolls in, so it is already moving when it appears.
-      { rootMargin: '300px 0px 300px 0px' }
+      { rootMargin: animMargin }
     );
 
     const smilIo = new IntersectionObserver(
@@ -58,7 +67,7 @@ export function AnimationGovernor() {
           else svg.pauseAnimations();
         }
       },
-      { rootMargin: '300px 0px 300px 0px' }
+      { rootMargin: animMargin }
     );
 
     const scan = () => {
@@ -87,7 +96,7 @@ export function AnimationGovernor() {
           if (img.loading === 'lazy') img.loading = 'eager';
         }
       },
-      { rootMargin: '150% 0px 150% 0px' }
+      { rootMargin: `${fetchAhead} 0px ${fetchAhead} 0px` }
     );
     // Photo pre-decode: a phone keeps only a limited number of big photos unpacked in memory, so photos the visitor
     // scrolled past are thrown out and had to be unpacked again (2-3 MB originals) at the very moment they came back
@@ -109,7 +118,7 @@ export function AnimationGovernor() {
           else img.addEventListener('load', () => predecode(img), { once: true });
         }
       },
-      { rootMargin: '100% 0px 100% 0px' }
+      { rootMargin: `${decodeAhead} 0px ${decodeAhead} 0px` }
     );
     const decodeWatched = new WeakSet<Element>();
     const scanImages = () => {

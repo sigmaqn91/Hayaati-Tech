@@ -5,6 +5,28 @@ import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 import { crispPixelRatio } from '@/lib/crispPixels';
 
+// Smooth-shrink layers cost graphics memory: each one holds the full original photo on the GPU. With all 55 photos
+// layered at once (~345 MB), phones ran short of graphics memory (black boxes, blinking, tab crashes). Now a photo has
+// its layer only while it is on or near the screen (60% of a screen ahead/behind, so the switch is never seen).
+// Same file, same size, same crop. (Weak phones keep these layers too: in low-memory tests a photo layer is the
+// most reliable way for a photo to appear at once, so they are kept, just not for off-screen photos.)
+const wantsCrisp = new WeakMap<Element, boolean>();
+let crispIo: IntersectionObserver | null = null;
+const setCrisp = (img: HTMLElement, on: boolean) => {
+  if (on) img.style.setProperty('will-change', 'transform', 'important');
+  else img.style.removeProperty('will-change');
+};
+function crispObserver(): IntersectionObserver | null {
+  if (crispIo || typeof IntersectionObserver === 'undefined') return crispIo;
+  crispIo = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) setCrisp(e.target as HTMLElement, e.isIntersecting && !!wantsCrisp.get(e.target));
+    },
+    { rootMargin: '60% 0px 60% 0px' }
+  );
+  return crispIo;
+}
+
 interface RealImageSlotProps {
   src: string;
   alt: string;
@@ -49,12 +71,17 @@ export function RealImageSlot({
   useEffect(() => {
     const img = imgEl.current;
     if (!img || !isLoaded) return;
+    const io = crispObserver();
     const check = () => {
       const r = img.getBoundingClientRect();
       if (!img.naturalWidth || r.width < 2) return;
       const scale = Math.max(r.width / img.naturalWidth, r.height / img.naturalHeight) * crispPixelRatio(4);
-      if (1 / scale > 1.8) img.style.setProperty('will-change', 'transform', 'important');
-      else img.style.removeProperty('will-change');
+      wantsCrisp.set(img, 1 / scale > 1.8);
+      if (io) {
+        // Re-evaluate through the watcher (it knows whether the photo is near the screen).
+        io.unobserve(img);
+        io.observe(img);
+      }
     };
     check();
     // Only width changes can change the shrink factor. Phone address-bar slides (height only) fire "resize" on
@@ -66,7 +93,11 @@ export function RealImageSlot({
       check();
     };
     window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      io?.unobserve(img);
+      setCrisp(img, false);
+    };
   }, [isLoaded, src]);
 
   // Card photos are already small 800px WebP files: serve them as they are, so a card and its popup

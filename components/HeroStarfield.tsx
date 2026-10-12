@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { crispPixelRatio } from '@/lib/crispPixels';
+import { getDeviceProfile } from '@/lib/deviceProfile';
 
 interface HeroStarfieldProps {
   hasImage?: boolean;
@@ -40,7 +41,9 @@ export function HeroStarfield({ hasImage = false, className = '' }: HeroStarfiel
 
     // Soft background layer (mostly shown at 40% opacity): 1x pixels on phones; on computers the screen's real
     // pixel density (up to 2x) so thin grid lines stay sharp on 4K / Retina screens.
-    const isPhone = window.innerWidth < 768;
+    // Phones in the mobile layout and light-tier devices: 1x pixels, ~30 fps.
+    const device = getDeviceProfile();
+    const isPhone = window.innerWidth < 768 || device.tier === 'low';
     const getDpr = () => (isPhone ? 1 : crispPixelRatio(2));
     const minFrameGap = isPhone ? 32 : 15; // ~30 fps on phones, ~60 on desktop
 

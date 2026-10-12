@@ -371,6 +371,11 @@ html.bg-paused .hero-panel__holo-aurora { animation-play-state: paused; }
   animation: beam-spin 7s linear infinite;
 }
 @keyframes beam-spin { to { transform: rotate(360deg); } }
+/* Older phone browsers without container units: a fixed square that still covers any card (the light is a conic
+   gradient from the centre, so its look does not depend on the square's size). */
+@supports not (width: 1cqmax) {
+  .beam__ray { width: 1600px; height: 1600px; margin: -800px 0 0 -800px; }
+}
 
 /* =====================================================================
    LANGUAGE BUTTON highlight (UI only): slightly larger (+5% length, +3% height),
@@ -1881,3 +1886,21 @@ html.bg-paused .rate-btn__star { animation-play-state: paused; }
 .vn-btn--ghost { color: #cbd5e1; background: transparent; border-color: rgba(148, 163, 184, 0.35); min-width: 36px; padding: 0 0.5rem; }
 @keyframes vn-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .vn-card { animation: none; } }
+/* =====================================================================
+   LIGHT TIER (set by the device brain, lib/deviceProfile.ts) — only on weak phones / limited browsers.
+   Live background blur behind glass is the single most expensive effect for a weak phone GPU (it re-blurs
+   every frame something moves behind it). There the glass keeps its colour and transparency but without the
+   blur, with a slightly deeper tint so text stays exactly as readable. Computers and capable phones never see this.
+   ===================================================================== */
+html[data-tier="low"] .pc-badge,
+html[data-tier="low"] .ab-glass,
+html[data-tier="low"] .ms-b-glass,
+html[data-tier="low"] .eb-panel,
+html[data-tier="low"] [class*="backdrop-blur"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html[data-tier="low"] .ab-glass { background: linear-gradient(145deg, rgba(14, 24, 38, 0.62), rgba(6, 10, 18, 0.74)) !important; }
+html[data-tier="low"] .ms-b-glass { background: linear-gradient(145deg, rgba(14, 24, 38, 0.50), rgba(6, 10, 18, 0.62)); }
+html[data-tier="low"] .eb-panel { background: linear-gradient(145deg, rgba(10, 18, 30, 0.66), rgba(4, 8, 14, 0.80)) !important; }
+html[data-tier="low"] .pc-badge { background-color: rgba(5, 9, 15, 0.55); }

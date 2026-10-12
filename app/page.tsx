@@ -14,6 +14,7 @@ import dynamic from 'next/dynamic';
 import { FloatingVoiceTrigger } from '@/components/FloatingVoiceTrigger';
 import { Footer } from '@/components/Footer';
 import { AnimationGovernor } from '@/components/AnimationGovernor';
+import { DeviceBrain } from '@/components/DeviceBrain';
 import { RatingCenter } from '@/components/rating/RatingCenter';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminControlHost } from '@/components/admin/AdminControlHost';
@@ -62,6 +63,9 @@ export default function HomePage() {
     >
       {/* Pauses looping animations of off-screen sections/cards (performance only) */}
       <AnimationGovernor />
+
+      {/* Learns how strong this device/browser is and lightens the heaviest effects only where needed */}
+      <DeviceBrain />
 
       {/* Fixed Navigation with Language Selector */}
       <Navbar />
