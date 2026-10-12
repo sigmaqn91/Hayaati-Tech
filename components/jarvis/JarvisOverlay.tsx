@@ -96,7 +96,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
 
   // Input & Messages
   const [inputQuery, setInputQuery] = useState<string>('');
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string; lang?: string }>>([]);
+  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string; lang?: string; error?: boolean }>>([]);
   // UI-only chat view state: the stored messages (used as chat history) are never edited, the view just starts later.
   const [clearedBefore, setClearedBefore] = useState<number>(0);
   const messagesLenRef = useRef<number>(0);
@@ -530,7 +530,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       friendlyMsg = t?.assistant?.errors?.sessionEnded || friendlyMsg;
     }
     setBootLogs((prev) => [...prev, `SYS_VOICE_NOTICE: ${friendlyMsg}`]);
-    setMessages((prev) => [...prev, { role: 'assistant', text: friendlyMsg }]);
+    setMessages((prev) => [...prev, { role: 'assistant', text: friendlyMsg, error: true }]);
 
     // Real problems (not the visitor's own microphone / limits) are reported for the owner.
     if (!userSide.includes(speechError) && speechError !== 'SESSION_ENDED') {
@@ -1137,7 +1137,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mr-2">
               {messages[messages.length - 1].role === 'user' ? 'TRANSMISSION:' : 'Jarvis:'}
             </span>
-            <span className="font-sans text-slate-100">{messages[messages.length - 1].text}</span>
+            <span className={`font-sans ${messages[messages.length - 1].error ? 'text-[#ff5c5c]' : 'text-slate-100'}`}>{messages[messages.length - 1].text}</span>
           </div>
         )}
 
@@ -1153,13 +1153,13 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         <AnimatePresence>
           {panelOpen && (() => {
             // UI only: current-language messages since the view started, same-role chunks merged into one bubble.
-            const merged: Array<{ id: number; role: 'user' | 'assistant'; text: string }> = [];
+            const merged: Array<{ id: number; role: 'user' | 'assistant'; text: string; error?: boolean }> = [];
             messages.forEach((m, i) => {
               if (i < clearedBefore) return;
               if (m.lang && m.lang !== language) return;
               const prev = merged[merged.length - 1];
-              if (prev && prev.role === m.role) prev.text = `${prev.text} ${m.text}`.trim();
-              else merged.push({ id: i, role: m.role, text: m.text });
+              if (prev && prev.role === m.role && !prev.error && !m.error) prev.text = `${prev.text} ${m.text}`.trim();
+              else merged.push({ id: i, role: m.role, text: m.text, error: m.error });
             });
             const shown = merged.slice(-5);
             const stateLabel =
@@ -1212,7 +1212,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
                             >
                               <div className={`chat-bubble ${isUser ? 'chat-bubble--user' : 'chat-bubble--ai'}`}>
                                 <span className="chat-bubble__who">{isUser ? 'YOU' : 'JARVIS'}</span>
-                                <span dir="auto" className="chat-bubble__text">{message.text}</span>
+                                <span dir="auto" className="chat-bubble__text" style={message.error ? { color: '#ff5c5c' } : undefined}>{message.text}</span>
                               </div>
                             </motion.div>
                           );
