@@ -192,7 +192,7 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
     BRAND_PRONUNCIATION_RULE,
     'THIS IS A ONE-SIDED GUIDED TOUR: you narrate the website by yourself from start to end. Never ask "shall we continue?", never ask permission, never wait for the visitor between stops. ' +
       (full
-        ? 'Only at the very start you ask ONE short question: their name. Ask nothing else (not what they like, not who they are, not what they want to see). After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then.'
+        ? 'Only at the very start you ask ONE short question: their name. Ask nothing else (not what they like, not who they are, not what they want to see). Listen to the whole name before you answer, even if the visitor pauses in the middle or says something like "my name is ..." first. Repeat the name back exactly as you heard it, never swap it for a more common or similar-sounding name; if you could not hear it clearly, say sorry and ask only for the name once more, slowly. After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then.'
         : 'Do not ask the visitor anything at all.'),
     'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again. Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show.',
     'TIME: the tour must finish within its time. Keep to the speaking time given in each result; it is calculated so the whole tour fits.',
@@ -1164,8 +1164,10 @@ export function useJarvisVoice({
               disabled: false,
               startOfSpeechSensitivity: 'START_SENSITIVITY_HIGH',
               endOfSpeechSensitivity: 'END_SENSITIVITY_LOW',
-              prefixPaddingMs: 40,
-              silenceDurationMs: 650,
+              // Premium Tour opening: a name is short and often said after a small pause, so more pre-roll keeps its
+              // first syllable and a longer pause length keeps "mera naam ..." and the name in one answer.
+              prefixPaddingMs: tour === 'full' ? 300 : 40,
+              silenceDurationMs: tour === 'full' ? 1100 : 650,
             },
           },
         };
@@ -1489,7 +1491,7 @@ export function useJarvisVoice({
           (tourModeRef.current && !tourIntroRef.current) ||
           isSpeakingRef.current ||
           !greetingDoneRef.current ||
-          Date.now() - speechEndedAtRef.current < 250
+          Date.now() - speechEndedAtRef.current < (tourIntroRef.current ? 80 : 250)
         ) {
           return;
         }
