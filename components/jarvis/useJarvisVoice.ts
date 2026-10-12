@@ -171,6 +171,9 @@ function buildSystemInstruction(languageCode: string, isOwner: boolean, knowledg
 
 // Seconds of quiet between two tour stops (the card opens in this moment).
 const TOUR_STOP_BREATH = 0.3;
+// Audio that reaches us this soon after a stop was handed over is still the end of the previous stop (it was on
+// its way already). Jarvis cannot answer that fast, so anything later is his words about the new stop.
+const TOUR_TAIL_MS = 150;
 
 // Tour sessions (Quick Tour / Premium Full Tour buttons): one-sided narration, only the tour_next tool.
 function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = ''): string {
@@ -296,7 +299,14 @@ export function useJarvisVoice({
   const tourNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The next stop's screen change, waiting for the moment Jarvis's current words end (see playLiveAudioChunk).
   const tourPendingShowRef = useRef<{ show: () => void; fallback: ReturnType<typeof setTimeout> } | null>(null);
-  const tourShowTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Screen changes waiting for a moment in Jarvis's audio (`at` is a time on the playback clock). They run when
+  // that audio has really been played, not after a wall-clock timer: a phone that turns its screen off, a tab in
+  // the background or a stalled speaker pauses the audio, and the screen must wait with it.
+  const tourShowQueueRef = useRef<{ run: () => void; at: number }[]>([]);
+  const tourShowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Counts the stops handed to Jarvis. A request for the next stop (his tour_next, or his turn ending) is
+  // remembered with the stop that was current when it ARRIVED; if another stop was handed meanwhile, it is stale.
+  const tourHandSeqRef = useRef<number>(0);
   // Premium Tour: stops are handed over one after another, each only after Jarvis's words have finished playing.
   const tourFullQueueRef = useRef<Promise<void>>(Promise.resolve());
   // Stall guard and automatic reconnection (a long tour can outlive one Live connection).
@@ -322,6 +332,56 @@ export function useJarvisVoice({
   const tourLastStopRef = useRef<{ response: Record<string, unknown>; at: number } | null>(null);
   const tourStopVoicedRef = useRef<boolean>(false);
   const handTourStopRef = useRef<(calls: { id?: string; name?: string }[] | null) => void>(() => {});
+
+  /** Runs every queued screen change whose moment in the audio has been played; waits for the rest. */
+  const flushTourShows = useCallback((all = false) => {
+    if (tourShowTimerRef.current) {
+      clearTimeout(tourShowTimerRef.current);
+      tourShowTimerRef.current = null;
+    }
+    const queue = tourShowQueueRef.current;
+    const ctx = playbackContextRef.current;
+    const live = Boolean(ctx && ctx.state !== 'closed');
+    const now = live ? ctx!.currentTime : Infinity;
+    while (queue.length && (all || queue[0].at <= now + 0.04)) {
+      const item = queue.shift()!;
+      try {
+        item.run();
+      } catch {}
+    }
+    if (!queue.length) return;
+    if (ctx!.state === 'suspended' && document.visibilityState === 'visible') ctx!.resume().catch(() => {});
+    const wait = Math.min(250, Math.max(20, (queue[0].at - now) * 1000 - 40));
+    tourShowTimerRef.current = setTimeout(() => flushTourShows(), wait);
+  }, []);
+
+  /** The screen changes exactly when the audio reaches `at` (now, if no audio is queued). */
+  const scheduleTourShow = useCallback(
+    (run: () => void, at?: number) => {
+      const ctx = playbackContextRef.current;
+      const when = at ?? (ctx && ctx.state !== 'closed' ? Math.max(nextPlayTimeRef.current, ctx.currentTime) : 0);
+      tourShowQueueRef.current.push({ run, at: when });
+      flushTourShows();
+    },
+    [flushTourShows]
+  );
+
+  // Back on screen (phone screen on again, tab visible): the speaker continues and the screen catches up with
+  // exactly the stop that is being spoken about.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || !tourModeRef.current) return;
+      const ctx = playbackContextRef.current;
+      if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+      flushTourShows();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('pageshow', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('pageshow', onVisible);
+    };
+  }, [flushTourShows]);
 
   // Warm the voice server once the page is idle, and again when the visitor hovers "Activate Jarvis".
   useEffect(() => {
@@ -393,6 +453,8 @@ export function useJarvisVoice({
     });
     activeAudioSourcesRef.current = [];
     nextPlayTimeRef.current = 0;
+    // The words these screen changes were waiting for have been cut: the screen moves on now.
+    flushTourShows(true);
     isSpeakingRef.current = false;
     speechEndedAtRef.current = Date.now();
     turnCompleteRef.current = false;
@@ -400,7 +462,7 @@ export function useJarvisVoice({
     setIsSpeaking(false);
     setAudioLevel(0);
     audioLevelRef.current = 0;
-  }, []);
+  }, [flushTourShows]);
 
   // Website language switched while Jarvis is live (v17 behaviour, restored): stop the old-language speech
   // and let Jarvis introduce himself again right away in the new language. The overlay hides the old chat.
@@ -492,11 +554,12 @@ export function useJarvisVoice({
     tourPendingShowRef.current = null;
     if (pendingShow) clearTimeout(pendingShow.fallback);
     if (keepTourOnStopRef.current) {
-      // Reconnecting: the stop Jarvis was talking about stays on screen, the tour itself goes on.
-      pendingShow?.show();
+      // Reconnecting: the last words still play to the end, then the stop they lead to is on screen.
+      if (pendingShow) scheduleTourShow(pendingShow.show);
     } else {
-      tourShowTimersRef.current.forEach((t) => clearTimeout(t));
-      tourShowTimersRef.current = [];
+      tourShowQueueRef.current = [];
+      if (tourShowTimerRef.current) clearTimeout(tourShowTimerRef.current);
+      tourShowTimerRef.current = null;
     }
     if (tourModeRef.current && !keepTourOnStopRef.current) {
       endTour();
@@ -557,7 +620,7 @@ export function useJarvisVoice({
     isTurnRunningRef.current = false;
     turnCompleteRef.current = false;
     turnHasAudioRef.current = false;
-  }, []);
+  }, [scheduleTourShow]);
 
   // Return control to the user only after the Live API has completed the model
   // turn AND all already-scheduled PCM playback has finished.
@@ -619,11 +682,22 @@ export function useJarvisVoice({
   const waitForSpeechToFinish = useCallback(async (sessionId: number | null) => {
     const pause = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
     await pause(120); // audio chunks sent just before the tool call
-    for (let i = 0; i < 240; i++) {
+    // Measured on the playback clock: while the audio is paused (phone screen off, tab in the background) the
+    // wait simply goes on, so the next stop is never shown while the current words are still to be heard.
+    // Only audio that is truly stuck (clock not moving on a visible page for 20 s) stops the wait.
+    let lastClock = -1;
+    let stuckSince = Date.now();
+    for (;;) {
       if (liveSessionIdRef.current !== sessionId) return;
       const ctx = playbackContextRef.current;
-      const left = ctx ? nextPlayTimeRef.current - ctx.currentTime : 0;
+      if (!ctx || ctx.state === 'closed') break;
+      const left = nextPlayTimeRef.current - ctx.currentTime;
       if (left <= 0.03) break;
+      if (ctx.currentTime !== lastClock || document.visibilityState !== 'visible') {
+        lastClock = ctx.currentTime;
+        stuckSince = Date.now();
+      } else if (Date.now() - stuckSince > 20000) break;
+      if (ctx.state === 'suspended' && document.visibilityState === 'visible') ctx.resume().catch(() => {});
       await pause(Math.min(250, left * 1000 + 20));
     }
     await pause(350);
@@ -698,7 +772,7 @@ export function useJarvisVoice({
       // Words that arrive right after the next stop was handed over are still the end of the current stop
       // (Gemini streams them a moment late); the screen changes only with the first words that really belong
       // to the next stop, so what Jarvis says and what is on screen always match (Quick and Premium Tour).
-      const tailOfPreviousStop = Boolean(tourModeRef.current) && Date.now() - lastToolResponseAtRef.current < 450;
+      const tailOfPreviousStop = Boolean(tourModeRef.current) && Date.now() - lastToolResponseAtRef.current < TOUR_TAIL_MS;
       if (tourModeRef.current && !tailOfPreviousStop) {
         tourStopVoicedRef.current = true;
         if (!tourIntroRef.current || tourVisitorAnsweredRef.current) tourAwaitingNextRef.current = true;
@@ -706,13 +780,11 @@ export function useJarvisVoice({
       if (pendingShow && !tailOfPreviousStop) {
         tourPendingShowRef.current = null;
         clearTimeout(pendingShow.fallback);
-        if (queueDry) pendingShow.show();
+        if (queueDry) scheduleTourShow(pendingShow.show, 0);
         else {
           const boundary = nextPlayTimeRef.current;
           nextPlayTimeRef.current += TOUR_STOP_BREATH;
-          const t = setTimeout(pendingShow.show, Math.max(0, (boundary - pCtx.currentTime) * 1000 - 40));
-          tourShowTimersRef.current.push(t);
-          if (tourShowTimersRef.current.length > 8) tourShowTimersRef.current.shift();
+          scheduleTourShow(pendingShow.show, boundary);
         }
       }
       if (tourNudgeTimerRef.current && !tourEndAfterTurnRef.current) {
@@ -779,7 +851,7 @@ export function useJarvisVoice({
       console.warn('[Live Audio Playback Error]:', err);
       setFailingLayer('AUDIO_PLAYBACK');
     }
-  }, [finishCompletedTurnIfReady]);
+  }, [finishCompletedTurnIfReady, scheduleTourShow]);
 
   const appendTranscript = useCallback((entry: string) => {
     const clean = entry.replace(/\s+/g, ' ').trim();
@@ -1495,8 +1567,12 @@ export function useJarvisVoice({
   // changes to the next stop, and only then is he told what that stop is. He can never speak about a stop that
   // is not on the screen (a short breath between stops instead of any mismatch). The Quick Tour is unchanged.
   handTourStopRef.current = (calls) => {
+    // Judged NOW, when the request arrives (not later, after waiting for the words to end): does it follow
+    // Jarvis's words about the stop he was last handed? Waiting first let a turn end that belonged to the old
+    // stop move the tour on while he was already starting the new one, so the screen ran one card ahead.
+    const asked = { seq: tourHandSeqRef.current, voiced: tourStopVoicedRef.current };
     if (tourModeRef.current !== 'full') {
-      handOverTourStop(calls, false);
+      handOverTourStop(calls, false, asked);
       return;
     }
     const sessionId = liveSessionIdRef.current;
@@ -1506,7 +1582,7 @@ export function useJarvisVoice({
         try {
           await waitForSpeechToFinish(sessionId);
           if (liveSessionIdRef.current !== sessionId || tourModeRef.current !== 'full') return;
-          handOverTourStop(calls, true);
+          handOverTourStop(calls, true, asked);
         } finally {
           tourPendingToolsRef.current = Math.max(0, tourPendingToolsRef.current - 1);
         }
@@ -1514,15 +1590,23 @@ export function useJarvisVoice({
       .catch(() => {});
   };
 
-  const handOverTourStop = (calls: { id?: string; name?: string }[] | null, showFirst: boolean) => {
+  const handOverTourStop = (
+    calls: { id?: string; name?: string }[] | null,
+    showFirst: boolean,
+    asked: { seq: number; voiced: boolean }
+  ) => {
     if (!tourModeRef.current) return;
-    // Jarvis has not started speaking about the stop he was just handed (a double tour_next, or his turn end
-    // and his tour_next arriving together): he gets that same stop again, the tour does not move on.
+    // The request is stale or early: another stop was handed after it arrived, or Jarvis had not yet spoken
+    // about the stop he was handed (a double tour_next, or his turn end and his tour_next arriving together).
+    // He gets that same stop again; the tour does not move on, so his words and the screen stay on one stop.
     const last = tourLastStopRef.current;
-    if (last && !tourStopVoicedRef.current && !tourIntroRef.current && Date.now() - last.at < 8000) {
+    const stale = asked.seq !== tourHandSeqRef.current;
+    if (last && !tourIntroRef.current && (stale || (!asked.voiced && Date.now() - last.at < 8000))) {
       const again = {
         ...last.response,
-        note: 'This is the same stop you were just given; it is on the screen now. Speak about this stop once, then call tour_next.',
+        note: tourStopVoicedRef.current
+          ? 'This is the stop you are already speaking about; it is on the screen now. Do not start it again: finish it, then call tour_next.'
+          : 'This is the same stop you were just given; it is on the screen now. Speak about this stop once, then call tour_next.',
       };
       try {
         if (calls) {
@@ -1547,9 +1631,10 @@ export function useJarvisVoice({
     }
     const earlier = tourPendingShowRef.current;
     if (earlier) {
+      // (only after 8 s without words about it) it comes on screen when the words now playing end
       tourPendingShowRef.current = null;
       clearTimeout(earlier.fallback);
-      earlier.show();
+      scheduleTourShow(earlier.show);
     }
     if (tourIntroRef.current) {
       // Opening questions are over: the microphone switches off for the rest of the tour.
@@ -1598,15 +1683,14 @@ export function useJarvisVoice({
     lastToolResponseAtRef.current = Date.now();
     tourLastStopRef.current = given ? { response: given, at: Date.now() } : null;
     tourStopVoicedRef.current = false;
+    tourHandSeqRef.current += 1;
     if (show) {
       const run: () => void = show;
       // If no new words arrive, the screen still changes when the current words have finished.
       const fallback = setTimeout(() => {
         if (tourPendingShowRef.current?.show !== run) return;
         tourPendingShowRef.current = null;
-        const ctx = playbackContextRef.current;
-        const left = ctx ? nextPlayTimeRef.current - ctx.currentTime : 0;
-        tourShowTimersRef.current.push(setTimeout(run, Math.max(0, left * 1000)));
+        scheduleTourShow(run);
       }, 2500);
       tourPendingShowRef.current = { show: run, fallback };
     }
