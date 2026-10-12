@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useReducedMotion, type Variants } from 'motion
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
 import { RatingButton } from './rating/RatingButton';
-import { Home, Clock, Cpu, MapPin, Layers, Megaphone, User, Mail, ChevronRight, Sliders } from 'lucide-react';
+import { Home, Clock, Cpu, MapPin, Layers, Megaphone, User, Mail, ChevronRight, Sliders, Gift } from 'lucide-react';
 import { isOwnerUi, openAdminControl, OWNER_EVENT } from '@/lib/ownerState';
 import { useOverlayHistory, runWhenHistoryIdle } from '@/hooks/use-overlay-history';
 
@@ -20,7 +20,7 @@ export function Navbar() {
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   // Owner verified (Jarvis owner code): the menu also shows "Admin Control"
   const [owner, setOwner] = useState(false);
-  const [adminPending, setAdminPending] = useState(false);
+  const [adminPending, setAdminPending] = useState<'admin' | 'guest' | null>(null);
 
   useEffect(() => {
     setOwner(isOwnerUi());
@@ -29,11 +29,12 @@ export function Navbar() {
     return () => window.removeEventListener(OWNER_EVENT, onOwner);
   }, []);
 
-  // Open Admin Control after the menu has closed (its history entry is removed first)
+  // Open Admin Control / Guest access after the menu has closed (its history entry is removed first)
   useEffect(() => {
     if (mobileMenuOpen || !adminPending) return;
-    setAdminPending(false);
-    runWhenHistoryIdle(() => openAdminControl());
+    const which = adminPending;
+    setAdminPending(null);
+    runWhenHistoryIdle(() => (which === 'admin' ? openAdminControl() : window.dispatchEvent(new CustomEvent('guest:open'))));
   }, [mobileMenuOpen, adminPending]);
 
   // Back button closes the menu instead of leaving the site
@@ -324,11 +325,28 @@ export function Navbar() {
                       })}
                     </motion.nav>
 
+                    {/* Guests of Aliya Khan: one-time guest code unlocks the premium features */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAdminPending('guest');
+                        setMobileMenuOpen(false);
+                      }}
+                      className="group mt-2 w-full relative flex items-center gap-3 px-3 min-h-[44px] font-mono text-[13px] border border-[#818cf8]/30 text-slate-300 hover:text-white hover:border-[#818cf8]/60 hover:bg-[#818cf8]/[0.07] transition-colors"
+                    >
+                      <span className="text-[10px] tabular-nums text-[#818cf8]/70 w-5 shrink-0" aria-hidden="true">
+                        ✦
+                      </span>
+                      <Gift className="w-4 h-4 shrink-0 text-[#a5b4fc]" aria-hidden="true" />
+                      <span className="flex-1 min-w-0 text-start">Guest</span>
+                      <ChevronRight className="w-3.5 h-3.5 shrink-0 rtl:-scale-x-100 opacity-60" aria-hidden="true" />
+                    </button>
+
                     {owner && (
                       <button
                         type="button"
                         onClick={() => {
-                          setAdminPending(true);
+                          setAdminPending('admin');
                           setMobileMenuOpen(false);
                         }}
                         className="group mt-2 w-full relative flex items-center gap-3 px-3 min-h-[44px] font-mono text-[13px] border border-[#ffaa00]/40 bg-gradient-to-r from-[#ffaa00]/12 via-[#ffaa00]/5 to-transparent rtl:bg-gradient-to-l text-[#ffcf66] hover:border-[#ffaa00]/70 transition-colors"

@@ -17,6 +17,7 @@ import { AnimationGovernor } from '@/components/AnimationGovernor';
 import { RatingCenter } from '@/components/rating/RatingCenter';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminControlHost } from '@/components/admin/AdminControlHost';
+import { GuestHost } from '@/components/guest/GuestHost';
 
 // Anonymous visitor analytics + privacy / update notices: downloaded separately, runs after the page is idle.
 const VisitorTracker = dynamic(() => import('@/components/visitor/VisitorTracker').then((m) => m.VisitorTracker), {
@@ -124,6 +125,9 @@ export default function HomePage() {
 
       {/* Owner only: Admin Control panel (ratings, visitors ...), opened from the menu after owner verification */}
       <AdminControlHost />
+
+      {/* Guest access (menu > Guest): one-time code from Aliya Khan */}
+      <GuestHost />
 
       <VisitorTracker />
 

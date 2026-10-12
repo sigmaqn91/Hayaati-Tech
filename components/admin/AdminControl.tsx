@@ -7,12 +7,13 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { X, Users, Star, ShieldAlert, RefreshCw, Lock, Loader2, Sliders } from 'lucide-react';
+import { X, Users, Star, ShieldAlert, RefreshCw, Lock, Loader2, Sliders, Gift } from 'lucide-react';
 import { useOverlayHistory } from '@/hooks/use-overlay-history';
 import { RatingsReport, type RatingsReportData } from './RatingsReport';
 import { VisitorsReport, type VisitorsReportData } from './VisitorsReport';
+import { GuestsPanel, type GuestRow } from './GuestsPanel';
 
-export type AdminTab = 'visitors' | 'ratings' | 'security';
+export type AdminTab = 'visitors' | 'ratings' | 'guests' | 'security';
 
 interface SecurityLog {
   id: string;
@@ -30,6 +31,7 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
   const [visitors, setVisitors] = useState<VisitorsReportData | null>(null);
   const [ratings, setRatings] = useState<RatingsReportData | null>(null);
   const [security, setSecurity] = useState<SecurityLog[] | null>(null);
+  const [guests, setGuests] = useState<GuestRow[] | null>(null);
   const [loadedAt, setLoadedAt] = useState<Date | null>(null);
 
   useOverlayHistory(true, onClose);
@@ -52,10 +54,11 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
     setBusy(true);
     setError('');
     try {
-      const [v, r, s] = await Promise.all([
+      const [v, r, s, g] = await Promise.all([
         fetch('/api/admin/visitors', { cache: 'no-store' }),
         fetch('/api/rating', { cache: 'no-store' }),
         fetch('/api/jarvis/admin', { cache: 'no-store' }).catch(() => null),
+        fetch('/api/admin/guests', { cache: 'no-store' }).catch(() => null),
       ]);
       if (v.status === 401 || r.status === 401) {
         setNeedCode(true);
@@ -69,6 +72,8 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
       const rData = await r.json().catch(() => null);
       if (vData?.success) setVisitors(vData);
       if (rData?.success) setRatings(rData);
+      const gData = g && g.ok ? await g.json().catch(() => null) : null;
+      if (gData?.success) setGuests(gData.guests);
       if (s && s.ok) {
         const sData = await s.json().catch(() => null);
         setSecurity(Array.isArray(sData?.failedLogs) ? sData.failedLogs : []);
@@ -85,6 +90,14 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
   useEffect(() => {
     load();
   }, [load]);
+
+  const reloadGuests = useCallback(async () => {
+    try {
+      const g = await fetch('/api/admin/guests', { cache: 'no-store' });
+      const gData = g.ok ? await g.json().catch(() => null) : null;
+      if (gData?.success) setGuests(gData.guests);
+    } catch {}
+  }, []);
 
   // Owner code here signs the owner in for 2 hours (same server check as Jarvis), then the reports load.
   const verify = async (e: React.FormEvent) => {
@@ -114,6 +127,7 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
   const TABS: [AdminTab, string, React.ComponentType<{ className?: string }>][] = [
     ['visitors', 'Visitors', Users],
     ['ratings', 'Ratings', Star],
+    ['guests', 'Guests', Gift],
     ['security', 'Security', ShieldAlert],
   ];
 
@@ -194,6 +208,7 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
               )}
               {tab === 'visitors' && visitors && <VisitorsReport report={visitors} />}
               {tab === 'ratings' && ratings && <RatingsReport report={ratings} />}
+              {tab === 'guests' && <GuestsPanel guests={guests || []} onChanged={reloadGuests} />}
               {tab === 'security' && (
                 <div className="rt-card">
                   <p className="rt-label">Wrong owner-code tries</p>

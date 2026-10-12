@@ -117,3 +117,15 @@ export async function couponStatus(req: NextRequest | Request, raw: unknown): Pr
   const identity = getVisitorIdentity(req);
   return record.keys.some((k) => identity.keys.includes(k)) ? 'valid' : 'not_yours';
 }
+
+/** Guest pass (code from Aliya Khan): a Premium Tour coupon for this visitor, outside the one-per-year rule. */
+// cookieToSet: the visitor cookie the coupon is tied to (new browsers get it here, so the tour later finds it).
+export async function issueGuestCoupon(req: NextRequest | Request): Promise<{ code: string | null; cookieToSet?: string }> {
+  const identity = getVisitorIdentity(req);
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const code = newCode();
+    const record: CouponRecord = { keys: identity.keys, createdAt: Date.now() };
+    if (await kvSet(codeKey(code), JSON.stringify(record), CODE_TTL, true)) return { code, cookieToSet: identity.cookieToSet };
+  }
+  return { code: null, cookieToSet: identity.cookieToSet };
+}
