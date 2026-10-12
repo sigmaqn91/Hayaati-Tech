@@ -5,7 +5,8 @@ import { motion, AnimatePresence, useReducedMotion, type Variants } from 'motion
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from './LanguageSelector';
 import { RatingButton } from './rating/RatingButton';
-import { Home, Clock, Cpu, MapPin, Layers, Megaphone, User, Mail, ChevronRight } from 'lucide-react';
+import { Home, Clock, Cpu, MapPin, Layers, Megaphone, User, Mail, ChevronRight, Sliders } from 'lucide-react';
+import { isOwnerUi, openAdminControl, OWNER_EVENT } from '@/lib/ownerState';
 import { useOverlayHistory, runWhenHistoryIdle } from '@/hooks/use-overlay-history';
 
 const MENU_ICONS = [Home, Clock, Cpu, MapPin, Layers, Megaphone, User, Mail];
@@ -17,6 +18,23 @@ export function Navbar() {
   const [activeHref, setActiveHref] = useState('#hero');
   const [menuActive, setMenuActive] = useState('#hero');
   const [pendingHref, setPendingHref] = useState<string | null>(null);
+  // Owner verified (Jarvis owner code): the menu also shows "Admin Control"
+  const [owner, setOwner] = useState(false);
+  const [adminPending, setAdminPending] = useState(false);
+
+  useEffect(() => {
+    setOwner(isOwnerUi());
+    const onOwner = (e: Event) => setOwner(Boolean((e as CustomEvent<boolean>).detail));
+    window.addEventListener(OWNER_EVENT, onOwner);
+    return () => window.removeEventListener(OWNER_EVENT, onOwner);
+  }, []);
+
+  // Open Admin Control after the menu has closed (its history entry is removed first)
+  useEffect(() => {
+    if (mobileMenuOpen || !adminPending) return;
+    setAdminPending(false);
+    runWhenHistoryIdle(() => openAdminControl());
+  }, [mobileMenuOpen, adminPending]);
 
   // Back button closes the menu instead of leaving the site
   useOverlayHistory(mobileMenuOpen, () => setMobileMenuOpen(false));
@@ -305,6 +323,24 @@ export function Navbar() {
                         );
                       })}
                     </motion.nav>
+
+                    {owner && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdminPending(true);
+                          setMobileMenuOpen(false);
+                        }}
+                        className="group mt-2 w-full relative flex items-center gap-3 px-3 min-h-[44px] font-mono text-[13px] border border-[#ffaa00]/40 bg-gradient-to-r from-[#ffaa00]/12 via-[#ffaa00]/5 to-transparent rtl:bg-gradient-to-l text-[#ffcf66] hover:border-[#ffaa00]/70 transition-colors"
+                      >
+                        <span className="text-[10px] tabular-nums text-[#ffaa00]/60 w-5 shrink-0" aria-hidden="true">
+                          ◆
+                        </span>
+                        <Sliders className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <span className="flex-1 min-w-0 text-start uppercase tracking-wider">Admin Control</span>
+                        <ChevronRight className="w-3.5 h-3.5 shrink-0 rtl:-scale-x-100 opacity-70" aria-hidden="true" />
+                      </button>
+                    )}
 
                     <div className="mt-2.5 pt-2 border-t border-[#38e8ff]/15 text-[10px] font-mono text-slate-500 text-center break-words">
                       {t.nav.locationDomain}

@@ -28,6 +28,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { QUICK_ACK } from '@/lib/jarvisLocale';
 import { collectLiveSiteSnapshot } from '@/lib/jarvisKnowledge';
 import { runJarvisAction } from '@/lib/jarvisActions';
+import { openAdminControl, setOwnerUi } from '@/lib/ownerState';
 import { TourDock } from './TourDock';
 
 // Owner flow phrases (voice captions arrive in small pieces, so these run on the whole spoken turn).
@@ -115,6 +116,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   const verifyInputRef = useRef<HTMLInputElement | null>(null);
   const [verifyFocused, setVerifyFocused] = useState<boolean>(false);
   const isOwnerRef = useRef<boolean>(false);
+  const ownerUiPrevRef = useRef(false);
   const showVerifyRef = useRef<boolean>(false);
   // Spoken turn text (voice captions come in pieces) + "she said she is the owner, wait for Jarvis to ask for the code"
   const turnRoleRef = useRef<'user' | 'assistant' | null>(null);
@@ -361,6 +363,12 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   useEffect(() => {
     isOwnerRef.current = isOwner;
     if (isOwner) byeHandledRef.current = false;
+    // Header menu shows "Admin Control" while owner mode is on. Only real changes are passed on, so a reload
+    // (owner mode starts off here) keeps the tab's flag while the signed owner session lasts.
+    if (ownerUiPrevRef.current !== isOwner) {
+      ownerUiPrevRef.current = isOwner;
+      setOwnerUi(isOwner);
+    }
   }, [isOwner]);
 
   useEffect(() => {
@@ -1211,15 +1219,29 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       )}
 
       {embedded && (
-        <button
-          onClick={() => (isOwner ? handleLockOwnerMode() : setShowVerifyModal(true))}
-          className="absolute right-3 top-3 sm:right-5 sm:top-5 z-30 pointer-events-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-[#38e8ff]/30 bg-[#05070a]/85 text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff] text-xs transition-colors cursor-pointer"
-          title="Owner Authentication"
-          aria-label="Owner Authentication"
-        >
-          {isOwner ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Lock className="w-3.5 h-3.5" />}
-          <span>{isOwner ? 'VERIFIED' : 'AUTHENTICATE'}</span>
-        </button>
+        <div className="absolute right-3 top-3 sm:right-5 sm:top-5 z-30 flex items-center gap-2 pointer-events-none">
+          {/* Owner only: opens Admin Control (ratings, visitors) right here, no separate URL */}
+          {isOwner && (
+            <button
+              onClick={() => openAdminControl()}
+              className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-[#ffaa00]/50 bg-[#05070a]/85 text-[#ffcf66] hover:border-[#ffaa00] text-xs transition-colors cursor-pointer"
+              title="Admin Control"
+              aria-label="Admin Control"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>ADMIN CONTROL</span>
+            </button>
+          )}
+          <button
+            onClick={() => (isOwner ? handleLockOwnerMode() : setShowVerifyModal(true))}
+            className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-[#38e8ff]/30 bg-[#05070a]/85 text-slate-400 hover:text-[#38e8ff] hover:border-[#38e8ff] text-xs transition-colors cursor-pointer"
+            title="Owner Authentication"
+            aria-label="Owner Authentication"
+          >
+            {isOwner ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Lock className="w-3.5 h-3.5" />}
+            <span>{isOwner ? 'VERIFIED' : 'AUTHENTICATE'}</span>
+          </button>
+        </div>
       )}
 
       {/* 6. Fixed Bottom Command Bar */}

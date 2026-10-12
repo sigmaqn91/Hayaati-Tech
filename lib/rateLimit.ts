@@ -743,3 +743,23 @@ export async function checkRatingRateLimit(
   }
   return { allowed: true, cookieToSet: identity.cookieToSet };
 }
+
+// ==========================================
+// 9. Visitor analytics messages
+// ==========================================
+
+/** Visit start / update messages: at most 120 per visitor per hour (a normal visit sends a handful). */
+export async function checkVisitRateLimit(reqOrIp: NextRequest | Request | string): Promise<{
+  allowed: boolean;
+  identity: VisitorIdentity;
+}> {
+  const identity = getVisitorIdentity(reqOrIp);
+  const WINDOW_SECONDS = 60 * 60;
+  const LIMIT = 120;
+  for (const key of identity.keys) {
+    const counter = await getCounter(`rate:visit:${key}`);
+    if (counter.count >= LIMIT) return { allowed: false, identity };
+  }
+  for (const key of identity.keys) await atomicIncrement(`rate:visit:${key}`, WINDOW_SECONDS);
+  return { allowed: true, identity };
+}

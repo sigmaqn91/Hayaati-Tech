@@ -16,6 +16,13 @@ import { Footer } from '@/components/Footer';
 import { AnimationGovernor } from '@/components/AnimationGovernor';
 import { RatingCenter } from '@/components/rating/RatingCenter';
 import { useLanguage } from '@/context/LanguageContext';
+import { AdminControlHost } from '@/components/admin/AdminControlHost';
+
+// Anonymous visitor analytics + privacy / update notices: downloaded separately, runs after the page is idle.
+const VisitorTracker = dynamic(() => import('@/components/visitor/VisitorTracker').then((m) => m.VisitorTracker), {
+  ssr: false,
+  loading: () => null,
+});
 
 // Start downloading Jarvis (orb + chat) as soon as the page script runs, instead of waiting until the
 // whole page has finished rendering: the orb shows up several seconds sooner on phones.
@@ -114,6 +121,11 @@ export default function HomePage() {
 
       {/* Website rating popup (every minute until the visitor rates; header Rate button opens it any time) */}
       <RatingCenter />
+
+      {/* Owner only: Admin Control panel (ratings, visitors ...), opened from the menu after owner verification */}
+      <AdminControlHost />
+
+      <VisitorTracker />
 
       {/* Footer */}
       <Suspense fallback={null}>
