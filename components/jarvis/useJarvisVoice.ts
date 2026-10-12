@@ -185,7 +185,7 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
       (full
         ? 'Only at the very start you may ask at most two short questions (for example their name, and what interests them most). After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then and lean a little towards what they said they like.'
         : 'Do not ask the visitor anything at all.'),
-    'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again. Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show.',
+    'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again in the same turn, right after your last sentence (never end your turn without calling it, and never say "let\'s move on" twice). Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show.',
     'TIME: the tour must finish within its time. Keep to the speaking time given in each result; it is calculated so the whole tour fits.',
     'VOICE: warm, calm, clear and lively, like a kind expert guide. Short natural sentences, no lists or symbols read aloud, vary your words.',
     'RESPECT AND NAME: always say "Aliya Khan" or "founder Aliya Khan" (Hindi/Urdu: "Aliya Khan ji"), pronounced Aa-li-yaa Khaan (Hindi आलिया ख़ान, Urdu عالیہ خان), never "Ali" or "Ali Khan".',
@@ -586,7 +586,7 @@ export function useJarvisVoice({
         liveSessionRef.current?.sendRealtimeInput({
           text: intro
             ? '[SYSTEM] Start the tour now: call tour_next.'
-            : '[SYSTEM] Continue the tour now: call tour_next right away, without asking anything.',
+            : '[SYSTEM] Call tour_next now. Do not say anything before calling it (you already finished this stop; do not repeat it or announce moving on again).',
         });
       } catch {}
     }, intro ? 14000 : 1200);
@@ -1330,7 +1330,7 @@ export function useJarvisVoice({
           lastNudgeAtRef.current = now;
           try {
             liveSessionRef.current?.sendRealtimeInput({
-              text: '[SYSTEM] Continue the tour now: call tour_next right away, without asking anything.',
+              text: '[SYSTEM] Call tour_next now. Do not say anything before calling it (you already finished this stop; do not repeat it or announce moving on again).',
             });
           } catch {}
         }, 1000);
@@ -1513,7 +1513,9 @@ export function useJarvisVoice({
     }
     tourResumingRef.current = true;
     tourResumeAtNextToolRef.current = false;
-    if (rewind) rewindForResume();
+    // The stop is presented again only if Jarvis had not started talking about it yet; a stop he already
+    // spoke about is never repeated (that sounded like Jarvis saying the same thing twice).
+    if (rewind && tourPendingShowRef.current) rewindForResume();
     keepTourOnStopRef.current = true;
     try {
       stopListening();

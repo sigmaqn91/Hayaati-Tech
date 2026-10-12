@@ -2,6 +2,8 @@
 // Jarvis only describes what this file reads from the page after a scroll has finished, so his words
 // always match the screen. Nothing here changes how the website looks.
 
+import { runWhenHistoryIdle } from '@/hooks/use-overlay-history';
+
 export const NAV_OFFSET = 72; // fixed navbar (64px) + a little air
 
 const SECTION_NAMES: Record<string, string> = {
@@ -44,7 +46,16 @@ export const scrollTargetFor = (el: Element) => Math.round(Math.min(Math.max(0, 
 /** Jump straight to a page position (no visible scrolling: Jarvis drives the site during a tour). */
 export function jumpTo(y: number) {
   ++scrollToken; // stops any glide that is still running
-  window.scrollTo({ top: Math.round(Math.min(Math.max(0, y), maxScroll())), behavior: 'instant' as ScrollBehavior });
+  const token = scrollToken;
+  const go = () => window.scrollTo({ top: Math.round(Math.min(Math.max(0, y), maxScroll())), behavior: 'instant' as ScrollBehavior });
+  go();
+  // A popup that just closed takes its Back-button entry off the history; the browser then puts the page back
+  // where it was when the popup opened. Jump again once that has happened, so the page stays where Jarvis is.
+  // (the popup closes a moment later, when React has drawn it away, so this is checked again shortly after)
+  const again = () => token === scrollToken && go();
+  runWhenHistoryIdle(again);
+  window.setTimeout(() => runWhenHistoryIdle(again), 60);
+  window.setTimeout(() => runWhenHistoryIdle(again), 320);
 }
 
 /** Bring an element's top just under the navbar (or as close as the page allows). */

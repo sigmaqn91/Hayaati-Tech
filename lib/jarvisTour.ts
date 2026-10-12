@@ -142,7 +142,7 @@ function quickPlan(): TourStep[] {
 // the next stop is prepared while Jarvis is still talking.
 const OVERHEAD = 0.7;
 // Time kept free at the end for the goodbye.
-const END_RESERVE: Record<TourMode, number> = { quick: 28, full: 40 };
+const END_RESERVE: Record<TourMode, number> = { quick: 40, full: 50 };
 // Below this many speaking seconds per weight, a whole category is summed up instead of opening each card.
 const MIN_SECONDS_PER_WEIGHT = 6;
 const WORDS_PER_SECOND = 2.3;
@@ -473,7 +473,12 @@ export function tourNext(): PreparedStop {
   for (;;) {
     state.index += 1;
     if (state.index >= state.steps.length) return finish('done');
-    if (secondsLeft() <= 0) return finish('time');
+    if (secondsLeft() <= 0) {
+      // Time is nearly up: the tour still ends at its final stop (the founder in the Quick Tour, contact in the
+      // full tour) instead of stopping where it is. Only when even that no longer fits does it say goodbye.
+      if (secondsLeft() < -(END_RESERVE[state.mode] - 18) * 1000) return finish('time');
+      state.index = Math.max(state.index, state.steps.length - 1);
+    }
     const step = state.steps[state.index];
     // The other cards of a summed-up category are skipped.
     if (step.kind === 'card' && isCollapsed(step) && !step.intro) continue;
