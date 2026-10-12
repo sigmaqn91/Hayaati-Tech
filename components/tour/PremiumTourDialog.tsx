@@ -14,7 +14,6 @@ import {
   startFullTour,
   type CouponState,
 } from '@/lib/tourCoupon';
-import { playConfirm, playError, playPress, playReveal } from '@/lib/couponSounds';
 
 const MESSAGES: Partial<Record<CouponState | 'empty' | 'busy', string>> = {
   empty: 'Please enter your coupon code.',
@@ -68,7 +67,6 @@ export function PremiumTourDialog({ open, onClose }: PremiumTourDialogProps) {
   const begin = async (value: string) => {
     const clean = value.trim().toUpperCase();
     if (!clean) {
-      playError();
       setError(MESSAGES.empty!);
       inputRef.current?.focus();
       return;
@@ -78,12 +76,10 @@ export function PremiumTourDialog({ open, onClose }: PremiumTourDialogProps) {
     const status = await checkCoupon(clean);
     setChecking(false);
     if (status !== 'valid') {
-      playError();
       setError(MESSAGES[status] || MESSAGES.error!);
       if (status === 'already_used') saveCoupon(null);
       return;
     }
-    playConfirm();
     setStarting(true);
     saveCoupon(clean);
     window.setTimeout(() => {
@@ -167,9 +163,7 @@ export function PremiumTourDialog({ open, onClose }: PremiumTourDialogProps) {
               className="mt-5"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (busy) return;
-                playPress();
-                begin(code);
+                if (!busy) begin(code);
               }}
             >
               <label htmlFor="premium-coupon" className="block font-mono text-[10.5px] uppercase tracking-[0.18em] text-slate-400">
@@ -215,8 +209,6 @@ export function PremiumTourDialog({ open, onClose }: PremiumTourDialogProps) {
               type="button"
               disabled={busy}
               onClick={() => {
-                playPress();
-                playReveal();
                 onClose();
                 window.setTimeout(() => goToFounderForCoupon(), 40);
               }}
