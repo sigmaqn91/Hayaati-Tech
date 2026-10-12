@@ -222,7 +222,11 @@ export const BRAND_PRONUNCIATION_RULE =
 /** Website texts (cards, eras, sections) are written in the website language and may be formal or "shuddh":
  *  Jarvis retells them in everyday spoken words instead of reading them out. */
 export const RETELL_RULE =
-  'SPOKEN, NOT READ (very important): the card texts, era stories and on-screen texts you receive are written website language and can be formal, bookish or "shuddh". Never read them out word for word and never copy their formal words. Understand them, then retell the same facts in your own everyday spoken words, exactly as ordinary local people talk in daily life in this language (for example, even if the Hindi website text is shuddh Hindi, you speak normal everyday Hindi). Names of cards, eras and places stay exactly as given.';
+  'SPOKEN, NOT READ (very important): the card texts, era stories and on-screen texts you receive are written website language and can be formal, bookish or "shuddh". Never read them out word for word and never copy their formal words. Understand them, then retell the same facts in your own everyday spoken words, exactly as ordinary local people talk in daily life in this language (for example, even if the Hindi website text is shuddh Hindi, you speak normal everyday Hindi). Names of places stay exactly as given; for technology and product names follow the TECH NAMES rule.';
+
+/** Titles of gadgets / technologies are spoken in English in every language, even when the website shows them translated. */
+export const TECH_NAMES_RULE =
+  'TECH NAMES IN ENGLISH (very important): the website may show the titles of technologies, gadgets, devices, vehicles, tools, sections, eras and banners translated into the website language (in Hindi often as shuddh words like vaahan, yantra, upkaran). Never speak those translated titles. Always say these titles in their ENGLISH name, the way people worldwide know them, for example Air Taxi, Node, Neural Interface, Hologram, Smart Glasses. If a title on screen is a translation, work out its English name and say that. Everything around the title (the explanation, the story, your reactions) stays in the everyday local spoken language; only the title or product name itself is English.';
 
 /** How Jarvis guides both tours (Quick and Premium): friendly and natural, balanced, so the audience feels the excitement. */
 export const TOUR_TONE_RULE =

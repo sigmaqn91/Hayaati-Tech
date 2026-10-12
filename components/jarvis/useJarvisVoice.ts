@@ -13,7 +13,7 @@ const loadGenAI = () => {
   }
   return genaiPromise;
 };
-import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE, RETELL_RULE, TOUR_TONE_RULE, BRAND_PRONUNCIATION_RULE, HINDI_PREMIUM_TOUR_STYLE } from '@/lib/jarvisLocale';
+import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE, RETELL_RULE, TECH_NAMES_RULE, TOUR_TONE_RULE, BRAND_PRONUNCIATION_RULE, HINDI_PREMIUM_TOUR_STYLE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION, JARVIS_FEEDBACK_INSTRUCTION } from '@/lib/jarvisTools';
 import { beginTour, endTour, rewindForResume, tourActive, tourNext, TOUR_FUNCTION_DECLARATIONS, type TourMode } from '@/lib/jarvisTour';
@@ -186,6 +186,7 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
     `LANGUAGE: speak only ${lp.name} for the whole tour.`,
     `LOCAL, NATURAL SPEECH (very important): ${lp.style}${where}`,
     RETELL_RULE,
+    TECH_NAMES_RULE,
     TOUR_TONE_RULE,
     `GREETING: the normal greeting in ${lp.name} is ${lp.greeting}.`,
     GREETING_PRONUNCIATION_RULE,
