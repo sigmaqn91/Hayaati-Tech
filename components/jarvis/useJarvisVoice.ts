@@ -13,7 +13,7 @@ const loadGenAI = () => {
   }
   return genaiPromise;
 };
-import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE } from '@/lib/jarvisLocale';
+import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE, RETELL_RULE, TOUR_TONE_RULE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION, JARVIS_FEEDBACK_INSTRUCTION } from '@/lib/jarvisTools';
 import { beginTour, endTour, rewindForResume, tourActive, tourNext, TOUR_FUNCTION_DECLARATIONS, type TourMode } from '@/lib/jarvisTour';
@@ -178,10 +178,14 @@ const TOUR_TAIL_MS = 150;
 // Tour sessions (Quick Tour / Premium Full Tour buttons): one-sided narration, only the tour_next tool.
 function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = ''): string {
   const lp = getJarvisLang(languageCode);
+  const where = lp.country ? ` The visitor appears to be in country code ${lp.country}; adapt wording to that country where natural.` : '';
   const full = mode === 'full';
   return [
     `You are Jarvis, the voice guide of Hayaati Web Technology, giving the ${full ? 'Premium Full Tour (about 14 minutes)' : 'free Quick Tour (about 3 minutes)'} of the website. The owner and founder is Aliya Khan. Never invent facts; describe only what the tour results show and what the knowledge below says.`,
-    `LANGUAGE: speak only ${lp.name} for the whole tour. Style: ${lp.style}`,
+    `LANGUAGE: speak only ${lp.name} for the whole tour.`,
+    `LOCAL, NATURAL SPEECH (very important): ${lp.style}${where}`,
+    RETELL_RULE,
+    TOUR_TONE_RULE,
     `GREETING: the normal greeting in ${lp.name} is ${lp.greeting}.`,
     GREETING_PRONUNCIATION_RULE,
     'THIS IS A ONE-SIDED GUIDED TOUR: you narrate the website by yourself from start to end. Never ask "shall we continue?", never ask permission, never wait for the visitor between stops. ' +
@@ -190,7 +194,7 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
         : 'Do not ask the visitor anything at all.'),
     'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again. Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show.',
     'TIME: the tour must finish within its time. Keep to the speaking time given in each result; it is calculated so the whole tour fits.',
-    'VOICE: warm, calm, clear and lively, like a kind expert guide. Short natural sentences, no lists or symbols read aloud, vary your words.',
+    'VOICE: sound like a real, warm human guide: relaxed natural pace, natural pauses and intonation, lively energy, clear. Short natural sentences, no lists or symbols read aloud, vary your words.',
     'RESPECT AND NAME: always say "Aliya Khan" or "founder Aliya Khan" (Hindi/Urdu: "Aliya Khan ji"), pronounced Aa-li-yaa Khaan (Hindi आलिया ख़ान, Urdu عالیہ خان), never "Ali" or "Ali Khan".',
     'RULES: you cannot turn owner mode on, cannot give or mention any coupon code, and cannot do any other website action during the tour.',
     knowledge,
@@ -491,7 +495,7 @@ export function useJarvisVoice({
       if (tourModeRef.current) {
         greetingDoneRef.current = true;
         session.sendRealtimeInput({
-          text: `[SYSTEM] The visitor just switched the website language to ${lp.name}. From now on speak ONLY ${lp.name} (style: ${lp.style}). Continue the tour from where you are in ${lp.name}: say the current stop again briefly, then call tour_next.`,
+          text: `[SYSTEM] The visitor just switched the website language to ${lp.name}. From now on speak ONLY ${lp.name} (style: ${lp.style} Retell everything in everyday spoken words, never read website text out, and keep the same friendly, exciting guide tone). Continue the tour from where you are in ${lp.name}: say the current stop again briefly, then call tour_next.`,
         });
         return;
       }

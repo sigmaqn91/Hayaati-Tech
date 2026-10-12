@@ -328,7 +328,7 @@ function preloadAround(from: number) {
 function instruction(seconds: number, extra = '') {
   const words = Math.round(seconds * WORDS_PER_SECOND);
   return (
-    `${extra}Speak for about ${seconds} seconds (about ${words} words), calmly and warmly, only about what this result shows. ` +
+    `${extra}Speak for about ${seconds} seconds (about ${words} words), in friendly, natural everyday speech, only about what this result shows. ` +
     'Do not ask the visitor anything and do not wait for an answer. As soon as you finish speaking, call tour_next.'
   );
 }
@@ -390,7 +390,7 @@ function prepareStep(step: TourStep): PreparedStop {
   }
 
   if (step.kind === 'card') {
-    const card = 'This card is now open large on the screen. Name it exactly as card_title and explain what it is and how it works, in simple words. ';
+    const card = 'This card is now open large on the screen. Name it exactly as card_title and explain in simple everyday words what it is and how it works, and how it could make our life better when it arrives. ';
     // Same words as the Quick Tour (which visitors love); the full tour only adds a one-line category intro.
     const extra =
       full && step.intro
