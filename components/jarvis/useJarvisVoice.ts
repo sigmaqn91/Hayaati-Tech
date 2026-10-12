@@ -1664,7 +1664,9 @@ export function useJarvisVoice({
       clearTimeout(earlier.fallback);
       scheduleTourShow(earlier.show);
     }
-    const afterIntro = tourIntroRef.current;
+    // The first stop after the opening words (Premium Tour: after the name question; Quick Tour: after the welcome)
+    // must not greet again.
+    const afterIntro = tourIntroRef.current || (!tourLastStopRef.current && !tourResumedRef.current);
     if (tourIntroRef.current) {
       // Opening questions are over: the microphone switches off for the rest of the tour.
       tourIntroRef.current = false;
