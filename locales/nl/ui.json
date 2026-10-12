@@ -210,6 +210,7 @@
       "noDevice": "Geen microfoon gedetecteerd.",
       "micFailed": "Microfooninitialisatie mislukt.",
       "rateLimit": "Spraakfrequentielimiet bereikt.",
+      "unavailable": "Jarvis is een tijdje niet beschikbaar. Probeer het later opnieuw.",
       "providerQuota": "Spraakquotum overschreden.",
       "noKey": "Spraakservice niet geconfigureerd.",
       "modelFailed": "Spraakmodel mislukt.",

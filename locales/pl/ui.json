@@ -210,6 +210,7 @@
       "noDevice": "Nie wykryto mikrofonu.",
       "micFailed": "Inicjalizacja mikrofonu nie powiodła się.",
       "rateLimit": "Przekroczono limit zapytań głosowych.",
+      "unavailable": "Jarvis jest na chwilę niedostępny. Spróbuj ponownie później.",
       "providerQuota": "Wyczerpano limit dostawcy głosu.",
       "noKey": "Usługa głosowa nie jest skonfigurowana.",
       "modelFailed": "Błąd modelu głosu.",

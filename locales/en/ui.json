@@ -230,6 +230,7 @@
       "noDevice": "No microphone input device was found on this system.",
       "micFailed": "Unable to initialize audio recording device.",
       "rateLimit": "Voice rate limit reached. Please hold for a moment.",
+      "unavailable": "Jarvis is not available for a little while. Please try again later.",
       "providerQuota": "Voice service quota exceeded. Text command input remains active.",
       "noKey": "Neural voice service key is unconfigured.",
       "modelFailed": "Neural audio synthesis failed. Text response shown below.",

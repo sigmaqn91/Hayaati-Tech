@@ -250,6 +250,8 @@ export function useJarvisVoice({
   const [failingLayer, setFailingLayer] = useState<VoiceFailureLayer>('NONE');
   // Raw technical detail of the last voice failure (shown on screen so the real cause is visible).
   const [speechDetail, setSpeechDetail] = useState<string>('');
+  // Structured, secret-free facts of the last failure (sent to the owner's Admin Control only).
+  const [speechInfo, setSpeechInfo] = useState<{ status: number | null; code: string; reason: string; retryAfter: number | null; mode: string } | null>(null);
 
   // References for live streaming and playback
   const onTranscriptReadyRef = useRef(onTranscriptReady);
@@ -967,6 +969,7 @@ export function useJarvisVoice({
     setFailingLayer('NONE');
     setSpeechError(null);
     setSpeechDetail('');
+    setSpeechInfo(null);
     try {
       const stored = JSON.parse(sessionStorage.getItem('hayaati_jarvis_transcript') || '[]');
       if (Array.isArray(stored)) rollingTranscriptRef.current = stored.slice(-20);
@@ -1285,6 +1288,7 @@ export function useJarvisVoice({
               }
               if (ageMs < 5000) {
                 setSpeechDetail(`Live closed code=${closeCode ?? 'unknown'} reason=${closeReason || 'none'} after ${ageMs}ms`);
+                setSpeechInfo({ status: null, code: `live_closed_${closeCode ?? 'unknown'}`, reason: '', retryAfter: null, mode: tourModeRef.current || 'normal' });
                 setSpeechError(closeCode === 401 || closeCode === 403 ? 'NO_KEY' : 'NETWORK');
                 setFailingLayer('GEMINI_LIVE');
               }
@@ -1298,6 +1302,7 @@ export function useJarvisVoice({
                 return;
               }
               setSpeechDetail(`Live error status=${err?.status || err?.statusCode || 'n/a'} ${String(err?.message || err?.type || '').slice(0, 160)}`);
+              setSpeechInfo({ status: Number(err?.status || err?.statusCode) || null, code: 'live_error', reason: '', retryAfter: null, mode: tourModeRef.current || 'normal' });
               setFailingLayer('GEMINI_LIVE');
               const status = err?.status || err?.statusCode;
               if (status === 429) setSpeechError('PROVIDER_QUOTA');
@@ -1328,6 +1333,7 @@ export function useJarvisVoice({
       if (!liveSession) {
         const status = lastLiveError?.status || lastLiveError?.statusCode;
         setFailingLayer('GEMINI_LIVE');
+        setSpeechInfo({ status: Number(status) || null, code: String(lastLiveError?.code || 'live_connect_failed'), reason: '', retryAfter: null, mode: tourModeRef.current || 'normal' });
         setSpeechDetail(`Live connect failed status=${status || 'n/a'} code=${lastLiveError?.code || 'n/a'} ${String(lastLiveError?.message || lastLiveError || '').slice(0, 160)}`);
         if (lastLiveError?.code === 'LIVE_TIMEOUT') setSpeechError('NETWORK');
         else if (status === 429) setSpeechError('PROVIDER_QUOTA');
@@ -1530,6 +1536,14 @@ export function useJarvisVoice({
     } catch (err: any) {
       console.warn('[Live Setup Error]:', err);
       const layer = err?.layer as VoiceFailureLayer | undefined;
+      const retryMatch = /retryAfter=(\d+)s/.exec(String(err?.message || ''));
+      setSpeechInfo({
+        status: Number(err?.status) || null,
+        code: String(err?.code || 'setup_failed'),
+        reason: String(err?.reason || ''),
+        retryAfter: retryMatch ? Number(retryMatch[1]) : null,
+        mode: tourModeRef.current || tour || 'normal',
+      });
       setSpeechDetail(`${err?.layer || 'SETUP'} ${err?.name || ''} code=${err?.code || 'n/a'} status=${err?.status || 'n/a'} ${String(err?.message || '').slice(0, 160)}`);
       if (layer) setFailingLayer(layer);
       else if (!audioContextRef.current) setFailingLayer('AUDIO_CONTEXT');
@@ -1817,6 +1831,7 @@ export function useJarvisVoice({
     speechError,
     failingLayer,
     speechDetail,
+    speechInfo,
     analyserNode: activeAnalyser,
     audioLevelRef,
     startListening,

@@ -210,6 +210,7 @@
       "noDevice": "Kein Mikrofongerät auf diesem System gefunden.",
       "micFailed": "Audiogerät konnte nicht initialisiert werden.",
       "rateLimit": "Sprachlimit erreicht. Bitte einen Moment warten.",
+      "unavailable": "Jarvis ist für kurze Zeit nicht verfügbar. Bitte versuchen Sie es später noch einmal.",
       "providerQuota": "Sprachkontingent überschritten. Texteingabe bleibt aktiv.",
       "noKey": "Der Schlüssel für den Sprachdienst ist nicht konfiguriert.",
       "modelFailed": "Sprachsynthese fehlgeschlagen. Textantwort unten angezeigt.",

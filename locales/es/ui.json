@@ -210,6 +210,7 @@
       "noDevice": "No se detectó ningún dispositivo de micrófono en el sistema.",
       "micFailed": "No se pudo iniciar el dispositivo de grabación de audio.",
       "rateLimit": "Límite de voz alcanzado. Por favor, espere un momento.",
+      "unavailable": "Jarvis no está disponible por un momento. Inténtalo de nuevo más tarde.",
       "providerQuota": "Cuota de voz agotada. La entrada por texto sigue activa.",
       "noKey": "Clave del servicio de voz neuronal no configurada.",
       "modelFailed": "Síntesis de voz fallida. Respuesta mostrada en texto abajo.",

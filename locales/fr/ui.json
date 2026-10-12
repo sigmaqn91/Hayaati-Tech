@@ -210,6 +210,7 @@
       "noDevice": "Aucun microphone détecté sur cet appareil.",
       "micFailed": "Impossible d’initialiser l’enregistrement audio.",
       "rateLimit": "Limite vocale atteinte. Veuillez patienter un instant.",
+      "unavailable": "Jarvis est indisponible pour un moment. Veuillez réessayer plus tard.",
       "providerQuota": "Quota vocal dépassé. La saisie textuelle reste active.",
       "noKey": "Clé de service vocal neuronal non configurée.",
       "modelFailed": "Synthèse vocale échouée. Réponse textuelle affichée ci-dessous.",

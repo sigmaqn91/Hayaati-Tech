@@ -210,6 +210,7 @@
       "noDevice": "Hakuna kipaza sauti kilichopatikana.",
       "micFailed": "Kuanzisha kipaza sauti kumeshindikana.",
       "rateLimit": "Kikomo cha maombi ya sauti kimefikiwa.",
+      "unavailable": "Jarvis haipatikani kwa muda mfupi. Tafadhali jaribu tena baadaye.",
       "providerQuota": "Kiwango cha mtoa huduma kimezidiwa.",
       "noKey": "Huduma ya sauti haijawekwa mipangilio.",
       "modelFailed": "Mfumo wa sauti umeshindwa kufanya kazi.",

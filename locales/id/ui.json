@@ -210,6 +210,7 @@
       "noDevice": "Perangkat mikrofon tidak ditemukan pada sistem ini.",
       "micFailed": "Gagal menginisialisasi perangkat perekam audio.",
       "rateLimit": "Batas transmisi suara tercapai. Harap tunggu sebentar.",
+      "unavailable": "Jarvis tidak tersedia untuk sementara waktu. Silakan coba lagi nanti.",
       "providerQuota": "Kuota layanan suara habis. Perintah teks tetap aktif.",
       "noKey": "Kunci layanan suara neural belum dikonfigurasi.",
       "modelFailed": "Sintesis suara gagal. Tanggapan teks ditampilkan di bawah.",

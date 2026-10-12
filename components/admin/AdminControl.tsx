@@ -7,13 +7,14 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { X, Users, Star, ShieldAlert, RefreshCw, Lock, Loader2, Sliders, Gift } from 'lucide-react';
+import { X, Users, Star, ShieldAlert, RefreshCw, Lock, Loader2, Sliders, Gift, Mic } from 'lucide-react';
 import { useOverlayHistory } from '@/hooks/use-overlay-history';
 import { RatingsReport, type RatingsReportData } from './RatingsReport';
 import { VisitorsReport, type VisitorsReportData } from './VisitorsReport';
 import { GuestsPanel, type GuestRow } from './GuestsPanel';
+import { VoiceErrorsPanel, type VoiceErrorsData } from './VoiceErrorsPanel';
 
-export type AdminTab = 'visitors' | 'ratings' | 'guests' | 'security';
+export type AdminTab = 'visitors' | 'ratings' | 'guests' | 'voice' | 'security';
 
 interface SecurityLog {
   id: string;
@@ -32,6 +33,7 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
   const [ratings, setRatings] = useState<RatingsReportData | null>(null);
   const [security, setSecurity] = useState<SecurityLog[] | null>(null);
   const [guests, setGuests] = useState<GuestRow[] | null>(null);
+  const [voiceErrors, setVoiceErrors] = useState<VoiceErrorsData | null>(null);
   const [loadedAt, setLoadedAt] = useState<Date | null>(null);
 
   useOverlayHistory(true, onClose);
@@ -54,11 +56,12 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
     setBusy(true);
     setError('');
     try {
-      const [v, r, s, g] = await Promise.all([
+      const [v, r, s, g, ve] = await Promise.all([
         fetch('/api/admin/visitors', { cache: 'no-store' }),
         fetch('/api/rating', { cache: 'no-store' }),
         fetch('/api/jarvis/admin', { cache: 'no-store' }).catch(() => null),
         fetch('/api/admin/guests', { cache: 'no-store' }).catch(() => null),
+        fetch('/api/admin/voice-errors', { cache: 'no-store' }).catch(() => null),
       ]);
       if (v.status === 401 || r.status === 401) {
         setNeedCode(true);
@@ -74,6 +77,8 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
       if (rData?.success) setRatings(rData);
       const gData = g && g.ok ? await g.json().catch(() => null) : null;
       if (gData?.success) setGuests(gData.guests);
+      const veData = ve && ve.ok ? await ve.json().catch(() => null) : null;
+      if (veData?.success) setVoiceErrors({ total: veData.total, latest: veData.latest });
       if (s && s.ok) {
         const sData = await s.json().catch(() => null);
         setSecurity(Array.isArray(sData?.failedLogs) ? sData.failedLogs : []);
@@ -128,6 +133,7 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
     ['visitors', 'Visitors', Users],
     ['ratings', 'Ratings', Star],
     ['guests', 'Guests', Gift],
+    ['voice', 'Voice errors', Mic],
     ['security', 'Security', ShieldAlert],
   ];
 
@@ -209,6 +215,7 @@ export function AdminControl({ initialTab, onClose }: { initialTab?: AdminTab | 
               {tab === 'visitors' && visitors && <VisitorsReport report={visitors} />}
               {tab === 'ratings' && ratings && <RatingsReport report={ratings} />}
               {tab === 'guests' && <GuestsPanel guests={guests || []} onChanged={reloadGuests} />}
+              {tab === 'voice' && <VoiceErrorsPanel report={voiceErrors || { total: 0, latest: [] }} onCleared={load} />}
               {tab === 'security' && (
                 <div className="rt-card">
                   <p className="rt-label">Wrong owner-code tries</p>

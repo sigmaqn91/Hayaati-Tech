@@ -210,6 +210,7 @@
       "noDevice": "Không tìm thấy thiết bị micro nào trên hệ thống này.",
       "micFailed": "Không thể khởi tạo thiết bị ghi âm.",
       "rateLimit": "Đã đạt giới hạn giọng nói. Vui lòng đợi trong giây lát.",
+      "unavailable": "Jarvis tạm thời không khả dụng. Vui lòng thử lại sau.",
       "providerQuota": "Đã hết hạn ngạch dịch vụ giọng nói. Nhập văn bản vẫn hoạt động.",
       "noKey": "Khóa dịch vụ giọng nói nơ-ron chưa được định cấu hình.",
       "modelFailed": "Tổng hợp giọng nói thất bại. Phản hồi dạng văn bản hiển thị bên dưới.",

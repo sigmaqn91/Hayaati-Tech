@@ -210,6 +210,7 @@
       "noDevice": "Nenhum dispositivo de microfone encontrado no sistema.",
       "micFailed": "Falha ao inicializar o dispositivo de gravação de áudio.",
       "rateLimit": "Limite de voz atingido. Aguarde um momento.",
+      "unavailable": "O Jarvis está indisponível por um momento. Tente novamente mais tarde.",
       "providerQuota": "Cota de voz excedida. Entrada por texto continua ativa.",
       "noKey": "Chave do serviço de voz neural não configurada.",
       "modelFailed": "Síntese de voz falhou. Resposta em texto exibida abaixo.",

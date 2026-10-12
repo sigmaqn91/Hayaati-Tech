@@ -210,6 +210,7 @@
       "noDevice": "在此系统上未检测到麦克风输入设备。",
       "micFailed": "无法初始化音频录制设备。",
       "rateLimit": "已达到语音请求限制。请稍候再试。",
+      "unavailable": "Jarvis 暂时无法使用，请稍后再试。",
       "providerQuota": "语音服务配额已用尽。文字输入仍然可用。",
       "noKey": "神经语音服务密钥尚未配置。",
       "modelFailed": "语音合成失败。文字回复显示在下方。",

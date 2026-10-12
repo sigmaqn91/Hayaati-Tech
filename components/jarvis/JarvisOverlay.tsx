@@ -279,7 +279,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     transcript,
     speechError,
     failingLayer,
-    speechDetail,
+    speechInfo,
     analyserNode,
     audioLevelRef,
     startListening,
@@ -509,36 +509,55 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     return () => window.clearTimeout(id);
   }, [embedded, sessionLive]);
 
-  // Map VoiceError codes to friendly localized messages in terminal
+  // Visitors only see a calm, translated notice. The real technical cause goes to the owner's Admin Control.
   useEffect(() => {
-    if (speechError) {
-      const voiceErrors = (t?.assistant as any)?.voiceErrors;
-      let friendlyMsg = t?.assistant?.errors?.genericError || 'Voice service notice.';
-      if (voiceErrors) {
-        if (speechError === 'UNSUPPORTED') friendlyMsg = voiceErrors.unsupported;
-        else if (speechError === 'INSECURE') friendlyMsg = voiceErrors.insecure;
-        else if (speechError === 'DENIED') friendlyMsg = voiceErrors.denied;
-        else if (speechError === 'NO_DEVICE') friendlyMsg = voiceErrors.noDevice;
-        else if (speechError === 'MIC_FAILED') friendlyMsg = voiceErrors.micFailed;
-        else if (speechError === 'RATE_LIMIT') friendlyMsg = voiceErrors.rateLimit;
-        else if (speechError === 'PROVIDER_QUOTA') friendlyMsg = voiceErrors.providerQuota;
-        else if (speechError === 'NO_KEY') friendlyMsg = voiceErrors.noKey;
-        else if (speechError === 'MODEL_FAILED') friendlyMsg = voiceErrors.modelFailed;
-        else if (speechError === 'NETWORK') friendlyMsg = voiceErrors.network;
-        else if (speechError === 'SERVER_ERROR') friendlyMsg = voiceErrors.serverError;
-      }
-      if (speechError === 'SESSION_ENDED') {
-        friendlyMsg = t?.assistant?.errors?.sessionEnded || friendlyMsg;
-      }
-      const layerTag = failingLayer && failingLayer !== 'NONE' ? ` [${failingLayer}]` : '';
-      setBootLogs((prev) => [...prev, `SYS_VOICE_NOTICE${layerTag}: ${friendlyMsg}`]);
-      // Also show the real technical cause on screen (the boot log is hidden in the hero).
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', text: `[VOICE ${speechError}${layerTag}] ${friendlyMsg}${speechDetail ? ' | ' + speechDetail : ''}` },
-      ]);
+    if (!speechError) return;
+    const voiceErrors = (t?.assistant as any)?.voiceErrors;
+    const userSide = ['UNSUPPORTED', 'INSECURE', 'DENIED', 'NO_DEVICE', 'MIC_FAILED', 'RATE_LIMIT'];
+    let friendlyMsg = voiceErrors?.unavailable || t?.assistant?.errors?.genericError || 'Voice service notice.';
+    if (userSide.includes(speechError) && voiceErrors) {
+      const key: Record<string, string> = {
+        UNSUPPORTED: 'unsupported',
+        INSECURE: 'insecure',
+        DENIED: 'denied',
+        NO_DEVICE: 'noDevice',
+        MIC_FAILED: 'micFailed',
+        RATE_LIMIT: 'rateLimit',
+      };
+      friendlyMsg = voiceErrors[key[speechError]] || friendlyMsg;
     }
-  }, [speechError, failingLayer, speechDetail, t]);
+    if (speechError === 'SESSION_ENDED') {
+      friendlyMsg = t?.assistant?.errors?.sessionEnded || friendlyMsg;
+    }
+    setBootLogs((prev) => [...prev, `SYS_VOICE_NOTICE: ${friendlyMsg}`]);
+    setMessages((prev) => [...prev, { role: 'assistant', text: friendlyMsg }]);
+
+    // Real problems (not the visitor's own microphone / limits) are reported for the owner.
+    if (!userSide.includes(speechError) && speechError !== 'SESSION_ENDED') {
+      let vid = '';
+      try {
+        vid = window.localStorage.getItem('hayaati_vid') || '';
+      } catch {}
+      try {
+        fetch('/api/voice-error', {
+          method: 'POST',
+          keepalive: true,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: speechError,
+            code: speechInfo?.code || '',
+            status: speechInfo?.status ?? null,
+            reason: speechInfo?.reason || '',
+            retryAfter: speechInfo?.retryAfter ?? null,
+            mode: speechInfo?.mode || 'normal',
+            layer: failingLayer,
+            vid,
+          }),
+        }).catch(() => {});
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speechError]);
 
   // Sync Visual State with Voice
   useEffect(() => {
