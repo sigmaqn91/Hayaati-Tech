@@ -191,9 +191,7 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
     GREETING_PRONUNCIATION_RULE,
     BRAND_PRONUNCIATION_RULE,
     'THIS IS A ONE-SIDED GUIDED TOUR: you narrate the website by yourself from start to end. Never ask "shall we continue?", never ask permission, never wait for the visitor between stops. ' +
-      (full
-        ? 'Only at the very start you ask ONE short question: their name. Ask nothing else (not what they like, not who they are, not what they want to see). Listen to the whole name before you answer, even if the visitor pauses in the middle or says something like "my name is ..." first. Repeat the name back exactly as you heard it, never swap it for a more common or similar-sounding name; if you could not hear it clearly, say sorry and ask only for the name once more, slowly. After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then.'
-        : 'Do not ask the visitor anything at all.'),
+      ('Only at the very start you ask ONE short question: their name. Ask nothing else (not what they like, not who they are, not what they want to see). Listen to the whole name before you answer, even if the visitor pauses in the middle or says something like "my name is ..." first. Repeat the name back exactly as you heard it, never swap it for a more common or similar-sounding name; if you could not hear it clearly, say sorry and ask only for the name once more, slowly. After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then.'),
     'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again. Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show.',
     'TIME: the tour must finish within its time. Keep to the speaking time given in each result; it is calculated so the whole tour fits.',
     'VOICE: sound like a real, warm human guide: relaxed natural pace, natural pauses and intonation, lively energy, clear. Short natural sentences, no lists or symbols read aloud, vary your words.',
@@ -297,7 +295,7 @@ export function useJarvisVoice({
   // Adaptive playback cushion (seconds): grows a little after any network hiccup so the voice never breaks.
   const jitterRef = useRef<number>(0.18);
   // Tour session (started only by the Quick Tour / Premium Tour buttons). During a tour the microphone is not
-  // streamed (only for the 1-2 opening questions of the full tour), so the visitor's voice can never interrupt.
+  // streamed (only for the opening name question of both tours), so the visitor's voice can never interrupt.
   const [tourMode, setTourMode] = useState<TourMode | null>(null);
   const tourModeRef = useRef<TourMode | null>(null);
   const tourIntroRef = useRef<boolean>(false);
@@ -960,8 +958,8 @@ export function useJarvisVoice({
     const tour: TourMode | null = options?.tour === 'quick' || options?.tour === 'full' ? options.tour : null;
     // A tour continuing on a fresh connection (its last words may still be playing: they are not cut).
     const resume = tour && options?.resume ? options.resume : null;
-    // The free Quick Tour never needs the microphone; the full tour only for its opening questions.
-    const needMic = tour !== 'quick' && !resume;
+    // Both tours use the microphone only for the opening name question.
+    const needMic = !resume;
 
     // Interrupt any current speech output
     if (isSpeakingRef.current && !resume) {
@@ -981,7 +979,7 @@ export function useJarvisVoice({
     } catch {}
     setIsConnecting(true);
     tourModeRef.current = tour;
-    tourIntroRef.current = tour === 'full' && !resume;
+    tourIntroRef.current = Boolean(tour) && !resume;
     if (!resume) tourCouponRef.current = tour === 'full' ? options?.coupon || null : null;
     tourEndAfterTurnRef.current = false;
     tourGoodbyeStartedRef.current = false;
@@ -1175,8 +1173,8 @@ export function useJarvisVoice({
               endOfSpeechSensitivity: 'END_SENSITIVITY_LOW',
               // Premium Tour opening: a name is short and often said after a small pause, so more pre-roll keeps its
               // first syllable and a longer pause length keeps "mera naam ..." and the name in one answer.
-              prefixPaddingMs: tour === 'full' ? 300 : 40,
-              silenceDurationMs: tour === 'full' ? 1100 : 650,
+              prefixPaddingMs: tour ? 300 : 40,
+              silenceDurationMs: tour ? 1100 : 650,
             },
           },
         };
@@ -1429,7 +1427,7 @@ export function useJarvisVoice({
             text:
               tour === 'full'
                 ? `[SYSTEM] The visitor pressed the Premium Full Tour button. Greet them now in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them warmly to the full tour of Hayaati Web Technology, then ask ONLY their name, nothing else (no other question about interests, preferences or who they are). After their answer, or if they stay silent, call tour_next.`
-                : `[SYSTEM] The visitor pressed the Quick Tour button. In one or two short sentences in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them to a quick three-minute tour of the highlights, then call tour_next right away. Do not ask anything.`,
+                : `[SYSTEM] The visitor pressed the Quick Tour button. In one or two short sentences in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them to a quick three-minute tour of the highlights, then ask ONLY their name, nothing else. After their answer, or if they stay silent, call tour_next.`,
           });
         } catch {}
       } else try {
