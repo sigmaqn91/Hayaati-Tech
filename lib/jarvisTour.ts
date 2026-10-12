@@ -142,7 +142,7 @@ function quickPlan(): TourStep[] {
 // the next stop is prepared while Jarvis is still talking.
 const OVERHEAD = 0.7;
 // Time kept free at the end for the goodbye.
-const END_RESERVE: Record<TourMode, number> = { quick: 40, full: 50 };
+const END_RESERVE: Record<TourMode, number> = { quick: 28, full: 40 };
 // Below this many speaking seconds per weight, a whole category is summed up instead of opening each card.
 const MIN_SECONDS_PER_WEIGHT = 6;
 const WORDS_PER_SECOND = 2.3;

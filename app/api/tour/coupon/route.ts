@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { couponStatus, requestCoupon } from '@/lib/couponStore';
+import { verifyOwnerSession } from '@/lib/jarvisAuth';
 import { checkVoiceActionLimit } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
@@ -15,18 +16,20 @@ export async function POST(req: NextRequest) {
     body = {};
   }
 
-  const limit = await checkVoiceActionLimit(req, 'coupon', 20, 600);
+  // The verified owner (founder) can request and test as many coupons as she likes.
+  const owner = verifyOwnerSession(req);
+  const limit = owner ? { ok: true as const, retryAfter: 0 } : await checkVoiceActionLimit(req, 'coupon', 20, 600);
   if (!limit.ok) {
     return NextResponse.json({ ok: false, reason: 'rate_limited', retryAfterSeconds: limit.retryAfter }, { status: 429 });
   }
 
   if (body?.action === 'check') {
-    const status = await couponStatus(req, body?.code);
+    const status = await couponStatus(req, body?.code, owner);
     return NextResponse.json({ ok: status === 'valid', status });
   }
 
   if (body?.action === 'request') {
-    const result = await requestCoupon(req);
+    const result = await requestCoupon(req, owner);
     const res = result.ok
       ? NextResponse.json({ ok: true, code: result.code, reused: result.reused })
       : NextResponse.json({ ok: false, reason: result.reason }, { status: result.reason === 'already_used' ? 409 : 503 });

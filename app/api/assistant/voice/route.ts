@@ -37,7 +37,10 @@ export async function POST(req: NextRequest) {
       );
     }
     // A resumed tour is not a new attempt: only the server-wide checks apply (no hourly count, no coupon).
-    const limitKind: VoiceSessionKind = resume ? 'full' : kind;
+    // The verified owner (founder) is never held back by the per-visitor hourly limits either, so she can test
+    // Jarvis and both tours as often as she likes (the server-wide daily cap and concurrency still apply).
+    const ownerRequest = verifyOwnerSession(req);
+    const limitKind: VoiceSessionKind = resume || ownerRequest ? 'full' : kind;
 
     // 1. Session Release / End Action: release concurrency slot & track daily minutes
     if (action === 'release' || action === 'end') {
@@ -53,7 +56,7 @@ export async function POST(req: NextRequest) {
     // so give back the concurrency slot AND the visitor's hourly attempt.
     if (action === 'refund') {
       // A resumed tour session took no hourly attempt and no coupon, so only its slot is returned.
-      await refundVoiceSession(req, body?.resumed ? 'full' : kind);
+      await refundVoiceSession(req, body?.resumed || ownerRequest ? 'full' : kind);
       if (kind === 'full' && body?.coupon && !body?.resumed) await restoreCoupon(req, body.coupon);
       return NextResponse.json({ success: true, refunded: true });
     }
@@ -81,7 +84,7 @@ export async function POST(req: NextRequest) {
     // 3. New Session Request (action === 'session')
     if (action === 'session') {
       const { language } = body;
-      const isOwner = verifyOwnerSession(req);
+      const isOwner = ownerRequest;
       const userLang = typeof language === 'string' ? language.toLowerCase().trim() : 'en';
 
       const apiKey = process.env.GEMINI_API_KEY;

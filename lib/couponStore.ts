@@ -53,12 +53,16 @@ export type CouponRequestResult =
   | { ok: true; code: string; reused: boolean; cookieToSet?: string }
   | { ok: false; reason: 'already_used' | 'store_error'; cookieToSet?: string };
 
-/** Gives this visitor their coupon: the same unused code again if they already have one, else a new code. */
-export async function requestCoupon(req: NextRequest | Request): Promise<CouponRequestResult> {
+/**
+ * Gives this visitor their coupon: the same unused code again if they already have one, else a new code.
+ * The verified owner gets a fresh code every time (for testing), and her codes are never used up (the voice
+ * server starts her full tour without redeeming one).
+ */
+export async function requestCoupon(req: NextRequest | Request, owner = false): Promise<CouponRequestResult> {
   const identity = getVisitorIdentity(req);
   const cookieToSet = identity.cookieToSet;
 
-  for (const key of identity.keys) {
+  for (const key of owner ? [] : identity.keys) {
     const existing = await kvGet(visitorKey(key));
     if (!existing) continue;
     const record = await readRecord(existing);
@@ -71,7 +75,7 @@ export async function requestCoupon(req: NextRequest | Request): Promise<CouponR
     const code = newCode();
     const record: CouponRecord = { keys: identity.keys, createdAt: Date.now() };
     if (!(await kvSet(codeKey(code), JSON.stringify(record), CODE_TTL, true))) continue;
-    await Promise.all(identity.keys.map((key) => kvSet(visitorKey(key), code, VISITOR_TTL)));
+    if (!owner) await Promise.all(identity.keys.map((key) => kvSet(visitorKey(key), code, VISITOR_TTL)));
     return { ok: true, code, reused: false, cookieToSet };
   }
   return { ok: false, reason: 'store_error', cookieToSet };
@@ -108,11 +112,17 @@ export async function restoreCoupon(req: NextRequest | Request, raw: unknown): P
 }
 
 /** Read-only check used by the coupon box before the tour starts. */
-export async function couponStatus(req: NextRequest | Request, raw: unknown): Promise<'valid' | 'invalid' | 'already_used' | 'not_yours'> {
+export async function couponStatus(
+  req: NextRequest | Request,
+  raw: unknown,
+  owner = false
+): Promise<'valid' | 'invalid' | 'already_used' | 'not_yours'> {
   const code = normalizeCoupon(raw);
   if (!code) return 'invalid';
   const record = await readRecord(code);
   if (!record) return 'invalid';
+  // The owner can test with any real code, used or not (her full tour never redeems one).
+  if (owner) return 'valid';
   if (record.usedAt) return 'already_used';
   const identity = getVisitorIdentity(req);
   return record.keys.some((k) => identity.keys.includes(k)) ? 'valid' : 'not_yours';
