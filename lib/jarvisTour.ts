@@ -410,7 +410,7 @@ function prepareStep(step: TourStep): PreparedStop {
   let facts: Record<string, unknown> = {};
   if (step.kind === 'era') {
     facts = eraFacts(step.era!);
-    extra = 'Describe this era in a few lively sentences. ';
+    extra = `The era on screen now is ${step.era}. Say the year ${step.era} exactly and describe only this era in a few lively sentences; do not name any other era year. `;
   } else if (step.kind === 'tech') {
     extra = 'Introduce the catalogue: 42 future technologies in seven categories. Three highlights will open next. ';
   } else if (step.key === 'about') {

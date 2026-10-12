@@ -314,6 +314,11 @@ export function useJarvisVoice({
   const tourAwaitingNextRef = useRef<boolean>(false);
   // Full tour opening: the visitor answered Jarvis's questions (after his reply to that, the tour starts).
   const tourVisitorAnsweredRef = useRef<boolean>(false);
+  // The stop Jarvis was handed last, and whether his words about it have started. The tour moves on only after
+  // he has spoken about the current stop, so a second tour_next (or a turn end arriving at the same moment)
+  // can never skip a stop: what he says and the era or card on screen stay the same stop.
+  const tourLastStopRef = useRef<{ response: Record<string, unknown>; at: number } | null>(null);
+  const tourStopVoicedRef = useRef<boolean>(false);
   const handTourStopRef = useRef<(calls: { id?: string; name?: string }[] | null) => void>(() => {});
 
   // Warm the voice server once the page is idle, and again when the visitor hovers "Activate Jarvis".
@@ -685,7 +690,6 @@ export function useJarvisVoice({
       turnCompleteRef.current = false;
       turnHasAudioRef.current = true;
       nudgesWithoutAudioRef.current = 0;
-      if (tourModeRef.current && (!tourIntroRef.current || tourVisitorAnsweredRef.current)) tourAwaitingNextRef.current = true;
       // First words about the next tour stop: the screen changes exactly when the current words end, and a
       // short natural breath (the card opening) comes before the new words. No waiting, no visible scrolling.
       const pendingShow = tourPendingShowRef.current;
@@ -693,6 +697,10 @@ export function useJarvisVoice({
       // (Gemini streams them a moment late); the screen changes only with the first words that really belong
       // to the next stop, so what Jarvis says and what is on screen always match (Quick and Premium Tour).
       const tailOfPreviousStop = Boolean(tourModeRef.current) && Date.now() - lastToolResponseAtRef.current < 450;
+      if (tourModeRef.current && !tailOfPreviousStop) {
+        tourStopVoicedRef.current = true;
+        if (!tourIntroRef.current || tourVisitorAnsweredRef.current) tourAwaitingNextRef.current = true;
+      }
       if (pendingShow && !tailOfPreviousStop) {
         tourPendingShowRef.current = null;
         clearTimeout(pendingShow.fallback);
@@ -895,6 +903,8 @@ export function useJarvisVoice({
     nudgesWithoutAudioRef.current = 0;
     tourAwaitingNextRef.current = false;
     tourVisitorAnsweredRef.current = false;
+    tourLastStopRef.current = null;
+    tourStopVoicedRef.current = false;
     setTourMode(tour);
     if (tour && !resume) window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'connecting', mode: tour } }));
 
@@ -1481,6 +1491,26 @@ export function useJarvisVoice({
   // calls; null means his turn ended without one, so the stop is handed to him as a message instead.
   handTourStopRef.current = (calls) => {
     if (!tourModeRef.current) return;
+    // Jarvis has not started speaking about the stop he was just handed (a double tour_next, or his turn end
+    // and his tour_next arriving together): he gets that same stop again, the tour does not move on.
+    const last = tourLastStopRef.current;
+    if (last && !tourStopVoicedRef.current && !tourIntroRef.current && Date.now() - last.at < 8000) {
+      const again = {
+        ...last.response,
+        note: 'This is the same stop you were just given; it is on the screen now. Speak about this stop once, then call tour_next.',
+      };
+      try {
+        if (calls) {
+          const functionResponses = calls
+            .filter((call) => !cancelledToolIdsRef.current.has(String(call.id)))
+            .map((call) => ({ id: call.id, name: call.name, response: again }));
+          if (functionResponses.length) liveSessionRef.current?.sendToolResponse({ functionResponses });
+        }
+      } catch (error) {
+        console.warn('[Gemini Live Tool Response Error]:', error);
+      }
+      return;
+    }
     tourAwaitingNextRef.current = false;
     if (tourResumeAtNextToolRef.current && !tourEndAfterTurnRef.current) {
       resumeTourRef.current(false);
@@ -1502,11 +1532,15 @@ export function useJarvisVoice({
       releaseMicForTour();
     }
     let show: (() => void) | null = null;
+    let given: Record<string, unknown> | null = null;
+    // One stop per hand-over: several tour_next calls in one message all get the same stop.
     const takeStop = () => {
+      if (given) return given;
       const stop = tourNext();
       show = stop.show;
       if (stop.finished) tourEndAfterTurnRef.current = true;
-      return stop.response;
+      given = stop.response;
+      return given;
     };
     try {
       if (calls) {
@@ -1528,6 +1562,8 @@ export function useJarvisVoice({
       console.warn('[Gemini Live Tool Response Error]:', error);
     }
     lastToolResponseAtRef.current = Date.now();
+    tourLastStopRef.current = given ? { response: given, at: Date.now() } : null;
+    tourStopVoicedRef.current = false;
     if (show) {
       const run: () => void = show;
       // If no new words arrive, the screen still changes when the current words have finished.
