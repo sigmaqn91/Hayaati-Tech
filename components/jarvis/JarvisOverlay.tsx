@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useOverlayHistory } from '@/hooks/use-overlay-history';
+import { useScreenWakeLock } from '@/hooks/use-screen-wake-lock';
 import {
   Send,
   X,
@@ -338,6 +339,8 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
       }
     },
   });
+
+  useScreenWakeLock(Boolean(tourMode));
 
   // Opens the owner code box (keyboard comes up with it). Safe to call more than once.
   function openVerifyBox(delay = 0) {
