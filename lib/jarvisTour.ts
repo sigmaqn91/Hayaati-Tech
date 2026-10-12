@@ -332,10 +332,6 @@ function instruction(seconds: number, extra = '') {
   );
 }
 
-// Full tour only: one natural sentence that leads into the next stop, so the tour flows like one story.
-const FLOW =
-  'End with one short, natural bridge to what comes next (vary it every time; never the same phrase twice in a row). ';
-
 /** Texts that will be on screen once the page has jumped to the element (read from the layout, no scrolling). */
 function textsAt(selector: string | undefined, section: string) {
   const root = document.getElementById(section);
@@ -386,7 +382,7 @@ function prepareStep(step: TourStep): PreparedStop {
         ...base,
         catalogue_category: CATEGORY_NAMES[step.category!],
         cards_in_this_category: titles,
-        what_to_do_now: instruction(seconds, 'Name this category, then mention each of its cards in one short sentence (they will not be opened). ' + FLOW),
+        what_to_do_now: instruction(seconds, 'Name this category, then mention each of its cards in one short sentence (they will not be opened). '),
       },
       show: () => showSection({ ...step, kind: 'tech' }),
     };
@@ -394,14 +390,11 @@ function prepareStep(step: TourStep): PreparedStop {
 
   if (step.kind === 'card') {
     const card = 'This card is now open large on the screen. Name it exactly as card_title and explain what it is and how it works, in simple words. ';
-    const extra = full
-      ? (step.intro
-          ? `A new catalogue category begins here: ${CATEGORY_NAMES[step.category!]}. First say in one natural sentence what this category is about, then turn to its first card. `
-          : '') +
-        card +
-        'Explain it like a friendly expert, with one vivid everyday example of how it could change daily life. ' +
-        FLOW
-      : card;
+    // Same words as the Quick Tour (which visitors love); the full tour only adds a one-line category intro.
+    const extra =
+      full && step.intro
+        ? `A new catalogue category begins here: ${CATEGORY_NAMES[step.category!]}. First say in one natural sentence what this category is about, then turn to its first card. ${card}`
+        : card;
     return {
       response: {
         ...base,
@@ -417,15 +410,11 @@ function prepareStep(step: TourStep): PreparedStop {
   let facts: Record<string, unknown> = {};
   if (step.kind === 'era') {
     facts = eraFacts(step.era!);
-    extra = full
-      ? 'This era is now on screen. Describe it in lively sentences: the big banner photo, the story of a day in this era and its key breakthroughs; mention its milestone cards briefly by name. ' + FLOW
-      : 'Describe this era in a few lively sentences. ';
+    extra = 'Describe this era in a few lively sentences. ';
   } else if (step.kind === 'tech') {
     extra = 'Introduce the catalogue: 42 future technologies in seven categories. Three highlights will open next. ';
   } else if (step.key === 'about') {
-    extra = 'Speak about founder Aliya Khan with warmth and respect, describing what is on screen. ' + (full ? FLOW : '');
-  } else if (full) {
-    extra = FLOW;
+    extra = 'Speak about founder Aliya Khan with warmth and respect, describing what is on screen. ';
   }
   const isLast = state.index === state.steps.length - 1;
   return {
@@ -435,7 +424,7 @@ function prepareStep(step: TourStep): PreparedStop {
       ...facts,
       ...(step.kind === 'era' ? {} : { visible_on_screen: textsAt(step.start, step.section) }),
       what_to_do_now: isLast
-        ? `${extra.replace(FLOW, '')}Speak for about ${seconds} seconds about it, then call tour_next one last time.`
+        ? `${extra}Speak for about ${seconds} seconds about it, then call tour_next one last time.`
         : instruction(seconds, extra),
     },
     show: () => showSection(step),

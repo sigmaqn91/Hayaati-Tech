@@ -689,7 +689,11 @@ export function useJarvisVoice({
       // First words about the next tour stop: the screen changes exactly when the current words end, and a
       // short natural breath (the card opening) comes before the new words. No waiting, no visible scrolling.
       const pendingShow = tourPendingShowRef.current;
-      if (pendingShow) {
+      // Premium Tour: words that arrive right after the next stop was handed over are still the end of the
+      // current stop (Gemini streams them a moment late); the screen changes only with the first words that
+      // really belong to the next stop, so what Jarvis says and what is on screen always match.
+      const tailOfPreviousStop = tourModeRef.current === 'full' && Date.now() - lastToolResponseAtRef.current < 450;
+      if (pendingShow && !tailOfPreviousStop) {
         tourPendingShowRef.current = null;
         clearTimeout(pendingShow.fallback);
         if (queueDry) pendingShow.show();
