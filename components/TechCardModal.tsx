@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TechCardData, TimelineCardData } from '@/data/future';
 import { RealImageSlot } from './RealImageSlot';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,8 +12,24 @@ interface TechCardModalProps {
   onClose: () => void;
 }
 
-export function TechCardModal({ card, onClose }: TechCardModalProps) {
+export function TechCardModal({ card: openCard, onClose }: TechCardModalProps) {
   const { t, content } = useLanguage();
+  // The popup opens large with a soft zoom and, when closed, fades out before it leaves (GPU-only animation).
+  const [card, setCard] = useState(openCard);
+  const [closing, setClosing] = useState(false);
+  useEffect(() => {
+    if (openCard) {
+      setCard(openCard);
+      setClosing(false);
+      return;
+    }
+    setClosing(true);
+    const id = window.setTimeout(() => {
+      setCard(null);
+      setClosing(false);
+    }, 260);
+    return () => window.clearTimeout(id);
+  }, [openCard]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -26,7 +42,7 @@ export function TechCardModal({ card, onClose }: TechCardModalProps) {
   }, [onClose]);
 
   // Back button closes this modal instead of leaving the site
-  useOverlayHistory(!!card, onClose);
+  useOverlayHistory(!!openCard, onClose);
 
   if (!card) return null;
 
@@ -48,12 +64,13 @@ export function TechCardModal({ card, onClose }: TechCardModalProps) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-card-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 overflow-y-auto"
+      data-closing={closing ? '' : undefined}
+      className="tcm-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-3xl bg-[#0b0f17] border border-[#38e8ff]/60 shadow-[0_0_30px_rgba(56,232,255,0.2)] my-8 hud-frame">
+      <div className="tcm-panel relative w-full max-w-3xl bg-[#0b0f17] border border-[#38e8ff]/60 shadow-[0_0_30px_rgba(56,232,255,0.2)] my-8 hud-frame">
         {/* Top Header Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#1e293b] bg-[#070a0f]">
           <div className="flex items-center gap-3">

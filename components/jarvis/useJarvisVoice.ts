@@ -16,6 +16,7 @@ const loadGenAI = () => {
 import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION, JARVIS_FEEDBACK_INSTRUCTION } from '@/lib/jarvisTools';
+import { beginTour, endTour, tourNext, TOUR_FUNCTION_DECLARATIONS, type TourMode } from '@/lib/jarvisTour';
 
 // Maps language codes from Hayaati's 30 locales to BCP-47 / Live voice language tags
 const LOCALE_TO_VOICE_LANG: Record<string, string> = {
@@ -168,6 +169,30 @@ function buildSystemInstruction(languageCode: string, isOwner: boolean, knowledg
     .join('\n\n');
 }
 
+// Tour sessions (Quick Tour / Premium Full Tour buttons): one-sided narration, only the tour_next tool.
+function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = ''): string {
+  const lp = getJarvisLang(languageCode);
+  const full = mode === 'full';
+  return [
+    `You are Jarvis, the voice guide of Hayaati Web Technology, giving the ${full ? 'Premium Full Tour (about 14 minutes)' : 'free Quick Tour (about 3 minutes)'} of the website. The owner and founder is Aliya Khan. Never invent facts; describe only what the tour results show and what the knowledge below says.`,
+    `LANGUAGE: speak only ${lp.name} for the whole tour. Style: ${lp.style}`,
+    `GREETING: the normal greeting in ${lp.name} is ${lp.greeting}.`,
+    GREETING_PRONUNCIATION_RULE,
+    'THIS IS A ONE-SIDED GUIDED TOUR: you narrate the website by yourself from start to end. Never ask "shall we continue?", never ask permission, never wait for the visitor between stops. ' +
+      (full
+        ? 'Only at the very start you may ask at most two short questions (for example their name, and what interests them most). After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then and lean a little towards what they said they like.'
+        : 'Do not ask the visitor anything at all.'),
+    'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again. Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show.',
+    'TIME: the tour must finish within its time. Keep to the speaking time given in each result; it is calculated so the whole tour fits.',
+    'VOICE: warm, calm, clear and lively, like a kind expert guide. Short natural sentences, no lists or symbols read aloud, vary your words.',
+    'RESPECT AND NAME: always say "Aliya Khan" or "founder Aliya Khan" (Hindi/Urdu: "Aliya Khan ji"), pronounced Aa-li-yaa Khaan (Hindi आलिया ख़ान, Urdu عالیہ خان), never "Ali" or "Ali Khan".',
+    'RULES: you cannot turn owner mode on, cannot give or mention any coupon code, and cannot do any other website action during the tour.',
+    knowledge,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+}
+
 export type VoiceFailureLayer =
   | 'NONE'
   | 'MIC_PERMISSION'
@@ -257,6 +282,15 @@ export function useJarvisVoice({
   getSiteSnapshotRef.current = getSiteSnapshot;
   // Adaptive playback cushion (seconds): grows a little after any network hiccup so the voice never breaks.
   const jitterRef = useRef<number>(0.18);
+  // Tour session (started only by the Quick Tour / Premium Tour buttons). During a tour the microphone is not
+  // streamed (only for the 1-2 opening questions of the full tour), so the visitor's voice can never interrupt.
+  const [tourMode, setTourMode] = useState<TourMode | null>(null);
+  const tourModeRef = useRef<TourMode | null>(null);
+  const tourIntroRef = useRef<boolean>(false);
+  const tourCouponRef = useRef<string | null>(null);
+  const tourEndAfterTurnRef = useRef<boolean>(false);
+  const tourPendingToolsRef = useRef<number>(0);
+  const tourNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Warm the voice server once the page is idle, and again when the visitor hovers "Activate Jarvis".
   useEffect(() => {
@@ -361,6 +395,13 @@ export function useJarvisVoice({
     }, 10000);
     try {
       const lp = getJarvisLang(language);
+      if (tourModeRef.current) {
+        greetingDoneRef.current = true;
+        session.sendRealtimeInput({
+          text: `[SYSTEM] The visitor just switched the website language to ${lp.name}. From now on speak ONLY ${lp.name} (style: ${lp.style}). Continue the tour from where you are in ${lp.name}: say the current stop again briefly, then call tour_next.`,
+        });
+        return;
+      }
       session.sendRealtimeInput({
         text: `[SYSTEM] The visitor just switched the website language to ${lp.name}. From now on speak ONLY ${lp.name}. Speaking style: ${lp.style} Right now, immediately introduce yourself again in ${lp.name}: start with ${lp.greeting}, say you are Jarvis from Hayaati Web Technology and ask how you can help. One or two short, warm sentences.`,
       });
@@ -397,13 +438,31 @@ export function useJarvisVoice({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
-          liveOpenedRef.current ? { action: 'release', durationSeconds } : { action: 'refund' }
+          liveOpenedRef.current
+            ? { action: 'release', durationSeconds }
+            : { action: 'refund', tour: tourModeRef.current, coupon: tourCouponRef.current }
         ),
         keepalive: true,
       }).catch(() => {});
     }
     sessionStartTimeRef.current = 0;
     liveOpenedRef.current = false;
+
+    // Tour: end it cleanly (any open card closes) and tell the page.
+    if (tourNudgeTimerRef.current) {
+      clearTimeout(tourNudgeTimerRef.current);
+      tourNudgeTimerRef.current = null;
+    }
+    if (tourModeRef.current) {
+      endTour();
+      window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'ended', mode: tourModeRef.current } }));
+      tourModeRef.current = null;
+      tourIntroRef.current = false;
+      tourCouponRef.current = null;
+      tourEndAfterTurnRef.current = false;
+      tourPendingToolsRef.current = 0;
+      setTourMode(null);
+    }
 
     // 2. Disconnect ScriptProcessor
     if (scriptProcessorRef.current) {
@@ -467,7 +526,35 @@ export function useJarvisVoice({
     nextPlayTimeRef.current = 0;
     turnHasAudioRef.current = false;
     setIsListening(true);
+    if (tourModeRef.current) afterTourTurnRef.current();
   }, []);
+
+  // Tour rhythm guard: Jarvis finished speaking. If the tour is over, the session closes (saves voice minutes);
+  // otherwise, if he forgot to call tour_next, he is reminded quietly, so the tour can never hang.
+  const afterTourTurnRef = useRef<() => void>(() => {});
+  afterTourTurnRef.current = () => {
+    if (tourNudgeTimerRef.current) clearTimeout(tourNudgeTimerRef.current);
+    tourNudgeTimerRef.current = null;
+    if (tourEndAfterTurnRef.current) {
+      tourNudgeTimerRef.current = setTimeout(() => stopListeningRef.current(), 900);
+      return;
+    }
+    if (tourPendingToolsRef.current > 0) return;
+    const intro = tourIntroRef.current;
+    tourNudgeTimerRef.current = setTimeout(() => {
+      tourNudgeTimerRef.current = null;
+      if (!tourModeRef.current || tourPendingToolsRef.current > 0 || isSpeakingRef.current) return;
+      try {
+        liveSessionRef.current?.sendRealtimeInput({
+          text: intro
+            ? '[SYSTEM] Start the tour now: call tour_next.'
+            : '[SYSTEM] Continue the tour now: call tour_next right away, without asking anything.',
+        });
+      } catch {}
+    }, intro ? 14000 : 2500);
+  };
+  const stopListeningRef = useRef<() => void>(() => {});
+  stopListeningRef.current = stopListening;
 
   // Handle a genuine server-side Live API interruption/barge-in event.
   // Do not infer interruptions from microphone volume; Gemini Live's VAD is
@@ -487,6 +574,8 @@ export function useJarvisVoice({
   }, []);
 
   const handleInterruption = useCallback(() => {
+    // Nothing may cut Jarvis off during a tour.
+    if (tourModeRef.current && !tourIntroRef.current) return;
     cancelSpeech();
     turnCompleteRef.current = true;
     setIsListening(true);
@@ -546,6 +635,10 @@ export function useJarvisVoice({
       // UI to LISTENING.
       turnCompleteRef.current = false;
       turnHasAudioRef.current = true;
+      if (tourNudgeTimerRef.current && !tourEndAfterTurnRef.current) {
+        clearTimeout(tourNudgeTimerRef.current);
+        tourNudgeTimerRef.current = null;
+      }
       isSpeakingRef.current = true;
       setIsSpeaking(true);
       setIsListening(false);
@@ -679,9 +772,29 @@ export function useJarvisVoice({
     return sendLiveText('[SYSTEM] Owner mode has just been switched off at the owner\'s request. From now on treat the user as a normal visitor and do not share owner-only information. Say one short, warm goodbye in the currently selected website language.');
   }, [sendLiveText]);
 
+  // Full tour: after the opening questions the microphone is switched off completely (the browser's mic
+  // indicator goes off too), so nothing the visitor says can reach Jarvis during the tour.
+  const releaseMicForTour = useCallback(() => {
+    if (scriptProcessorRef.current) {
+      try {
+        scriptProcessorRef.current.disconnect();
+      } catch {}
+      scriptProcessorRef.current = null;
+    }
+    mediaStreamRef.current?.getTracks().forEach((track) => {
+      try {
+        track.stop();
+      } catch {}
+    });
+    mediaStreamRef.current = null;
+  }, []);
+
   // Start Live Microphone Capture and Stream into Gemini Live WebSocket
-  const startListening = useCallback(async () => {
+  const startListening = useCallback(async (options?: { tour?: TourMode; coupon?: string }) => {
     if (typeof window === 'undefined') return;
+    const tour: TourMode | null = options?.tour === 'quick' || options?.tour === 'full' ? options.tour : null;
+    // The free Quick Tour never needs the microphone; the full tour only for its opening questions.
+    const needMic = tour !== 'quick';
 
     // Interrupt any current speech output
     if (isSpeakingRef.current) {
@@ -699,6 +812,13 @@ export function useJarvisVoice({
       if (Array.isArray(stored)) rollingTranscriptRef.current = stored.slice(-20);
     } catch {}
     setIsConnecting(true);
+    tourModeRef.current = tour;
+    tourIntroRef.current = tour === 'full';
+    tourCouponRef.current = tour === 'full' ? options?.coupon || null : null;
+    tourEndAfterTurnRef.current = false;
+    tourPendingToolsRef.current = 0;
+    setTourMode(tour);
+    if (tour) window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'connecting', mode: tour } }));
 
     // Start token, microphone permission and input AudioContext work together.
     // The Live connection begins as soon as the token arrives; mic setup continues in parallel.
@@ -710,7 +830,11 @@ export function useJarvisVoice({
         const res = await fetch('/api/assistant/voice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'session', language: languageRef.current }),
+          body: JSON.stringify({
+            action: 'session',
+            language: languageRef.current,
+            ...(tour ? { tour, coupon: tourCouponRef.current || undefined } : {}),
+          }),
           signal: controller.signal,
         });
         const data = await res.json().catch(() => ({}));
@@ -720,6 +844,7 @@ export function useJarvisVoice({
           );
           error.layer = 'TOKEN';
           error.code = data?.code || (res.status === 429 ? 'quota_reached' : 'SERVER_ERROR');
+          error.reason = data?.reason;
           error.status = res.status;
           throw error;
         }
@@ -735,7 +860,7 @@ export function useJarvisVoice({
       }
     })();
 
-    const mediaPromise = (async () => {
+    const mediaPromise: Promise<MediaStream> | null = !needMic ? null : (async () => {
       if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
         const error: any = new Error('Microphone access requires a secure browser context.');
         error.layer = 'MIC_PERMISSION';
@@ -755,7 +880,8 @@ export function useJarvisVoice({
         mediaStreamRef.current = stream;
         return stream;
       } catch (error: any) {
-        const err: any = error instanceof Error ? error : new Error(String(error));
+        // Browser errors (DOMException) have a read-only "code": copy into a plain Error before tagging it.
+        const err: any = Object.assign(new Error(error?.message || String(error)), { name: error?.name || 'Error' });
         err.layer =
           err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
             ? 'MIC_PERMISSION'
@@ -792,7 +918,8 @@ export function useJarvisVoice({
         }
         return ctx;
       } catch (error: any) {
-        const err: any = error instanceof Error ? error : new Error(String(error));
+        // Browser errors (DOMException) have a read-only "code": copy into a plain Error before tagging it.
+        const err: any = Object.assign(new Error(error?.message || String(error)), { name: error?.name || 'Error' });
         err.layer = 'AUDIO_CONTEXT';
         err.code = 'MIC_FAILED';
         throw err;
@@ -805,7 +932,7 @@ export function useJarvisVoice({
     // If setup fails, a microphone that is granted a moment later must not stay switched on.
     const releaseLateMic = () => {
       mediaPromise
-        .then((st) => {
+        ?.then((st) => {
           if (liveSessionRef.current) return;
           st.getTracks().forEach((tr) => {
             try {
@@ -842,6 +969,9 @@ export function useJarvisVoice({
       try {
         knowledge = buildJarvisKnowledge(getSiteSnapshotRef.current?.() || '');
       } catch {}
+      const systemInstruction = tour
+        ? buildTourInstruction(languageRef.current, tour, knowledge)
+        : buildSystemInstruction(languageRef.current, Boolean(sessionData?.isOwner), knowledge);
 
       const connectLive = async () => {
         const config: any = {
@@ -853,9 +983,10 @@ export function useJarvisVoice({
               prebuiltVoiceConfig: { voiceName: sessionData.voice || 'Capella' },
             },
           },
-          systemInstruction: buildSystemInstruction(languageRef.current, Boolean(sessionData?.isOwner), knowledge),
-          // Website actions Jarvis can do for the visitor (go to a section, open a card, fill the rating ...)
-          tools: [{ functionDeclarations: JARVIS_FUNCTION_DECLARATIONS }],
+          systemInstruction,
+          // Website actions Jarvis can do for the visitor (go to a section, open a card, fill the rating ...).
+          // A tour session has only tour_next; a normal session has no tour tool at all.
+          tools: [{ functionDeclarations: tour ? TOUR_FUNCTION_DECLARATIONS : JARVIS_FUNCTION_DECLARATIONS }],
           // Hear the visitor quickly and reliably: sensitive start-of-speech detection, short pre-roll and a
           // natural pause length before Jarvis answers.
           realtimeInputConfig: {
@@ -886,6 +1017,13 @@ export function useJarvisVoice({
               if (Array.isArray(cancelled)) cancelled.forEach((id: string) => cancelledToolIdsRef.current.add(String(id)));
               const calls = msg.toolCall?.functionCalls;
               if (Array.isArray(calls) && calls.length) {
+                if (tourModeRef.current) {
+                  tourPendingToolsRef.current += 1;
+                  if (tourNudgeTimerRef.current) {
+                    clearTimeout(tourNudgeTimerRef.current);
+                    tourNudgeTimerRef.current = null;
+                  }
+                }
                 toolQueueRef.current = toolQueueRef.current.then(async () => {
                   await waitForSpeechToFinish(sessionId);
                   if (liveSessionIdRef.current !== sessionId) return;
@@ -894,13 +1032,24 @@ export function useJarvisVoice({
                     if (cancelledToolIdsRef.current.has(String(call.id))) continue;
                     let response: Record<string, unknown>;
                     try {
-                      response =
-                        (await onToolCallRef.current?.(String(call.name || ''), call.args)) || { ok: false, error: 'not available' };
+                      if (tourModeRef.current) {
+                        // Opening questions are over: the microphone switches off for the rest of the tour.
+                        if (tourIntroRef.current) {
+                          tourIntroRef.current = false;
+                          releaseMicForTour();
+                        }
+                        response = call.name === 'tour_next' ? await tourNext() : { ok: false, error: 'only tour_next is available during the tour' };
+                        if (response.finished) tourEndAfterTurnRef.current = true;
+                      } else {
+                        response =
+                          (await onToolCallRef.current?.(String(call.name || ''), call.args)) || { ok: false, error: 'not available' };
+                      }
                     } catch {
                       response = { ok: false, error: 'action failed' };
                     }
                     functionResponses.push({ id: call.id, name: call.name, response });
                   }
+                  if (tourModeRef.current) tourPendingToolsRef.current = Math.max(0, tourPendingToolsRef.current - 1);
                   if (!functionResponses.length || liveSessionIdRef.current !== sessionId) return;
                   try {
                     liveSessionRef.current?.sendToolResponse({ functionResponses });
@@ -923,6 +1072,7 @@ export function useJarvisVoice({
                       setAudioLevel(0);
                       audioLevelRef.current = 0;
                       setIsListening(true);
+                      if (tourModeRef.current) afterTourTurnRef.current();
                     }
                   }, 0);
                 }
@@ -1039,9 +1189,23 @@ export function useJarvisVoice({
         }).catch(() => {});
       }, 25000);
 
+      if (tour) {
+        beginTour(tour, maxSeconds);
+        window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'live', mode: tour } }));
+      }
+
       // Greet immediately after the session opens, before microphone processor creation. Earlier history (if any)
       // goes in the SAME message: two separate messages made the model answer twice and delayed the greeting.
-      try {
+      if (tour) {
+        try {
+          liveSession.sendRealtimeInput({
+            text:
+              tour === 'full'
+                ? `[SYSTEM] The visitor pressed the Premium Full Tour button. Greet them now in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them warmly to the full tour of Hayaati Web Technology, then ask at most two short questions: their name, and what interests them most in the future (cities, space, AI, health ...). After their answer, or if they stay silent, call tour_next.`
+                : `[SYSTEM] The visitor pressed the Quick Tour button. In one or two short sentences in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them to a quick three-minute tour of the highlights, then call tour_next right away. Do not ask anything.`,
+          });
+        } catch {}
+      } else try {
         const history =
           rollingTranscriptRef.current.length > 0
             ? `Earlier conversation with this visitor (remember it, do not repeat it):\n${rollingTranscriptRef.current.join('\n')}\n\n`
@@ -1055,13 +1219,29 @@ export function useJarvisVoice({
 
       // Mic and AudioContext work was started in parallel with the Live connection.
       // Never hang forever on mic permission / audio start: give up after 30 seconds.
+      if (!mediaPromise) {
+        // Quick Tour: no microphone at all, only the speaker.
+        await audioContextPromise.catch(() => null);
+        setIsConnecting(false);
+        setSpeechError(null);
+        return;
+      }
       const micTimeout = new Promise<never>((_, reject) => {
         window.setTimeout(
           () => reject(Object.assign(new Error('Microphone or audio start timed out'), { layer: 'MEDIA_STREAM', code: 'MIC_FAILED' })),
           30000
         );
       });
-      [stream, ctx] = await Promise.race([Promise.all([mediaPromise, audioContextPromise]), micTimeout]);
+      try {
+        [stream, ctx] = await Promise.race([Promise.all([mediaPromise, audioContextPromise]), micTimeout]);
+      } catch (micErr) {
+        if (!tour) throw micErr;
+        // Full tour without a microphone: Jarvis simply starts the tour without waiting for answers.
+        tourIntroRef.current = false;
+        releaseLateMic();
+        setIsConnecting(false);
+        return;
+      }
       mediaStreamRef.current = stream;
       audioContextRef.current = ctx;
 
@@ -1093,6 +1273,7 @@ export function useJarvisVoice({
         // Echo guard: never stream the mic while Jarvis speaks, while the greeting is
         // still pending, or for a short moment after speech ends (speaker tail).
         if (
+          (tourModeRef.current && !tourIntroRef.current) ||
           isSpeakingRef.current ||
           !greetingDoneRef.current ||
           Date.now() - speechEndedAtRef.current < 250
@@ -1141,6 +1322,17 @@ export function useJarvisVoice({
       else setFailingLayer('GEMINI_LIVE');
 
       const code = err?.code;
+      if (tour) {
+        window.dispatchEvent(
+          new CustomEvent('jarvis:tour-status', {
+            detail: { state: 'error', mode: tour, code: code || 'error', reason: err?.reason || null },
+          })
+        );
+      }
+      if (code === 'coupon_rejected') {
+        stopListening();
+        return;
+      }
       if (code === 'quota_reached' || err?.status === 429) setSpeechError('PROVIDER_QUOTA');
       else if (code === 'rate_limited') setSpeechError('RATE_LIMIT');
       else if (code === 'server_busy' || err?.status === 503) setSpeechError('SERVER_ERROR');
@@ -1152,7 +1344,7 @@ export function useJarvisVoice({
       stopListening();
       releaseLateMic();
     }
-  }, [cancelSpeech, finishCompletedTurnIfReady, handleInterruption, playLiveAudioChunk, stopListening, queueCaption, flushCaptions]);
+  }, [cancelSpeech, finishCompletedTurnIfReady, handleInterruption, playLiveAudioChunk, stopListening, queueCaption, flushCaptions, releaseMicForTour, waitForSpeechToFinish]);
 
   // Speak through the existing Live session when one is open; browser TTS is fallback only.
   const speak = useCallback(
@@ -1246,5 +1438,6 @@ export function useJarvisVoice({
     notifyOwnerVerified,
     notifyOwnerLocked,
     cancelSpeech,
+    tourMode,
   };
 }

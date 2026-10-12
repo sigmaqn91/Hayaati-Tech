@@ -17,23 +17,37 @@ import type { NextRequest } from 'next/server';
 
 export interface RateLimitConfig {
   chatLimitPerVisitor: number; // default: 20 per 10 mins
-  voiceSessionsPerHour: number; // default: 3 per hour
-  voiceSessionMaxSeconds: number; // default: 600 seconds (10 minutes, enough for the full guided tour)
-  maxConcurrentVoiceSessions: number; // default: 5
+  voiceSessionsPerHour: number; // default: 1 normal Jarvis voice session per visitor per hour
+  voiceSessionMaxSeconds: number; // default: 840 seconds (14 minutes: the Premium full tour fits, Live hard limit is 15)
+  maxConcurrentVoiceSessions: number; // default: 3
   globalDailyChatCap: number; // default: 500
-  globalDailyVoiceMinutesCap: number; // default: 60
+  globalDailyVoiceMinutesCap: number; // default: 70 (all voice: normal Jarvis + tours)
   maxMessageChars: number; // default: 500
+  quickTourMaxSeconds: number; // default: 240 (the free Quick Tour is about 3 minutes)
+  quickToursPerHour: number; // default: 2 per visitor per hour (own counter, separate from normal voice)
 }
 
+// Defaults match the values set on Vercel, so the site behaves the same even if a variable is missing.
 export const RATE_CONFIG: RateLimitConfig = {
   chatLimitPerVisitor: parseInt(process.env.CHAT_LIMIT_PER_VISITOR || '20', 10),
-  voiceSessionsPerHour: parseInt(process.env.VOICE_SESSIONS_PER_VISITOR_PER_HOUR || '3', 10),
-  voiceSessionMaxSeconds: parseInt(process.env.VOICE_SESSION_MAX_SECONDS || '600', 10),
-  maxConcurrentVoiceSessions: parseInt(process.env.MAX_CONCURRENT_VOICE_SESSIONS || '5', 10),
+  voiceSessionsPerHour: parseInt(process.env.VOICE_SESSIONS_PER_VISITOR_PER_HOUR || '1', 10),
+  voiceSessionMaxSeconds: parseInt(process.env.VOICE_SESSION_MAX_SECONDS || '840', 10),
+  maxConcurrentVoiceSessions: parseInt(process.env.MAX_CONCURRENT_VOICE_SESSIONS || '3', 10),
   globalDailyChatCap: parseInt(process.env.GLOBAL_DAILY_CHAT_CAP || '500', 10),
-  globalDailyVoiceMinutesCap: parseInt(process.env.GLOBAL_DAILY_VOICE_MINUTES_CAP || '60', 10),
+  globalDailyVoiceMinutesCap: parseInt(process.env.GLOBAL_DAILY_VOICE_MINUTES_CAP || '70', 10),
   maxMessageChars: parseInt(process.env.MAX_MESSAGE_CHARS || '500', 10),
+  quickTourMaxSeconds: parseInt(process.env.QUICK_TOUR_MAX_SECONDS || '240', 10),
+  quickToursPerHour: parseInt(process.env.QUICK_TOURS_PER_VISITOR_PER_HOUR || '2', 10),
 };
+
+/** Kind of voice session: normal Jarvis conversation, the free Quick Tour or the Premium full tour (coupon). */
+export type VoiceSessionKind = 'normal' | 'quick' | 'full';
+
+/** Hourly counter per kind. The full tour has none: its one-time coupon is the limit. */
+const hourlyKeyPrefix = (kind: VoiceSessionKind) =>
+  kind === 'normal' ? 'rate:voice:hour:' : kind === 'quick' ? 'rate:tour:quick:hour:' : null;
+const hourlyLimit = (kind: VoiceSessionKind) =>
+  kind === 'quick' ? RATE_CONFIG.quickToursPerHour : RATE_CONFIG.voiceSessionsPerHour;
 
 // ==========================================
 // 1. Storage & Upstash Redis REST Integration
@@ -192,6 +206,43 @@ async function decrementCounter(key: string, amount = 1): Promise<number> {
     return existing.count;
   }
   return 0;
+}
+
+// Small key-value store (coupons). Same Upstash Redis as the counters; in-memory fallback otherwise.
+const inMemoryValues = new Map<string, { value: string; expiresAt: number }>();
+
+export async function kvGet(key: string): Promise<string | null> {
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    const v = await executeRedisCommand(['GET', key]);
+    return v === null || v === undefined ? null : String(v);
+  }
+  logRedisWarningOnce();
+  const item = inMemoryValues.get(key);
+  if (!item || item.expiresAt <= Date.now()) return null;
+  return item.value;
+}
+
+/** Set a value. With onlyIfNew the write happens only when the key does not exist yet (returns false then). */
+export async function kvSet(key: string, value: string, ttlSeconds: number, onlyIfNew = false): Promise<boolean> {
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    const cmd: (string | number)[] = ['SET', key, value, 'EX', ttlSeconds];
+    if (onlyIfNew) cmd.push('NX');
+    return (await executeRedisCommand(cmd)) === 'OK';
+  }
+  logRedisWarningOnce();
+  const now = Date.now();
+  const existing = inMemoryValues.get(key);
+  if (onlyIfNew && existing && existing.expiresAt > now) return false;
+  inMemoryValues.set(key, { value, expiresAt: now + ttlSeconds * 1000 });
+  return true;
+}
+
+export async function kvDel(key: string): Promise<void> {
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    await executeRedisCommand(['DEL', key]);
+    return;
+  }
+  inMemoryValues.delete(key);
 }
 
 // ==========================================
@@ -390,7 +441,10 @@ export async function checkChatRateLimit(reqOrIp: NextRequest | Request | string
 
 const CONCURRENCY_KEY = 'concurrency:voice:active';
 
-export async function checkVoiceSessionLimit(reqOrIp: NextRequest | Request | string): Promise<{
+export async function checkVoiceSessionLimit(
+  reqOrIp: NextRequest | Request | string,
+  kind: VoiceSessionKind = 'normal'
+): Promise<{
   allowed: boolean;
   reason?: 'visitor_limit' | 'global_cap' | 'concurrency_limit';
   retryAfterSeconds?: number;
@@ -413,7 +467,9 @@ export async function checkVoiceSessionLimit(reqOrIp: NextRequest | Request | st
   const [globalMinutes, activeConcurrencyRead, visitorCounters] = await Promise.all([
     getCounter(globalVoiceKey),
     concurrencyRead,
-    Promise.all(identity.keys.map((key) => getCounter(`rate:voice:hour:${key}`))),
+    Promise.all(
+      hourlyKeyPrefix(kind) ? identity.keys.map((key) => getCounter(`${hourlyKeyPrefix(kind)}${key}`)) : []
+    ),
   ]);
 
   // 1. Check Global Daily Voice Minutes Cap
@@ -444,7 +500,7 @@ export async function checkVoiceSessionLimit(reqOrIp: NextRequest | Request | st
 
   // 3. Check Visitor Hourly Limit across both keys (stricter wins)
   for (const counter of visitorCounters) {
-    if (counter.count >= RATE_CONFIG.voiceSessionsPerHour) {
+    if (counter.count >= hourlyLimit(kind)) {
       return {
         allowed: false,
         reason: 'visitor_limit',
@@ -465,7 +521,8 @@ export async function checkVoiceSessionLimit(reqOrIp: NextRequest | Request | st
  * Increments visitor hourly count and concurrency slot in the shared store.
  */
 export async function recordVoiceSessionStart(
-  reqOrIdentity: NextRequest | Request | VisitorIdentity | string
+  reqOrIdentity: NextRequest | Request | VisitorIdentity | string,
+  kind: VoiceSessionKind = 'normal'
 ): Promise<void> {
   const identity =
     typeof reqOrIdentity === 'object' && 'keys' in reqOrIdentity
@@ -475,7 +532,8 @@ export async function recordVoiceSessionStart(
   const VOICE_HOUR_SECONDS = 60 * 60;
 
   // Hourly counters (both keys) and the concurrency slot are updated in parallel (same result, less waiting).
-  const hourly = identity.keys.map((key) => atomicIncrement(`rate:voice:hour:${key}`, VOICE_HOUR_SECONDS));
+  const prefix = hourlyKeyPrefix(kind);
+  const hourly = prefix ? identity.keys.map((key) => atomicIncrement(`${prefix}${key}`, VOICE_HOUR_SECONDS)) : [];
 
   const concurrency = (async () => {
     if (UPSTASH_URL && UPSTASH_TOKEN) {
@@ -498,16 +556,19 @@ export async function recordVoiceSessionStart(
  * Refunds a voice session if token creation failed on our side.
  */
 export async function refundVoiceSession(
-  reqOrIdentity: NextRequest | Request | VisitorIdentity | string
+  reqOrIdentity: NextRequest | Request | VisitorIdentity | string,
+  kind: VoiceSessionKind = 'normal'
 ): Promise<void> {
   const identity =
     typeof reqOrIdentity === 'object' && 'keys' in reqOrIdentity
       ? (reqOrIdentity as VisitorIdentity)
       : getVisitorIdentity(reqOrIdentity);
 
-  for (const key of identity.keys) {
-    const voiceKey = `rate:voice:hour:${key}`;
-    await decrementCounter(voiceKey, 1);
+  const prefix = hourlyKeyPrefix(kind);
+  if (prefix) {
+    for (const key of identity.keys) {
+      await decrementCounter(`${prefix}${key}`, 1);
+    }
   }
 
   // Decrement concurrency

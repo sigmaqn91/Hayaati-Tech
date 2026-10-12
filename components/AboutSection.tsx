@@ -6,6 +6,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { User, Mail, Globe } from 'lucide-react';
 import { FounderPortrait } from '@/components/FounderPortrait';
 import { Beam } from '@/components/Beam';
+import { CouponRequestPanel } from '@/components/tour/CouponRequestPanel';
 
 export function AboutSection() {
   const { t } = useLanguage();
@@ -103,6 +104,9 @@ export function AboutSection() {
             )}
           </div>
         </div>
+
+        {/* Premium Tour coupon (only for visitors who pressed "Request coupon"; never on the photo) */}
+        <CouponRequestPanel />
 
         {/* Bio & Dossier Details */}
         <div className="ab-card ab-glass ab-water-card relative p-6 sm:p-8 border border-[#1e293b] space-y-5 hud-frame">

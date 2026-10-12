@@ -28,6 +28,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { QUICK_ACK } from '@/lib/jarvisLocale';
 import { collectLiveSiteSnapshot } from '@/lib/jarvisKnowledge';
 import { runJarvisAction } from '@/lib/jarvisActions';
+import { TourDock } from './TourDock';
 
 // Owner flow phrases (voice captions arrive in small pieces, so these run on the whole spoken turn).
 const OWNER_NAME = '(a+l[iy]+a+h?|aaliya)';
@@ -285,6 +286,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     notifyOwnerVerified,
     notifyOwnerLocked,
     cancelSpeech,
+    tourMode,
   } = useJarvisVoice({
     language: language || 'en',
     welcomeMessage: t.assistant.welcomeMessage,
@@ -417,6 +419,39 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
     if (embedded) setEmbeddedActive(true);
     startListening();
   };
+
+  // Quick Tour / Premium Tour buttons: a tour always runs in its own fresh voice session (a normal
+  // conversation that is open is closed first), so the tour gets its full time.
+  const startTourRef = useRef<(mode: 'quick' | 'full', coupon?: string) => void>(() => {});
+  startTourRef.current = (mode, coupon) => {
+    const live = isConnecting || isListening || isSpeaking;
+    if (live) {
+      userStoppedRef.current = true;
+      cancelSpeech();
+      stopListening();
+    }
+    userStoppedRef.current = false;
+    setClearedBefore(messagesLenRef.current);
+    if (embedded) setEmbeddedActive(true);
+    window.setTimeout(() => startListening({ tour: mode, coupon }), live ? 350 : 0);
+  };
+  useEffect(() => {
+    if (!embedded) return;
+    const onStart = (e: Event) => {
+      const d = (e as CustomEvent<{ mode?: string; coupon?: string }>).detail;
+      if (d?.mode === 'quick' || d?.mode === 'full') startTourRef.current(d.mode, d.coupon);
+    };
+    const onStatus = (e: Event) => {
+      const d = (e as CustomEvent<{ state?: string }>).detail;
+      if (d?.state === 'error' || d?.state === 'ended') setEmbeddedActive(false);
+    };
+    window.addEventListener('jarvis:start-tour', onStart);
+    window.addEventListener('jarvis:tour-status', onStatus);
+    return () => {
+      window.removeEventListener('jarvis:start-tour', onStart);
+      window.removeEventListener('jarvis:tour-status', onStatus);
+    };
+  }, [embedded]);
 
   // Embedded hero controls dispatch the same toggle event so the existing voice hook stays single-instance.
   useEffect(() => {
@@ -606,6 +641,11 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   const handleSendMessage = async (textToSend?: string) => {
     const query = textToSend || inputQuery;
     if (!query || !query.trim() || isProcessing) return;
+    // A tour is one-sided: typed questions wait until it is over.
+    if (tourMode) {
+      setInputQuery('');
+      return;
+    }
 
     setInputQuery('');
     setMessages((prev) => [...prev, { role: 'user', text: query }]);
@@ -888,6 +928,18 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
   if (!isOpen && !embedded) return null;
 
   return (
+    <>
+    {tourMode && (
+      <TourDock
+        mode={tourMode}
+        speaking={isSpeaking}
+        onEnd={() => {
+          userStoppedRef.current = true;
+          cancelSpeech();
+          stopListening();
+        }}
+      />
+    )}
     <div
       ref={overlayRef}
       className={embedded
@@ -1546,6 +1598,7 @@ export const JarvisOverlay: React.FC<JarvisOverlayProps> = ({
         )}
       </AnimatePresence>
     </div>
+    </>
   );
 };
 

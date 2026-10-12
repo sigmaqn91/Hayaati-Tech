@@ -220,6 +220,7 @@ export function TimelineSection() {
               return (
                 <div
                   key={card.id}
+                  data-card-id={card.id}
                   onClick={() => setActiveModalCard(card)}
                   className="group flex flex-col bg-[#0b0f17] border border-[#1e293b] hover:border-[#38e8ff]/60 transition-all duration-300 cursor-pointer hud-frame ms-card ab-card"
                 >

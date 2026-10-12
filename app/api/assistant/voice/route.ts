@@ -7,7 +7,9 @@ import {
   refundVoiceSession,
   releaseVoiceSession,
   RATE_CONFIG,
+  type VoiceSessionKind,
 } from '@/lib/rateLimit';
+import { redeemCoupon, restoreCoupon } from '@/lib/couponStore';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,6 +25,8 @@ export async function POST(req: NextRequest) {
     }
 
     const action = body?.action || 'session';
+    // Tours start only from the Quick Tour / Premium Tour buttons; everything else is a normal Jarvis session.
+    const kind: VoiceSessionKind = body?.tour === 'quick' ? 'quick' : body?.tour === 'full' ? 'full' : 'normal';
 
     // 1. Session Release / End Action: release concurrency slot & track daily minutes
     if (action === 'release' || action === 'end') {
@@ -37,7 +41,8 @@ export async function POST(req: NextRequest) {
     // 1b. Refund Action: the token was issued but the Live connection / microphone failed,
     // so give back the concurrency slot AND the visitor's hourly attempt.
     if (action === 'refund') {
-      await refundVoiceSession(req);
+      await refundVoiceSession(req, kind);
+      if (kind === 'full' && body?.coupon) await restoreCoupon(req, body.coupon);
       return NextResponse.json({ success: true, refunded: true });
     }
 
@@ -110,7 +115,7 @@ export async function POST(req: NextRequest) {
         : null;
 
       // Check Rate, Concurrency, and Quota Limits
-      const sessionCheck = await checkVoiceSessionLimit(req);
+      const sessionCheck = await checkVoiceSessionLimit(req, kind);
       if (!sessionCheck.allowed) {
         console.warn(`[Voice Session Blocked] Reason: ${sessionCheck.reason}`);
         const headers = new Headers({ 'Content-Type': 'application/json' });
@@ -134,10 +139,26 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Premium full tour: the one-time coupon is used up here, only after every other check passed
+      // (so a busy server never wastes it). The verified owner can always run it without a coupon.
+      if (kind === 'full' && !isOwner) {
+        const redeemed = await redeemCoupon(req, body?.coupon);
+        if (!redeemed.ok) {
+          return NextResponse.json(
+            { error: 'Coupon not accepted.', code: 'coupon_rejected', reason: redeemed.reason },
+            { status: 403, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+      const sessionMaxSeconds =
+        kind === 'quick'
+          ? Math.min(RATE_CONFIG.quickTourMaxSeconds, RATE_CONFIG.voiceSessionMaxSeconds)
+          : RATE_CONFIG.voiceSessionMaxSeconds;
+
       console.info(`[Gemini Voice Server] Live model: ${liveModel}`);
 
       // Acquire concurrency slot & visitor hourly usage in shared store (in parallel with the token finishing)
-      const [, tokenResult] = await Promise.all([recordVoiceSessionStart(req), tokenPromise]);
+      const [, tokenResult] = await Promise.all([recordVoiceSessionStart(req, kind), tokenPromise]);
 
       // The API key remains strictly server-side; client receives ONLY the short-lived single-use token.
       try {
@@ -154,14 +175,16 @@ export async function POST(req: NextRequest) {
             voice: voiceName,
             voiceName,
             language: userLang,
-            sessionMaxSeconds: RATE_CONFIG.voiceSessionMaxSeconds,
+            sessionMaxSeconds,
+            tour: kind === 'normal' ? null : kind,
             isOwner,
           },
           { status: 200, headers }
         );
       } catch (tokenErr: any) {
         // Token creation failed: refund session slot so visitor is not penalized
-        await refundVoiceSession(req);
+        await refundVoiceSession(req, kind);
+        if (kind === 'full' && body?.coupon) await restoreCoupon(req, body.coupon);
         const status = tokenErr?.status || tokenErr?.statusCode || 500;
         const rawMessage = tokenErr?.message || String(tokenErr);
 

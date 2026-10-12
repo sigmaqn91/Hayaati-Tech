@@ -9,6 +9,7 @@ import { HeroStarfield } from './HeroStarfield';
 import { DecryptText } from './DecryptText';
 import { ArrowRight, Layers } from 'lucide-react';
 import DevBanner from './DevBanner';
+import { TourButtons } from './tour/TourButtons';
 
 interface HeroProps {
   onOpenAssistant?: () => void;
@@ -280,7 +281,7 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
                   {t.hero.subtitle}
                 </p>
 
-                {/* Exploration CTAs: Explore on its own row, then (Activate | Projects) side by side - keeps the wide panel short */}
+                {/* Exploration CTAs: Explore on its own row, then (Activate | Projects) and (Quick Tour | Premium Tour) side by side */}
                 <div className="grid grid-cols-2 gap-3 w-full">
                   {/* Primary Exploration CTA */}
                   <a
@@ -324,6 +325,9 @@ export function Hero({ onOpenAssistant, assistantOverlay }: HeroProps) {
                     <Layers className="w-4 h-4 shrink-0 text-[#38e8ff]" />
                     <span>{t.hero.projectsCta}</span>
                   </a>
+
+                  {/* Jarvis tours: Quick Tour (free) | Premium Tour (full, coupon) */}
+                  <TourButtons />
                 </div>
               </div>
             </div>

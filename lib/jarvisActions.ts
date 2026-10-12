@@ -9,7 +9,6 @@ import { RATED_STORAGE_KEY } from '@/lib/ratingCatalog';
 import type { ContentSchema, SupportedLanguage } from '@/locales/types';
 import { JARVIS_SECTIONS, JARVIS_TECH_CATEGORIES, JARVIS_ERAS } from '@/lib/jarvisTools';
 import { describeScreen, glideTo, glideToElement, nextFrames, NAV_OFFSET } from '@/lib/jarvisScreen';
-import { runTour } from '@/lib/jarvisTour';
 
 export type JarvisActionResult = { ok: boolean; done?: string; error?: string; [key: string]: unknown };
 
@@ -226,8 +225,6 @@ export async function runJarvisAction(
           note: 'not sent; the visitor must check it and press the send button',
         };
       }
-      case 'tour':
-        return (await runTour(String(a.action || 'next'), typeof a.target === 'string' ? a.target : undefined)) as JarvisActionResult;
       case 'whats_on_screen':
         return { ok: true, ...describeScreen() };
       case 'close_popup': {
