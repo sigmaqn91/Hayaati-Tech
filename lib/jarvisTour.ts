@@ -15,6 +15,7 @@ import { timelineEras, techCatalogue } from '@/data/future';
 import { defaultBundle, loadLanguageBundle } from '@/locales';
 import type { ContentSchema, SupportedLanguage } from '@/locales/types';
 import { jumpTo, scrollTargetFor, sectionName, visibleTexts } from '@/lib/jarvisScreen';
+import { projectsData } from '@/data/projects';
 
 export type TourMode = 'quick' | 'full';
 
@@ -34,6 +35,8 @@ interface TourStep {
   intro?: boolean;
   /** Cards of one category share a group; a group can be summed up in one step when time is short. */
   group?: string;
+  /** Closing stop that is still visited when time runs out (Premium Tour: the founder, then contact). */
+  closing?: boolean;
   weight: number;
 }
 
@@ -100,8 +103,8 @@ function fullPlan(): TourStep[] {
     { key: 'places', kind: 'section', section: 'places', start: '#places', label: 'Cities & Places of the Future: eight postcards of future cities, on Earth, the Moon, Mars and in orbit', weight: 1.2 },
     { key: 'projects', kind: 'section', section: 'projects', start: '#projects', label: 'My Projects by founder Aliya Khan (Hayaati Mehendi Studio is live)', weight: 0.8 },
     { key: 'advertise', kind: 'section', section: 'advertise', start: '#advertise', label: 'Advertise with Hayaati (a form to list a project or business)', weight: 0.6 },
-    { key: 'about', kind: 'section', section: 'about', start: '#about', label: 'About the founder, Aliya Khan (the founder; visitors do not request the Premium Tour coupon here, they request it with the Request coupon button after pressing the Premium Tour button)', weight: 1 },
-    { key: 'contact', kind: 'section', section: 'contact', start: '#contact', label: 'Contact (the last stop of the tour)', weight: 0.9 }
+    { key: 'about', kind: 'section', section: 'about', start: '#about', label: 'About the founder, Aliya Khan (the founder; visitors do not request the Premium Tour coupon here, they request it with the Request coupon button after pressing the Premium Tour button)', weight: 1, closing: true },
+    { key: 'contact', kind: 'section', section: 'contact', start: '#contact', label: 'Contact (the last stop of the tour)', weight: 0.9, closing: true }
   );
   return steps;
 }
@@ -139,9 +142,17 @@ function quickPlan(): TourStep[] {
   ];
 }
 
-// Seconds per step that are not speaking time (the screen change and Jarvis taking a breath). Small now:
-// the next stop is prepared while Jarvis is still talking.
+// Seconds per step that are not speaking time (the screen change and Jarvis taking a breath). Small in the Quick
+// Tour: the next stop is prepared while Jarvis is still talking.
 const OVERHEAD = 0.7;
+// Premium Tour: each stop is handed over only after the last words have played (plus 0.47 s in the voice hook) and
+// Jarvis then needs a moment before his first new words (estimated, not measured), so about 2 s per stop are silent.
+// With 0.7 s the 51 stops ran about a minute over plan, so the last categories were summed up and the founder skipped.
+const OVERHEAD_FULL = 2;
+// Hindi Premium Tour: the next stop is handed over while the last second of words is still playing (voice hook), so
+// only the 0.3 s breath and sometimes a short wait for the first new words remain.
+const OVERHEAD_HINDI_FULL = 1;
+const overhead = () => (state.mode === 'full' ? (state.lang === 'hi' ? OVERHEAD_HINDI_FULL : OVERHEAD_FULL) : OVERHEAD);
 // Time kept free at the end for the goodbye.
 const END_RESERVE: Record<TourMode, number> = { quick: 28, full: 40 };
 // Below this many speaking seconds per weight, a whole category is summed up instead of opening each card.
@@ -164,29 +175,64 @@ const state = {
   content: defaultBundle.content as ContentSchema,
   /** Language Jarvis speaks in this tour (the website language when the tour started). */
   lang: 'en',
-  /** Premium Tour catalogue cards narrated so far (picks a different angle for every card). */
-  cardsTold: 0,
 };
 
 // Premium Tour in Hindi: the website shows translated (often shuddh) titles such as "स्वायत्त शहरी स्काई टैक्सी".
 // Jarvis was told to "name it exactly as card_title" and so read the shuddh title aloud; he now gets the official
 // English title from the English site content and speaks that. Only for the Hindi Premium Tour.
 const hindiPremium = () => state.mode === 'full' && state.lang === 'hi';
+/** True while a Hindi Premium Tour is running (the voice hook times its hand-over differently). */
+export const hindiPremiumTour = () => state.active && hindiPremium();
 const englishTechTitle = (id: string) => defaultBundle.content.techCards[id]?.title || '';
 const englishMilestoneTitle = (id: string) => defaultBundle.content.timelineCards[id]?.title || '';
 
-// Hindi Premium Tour: every card had the same three-part shape (what it is, how it works, how life gets better
-// "when it arrives"), so after a few minutes every card sounded the same. Each card now leads with a different
-// angle; the facts still come only from the card.
-const CARD_ANGLES = [
-  'Lead with the one detail of this card that is most surprising, then explain simply how it works.',
-  'Lead with a small, everyday Indian scene where this would help (only what the card supports), then say what it is.',
-  'Lead with the problem it solves today, then how this technology solves it.',
-  'Keep this one short and crisp: what it is and its single best point, in three or four sentences.',
-  'Lead with how it works, explained like you would to a curious friend, then why it matters.',
-  'If it connects to something already shown in this tour, start from that link in one sentence; otherwise start with what makes it different from what we use today.',
-  'Lead with what it is in one plain sentence, then go a little deeper into the most interesting part of how it works.',
-];
+// Hindi Premium Tour: the facts Jarvis gets come from the English site content. The formal Hindi card texts
+// ("स्वायत्त ... कार्यप्रणाली") were the words he copied into his speech; he now explains English facts in Hinglish.
+const englishCard = (id: string) => defaultBundle.content.techCards[id];
+// Catalogue cards that already appeared as an era milestone (same official title): Jarvis builds on that instead
+// of explaining the basics again.
+const milestoneEraOf = (id: string) => {
+  const title = englishTechTitle(id);
+  for (const era of ERAS) if (eraCards(era).some((m) => englishMilestoneTitle(m.id) === title)) return era;
+  return null;
+};
+const cardEra = (id: string) => techCatalogue.find((c) => c.id === id)?.era;
+/** Longest a stop may take in the Hindi Premium Tour: a card gets time for its content, never more (spare time
+ *  used to be spread over the later stops, so simple cards were stretched with filler). */
+// Hindi Premium Tour: each era has its own feeling, taken from what the era is about (its title and story), so the
+// three eras do not sound the same. A feeling for the voice only, never a fact.
+const ERA_MOOD: Record<string, string> = {
+  '2030': 'curious and fresh: the first step into the future, familiar life but suddenly smarter; light, playful wonder',
+  '2035': 'surprise: technology now comes close to the body and to health; a "wait, really?" feeling, with warmth',
+  '2050': 'awe and calm reflection: Earth seen from orbit, fusion energy; slower, deeper, a quiet "wow"',
+};
+
+/** What comes after this stop (its English name), so Jarvis can build a little anticipation. */
+function comingNext(): string {
+  for (let i = state.index + 1; i < state.steps.length; i++) {
+    const s = state.steps[i];
+    if (s.kind === 'card' && isCollapsed(s) && !s.intro) continue;
+    if (s.kind === 'era') return `the ${s.era} era`;
+    if (s.kind === 'card' && isCollapsed(s)) return `the ${CATEGORY_NAMES[s.category!]} technologies`;
+    if (s.kind === 'card') {
+      const title = englishTechTitle(s.cardId!);
+      return s.intro ? `a new category, ${CATEGORY_NAMES[s.category!]}, starting with ${title}` : title;
+    }
+    if (s.kind === 'tech') return 'the Future Tech Catalogue';
+    return sectionName(s.section);
+  }
+  return 'the end of the tour';
+}
+
+function hindiCap(step: TourStep) {
+  if (step.kind === 'era') return 30;
+  if (step.kind === 'hero') return 20;
+  if (step.kind === 'section') return 18;
+  if (step.kind !== 'card') return 22;
+  const c = englishCard(step.cardId!);
+  const words = `${c?.description || ''} ${c?.howItWorks || ''}`.split(/\s+/).length;
+  return Math.round(9 + words / 5 + (step.intro ? 4 : 0));
+}
 
 const emit = (name: string, detail?: unknown) => window.dispatchEvent(new CustomEvent(name, { detail }));
 
@@ -206,7 +252,6 @@ function refreshSiteLanguage() {
 export function beginTour(mode: TourMode, maxSeconds: number, lang = 'en') {
   state.mode = mode;
   state.lang = lang;
-  state.cardsTold = 0;
   state.steps = mode === 'full' ? fullPlan() : quickPlan();
   state.index = -1;
   state.active = true;
@@ -275,7 +320,7 @@ function remaining(from: number) {
     weight += isCollapsed(s) ? COLLAPSED_WEIGHT : s.weight;
     steps += 1;
   }
-  return { weight, overhead: steps * OVERHEAD };
+  return { weight, overhead: steps * overhead() };
 }
 
 const perWeightNow = () => {
@@ -285,7 +330,8 @@ const perWeightNow = () => {
 
 function speakingSeconds(step: TourStep) {
   const w = isCollapsed(step) ? COLLAPSED_WEIGHT : step.weight;
-  return Math.round(Math.min(32, Math.max(5, perWeightNow() * w)));
+  const max = hindiPremium() && !isCollapsed(step) ? hindiCap(step) : 32;
+  return Math.round(Math.min(max, Math.max(5, perWeightNow() * w)));
 }
 
 /** At the start of a category: if its cards would not fit any more, the category is summed up instead. */
@@ -362,7 +408,7 @@ function instruction(seconds: number, extra = '') {
   if (hindiPremium()) {
     // "do not finish early" made Jarvis stretch simple cards with filler; the time is now a budget, not a quota.
     return (
-      `${extra}You have about ${seconds} seconds (about ${words} words) for this stop, at a relaxed natural pace: use most of it for a rich card, a little less for a simple one, and fill it with real content from this result, never with filler or repetition. ` +
+      `${extra}Use at most about ${seconds} seconds (about ${words} words) for this stop, at a relaxed natural pace: that is a limit, not a target; say what is worth saying and stop, never fill time with filler or repetition. ` +
       'Do not ask the visitor anything and do not wait for an answer. As soon as you finish speaking, call tour_next.'
     );
   }
@@ -381,8 +427,36 @@ function textsAt(selector: string | undefined, section: string) {
   return visibleTexts(root, 1800, scrollTargetFor(el));
 }
 
+/** Hindi Premium Tour: the same section texts from the English site content (the Hindi page text is formal). */
+function sectionEnglish(step: TourStep): string[] {
+  const ui = defaultBundle.ui;
+  const c = defaultBundle.content;
+  switch (step.key) {
+    case 'hero':
+      return [ui.hero.headline, ui.hero.subtitle];
+    case 'places':
+      return [ui.places.title, ui.places.subtitle, ...Object.values(c.places).map((p) => `${p.title} (${p.location})`)];
+    case 'projects':
+      return [
+        ui.projects.title,
+        ui.projects.subtitle,
+        ...projectsData.map((p) => `${p.title || p.id} (${p.status})${p.description ? `: ${p.description}` : ''}`),
+      ];
+    case 'advertise':
+      return [ui.advertise.title, ui.advertise.subtitle, ui.advertise.reviewNotice];
+    case 'about':
+      return [ui.about.title, ui.about.subtitle, ui.about.architectTitle, ui.about.bioPlaceholder];
+    case 'contact':
+      return [ui.contact.title, ui.contact.subtitle, ui.contact.directEmail];
+    default:
+      return [];
+  }
+}
+
 function eraFacts(era: string) {
-  const c = state.content.eras?.[`era-${era}`] || defaultBundle.content.eras[`era-${era}`];
+  const c = hindiPremium()
+    ? defaultBundle.content.eras[`era-${era}`]
+    : state.content.eras?.[`era-${era}`] || defaultBundle.content.eras[`era-${era}`];
   const milestones = eraCards(era)
     .map((card) =>
       hindiPremium()
@@ -401,8 +475,18 @@ function eraFacts(era: string) {
 
 function cardFacts(id: string) {
   const c = state.content.techCards?.[id] || defaultBundle.content.techCards[id];
-  const facts = { card_title: c?.title || '', card_text: [c?.description, c?.howItWorks].filter(Boolean) };
-  return hindiPremium() ? { ...facts, title_english: englishTechTitle(id) } : facts;
+  if (hindiPremium()) {
+    const en = englishCard(id);
+    const era = cardEra(id);
+    const milestone = milestoneEraOf(id);
+    return {
+      title_english: en?.title || '',
+      facts_english: [en?.description, en?.howItWorks].filter(Boolean),
+      ...(era ? { era_of_this_technology: era } : {}),
+      ...(milestone ? { already_shown_as_milestone_of_era: milestone } : {}),
+    };
+  }
+  return { card_title: c?.title || '', card_text: [c?.description, c?.howItWorks].filter(Boolean) };
 }
 
 function prepareStep(step: TourStep): PreparedStop {
@@ -416,6 +500,7 @@ function prepareStep(step: TourStep): PreparedStop {
     step: `${state.index + 1} of ${state.steps.length}`,
     showing: collapsed ? `Future Tech Catalogue: ${CATEGORY_NAMES[step.category!]} (summed up)` : step.label,
     section_name: sectionName(step.section),
+    ...(hindiPremium() ? { coming_next: comingNext() } : {}),
   };
   preloadAround(state.index);
 
@@ -436,11 +521,11 @@ function prepareStep(step: TourStep): PreparedStop {
   if (step.kind === 'card') {
     let card = 'This card is now open large on the screen. Name it exactly as card_title and explain in simple everyday words what it is and how it works, and how it could make our life better when it arrives. ';
     if (hindiPremium()) {
-      const angle = CARD_ANGLES[state.cardsTold % CARD_ANGLES.length];
-      state.cardsTold += 1;
       card =
-        'This card is now open large on the screen. Say its official English title exactly as title_english (card_title is only the Hindi translation shown on screen: never read it), then explain it in natural Hinglish from card_text, in your own words. ' +
-        `${angle} Do not end with "socho", "imagine" or "2050 tak" again unless it truly fits this card; end on a point about this card itself. `;
+        'This card is now open large on the screen. Say its official English title exactly as title_english, then explain it in natural Hinglish in your own words, from facts_english only. ' +
+        'Choose the way of telling that suits this card (see the policy), not the shape you used for the last card. ' +
+        'era_of_this_technology is the timeline era it belongs to: use it now and then to keep the time-travel feeling, not on every card. ' +
+        'If already_shown_as_milestone_of_era is given, the visitor already heard about it in that era: say so in a few words and add what is new, do not explain the basics again. ';
     }
     // Same words as the Quick Tour (which visitors love); the full tour only adds a one-line category intro.
     const extra =
@@ -461,8 +546,10 @@ function prepareStep(step: TourStep): PreparedStop {
   let extra = '';
   let facts: Record<string, unknown> = {};
   if (step.kind === 'era') {
-    facts = eraFacts(step.era!);
-    extra = `The era on screen now is ${step.era}. Say the year ${step.era} exactly and describe only this era in a few lively sentences; do not name any other era year. `;
+    facts = hindiPremium() ? { ...eraFacts(step.era!), mood_of_this_era: ERA_MOOD[step.era!] } : eraFacts(step.era!);
+    extra = hindiPremium()
+      ? `The era on screen now is ${step.era}. This is a stop of the time travel: say the year ${step.era} exactly, set the scene from the story (what the world looks like now and what has changed), name the milestones in English as given, and make the visitor curious; do not name any other era year. `
+      : `The era on screen now is ${step.era}. Say the year ${step.era} exactly and describe only this era in a few lively sentences; do not name any other era year. `;
   } else if (step.kind === 'tech') {
     extra = 'Introduce the catalogue: 42 future technologies in seven categories. Three highlights will open next. ';
   } else if (step.key === 'about') {
@@ -474,7 +561,11 @@ function prepareStep(step: TourStep): PreparedStop {
       ...base,
       ...(step.era ? { era_on_screen: step.era } : {}),
       ...facts,
-      ...(step.kind === 'era' ? {} : { visible_on_screen: textsAt(step.start, step.section) }),
+      ...(step.kind === 'era'
+        ? {}
+        : hindiPremium() && sectionEnglish(step).length
+          ? { on_screen_in_english: sectionEnglish(step).filter(Boolean) }
+          : { visible_on_screen: textsAt(step.start, step.section) }),
       what_to_do_now: isLast
         ? `${extra}Speak for about ${seconds} seconds about it, then call tour_next one last time.`
         : instruction(seconds, extra),
@@ -496,8 +587,9 @@ function finish(reason: 'done' | 'time'): PreparedStop {
       ok: true,
       finished: true,
       reason: reason === 'time' ? 'the tour time is over' : 'all stops are done',
-      what_to_do_now:
-        'The tour is complete. Say a warm, short goodbye in two or three sentences: thank the visitor for taking the tour' +
+      what_to_do_now: hindiPremium()
+        ? 'The tour is complete. Close it like the end of a good trip, in natural Hinglish, three or four sentences: one line that looks back on the journey from 2030 to 2050 as a feeling (no list, no summary of cards), a warm thank-you by name, say clearly that the Premium Tour has ended, invite them to explore the website on their own and to share their opinion with the rating button, and one memorable, friendly last line. Do not call any tool again.'
+        : 'The tour is complete. Say a warm, short goodbye in two or three sentences: thank the visitor for taking the tour' +
         (quick
           ? ', then say in complete, natural spoken sentences (never a clipped fragment, never a script) that this Quick Tour has now ended, and that if they want to know everything in full detail they can take the Premium Tour. If you mention the coupon: the Premium Tour is free the first time, and the "Request coupon" button appears after pressing the Premium Tour button (the coupon is not requested from the founder section by itself).'
           : ' and invite them to explore the website on their own and to share their opinion with the rating button.') +
@@ -506,15 +598,18 @@ function finish(reason: 'done' | 'time'): PreparedStop {
   };
 }
 
-/** Quick Tour: learn how long Jarvis really speaks per requested second and ask for more or fewer words next time. */
+/** Quick Tour and Hindi Premium Tour: learn how long Jarvis really speaks per requested second and ask for more or
+ *  fewer words next time (in the Premium Tour he spoke longer than asked, so the tour ran late). */
 function calibratePace(response: Record<string, unknown> | null) {
-  if (state.mode !== 'quick' || !response) return;
+  if ((state.mode !== 'quick' && !hindiPremium()) || !response) return;
   const now = Date.now();
   const prev = lastRequest;
   const text = String(response.what_to_do_now || '');
   const m = text.match(/about (\d+) seconds/);
   lastRequest = m ? { seconds: Number(m[1]), shownAt: now } : null;
   if (!prev || prev.seconds < 8) return;
+  // Hindi Premium Tour, like the Quick Tour: the screen changes with the first new words, so the time between two
+  // changes is his speaking time plus the 0.3 s breath.
   const actual = (now - prev.shownAt) / 1000 - 0.3;
   if (actual < 3 || actual > prev.seconds * 2.5) return;
   const ratio = Math.min(1.6, Math.max(0.6, prev.seconds / actual));
@@ -533,7 +628,10 @@ export function tourNext(): PreparedStop {
       // Time is nearly up: the tour still ends at its final stop (the founder in the Quick Tour, contact in the
       // full tour) instead of stopping where it is. Only when even that no longer fits does it say goodbye.
       if (secondsLeft() < -(END_RESERVE[state.mode] - 18) * 1000) return finish('time');
-      state.index = Math.max(state.index, state.steps.length - 1);
+      // Premium Tour: it continues with the closing stops (the founder, then contact). Jumping straight to the last
+      // stop skipped the founder section whenever the tour ran late.
+      const closing = state.mode === 'full' ? state.steps.findIndex((s) => s.closing) : -1;
+      state.index = Math.max(state.index, closing >= 0 ? closing : state.steps.length - 1);
     }
     const step = state.steps[state.index];
     // The other cards of a summed-up category are skipped.

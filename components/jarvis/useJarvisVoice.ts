@@ -16,7 +16,7 @@ const loadGenAI = () => {
 import { getJarvisLang, NAME_GREETING_RULE, GREETING_PRONUNCIATION_RULE, RETELL_RULE, TECH_NAMES_RULE, TOUR_TONE_RULE, BRAND_PRONUNCIATION_RULE, HINDI_PREMIUM_TOUR_STYLE } from '@/lib/jarvisLocale';
 import { buildJarvisKnowledge } from '@/lib/jarvisKnowledge';
 import { JARVIS_FUNCTION_DECLARATIONS, JARVIS_TOOLS_INSTRUCTION, JARVIS_FEEDBACK_INSTRUCTION } from '@/lib/jarvisTools';
-import { beginTour, endTour, rewindForResume, tourActive, tourNext, TOUR_FUNCTION_DECLARATIONS, type TourMode } from '@/lib/jarvisTour';
+import { beginTour, endTour, hindiPremiumTour, rewindForResume, tourActive, tourNext, TOUR_FUNCTION_DECLARATIONS, type TourMode } from '@/lib/jarvisTour';
 
 // Maps language codes from Hayaati's 30 locales to BCP-47 / Live voice language tags
 const LOCALE_TO_VOICE_LANG: Record<string, string> = {
@@ -172,12 +172,14 @@ function buildSystemInstruction(languageCode: string, isOwner: boolean, knowledg
 
 // Seconds of quiet between two tour stops (the card opens in this moment).
 const TOUR_STOP_BREATH = 0.3;
+// Hindi Premium Tour: the next stop is handed to Jarvis when this many seconds of his current words are left.
+const HINDI_PREMIUM_HANDOVER_LEAD = 1;
 // Audio that reaches us this soon after a stop was handed over is still the end of the previous stop (it was on
 // its way already). Jarvis cannot answer that fast, so anything later is his words about the new stop.
 const TOUR_TAIL_MS = 150;
 
 // Tour sessions (Quick Tour / Premium Full Tour buttons): one-sided narration, only the tour_next tool.
-function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = ''): string {
+export function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = ''): string {
   const lp = getJarvisLang(languageCode);
   const where = lp.country ? ` The visitor appears to be in country code ${lp.country}; adapt wording to that country where natural.` : '';
   const full = mode === 'full';
@@ -187,7 +189,10 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
   const hindiPremium = full && languageCode === 'hi';
   return [
     `You are Jarvis, the voice guide of Hayaati Web Technology, giving the ${full ? 'Premium Full Tour (about 14 minutes)' : 'free Quick Tour (about 3 minutes)'} of the website. The owner and founder is Aliya Khan. Never invent facts; describe only what the tour results show and what the knowledge below says.`,
-    `LANGUAGE: speak only ${lp.name} for the whole tour.`,
+    // "speak only Hindi" pulled the Hindi Premium Tour back towards pure (formal) Hindi.
+    hindiPremium
+      ? 'LANGUAGE: speak natural Hinglish (everyday Hindi with the English words Indians normally use) for the whole tour, never another language.'
+      : `LANGUAGE: speak only ${lp.name} for the whole tour.`,
     hindiPremium
       ? 'LOCAL, NATURAL SPEECH (very important): natural Indian Hinglish, exactly as the HINDI PREMIUM TOUR policy below says.'
       : `LOCAL, NATURAL SPEECH (very important): ${lp.style}${where}`,
@@ -199,7 +204,8 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
     BRAND_PRONUNCIATION_RULE,
     'THIS IS A ONE-SIDED GUIDED TOUR: you narrate the website by yourself from start to end. Never ask "shall we continue?", never ask permission, never wait for the visitor between stops. ' +
       ('Only at the very start you ask ONE short question: their name. Ask nothing else (not what they like, not who they are, not what they want to see). Listen to the whole name before you answer, even if the visitor pauses in the middle or says something like "my name is ..." first. Repeat the name back exactly as you heard it, never swap it for a more common or similar-sounding name; if you could not hear it clearly, say sorry and ask only for the name once more, slowly. After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then.'),
-    'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again. Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show.',
+    'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again. Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show' +
+      (hindiPremium ? ', except coming_next, which you may tease by name in one short line, never describing it.' : '.'),
     'TIME: the tour must finish within its time. Keep to the speaking time given in each result; it is calculated so the whole tour fits.',
     hindiPremium
       ? 'VOICE: sound like a real, warm human guide: relaxed natural pace, natural pauses and intonation, clear. No lists or symbols read aloud, vary your words.'
@@ -212,6 +218,19 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
   ]
     .filter(Boolean)
     .join('\n\n');
+}
+
+/** The first message of a tour session (Jarvis greets, then asks only the name). */
+export function buildTourOpening(languageCode: string, mode: TourMode): string {
+  const lp = getJarvisLang(languageCode);
+  if (mode === 'full' && languageCode === 'hi') {
+    // The old opening was "greet, welcome to the full tour, ask the name": the same flat welcome every visitor has
+    // heard on every website. It now opens with a hook from what the tour really is (2030, 2035, 2050).
+    return `[SYSTEM] The visitor pressed the Premium Full Tour button. Open in natural Hinglish (as the HINDI PREMIUM TOUR policy says): start with ${lp.greeting}, then in one or two lively sentences make them curious about the trip they are starting, a trip through the world of 2030, 2035 and 2050 with Hayaati Web Technology (an intriguing question or picture, said in your own fresh words, no "aapka swagat hai" formula, no list of what the tour contains), then ask ONLY their name, nothing else. After their answer, or if they stay silent, call tour_next.`;
+  }
+  return mode === 'full'
+    ? `[SYSTEM] The visitor pressed the Premium Full Tour button. Greet them now in everyday ${lp.name} (start with ${lp.greeting}), welcome them warmly to the full tour of Hayaati Web Technology, then ask ONLY their name, nothing else (no other question about interests, preferences or who they are). After their answer, or if they stay silent, call tour_next.`
+    : `[SYSTEM] The visitor pressed the Quick Tour button. In one or two short sentences in everyday ${lp.name} (start with ${lp.greeting}), welcome them to a quick three-minute tour of the highlights, then ask ONLY their name, nothing else. After their answer, or if they stay silent, call tour_next.`;
 }
 
 export type VoiceFailureLayer =
@@ -699,8 +718,9 @@ export function useJarvisVoice({
   // Handle a genuine server-side Live API interruption/barge-in event.
   // Do not infer interruptions from microphone volume; Gemini Live's VAD is
   // responsible for deciding whether incoming activity is user speech.
-  /** Resolves when the Jarvis audio already queued has finished playing (plus a short, natural pause). */
-  const waitForSpeechToFinish = useCallback(async (sessionId: number | null) => {
+  /** Resolves when the Jarvis audio already queued has finished playing (plus a short, natural pause), or, with
+   *  `lead`, when only that many seconds of it are left (and then without the pause). */
+  const waitForSpeechToFinish = useCallback(async (sessionId: number | null, lead = 0) => {
     const pause = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
     await pause(120); // audio chunks sent just before the tool call
     // Measured on the playback clock: while the audio is paused (phone screen off, tab in the background) the
@@ -713,7 +733,7 @@ export function useJarvisVoice({
       const ctx = playbackContextRef.current;
       if (!ctx || ctx.state === 'closed') break;
       const left = nextPlayTimeRef.current - ctx.currentTime;
-      if (left <= 0.03) break;
+      if (left <= Math.max(0.03, lead)) break;
       if (ctx.currentTime !== lastClock || document.visibilityState !== 'visible') {
         lastClock = ctx.currentTime;
         stuckSince = Date.now();
@@ -721,7 +741,7 @@ export function useJarvisVoice({
       if (ctx.state === 'suspended' && document.visibilityState === 'visible') ctx.resume().catch(() => {});
       await pause(Math.min(250, left * 1000 + 20));
     }
-    await pause(350);
+    if (!lead) await pause(350);
   }, []);
 
   const handleInterruption = useCallback(() => {
@@ -1429,16 +1449,13 @@ export function useJarvisVoice({
       if (tour && resume) {
         try {
           liveSession.sendRealtimeInput({
-            text: `[SYSTEM] You are in the middle of the ${tour === 'full' ? 'Premium Full Tour' : 'Quick Tour'}; the visitor has been listening to you all along. Do not greet, do not welcome, do not ask anything and do not mention any connection. Call tour_next right now and continue the tour naturally from that stop in everyday ${langProfile.name}.`,
+            text: `[SYSTEM] You are in the middle of the ${tour === 'full' ? 'Premium Full Tour' : 'Quick Tour'}; the visitor has been listening to you all along. Do not greet, do not welcome, do not ask anything and do not mention any connection. Call tour_next right now and continue the tour naturally from that stop in ${tour === 'full' && languageRef.current === 'hi' ? 'natural Hinglish' : `everyday ${langProfile.name}`}.`,
           });
         } catch {}
       } else if (tour) {
         try {
           liveSession.sendRealtimeInput({
-            text:
-              tour === 'full'
-                ? `[SYSTEM] The visitor pressed the Premium Full Tour button. Greet them now in ${languageRef.current === 'hi' ? 'natural Hinglish (as the HINDI PREMIUM TOUR policy says)' : `everyday ${langProfile.name}`} (start with ${langProfile.greeting}), welcome them warmly to the full tour of Hayaati Web Technology, then ask ONLY their name, nothing else (no other question about interests, preferences or who they are). After their answer, or if they stay silent, call tour_next.`
-                : `[SYSTEM] The visitor pressed the Quick Tour button. In one or two short sentences in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them to a quick three-minute tour of the highlights, then ask ONLY their name, nothing else. After their answer, or if they stay silent, call tour_next.`,
+            text: buildTourOpening(languageRef.current, tour),
           });
         } catch {}
       } else try {
@@ -1613,13 +1630,19 @@ export function useJarvisVoice({
       return;
     }
     const sessionId = liveSessionIdRef.current;
+    // Hindi Premium Tour: after every stop the old words played to the end, then (0.47 s later) the card changed
+    // and only then Jarvis started thinking about it, so every stop began with the same 1.5-2.5 s of silence on a
+    // new card: a stop-start rhythm that made the whole tour sound like a slideshow. He now gets the next stop when
+    // about 1 s of his words is left; his new words queue right behind the old ones (with the usual 0.3 s breath)
+    // and the card changes exactly at that boundary (or, if he is slow, when the old words end), as in the Quick Tour.
+    const early = hindiPremiumTour();
     tourPendingToolsRef.current += 1;
     tourFullQueueRef.current = tourFullQueueRef.current
       .then(async () => {
         try {
-          await waitForSpeechToFinish(sessionId);
+          await waitForSpeechToFinish(sessionId, early ? HINDI_PREMIUM_HANDOVER_LEAD : 0);
           if (liveSessionIdRef.current !== sessionId || tourModeRef.current !== 'full') return;
-          handOverTourStop(calls, true, asked);
+          handOverTourStop(calls, !early, asked);
         } finally {
           tourPendingToolsRef.current = Math.max(0, tourPendingToolsRef.current - 1);
         }
