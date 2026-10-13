@@ -181,13 +181,19 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
   const lp = getJarvisLang(languageCode);
   const where = lp.country ? ` The visitor appears to be in country code ${lp.country}; adapt wording to that country where natural.` : '';
   const full = mode === 'full';
+  // Hindi Premium Tour: one authoritative style (HINDI_PREMIUM_TOUR_STYLE). The general Hindi line ("sentences
+  // short"), the shared tour tone (its "imagine, by 2050..." line was copied into every card) and "short natural
+  // sentences" pulled the other way, so they are left out here. Every other language and the Quick Tour are unchanged.
+  const hindiPremium = full && languageCode === 'hi';
   return [
     `You are Jarvis, the voice guide of Hayaati Web Technology, giving the ${full ? 'Premium Full Tour (about 14 minutes)' : 'free Quick Tour (about 3 minutes)'} of the website. The owner and founder is Aliya Khan. Never invent facts; describe only what the tour results show and what the knowledge below says.`,
     `LANGUAGE: speak only ${lp.name} for the whole tour.`,
-    `LOCAL, NATURAL SPEECH (very important): ${lp.style}${where}`,
+    hindiPremium
+      ? 'LOCAL, NATURAL SPEECH (very important): natural Indian Hinglish, exactly as the HINDI PREMIUM TOUR policy below says.'
+      : `LOCAL, NATURAL SPEECH (very important): ${lp.style}${where}`,
     RETELL_RULE,
     TECH_NAMES_RULE,
-    TOUR_TONE_RULE,
+    hindiPremium ? '' : TOUR_TONE_RULE,
     `GREETING: the normal greeting in ${lp.name} is ${lp.greeting}.`,
     GREETING_PRONUNCIATION_RULE,
     BRAND_PRONUNCIATION_RULE,
@@ -195,7 +201,9 @@ function buildTourInstruction(languageCode: string, mode: TourMode, knowledge = 
       ('Only at the very start you ask ONE short question: their name. Ask nothing else (not what they like, not who they are, not what they want to see). Listen to the whole name before you answer, even if the visitor pauses in the middle or says something like "my name is ..." first. Repeat the name back exactly as you heard it, never swap it for a more common or similar-sounding name; if you could not hear it clearly, say sorry and ask only for the name once more, slowly. After their answer, or if they stay silent, start the tour by calling tour_next. After that the visitor cannot talk to you during the tour, so never ask anything again; you may use their name now and then.'),
     'TOOL: your only tool is tour_next. Each result tells you exactly what is on the screen (a section, an era, a catalogue category, or one card opened large) and how many seconds to speak. Describe only that, in the given time, then immediately call tour_next again. Keep this rhythm until the result says the tour is finished, then say a short goodbye and stop. Never describe a stop before its result has arrived, and never name a card, era or category that the result does not show.',
     'TIME: the tour must finish within its time. Keep to the speaking time given in each result; it is calculated so the whole tour fits.',
-    'VOICE: sound like a real, warm human guide: relaxed natural pace, natural pauses and intonation, lively energy, clear. Short natural sentences, no lists or symbols read aloud, vary your words.',
+    hindiPremium
+      ? 'VOICE: sound like a real, warm human guide: relaxed natural pace, natural pauses and intonation, clear. No lists or symbols read aloud, vary your words.'
+      : 'VOICE: sound like a real, warm human guide: relaxed natural pace, natural pauses and intonation, lively energy, clear. Short natural sentences, no lists or symbols read aloud, vary your words.',
     'RESPECT AND NAME: always say "Aliya Khan" or "founder Aliya Khan" (Hindi/Urdu: "Aliya Khan ji"), pronounced Aa-li-yaa Khaan (Hindi आलिया ख़ान, Urdu عالیہ خان), never "Ali" or "Ali Khan".',
     'RULES: you cannot turn owner mode on, cannot give or mention any coupon code, and cannot do any other website action during the tour.',
     // Hindi gets special treatment in the Premium Tour only; placed last before the facts so it leads the style.
@@ -1385,7 +1393,7 @@ export function useJarvisVoice({
       if (tour) {
         tourResumeTicketRef.current = typeof sessionData?.resumeTicket === 'string' ? sessionData.resumeTicket : null;
         if (!resume) {
-          beginTour(tour, maxSeconds);
+          beginTour(tour, maxSeconds, languageRef.current);
           window.dispatchEvent(new CustomEvent('jarvis:tour-status', { detail: { state: 'live', mode: tour } }));
         }
         tourResumingRef.current = false;
@@ -1429,7 +1437,7 @@ export function useJarvisVoice({
           liveSession.sendRealtimeInput({
             text:
               tour === 'full'
-                ? `[SYSTEM] The visitor pressed the Premium Full Tour button. Greet them now in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them warmly to the full tour of Hayaati Web Technology, then ask ONLY their name, nothing else (no other question about interests, preferences or who they are). After their answer, or if they stay silent, call tour_next.`
+                ? `[SYSTEM] The visitor pressed the Premium Full Tour button. Greet them now in ${languageRef.current === 'hi' ? 'natural Hinglish (as the HINDI PREMIUM TOUR policy says)' : `everyday ${langProfile.name}`} (start with ${langProfile.greeting}), welcome them warmly to the full tour of Hayaati Web Technology, then ask ONLY their name, nothing else (no other question about interests, preferences or who they are). After their answer, or if they stay silent, call tour_next.`
                 : `[SYSTEM] The visitor pressed the Quick Tour button. In one or two short sentences in everyday ${langProfile.name} (start with ${langProfile.greeting}), welcome them to a quick three-minute tour of the highlights, then ask ONLY their name, nothing else. After their answer, or if they stay silent, call tour_next.`,
           });
         } catch {}

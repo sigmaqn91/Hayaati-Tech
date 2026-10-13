@@ -162,7 +162,31 @@ const state = {
   maxSeconds: 240,
   collapsed: new Set<string>(),
   content: defaultBundle.content as ContentSchema,
+  /** Language Jarvis speaks in this tour (the website language when the tour started). */
+  lang: 'en',
+  /** Premium Tour catalogue cards narrated so far (picks a different angle for every card). */
+  cardsTold: 0,
 };
+
+// Premium Tour in Hindi: the website shows translated (often shuddh) titles such as "स्वायत्त शहरी स्काई टैक्सी".
+// Jarvis was told to "name it exactly as card_title" and so read the shuddh title aloud; he now gets the official
+// English title from the English site content and speaks that. Only for the Hindi Premium Tour.
+const hindiPremium = () => state.mode === 'full' && state.lang === 'hi';
+const englishTechTitle = (id: string) => defaultBundle.content.techCards[id]?.title || '';
+const englishMilestoneTitle = (id: string) => defaultBundle.content.timelineCards[id]?.title || '';
+
+// Hindi Premium Tour: every card had the same three-part shape (what it is, how it works, how life gets better
+// "when it arrives"), so after a few minutes every card sounded the same. Each card now leads with a different
+// angle; the facts still come only from the card.
+const CARD_ANGLES = [
+  'Lead with the one detail of this card that is most surprising, then explain simply how it works.',
+  'Lead with a small, everyday Indian scene where this would help (only what the card supports), then say what it is.',
+  'Lead with the problem it solves today, then how this technology solves it.',
+  'Keep this one short and crisp: what it is and its single best point, in three or four sentences.',
+  'Lead with how it works, explained like you would to a curious friend, then why it matters.',
+  'If it connects to something already shown in this tour, start from that link in one sentence; otherwise start with what makes it different from what we use today.',
+  'Lead with what it is in one plain sentence, then go a little deeper into the most interesting part of how it works.',
+];
 
 const emit = (name: string, detail?: unknown) => window.dispatchEvent(new CustomEvent(name, { detail }));
 
@@ -179,8 +203,10 @@ function refreshSiteLanguage() {
 }
 
 /** Called when the tour's voice session opens. */
-export function beginTour(mode: TourMode, maxSeconds: number) {
+export function beginTour(mode: TourMode, maxSeconds: number, lang = 'en') {
   state.mode = mode;
+  state.lang = lang;
+  state.cardsTold = 0;
   state.steps = mode === 'full' ? fullPlan() : quickPlan();
   state.index = -1;
   state.active = true;
@@ -333,6 +359,13 @@ function preloadAround(from: number) {
 
 function instruction(seconds: number, extra = '') {
   const words = Math.round(seconds * wordsPerSecond);
+  if (hindiPremium()) {
+    // "do not finish early" made Jarvis stretch simple cards with filler; the time is now a budget, not a quota.
+    return (
+      `${extra}You have about ${seconds} seconds (about ${words} words) for this stop, at a relaxed natural pace: use most of it for a rich card, a little less for a simple one, and fill it with real content from this result, never with filler or repetition. ` +
+      'Do not ask the visitor anything and do not wait for an answer. As soon as you finish speaking, call tour_next.'
+    );
+  }
   return (
     `${extra}Speak for about ${seconds} seconds (about ${words} words), calmly and warmly at an easy, unhurried pace with natural pauses (do not rush, do not finish early), in friendly, natural everyday speech, only about what this result shows. ` +
     'Do not ask the visitor anything and do not wait for an answer. As soon as you finish speaking, call tour_next.'
@@ -351,7 +384,11 @@ function textsAt(selector: string | undefined, section: string) {
 function eraFacts(era: string) {
   const c = state.content.eras?.[`era-${era}`] || defaultBundle.content.eras[`era-${era}`];
   const milestones = eraCards(era)
-    .map((card) => (state.content.timelineCards?.[card.id] || defaultBundle.content.timelineCards[card.id])?.title)
+    .map((card) =>
+      hindiPremium()
+        ? englishMilestoneTitle(card.id)
+        : (state.content.timelineCards?.[card.id] || defaultBundle.content.timelineCards[card.id])?.title
+    )
     .filter(Boolean);
   return {
     era_title: c?.title,
@@ -364,7 +401,8 @@ function eraFacts(era: string) {
 
 function cardFacts(id: string) {
   const c = state.content.techCards?.[id] || defaultBundle.content.techCards[id];
-  return { card_title: c?.title || '', card_text: [c?.description, c?.howItWorks].filter(Boolean) };
+  const facts = { card_title: c?.title || '', card_text: [c?.description, c?.howItWorks].filter(Boolean) };
+  return hindiPremium() ? { ...facts, title_english: englishTechTitle(id) } : facts;
 }
 
 function prepareStep(step: TourStep): PreparedStop {
@@ -383,7 +421,7 @@ function prepareStep(step: TourStep): PreparedStop {
 
   if (step.kind === 'card' && collapsed) {
     // Not enough time left for every card of this category: its grid is shown and summed up.
-    const titles = categoryCards(step.category!).map((c) => cardFacts(c.id).card_title);
+    const titles = categoryCards(step.category!).map((c) => (hindiPremium() ? englishTechTitle(c.id) : cardFacts(c.id).card_title));
     return {
       response: {
         ...base,
@@ -396,7 +434,14 @@ function prepareStep(step: TourStep): PreparedStop {
   }
 
   if (step.kind === 'card') {
-    const card = 'This card is now open large on the screen. Name it exactly as card_title and explain in simple everyday words what it is and how it works, and how it could make our life better when it arrives. ';
+    let card = 'This card is now open large on the screen. Name it exactly as card_title and explain in simple everyday words what it is and how it works, and how it could make our life better when it arrives. ';
+    if (hindiPremium()) {
+      const angle = CARD_ANGLES[state.cardsTold % CARD_ANGLES.length];
+      state.cardsTold += 1;
+      card =
+        'This card is now open large on the screen. Say its official English title exactly as title_english (card_title is only the Hindi translation shown on screen: never read it), then explain it in natural Hinglish from card_text, in your own words. ' +
+        `${angle} Do not end with "socho", "imagine" or "2050 tak" again unless it truly fits this card; end on a point about this card itself. `;
+    }
     // Same words as the Quick Tour (which visitors love); the full tour only adds a one-line category intro.
     const extra =
       full && step.intro
