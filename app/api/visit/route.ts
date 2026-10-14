@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkVisitRateLimit } from '@/lib/rateLimit';
-import { startVisit, updateVisit, type StoredVisit } from '@/lib/visitorStore';
+import { startVisit, updateVisit, updateGeo, type StoredVisit } from '@/lib/visitorStore';
 import { checkFreshness, detectFromUa } from '@/lib/visitorDetect';
 import { verifyOwnerSession } from '@/lib/jarvisAuth';
 
@@ -26,6 +26,11 @@ const headerText = (req: NextRequest, name: string) => {
   }
 };
 
+const headerNum = (req: NextRequest, name: string) => {
+  const n = Number(req.headers.get(name));
+  return req.headers.get(name) && Number.isFinite(n) ? n : undefined;
+};
+
 const ok = () => new NextResponse(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
 
 /** Anonymous visit message from the page (sent with sendBeacon after the page is idle, and when it is hidden). */
@@ -49,6 +54,21 @@ export async function POST(req: NextRequest) {
     : [];
   const seconds = Math.round(num(body.seconds, 24 * 3600) || 0);
 
+  if (body.kind === 'geo') {
+    // Exact location: only sent by the browser after the visitor's own permission (already given, or allowed in the browser's box).
+    const lat = Number(body.lat);
+    const lon = Number(body.lon);
+    if (Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+      await updateGeo(id, vid, {
+        lat: Math.round(lat * 10000) / 10000,
+        lon: Math.round(lon * 10000) / 10000,
+        accuracy: Math.round(num(body.accuracy, 100000) || 0),
+        at: new Date().toISOString(),
+      });
+    }
+    return ok();
+  }
+
   if (body.kind === 'update') {
     await updateVisit(id, vid, sections, seconds);
     return ok();
@@ -65,6 +85,9 @@ export async function POST(req: NextRequest) {
     desktopMode: bool(d.desktopMode),
     brand: pickStr('brand'),
     model: pickStr('model'),
+    modelGuess: clean(d.modelGuess, 80),
+    arch: clean(d.arch, 24),
+    gpu: clean(d.gpu, 80),
     os: pickStr('os', 30),
     osVersion: pickStr('osVersion', 20),
     browser: pickStr('browser', 30),
@@ -102,6 +125,10 @@ export async function POST(req: NextRequest) {
     country: clean(req.headers.get('x-vercel-ip-country'), 4) || undefined,
     region: headerText(req, 'x-vercel-ip-country-region') || undefined,
     city: headerText(req, 'x-vercel-ip-city') || undefined,
+    ipLat: headerNum(req, 'x-vercel-ip-latitude'),
+    ipLon: headerNum(req, 'x-vercel-ip-longitude'),
+    ipTimezone: headerText(req, 'x-vercel-ip-timezone') || undefined,
+    postal: headerText(req, 'x-vercel-ip-postal-code') || undefined,
     ipHash: rate.identity.ipHash || undefined,
     referrer: clean(body.referrer, 120) || undefined,
     page: clean(body.page, 80) || '/',

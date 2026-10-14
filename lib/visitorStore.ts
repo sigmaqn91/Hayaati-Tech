@@ -21,6 +21,9 @@ export interface StoredVisit {
   desktopMode: boolean;
   brand: string;
   model: string;
+  modelGuess?: string;
+  arch?: string;
+  gpu?: string;
   os: string;
   osVersion: string;
   browser: string;
@@ -44,6 +47,13 @@ export interface StoredVisit {
   country?: string;
   region?: string;
   city?: string;
+  /** Approximate position from the visitor's IP address (Vercel), city level */
+  ipLat?: number;
+  ipLon?: number;
+  ipTimezone?: string;
+  postal?: string;
+  /** Exact position, only when the visitor allowed it in the browser */
+  geo?: { lat: number; lon: number; accuracy: number; at: string };
   ipHash?: string;
   referrer?: string;
   page: string;
@@ -162,6 +172,35 @@ export async function updateVisit(id: string, vid: string, sections: string[], s
     seconds: Math.max(v.seconds || 0, seconds),
     updatedAt: new Date().toISOString(),
   });
+  if (REDIS_URL) {
+    const got = await pipeline([['HGET', DATA_KEY, id]]);
+    if (!got || typeof got[0] !== 'string') return false;
+    let v: StoredVisit;
+    try {
+      v = JSON.parse(got[0]) as StoredVisit;
+    } catch {
+      return false;
+    }
+    if (v.vid !== vid) return false;
+    return (await pipeline([['HSET', DATA_KEY, id, JSON.stringify(merge(v))]])) !== null;
+  }
+  if (!isProd) {
+    try {
+      const lines = fs.readFileSync(LOCAL_FILE, 'utf8').split('\n').filter(Boolean);
+      const out = lines.map((l) => {
+        const v = JSON.parse(l) as StoredVisit;
+        return v.id === id && v.vid === vid ? JSON.stringify(merge(v)) : l;
+      });
+      fs.writeFileSync(LOCAL_FILE, out.join('\n') + '\n');
+      return true;
+    } catch {}
+  }
+  return false;
+}
+
+/** Exact position of a visit (sent only after the visitor allowed location in the browser). */
+export async function updateGeo(id: string, vid: string, geo: NonNullable<StoredVisit['geo']>): Promise<boolean> {
+  const merge = (v: StoredVisit): StoredVisit => ({ ...v, geo, updatedAt: new Date().toISOString() });
   if (REDIS_URL) {
     const got = await pipeline([['HGET', DATA_KEY, id]]);
     if (!got || typeof got[0] !== 'string') return false;

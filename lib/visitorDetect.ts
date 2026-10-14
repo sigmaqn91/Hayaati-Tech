@@ -19,8 +19,14 @@ export interface DeviceInfo {
   desktopMode: boolean;
   brand: string;
   model: string;
+  /** Best guess when the browser hides the exact model (iPhone / iPad: from screen size), e.g. "iPhone 15 / 15 Pro" */
+  modelGuess: string;
   os: string;
   osVersion: string;
+  /** CPU type when the browser tells it, e.g. "x86 64-bit", "ARM 64-bit" */
+  arch: string;
+  /** Graphics chip name when the browser tells it (helps tell laptops and phones apart) */
+  gpu: string;
   browser: string;
   browserVersion: string;
   /** Chromium / Gecko / WebKit version the browser is built on (what really decides speed and features) */
@@ -115,6 +121,41 @@ interface UaChData {
   platform?: string;
   platformVersion?: string;
   formFactors?: string[];
+  architecture?: string;
+  bitness?: string;
+  wow64?: boolean;
+}
+
+/** iPhone / iPad exact model is hidden by Safari; the screen size narrows it down (best guess, said so in Admin). */
+const APPLE_SCREENS: Record<string, string> = {
+  '320x568@2': 'iPhone 5 / 5s / SE (1st gen)',
+  '375x667@2': 'iPhone 6 / 7 / 8 / SE (2nd-3rd gen)',
+  '414x736@3': 'iPhone 6 Plus / 7 Plus / 8 Plus',
+  '375x812@3': 'iPhone X / XS / 11 Pro',
+  '414x896@2': 'iPhone XR / 11',
+  '414x896@3': 'iPhone XS Max / 11 Pro Max',
+  '360x780@3': 'iPhone 12 mini / 13 mini',
+  '390x844@3': 'iPhone 12 / 12 Pro / 13 / 13 Pro / 14',
+  '428x926@3': 'iPhone 12 Pro Max / 13 Pro Max / 14 Plus',
+  '393x852@3': 'iPhone 14 Pro / 15 / 15 Pro / 16',
+  '430x932@3': 'iPhone 14 Pro Max / 15 Plus / 15 Pro Max / 16 Plus',
+  '402x874@3': 'iPhone 16 Pro / 17 / 17 Pro',
+  '420x912@3': 'iPhone Air',
+  '440x956@3': 'iPhone 16 Pro Max / 17 Pro Max',
+  '744x1133@2': 'iPad mini (6th gen+)',
+  '768x1024@2': 'iPad (9.7") / iPad mini / iPad Air 2',
+  '810x1080@2': 'iPad (7th-9th gen)',
+  '820x1180@2': 'iPad (10th gen) / iPad Air (4th-5th gen)',
+  '834x1194@2': 'iPad Pro 11"',
+  '834x1112@2': 'iPad Pro 10.5" / iPad Air (3rd gen)',
+  '1024x1366@2': 'iPad Pro 12.9"',
+};
+
+export function appleModelGuess(w: number, h: number, dpr: number): string {
+  if (!w || !h) return '';
+  const a = Math.min(w, h);
+  const b = Math.max(w, h);
+  return APPLE_SCREENS[`${a}x${b}@${Math.round(dpr)}`] || '';
 }
 
 function pick(ua: string, re: RegExp): string {
@@ -132,16 +173,18 @@ export function detectFromUa(
     touchPoints?: number;
     coarse?: boolean;
     brave?: boolean;
+    dpr?: number;
   } = {}
 ): Pick<
   DeviceInfo,
-  'type' | 'desktopMode' | 'brand' | 'model' | 'os' | 'osVersion' | 'browser' | 'browserVersion' | 'engine' | 'engineVersion' | 'inApp'
+  'type' | 'desktopMode' | 'brand' | 'model' | 'modelGuess' | 'os' | 'osVersion' | 'browser' | 'browserVersion' | 'engine' | 'engineVersion' | 'inApp'
 > {
   const ch = extra.ch || null;
   let type: DeviceType = 'unknown';
   let desktopMode = false;
   let brand = '';
   let model = '';
+  let modelGuess = '';
   let os = '';
   let osVersion = '';
   let browser = '';
@@ -162,7 +205,7 @@ export function detectFromUa(
   } else if (/Windows NT/i.test(ua)) {
     os = 'Windows';
     const nt = pick(ua, /Windows NT ([\d.]+)/i);
-    osVersion = { '10.0': '10/11', '6.3': '8.1', '6.2': '8', '6.1': '7', '6.0': 'Vista', '5.1': 'XP' }[nt] || nt;
+    osVersion = { '10.0': '10 / 11', '6.3': '8.1', '6.2': '8', '6.1': '7', '6.0': 'Vista', '5.1': 'XP' }[nt] || nt;
     if (ch?.platformVersion && nt === '10.0') osVersion = major(ch.platformVersion) >= 13 ? '11' : '10';
   } else if (/iPhone|iPad|iPod/i.test(ua)) {
     os = /iPad/i.test(ua) ? 'iPadOS' : 'iOS';
@@ -230,6 +273,9 @@ export function detectFromUa(
     brand = 'Apple';
     model = 'Apple Watch';
   }
+  if (brand === 'Apple' && (model === 'iPhone' || model === 'iPad')) {
+    modelGuess = appleModelGuess(extra.screenW || 0, extra.screenH || 0, extra.dpr || 0);
+  }
   if (!brand) brand = brandFromModel(model);
   if (!brand && /SamsungBrowser/i.test(ua)) brand = 'Samsung';
   if (!brand && /VivoBrowser/i.test(ua)) brand = 'vivo';
@@ -246,7 +292,7 @@ export function detectFromUa(
   } else if (/OPR\/|OPX\/|Opera/i.test(ua)) {
     browser = /OPX\//.test(ua) ? 'Opera GX' : 'Opera';
     browserVersion = pick(ua, /(?:OPR|OPX|Version)\/([\d.]+)/);
-  } else if (/EdgA?\/|EdgiOS\//.test(ua)) {
+  } else if (/Edg(?:A|iOS)?\//.test(ua)) {
     browser = 'Edge';
     browserVersion = pick(ua, /Edg(?:A|iOS)?\/([\d.]+)/);
   } else if (/SamsungBrowser/i.test(ua)) {
@@ -261,6 +307,12 @@ export function detectFromUa(
   } else if (/HeyTapBrowser/i.test(ua)) {
     browser = 'HeyTap Browser';
     browserVersion = pick(ua, /HeyTapBrowser\/([\d.]+)/i);
+  } else if (/Vivaldi\//i.test(ua)) {
+    browser = 'Vivaldi';
+    browserVersion = pick(ua, /Vivaldi\/([\d.]+)/i);
+  } else if (/Whale\//i.test(ua)) {
+    browser = 'Whale';
+    browserVersion = pick(ua, /Whale\/([\d.]+)/i);
   } else if (/UCBrowser|UCWEB/i.test(ua)) {
     browser = 'UC Browser';
     browserVersion = pick(ua, /UCBrowser\/([\d.]+)/i);
@@ -293,8 +345,17 @@ export function detectFromUa(
   if (extra.brave || chBrand(/^Brave/)) {
     browser = 'Brave';
     browserVersion = chBrand(/^Brave/)?.version || chromium;
-  } else if (browser === 'Chrome' && chBrand(/^Google Chrome$/)) {
-    browserVersion = chBrand(/^Google Chrome$/)!.version;
+  } else if (list.length && (browser === 'Chrome' || browser === '')) {
+    // The browser's own brand list is the most reliable name (Edge, Opera, Samsung Internet, Vivaldi ...).
+    const named = list.find((b) => !/not.?a.?brand|^chromium$|^google chrome$/i.test(b.brand));
+    if (named) {
+      const nice: Record<string, string> = { 'Microsoft Edge': 'Edge', 'Samsung Internet': 'Samsung Internet', 'Opera GX': 'Opera GX' };
+      browser = nice[named.brand] || named.brand;
+      browserVersion = named.version;
+    } else if (chBrand(/^Google Chrome$/)) {
+      browser = 'Chrome';
+      browserVersion = chBrand(/^Google Chrome$/)!.version;
+    }
   }
 
   // In-app browsers (they show the site inside another app)
@@ -361,7 +422,7 @@ export function detectFromUa(
     if (desktopMode && type === 'computer') type = minSide >= 600 ? 'tablet' : 'phone';
   }
 
-  return { type, desktopMode, brand, model, os, osVersion, browser, browserVersion, engine, engineVersion, inApp };
+  return { type, desktopMode, brand, model, modelGuess, os, osVersion, browser, browserVersion, engine, engineVersion, inApp };
 }
 
 /** Is the browser / OS clearly old? Only judged when the version is really known (never guessed). */
@@ -421,7 +482,7 @@ export async function detectDevice(): Promise<DeviceInfo> {
   try {
     if (nav.userAgentData?.getHighEntropyValues) {
       ch = await Promise.race([
-        nav.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'fullVersionList', 'formFactors']),
+        nav.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'fullVersionList', 'formFactors', 'architecture', 'bitness', 'wow64']),
         new Promise<null>((r) => setTimeout(() => r(null), 400)),
       ]);
       if (ch && !ch.platform) ch.platform = nav.userAgentData.platform;
@@ -442,13 +503,27 @@ export async function detectDevice(): Promise<DeviceInfo> {
     touchPoints: nav.maxTouchPoints || 0,
     coarse,
     brave: Boolean(nav.brave),
+    dpr: window.devicePixelRatio || 1,
   });
+  let arch = '';
+  if (ch?.architecture) {
+    const a = ch.architecture === 'x86' ? 'x86' : ch.architecture === 'arm' ? 'ARM' : ch.architecture;
+    arch = `${a}${ch.bitness ? ` ${ch.bitness}-bit` : ''}`;
+  }
+  let gpu = '';
+  try {
+    const gl = document.createElement('canvas').getContext('webgl') as WebGLRenderingContext | null;
+    const ext = gl?.getExtension('WEBGL_debug_renderer_info');
+    if (gl && ext) gpu = String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || '').slice(0, 80);
+  } catch {}
   let timezone = '';
   try {
     timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
   } catch {}
   return {
     ...base,
+    arch,
+    gpu,
     screen: `${sw}x${sh}`,
     viewport: `${window.innerWidth}x${window.innerHeight}`,
     dpr: Math.round((window.devicePixelRatio || 1) * 100) / 100,

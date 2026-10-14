@@ -1,60 +1,26 @@
 'use client';
 
 /**
- * Anonymous visitor analytics + a gentle update notice.
+ * Anonymous visitor analytics (no popup, nothing shown to the visitor by this component).
  *
  * - Nothing runs during page load: after the page is idle, the device is detected (about a millisecond, plus a
  *   few ms for Client Hints) and one small message is sent with sendBeacon. Sections seen and time on site are
  *   sent again only when the tab is hidden or closed.
- * - Identity: a random id kept in this browser (no name, no IP, no device ID).
- * - Only for a clearly old browser / phone software: a gentle update suggestion (hidden for 7 days after it is
- *   closed). How visit info is used is described in the Terms & Conditions page (/terms).
+ * - Exact location: sent only when the visitor already allowed location for this site in the browser (silent), or
+ *   allows it in the browser's own box (asked once, never again after a "Block"). No custom popup is shown.
+ * - Identity: a random id kept in this browser (no name, no device ID). How visit info is used is described in
+ *   the Terms & Conditions page (/terms).
  */
 
-import React, { useEffect, useState } from 'react';
-import { RefreshCw, X } from 'lucide-react';
-import { checkFreshness, detectDevice, type Freshness } from '@/lib/visitorDetect';
+import { useEffect } from 'react';
+import { detectDevice } from '@/lib/visitorDetect';
 import { isOwnerUi } from '@/lib/ownerState';
-import { useLanguage } from '@/context/LanguageContext';
 
 const VID_KEY = 'hayaati_vid';
-const UPDATE_KEY = 'hayaati_update_hidden_at';
-const UPDATE_SNOOZE_MS = 7 * 86_400_000;
+const GEO_ASKED_KEY = 'hayaati_geo_asked';
 const SECTIONS = ['hero', 'timeline', 'tech', 'places', 'projects', 'advertise', 'about', 'contact'];
-
-type Texts = { browserOld: string; osOld: string; limited: string };
-const TEXTS: Record<string, Texts> = {
-  en: {
-    browserOld: 'Your browser ({x}) is out of date. Please update it for the smoothest experience.',
-    osOld: "Your phone's software ({x}) is out of date. An update will make this site run smoother.",
-    limited: '{x} is a lite browser. For the full experience, open this site in Chrome or Safari.',
-  },
-  hi: {
-    browserOld: 'आपका ब्राउज़र ({x}) पुराना है। बेहतर अनुभव के लिए इसे अपडेट करें।',
-    osOld: 'आपके फ़ोन का सॉफ़्टवेयर ({x}) पुराना है। अपडेट करने से साइट और स्मूथ चलेगी।',
-    limited: '{x} एक लाइट ब्राउज़र है। पूरा अनुभव पाने के लिए साइट Chrome या Safari में खोलें।',
-  },
-  ur: {
-    browserOld: 'آپ کا براؤزر ({x}) پرانا ہے۔ بہتر تجربے کے لیے اسے اپڈیٹ کریں۔',
-    osOld: 'آپ کے فون کا سافٹ ویئر ({x}) پرانا ہے۔ اپڈیٹ کرنے سے سائٹ اور ہموار چلے گی۔',
-    limited: '{x} ایک لائٹ براؤزر ہے۔ مکمل تجربے کے لیے سائٹ Chrome یا Safari میں کھولیں۔',
-  },
-  ar: {
-    browserOld: 'متصفحك ({x}) قديم. حدّثه لتجربة أكثر سلاسة.',
-    osOld: 'برنامج هاتفك ({x}) قديم. التحديث يجعل الموقع يعمل بسلاسة أكبر.',
-    limited: '{x} متصفح خفيف. للتجربة الكاملة افتح الموقع في Chrome أو Safari.',
-  },
-  es: {
-    browserOld: 'Tu navegador ({x}) está desactualizado. Actualízalo para una experiencia más fluida.',
-    osOld: 'El software de tu teléfono ({x}) está desactualizado. Actualizarlo hará que el sitio funcione mejor.',
-    limited: '{x} es un navegador ligero. Para la experiencia completa, abre el sitio en Chrome o Safari.',
-  },
-  fr: {
-    browserOld: 'Votre navigateur ({x}) est obsolète. Mettez-le à jour pour une expérience plus fluide.',
-    osOld: 'Le logiciel de votre téléphone ({x}) est obsolète. Une mise à jour rendra le site plus fluide.',
-    limited: "{x} est un navigateur léger. Pour l'expérience complète, ouvrez le site dans Chrome ou Safari.",
-  },
-};
+/** true: the browser's own location box is shown once to visitors who were never asked. false: only silent (already allowed). */
+const ASK_BROWSER_LOCATION = true;
 
 function storage(): Storage | null {
   try {
@@ -91,9 +57,6 @@ function whenIdle(fn: () => void) {
 }
 
 export function VisitorTracker() {
-  const { language } = useLanguage();
-  const [update, setUpdate] = useState<{ kind: 'browserOld' | 'osOld' | 'limited'; label: string } | null>(null);
-
   useEffect(() => {
     let cancelled = false;
     let observer: IntersectionObserver | null = null;
@@ -149,8 +112,6 @@ export function VisitorTracker() {
         return;
       }
       if (cancelled) return;
-      const fresh: Freshness = checkFreshness(device);
-
       let referrer = '';
       try {
         const r = document.referrer ? new URL(document.referrer) : null;
@@ -185,17 +146,27 @@ export function VisitorTracker() {
         }
       }
 
-      // Update notice
-      if (fresh.browserOld || fresh.osOld || fresh.browserLimited) {
-        let snoozed = false;
+      // Exact location (browser permission only)
+      const sendGeo = () => {
         try {
-          snoozed = Date.now() - Number(st?.getItem(UPDATE_KEY) || 0) < UPDATE_SNOOZE_MS;
+          navigator.geolocation.getCurrentPosition(
+            (p) => send({ kind: 'geo', id: visitId, vid, lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy }),
+            () => {},
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }
+          );
         } catch {}
-        if (!snoozed) {
-          if (fresh.browserLimited) setUpdate({ kind: 'limited', label: device.browser || fresh.browserLabel });
-          else if (fresh.browserOld) setUpdate({ kind: 'browserOld', label: fresh.browserLabel.replace(/ \(.*\)$/, '') });
-          else setUpdate({ kind: 'osOld', label: fresh.osLabel });
-        }
+      };
+      if ('geolocation' in navigator) {
+        try {
+          const perm = await navigator.permissions?.query({ name: 'geolocation' });
+          if (perm?.state === 'granted') sendGeo();
+          else if (perm?.state === 'prompt' && ASK_BROWSER_LOCATION && !st?.getItem(GEO_ASKED_KEY)) {
+            st?.setItem(GEO_ASKED_KEY, '1');
+            setTimeout(() => {
+              if (!cancelled) sendGeo();
+            }, 6000);
+          }
+        } catch {}
       }
     });
 
@@ -207,32 +178,5 @@ export function VisitorTracker() {
     };
   }, []);
 
-  if (!update) return null;
-  const tx = TEXTS[language] || TEXTS.en;
-  const rtl = language === 'ur' || language === 'ar' || language === 'fa';
-
-  const closeUpdate = () => {
-    setUpdate(null);
-    try {
-      storage()?.setItem(UPDATE_KEY, String(Date.now()));
-    } catch {}
-  };
-
-  return (
-    <div
-      className="fixed z-[35] bottom-24 start-3 end-3 sm:end-auto sm:start-5 sm:w-[25rem] flex flex-col gap-2 pointer-events-none"
-      dir={rtl ? 'rtl' : 'ltr'}
-      data-visitor-notices
-    >
-      {update && (
-        <div className="vn-card vn-card--update" role="status">
-          <RefreshCw className="w-4 h-4 shrink-0 text-[#ffcf66]" aria-hidden="true" />
-          <p className="flex-1 min-w-0">{tx[update.kind].replace('{x}', update.label)}</p>
-          <button type="button" onClick={closeUpdate} className="vn-btn vn-btn--ghost" aria-label="Close">
-            <X className="w-4 h-4 mx-auto" aria-hidden="true" />
-          </button>
-        </div>
-      )}
-    </div>
-  );
+  return null;
 }
